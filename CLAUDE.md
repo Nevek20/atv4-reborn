@@ -458,6 +458,10 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   cor = tint (1.0) com o alpha, sem gravar profundidade, céu e depois
   montanhas. No remake x70 em volta da câmera (cabe no far de 4 km, relevo e
   objetos na frente pelo teste de profundidade), sem luz nem névoa.
+  Céu HD (melhoria nossa, ceu.gd CEU_HD): o Matheus ampliou as 2 texturas
+  x4 no Upscayl; o alfa das montanhas do jogo é liga/desliga em blocos de 4 px
+  (escadinha nos picos), refeito borrando e cortando com curva suave. Ficam em
+  assets/rx01/ceu/hd/ com o nome da original (fora do git); sem elas, a do jogo.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

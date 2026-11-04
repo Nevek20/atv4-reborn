@@ -21,6 +21,10 @@ const ARQ := "res://data/environment_rx01.xml"
 const PASTA := "res://assets/rx01/ceu/"
 const ESCALA := 70.0                     # 43 m -> 3 km (a câmera vê até 4 km)
 const COR_K_SRGB := 255.0 / 128.0       # cor do vértice do pingu2obj (0x80 = 1.0)
+## melhoria nossa: texturas do céu ampliadas (Upscayl x4 do Matheus, montanhas
+## com o contorno do alfa refeito) em assets/rx01/ceu/hd/ com o MESMO nome da
+## original; sem o arquivo (ou false) usa a do jogo (512 x 256)
+const CEU_HD := true
 
 var cupulas: Array = []                  # [{no, y, rot, vel}]
 var t := 0.0
@@ -63,6 +67,10 @@ func _cupula(arq: String, y: float, rot: float, vel: float, alfa: float, ordem: 
 		if m0 == null:
 			continue
 		var m := m0.duplicate() as StandardMaterial3D
+		if CEU_HD and m.albedo_texture:
+			var hd := PASTA + "hd/" + m.albedo_texture.resource_path.get_file()
+			if ResourceLoader.exists(hd):
+				m.albedo_texture = load(hd)
 		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		m.vertex_color_use_as_albedo = true
 		m.vertex_color_is_srgb = true
