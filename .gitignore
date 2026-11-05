@@ -23,3 +23,4 @@ tools/engine_sim_dyno/build/
 som/loops/**/*.import
 assets/escort/
 assets/rx01/
+assets/terrain/hd/
