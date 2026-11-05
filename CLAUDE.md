@@ -462,6 +462,9 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   x4 no Upscayl; o alfa das montanhas do jogo é liga/desliga em blocos de 4 px
   (escadinha nos picos), refeito borrando e cortando com curva suave. Ficam em
   assets/rx01/ceu/hd/ com o nome da original (fora do git); sem elas, a do jogo.
+  Chão HD (terrain.gd CHAO_HD, mesmo esquema): assets/terrain/hd/rx01_terrain
+  .png/.jpg. Trocar o .jpg original por um PNG renomeado deixa o chão BRANCO
+  (o Godot não importa PNG com extensão .jpg).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

@@ -20,6 +20,10 @@ extends Node3D
 @export var material_path := "res://assets/terrain/rx01_material.bin"
 @export var materials_xml := "res://data/materials_rx01.xml"
 @export var texture_path := "res://assets/terrain/rx01_terrain.jpg"
+## melhoria nossa: textura do chão ampliada (Upscayl do Matheus) em
+## assets/terrain/hd/ com o nome da original, .png ou .jpg (fora do git); sem
+## ela (ou false) usa a do jogo (2048 x 2048, ~1 m por pixel)
+const CHAO_HD := true
 @export var size := 1025          # pontos por lado
 @export var mesh_step := 2        # malha visual usa 1 ponto a cada N (colisão usa todos)
 
@@ -252,8 +256,11 @@ func _build_mesh() -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
 	var mat := StandardMaterial3D.new()
-	if ResourceLoader.exists(texture_path):
-		mat.albedo_texture = load(texture_path)
+	var tex := _textura_hd() if CHAO_HD else ""
+	if tex == "":
+		tex = texture_path
+	if ResourceLoader.exists(tex):
+		mat.albedo_texture = load(tex)
 	else:
 		mat.albedo_color = Color(0.45, 0.38, 0.3)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
@@ -264,3 +271,13 @@ func _build_mesh() -> void:
 	mi.mesh = mesh
 	mi.material_override = mat
 	add_child(mi)
+
+
+## a versão ampliada em assets/terrain/hd/ (mesmo nome, .png ou .jpg), ou ""
+func _textura_hd() -> String:
+	var pasta := texture_path.get_base_dir() + "/hd/"
+	var nome := texture_path.get_file().get_basename()
+	for ext in ["png", "jpg", "jpeg", "webp"]:
+		if ResourceLoader.exists(pasta + nome + "." + ext):
+			return pasta + nome + "." + ext
+	return ""
