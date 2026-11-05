@@ -467,6 +467,9 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   pelo conteúdo (PNG/JPG/WEBP, qualquer extensão), sem o import do Godot. PNG
   renomeado pra .jpg pelo import deixava o chão branco, e sem textura nenhuma
   ficava a cor lisa marrom. O console diz "chão: <arquivo usado> (LxA)".
+  Lida assim ela ia CRUA pra placa (4096 = ~85 MB): acima de 2048 vira DXT1
+  (~11 MB, 156 ms na carga). Disco: 2x em JPG qualidade 90 (~2-4 MB); o PNG
+  do Upscayl dá 13-20 MB. 4x+ não muda nada na altura do carro (Matheus).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

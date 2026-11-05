@@ -320,6 +320,13 @@ func _do_arquivo(caminho: String) -> Texture2D:
 	if err != OK:
 		push_warning("chão: não consegui ler %s" % caminho)
 		return null
+	# na placa comprimida (DXT1/BC1, 8x menor): 4096 x 4096 = ~11 MB com os
+	# mipmaps no lugar de ~85 MB cru; o import do Godot faria o mesmo
+	var t0 := Time.get_ticks_msec()
+	img.convert(Image.FORMAT_RGB8)
 	img.generate_mipmaps()
-	textura_usada = "%s (%dx%d)" % [caminho, img.get_width(), img.get_height()]
+	if img.get_width() > 2048:
+		img.compress(Image.COMPRESS_S3TC)
+	textura_usada = "%s (%dx%d, %s, %d ms)" % [caminho, img.get_width(), img.get_height(),
+		"comprimida" if img.is_compressed() else "crua", Time.get_ticks_msec() - t0]
 	return ImageTexture.create_from_image(img)
