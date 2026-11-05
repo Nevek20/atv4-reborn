@@ -31,7 +31,7 @@ camera_piloto.gd     câmera do piloto (melhoria nossa): força G na cabeça, FO
 camera_orbita.gd     órbita da câmera de corrida (melhoria nossa, o Forza): analógico direito / mouse giram em volta do carro, soltou volta
 suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
 vehicle_data.gd      leitor dos XMLs (base + veículo) e peças de fábrica
-main.gd              cena: terreno, carro, câmera, HUD, menu de carros (Tab, V); VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
+main.gd              cena: terreno, carro, câmera, HUD (F1 esconde, F2 contador de FPS), menu de carros (Tab, V); VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro_glb.gd         carros extras nossos: junta as malhas do .glb no frame do jogo (carroceria, rodas, volante)
 piloto.gd            piloto do jogo sentado no ARSE, braços pela direção (STEER_LEFT)
 volantes.gd          volantes gerados, um estilo por carro (melhoria nossa, no lugar do do jogo)

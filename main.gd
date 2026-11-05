@@ -126,6 +126,7 @@ const Ceu := preload("res://ceu.gd")
 var car  # instância de car.gd (sem tipo estático de propósito: métodos próprios do script)
 var cam: Camera3D
 var hud: Label
+var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
 var terrain
 var objetos                              # objetos_rx01.gd (aviso() no HUD se faltar o assets/rx01)
@@ -175,6 +176,16 @@ func _ready() -> void:
 	hud.add_theme_color_override("font_outline_color", Color.BLACK)
 	hud.add_theme_constant_override("outline_size", 6)
 	layer.add_child(hud)
+	fps_label = Label.new()
+	fps_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	fps_label.offset_left = -140
+	fps_label.offset_right = -16
+	fps_label.offset_top = 12
+	fps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	fps_label.add_theme_font_size_override("font_size", 18)
+	fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	fps_label.add_theme_constant_override("outline_size", 6)
+	layer.add_child(fps_label)
 	_make_menu(layer)
 	cam_piloto = CameraPiloto.new()
 	cam_piloto.name = "CameraPiloto"
@@ -278,6 +289,10 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
+			KEY_F1:
+				hud.visible = not hud.visible
+			KEY_F2:
+				fps_label.visible = not fps_label.visible
 			KEY_C:
 				_troca_camera()
 			KEY_G:
@@ -407,6 +422,13 @@ func _process(delta: float) -> void:
 	_update_camera(delta)
 	if ceu:
 		ceu.seguir(cam, delta)
+	if fps_label.visible:
+		var f := Engine.get_frames_per_second()
+		fps_label.text = "%d FPS" % f
+		fps_label.add_theme_color_override("font_color",
+			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
+	if not hud.visible:
+		return
 	var kmh: float = car.linear_velocity.length() * 3.6
 	var fp := ""
 	if cam_mode == 4:
@@ -414,7 +436,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/fx: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
