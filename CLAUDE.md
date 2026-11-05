@@ -462,9 +462,11 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   x4 no Upscayl; o alfa das montanhas do jogo é liga/desliga em blocos de 4 px
   (escadinha nos picos), refeito borrando e cortando com curva suave. Ficam em
   assets/rx01/ceu/hd/ com o nome da original (fora do git); sem elas, a do jogo.
-  Chão HD (terrain.gd CHAO_HD, mesmo esquema): assets/terrain/hd/rx01_terrain
-  .png/.jpg. Trocar o .jpg original por um PNG renomeado deixa o chão BRANCO
-  (o Godot não importa PNG com extensão .jpg).
+  Chão HD (terrain.gd CHAO_HD): qualquer imagem em assets/terrain/hd/ cujo
+  nome começa com rx01_terrain (o Upscayl põe sufixo), lida DIRETO do arquivo
+  pelo conteúdo (PNG/JPG/WEBP, qualquer extensão), sem o import do Godot. PNG
+  renomeado pra .jpg pelo import deixava o chão branco, e sem textura nenhuma
+  ficava a cor lisa marrom. O console diz "chão: <arquivo usado> (LxA)".
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

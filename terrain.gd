@@ -256,11 +256,12 @@ func _build_mesh() -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
 	var mat := StandardMaterial3D.new()
-	var tex := _textura_hd() if CHAO_HD else ""
-	if tex == "":
-		tex = texture_path
-	if ResourceLoader.exists(tex):
-		mat.albedo_texture = load(tex)
+	var textura: Texture2D = _textura_hd() if CHAO_HD else null
+	if textura == null:
+		textura = _carrega(texture_path)
+	print("chão: ", textura_usada)
+	if textura:
+		mat.albedo_texture = textura
 	else:
 		mat.albedo_color = Color(0.45, 0.38, 0.3)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
@@ -273,11 +274,52 @@ func _build_mesh() -> void:
 	add_child(mi)
 
 
-## a versão ampliada em assets/terrain/hd/ (mesmo nome, .png ou .jpg), ou ""
-func _textura_hd() -> String:
+var textura_usada := "nenhuma (cor lisa)"
+
+
+## a versão ampliada: qualquer imagem em assets/terrain/hd/ com o nome da
+## original no começo (o Upscayl põe "_upscayl_2x..." no fim). Lida direto do
+## arquivo pelo CONTEÚDO (PNG, JPG ou WEBP, seja qual for a extensão), sem
+## depender do import do Godot; null se não tiver
+func _textura_hd() -> Texture2D:
 	var pasta := texture_path.get_base_dir() + "/hd/"
-	var nome := texture_path.get_file().get_basename()
-	for ext in ["png", "jpg", "jpeg", "webp"]:
-		if ResourceLoader.exists(pasta + nome + "." + ext):
-			return pasta + nome + "." + ext
-	return ""
+	var nome := texture_path.get_file().get_basename().to_lower()
+	var d := DirAccess.open(pasta)
+	if d == null:
+		return null
+	for f in d.get_files():
+		if f.to_lower().begins_with(nome) and not f.ends_with(".import"):
+			var t := _do_arquivo(pasta + f)
+			if t:
+				return t
+	return null
+
+
+## pelo import do Godot; se falhar (arquivo trocado sem reimportar), direto
+func _carrega(caminho: String) -> Texture2D:
+	if ResourceLoader.exists(caminho):
+		var t = load(caminho)
+		if t is Texture2D:
+			textura_usada = caminho
+			return t
+	return _do_arquivo(caminho)
+
+
+func _do_arquivo(caminho: String) -> Texture2D:
+	var b := FileAccess.get_file_as_bytes(caminho)
+	if b.size() < 12:
+		return null
+	var img := Image.new()
+	var err := ERR_FILE_UNRECOGNIZED
+	if b[0] == 0x89 and b[1] == 0x50:
+		err = img.load_png_from_buffer(b)
+	elif b[0] == 0xFF and b[1] == 0xD8:
+		err = img.load_jpg_from_buffer(b)
+	elif b[0] == 0x52 and b[8] == 0x57:
+		err = img.load_webp_from_buffer(b)
+	if err != OK:
+		push_warning("chão: não consegui ler %s" % caminho)
+		return null
+	img.generate_mipmaps()
+	textura_usada = "%s (%dx%d)" % [caminho, img.get_width(), img.get_height()]
+	return ImageTexture.create_from_image(img)
