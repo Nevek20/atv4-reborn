@@ -119,8 +119,9 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
   limita a velocidade de ré.
 - **Arrasto 0x20e5e8** (na força 0x1a0, contra a velocidade 0x90, |v| =
   0xe0): kN = (Air_drag_coefficient·0.00065 + Damping médio 0x788 ·
-  Ground_drag_coefficient·0.01)·v² + água (veículo+0xae8 ligado: média de
-  veículo+0xaec+4i, Water_drag_*; não portado), no máximo massa·v/dt.
+  Ground_drag_coefficient·0.01)·v² + água (veículo+0xae8 ligado: média d de
+  veículo+0xaec+4i, + Water_drag_coefficient x min(d / max_wheel_depth, 1) x
+  0.01 x v² se d > 0; portado nov/2026, seção Água), no máximo massa·v/dt.
   Params+0x3e0..0x3fc = Misc (Air 1.25, Ground 2.0, água 0.5/0.1, atrito
   interno 5/80/3/5; iguais nos 6 save states). Atrito interno só com
   acelerador (0x380) zero e roda no chão.
@@ -830,7 +831,8 @@ nuvens; tools/fx_jogo.py -> assets/fx/poeira.png).
   2^Power valores pela posição no grupo, MaxParticleAge / PowerRatio^nível
   (Power 1: MaxParticleAge, MaxParticleAge/PowerRatio, alternando).
 - Não portado ainda: Dirt (pedrinhas WheelSpinDirt e WheelDirtTrail do
-  Effects/#3ffdac18, DirtKickupChance), água, o canto escuro, a sombra.
+  Effects/#3ffdac18, DirtKickupChance), o canto escuro, a sombra. A água
+  está na seção Água.
 
 ## Objetos da pista (RX01)
 
@@ -1016,3 +1018,40 @@ outras ficam como a introdução da corrida deixou (zoom 0.6027, 17.85/s) e
 parado podem estar mais perto do carro que a ativa. Câmbio em corpo+0x2d0 (+0x08
 marchas, +0x20 final, +0x9c embreagem máx, +0x60 rpm de subir). Motor em
 corpo+0x2ac (parâmetros; estado logo antes, com rpm e limitador).
+
+
+## Água
+
+Porta em objetos_rx01.gd (agua_em), car.gd (_agua_passo, _arrasto, lama),
+poeira.gd (ramo da água) e sfx_carro.gd (nov/2026). Save states do Matheus
+na poça do RX01: Renegade_dentro_da_agua.p2s (parado) e
+Renegade_andando_na_agua.p2s (61 km/h). tests/teste_agua.gd.
+- Objeto da água (vtable 0xe842e0; o do RX01 em 0x10cad20): +0x10 centro,
+  +0x20/+0x30/+0x40 linhas do giro (15° em Y), +0x50 meia-largura x, +0x58
+  meia-largura z, +0x60 superfície (206.017), +0x70 cor (0.588, 0.607, 0.614,
+  1.0). É a WATER_puddle01.pingu da instância: centro/meia-largura = caixa do
+  modelo (x de -20.66 a 21.35, z de -19.71 a 20.05) e a superfície = y dela.
+- 0x1bb098 (busca): testa antes a água da roda anterior, depois a lista
+  (DAT_007f5334+0x2c). Profundidade = superfície - y do ponto; dentro =
+  profundidade >= 0 e |d . linha0| < meia x e |d . linha2| < meia z. Grava a
+  profundidade da última testada mesmo fora.
+- 0x201c20 (por quadro): ponto = roda no mundo (corpo+0x500 + i x 0x10) com y
+  - raio (W+0x30); veículo+0xaec+4i = profundidade, veículo+0xae8 = água da
+  última roda. Também testa o meio do casco (0x9f0 +0x130/+0x140) contra a
+  superfície e passa de DAT_0055052c/0x550528 chama 0x159d18 (carro afundado;
+  não portado, a poça é rasa).
+- Arrasto 0x20e5e8: ver Forças. Lama 0x2242d0: na água o alvo é o registro
+  DAT_007f4bf8+0x20 (DustColour 0, DustType 3 = Water, WheelDirtAlpha 0,
+  WheelDirtRate 30; material da FL na RAM = -2). Na RAM parado: t 0.10, taxa
+  30, alvo (0.6, 0.51, 0.4, alfa 0) (com alfa 0 só o alfa cai).
+- Espirro 0x225108 (ramo com veículo+0xae8 e profundidade > 0): material = o
+  registro da água, cor = objeto +0x70 com alfa x 0.6 (de = para = cor, sem a
+  troca de 1 s), força = (|v| - 0.5)/35 sem a folga, ponto = roda no mundo com
+  y = ((y - raio) + superfície) / 2, sem o recuo de velocidade/60. Tipo Water
+  do Dust.xml (MaxParticleAge 0.3, Power 0), textura Sprites/WorldFXwater_dust
+  (atlas igual ao da poeira; só as 4 células de cima têm desenho).
+- Marca de pneu 0x224c38: na água (profundidade > 0) não deixa marca.
+- Som 0x370548: veículo+0xae8 e veículo+0xaec[roda] > -0.05 = material de som
+  "Water" (string 0x5b1008) do SoundDatabase (Surface/Water em loop).
+- Desenho: o lote da poça é transparente (+0x00 = 1) e a water_puddle
+  (128 x 128, cinza 105) tem alfa 96..254 (PS2: 0x80 = 1.0). Vértices 0.73.

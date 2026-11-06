@@ -15,7 +15,8 @@ mDirtTextureName, igual em todas). Carro: Vehicles/Generic/Textures (128x128),
 piloto: Characters/Textures/Dirt (256x256). Marrom com alfa de mancha.
 Lama dos pneus: UNI_TyreOverlay (128x128, 4 bits; igual nos pneus do jogo),
 só o alfa conta (o jogo troca a cor da paleta pela lama do chão).
-Poeira dos pneus (poeira.gd): Sprites/WorldFXdust (Setup/Dust.xml, tipos
+Poeira dos pneus (poeira.gd): Sprites/WorldFXdust (e o espirro na água,
+Sprites/WorldFXwater_dust -> agua.png) (Setup/Dust.xml, tipos
 Light/Medium/Heavy), 128x128, atlas de 6 nuvens (2 x 3), cinza com o alfa.
 
 Uso:
@@ -82,7 +83,8 @@ def main():
     for nome, png in (("Vehicles/Generic/Textures/GEN_DIRT_DIRT.bog", "sujeira.png"),
                       ("Characters/Textures/Dirt/GEN_DIRT_DIRT.bog", "sujeira_piloto.png"),
                       ("Vehicles/Buggy/Models_4K/Wheel/#0678de18/UNI_TyreOverlay.bog", "lama_pneu.png"),
-                      ("Sprites/WorldFXdust.bog", "poeira.png")):
+                      ("Sprites/WorldFXdust.bog", "poeira.png"),
+                      ("Sprites/WorldFXwater_dust.bog", "agua.png")):
         gob, _, _ = caminho(unpacked, arqs, nome)
         im, info = convert(gob)
         if im is None:

@@ -117,6 +117,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --path . --write-movie fumaca.avi --fixed-fps 60 -s res://tests/gravar_fumaca.gd -- 0  :: câmera presa no cano acelerando (FUMACA_COR=1 vermelha)
 %GODOT% --headless --path . -s res://tests/teste_poeira.gd        :: poeira dos pneus na largada do RX01: parado não, asfalto não, terra sim, rastro no pulo
 %GODOT% --headless --path . -s res://tests/teste_objetos.gd       :: objetos do RX01: 707 instâncias, no chão, céu, largada livre, guard-rail segura o carro
+%GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
@@ -470,6 +471,25 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   Lida assim ela ia CRUA pra placa (4096 = ~85 MB): acima de 2048 vira DXT1
   (~11 MB, 156 ms na carga). Disco: 2x em JPG qualidade 90 (~2-4 MB); o PNG
   do Upscayl dá 13-20 MB. 4x+ não muda nada na altura do carro (Matheus).
+- Água (PORTA, nov/2026; save states do Matheus Renegade_dentro_da_agua e
+  _andando_na_agua; tests/teste_agua.gd, docs Água): o RX01 TEM água, a poça
+  WATER_puddle01 (pingu) perto da largada. Não é material do chão: o jogo
+  cria uma caixa por instância WATER_* (0x1bb098) = caixa do modelo no frame
+  dela, superfície = o y mais alto (RAM: centro, giro 15°, 21.01 x 19.88 m,
+  206.017 = os da malha). 0x201c20 por quadro: profundidade de cada roda =
+  superfície - (centro - raio) em y (veículo+0xaec, ordem FL RL FR RR) e
+  veículo+0xae8 = a água da última roda. Usada em: arrasto 0x20e5e8
+  (Water_drag 0.1 x min(média/0.5, 1) x 0.01 x v²: ~95 N a 60 km/h, quase
+  nada, como o Matheus lembrava), lama da roda (registro AGUA_REG: cor 0,
+  alfa 0, taxa 30 = lava), espirro (0x225108 ramo da água: tipo Water do
+  Dust.xml, textura WorldFXwater_dust -> assets/fx/agua.png, cor do objeto
+  +0x70 com alfa x 0.6, no meio entre o fundo da roda e a superfície) e som
+  (0x370548: roda a mais de -5 cm da superfície = material "Water" do
+  SoundDatabase). Desenho: o lote da poça é transparente (+0x00 = 1) e a
+  water_puddle tem alfa do PS2 0.75..2 (o PNG velho vinha sem alfa e a malha
+  cinza opaca ficava azulada no Godot: o "pedaço azul"); agora sai com o alfa
+  (x 2, modelos.json "misturada"). Precisa rodar de novo o rx01_objetos.py e
+  o fx_jogo.py.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
@@ -816,7 +836,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   nível sobe min(v, 15)·WheelDirtRate·5e-5 a cada passo de 50 Hz com roda
   no chão (suja até no asfalto), igual em todo o carro, e só zera no
   recomeço (T no remake, car.limpar_sujeira). A água NÃO limpa a carroceria
-  no jogo. Desenho: o lote do .pingu tem uma 2ª textura pelo 2º UV
+  no jogo (só a lama da roda). Desenho: o lote do .pingu tem uma 2ª textura pelo 2º UV
   (pingu2obj -> <modelo>_camada.obj). Na carroceria só a pintura ("white")
   tem: a "dirt", trocada pela GEN_DIRT_DIRT da pista, alfa = nível x alfa
   da textura. Gaiola e peças ficam limpas (como no jogo). Nas rodas é a
@@ -1096,10 +1116,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
 - Câmera do piloto: referência do Matheus = cockpit do Dirt Rally 2.0
   (horizonte perto do meio, volante cortado embaixo, muita estrada).
 - Sinal do giro/direção visual: falta save state andando com volante virado.
-- Sujeira: água (veículo+0xae8 e o registro DAT_007f4bf8+0x20 que lava as
-  rodas: cor 0, alfa 0, taxa 30, lido no save state do Hinter Valley) não
-  portada: o RX01 não tem água. Reflexo menor com o carro sujo
-  (0x22ace8, 1 - nível) não portado. Sujeira do piloto como o jogo.
+- Sujeira: reflexo menor com o carro sujo (0x22ace8, 1 - nível) não
+  portado. Sujeira do piloto como o jogo.
 - Erro antigo com tela (não é da poeira): "Condition !v.is_finite()" em
   instance_set_transform quando o carro pula fora da pista (gravar_poeira na
   terra: 238 vezes em 2 s, com a poeira desligada também); sem tela não

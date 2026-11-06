@@ -367,9 +367,29 @@ def hsc(d):
 
 
 # ------------------------------------------------------------------ texturas
-def textura(unpacked, ind, nome, pasta, feitas, pasta_jogo="Levels/RX_01/Models/Textures"):
+def textura(unpacked, ind, nome, pasta, feitas, pasta_jogo="Levels/RX_01/Models/Textures", mistura=False):
     """<pasta_jogo>/<nome>.bog -> pasta/<nome>.png (com alfa se o jogo tem
-    furo: > 1% dos pixels com alfa < 20, como o alfa_texturas)"""
+    furo: > 1% dos pixels com alfa < 20, como o alfa_texturas). mistura = a
+    textura de um lote transparente (+0x00 = 1 no .pingu): sai sempre com o
+    alfa do PS2 (0x80 = 1.0) levado pro PNG (x 2, cortado em 255)"""
+    if mistura:
+        nome_m = nome + "#mistura"
+        if nome_m in feitas:
+            return feitas[nome_m]
+        feitas[nome_m] = None
+        cam = "%s/%s.bog" % (pasta_jogo, nome)
+        if cam not in ind or not ind[cam][3].startswith("gob/"):
+            return None
+        from gob_tex2png import convert
+        import numpy as np
+        from PIL import Image
+        im, _ = convert(os.path.join(unpacked, ind[cam][3]))
+        a = np.asarray(im.convert("RGBA")).copy()
+        a[..., 3] = np.minimum(a[..., 3].astype(np.int32) * 2, 255).astype(np.uint8)
+        arq = "%s.png" % nome.replace(" ", "_")
+        Image.fromarray(a, "RGBA").save(os.path.join(pasta, arq))
+        feitas[nome_m] = (arq, True)
+        return feitas[nome_m]
     if nome in feitas:
         return feitas[nome]
     feitas[nome] = None
@@ -459,20 +479,29 @@ def modelos(unpacked, ind, out, nomes):
             lotes = pingu2obj.read_batches(d)
             slots = pingu2obj.assign_batches(strips, lotes) if lotes else [-1] * len(strips)
             tnomes = lista_pingu(unpacked, ind, base)
+            # lotes marcados transparentes (+0x00 = 1; na pista só a poça)
+            transp = set()
+            n_l = max(struct.unpack_from("<I", d, 0xBC)[0], struct.unpack_from("<I", d, 0xAC)[0])
+            for i in range(n_l if 0 < n_l < 256 else 0):
+                o = 0xD0 + i * 0x50
+                if o + 0x50 <= len(d) and struct.unpack_from("<I", d, o)[0] == 1:
+                    transp.add(struct.unpack_from("<i", d, o + 0x14)[0])
             mats, texs = {}, {}
             for s in sorted(set(slots)):
                 if s is None or s < 0 or s >= len(tnomes):
                     mats[s] = "sem_textura"
                     continue
                 mats[s] = "s%d_%s" % (s, pingu2obj.safe_name(tnomes[s]))
-                t = textura(unpacked, ind, tnomes[s].strip(), os.path.join(out, "tex"), feitas)
+                t = textura(unpacked, ind, tnomes[s].strip(), os.path.join(out, "tex"), feitas,
+                            mistura=s in transp)
                 if t:
                     texs[mats[s]] = t
             txt_mtl = mtl(mats, texs)
             txt, nv, nf = pingu2obj.to_obj(strips, base, slots, base + ".mtl", mats)
             txt = "# mtl %s\n" % hashlib.md5(txt_mtl.encode()).hexdigest()[:12] + txt
             info[nome] = {"tipo": "pingu", "faces": nf, "texturas": [t[0] for t in texs.values()],
-                          "alfa": any(t[1] for t in texs.values())}
+                          "alfa": any(t[1] for t in texs.values()),
+                          "misturada": [m for s_, m in mats.items() if s_ in transp]}
         elif ext == "bantam":
             cam = "Levels/RX_01/Models/Bantams/%s" % nome
             d = bloco(unpacked, ind, cam)

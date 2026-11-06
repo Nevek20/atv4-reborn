@@ -375,6 +375,16 @@ const JIT_K := 0.06392613     # 2.2374146 / 35: amplitude cheia a 35 mph com Whe
 const JIT_HZ := 50.0          # passo de física do PAL (FUN_00172778)
 var surface_jitter := 0.3     # sem terreno (teste no plano): terra (Material_1 DIRT/COMMON)
 var terrain = null            # terrain.gd (main.gd põe): material do chão por roda
+var objetos = null            # objetos_rx01.gd (main.gd põe): caixas de água
+## água (0x201c20, por quadro): veículo+0xae8 = a água da última roda testada
+## (null = fora) e veículo+0xaec+4i = profundidade de cada roda (superfície -
+## fundo da roda; > 0 = dentro). Usada no arrasto, na lama, no espirro e no som
+var agua = null
+var agua_prof := PackedFloat32Array([0.0, 0.0, 0.0, 0.0])
+## registro da água (DAT_007f4bf8+0x20, igual no RX01 e no Hinter Valley):
+## DustColour 0, DustType Water, WheelDirtAlpha 0, WheelDirtRate 30
+const AGUA_REG := {"DustColour": Color(0, 0, 0, 0), "DustType": "Water",
+	"WheelDirtAlpha": 0.0, "WheelDirtRate": 30.0}
 var jit_seed := 0
 var jit_acc := 0.0
 var spd_ground := 0.0         # corpo+0x440: velocidade no plano do chão (m/s)
@@ -750,6 +760,8 @@ func _load_physics() -> void:
 	# arrasto e freio
 	P.air_drag = d.f("Misc", "Air_drag_coefficient", 1.0)
 	P.ground_drag = d.f("Misc", "Ground_drag_coefficient", 2.0)
+	P.water_drag = d.f("Misc", "Water_drag_coefficient", 0.1)
+	P.water_depth = d.f("Misc", "Water_drag_max_wheel_depth", 0.5)
 	P.ifd_lo_speed = d.f("Misc", "Internal_friction_drag_lower_speed", 5.0)
 	P.ifd_hi_speed = d.f("Misc", "Internal_friction_drag_upper_speed", 80.0)
 	P.ifd_lo = d.f("Misc", "Internal_friction_drag_lower_speed_decel", 3.0)
@@ -2161,6 +2173,7 @@ func _physics_process(dt: float) -> void:
 	var res_loc: Vector3 = -Vector3(inertia.x * P.ang_res.x * w_loc.x, inertia.y * P.ang_res.y * w_loc.y, inertia.z * P.ang_res.z * w_loc.z)
 	apply_torque(b * res_loc)
 
+	_agua_passo()
 	# 0x20e5e8: arrasto do ar + do chão, contra a velocidade
 	var f_arr := 0.0
 	if spd > 1e-6:
@@ -2232,23 +2245,24 @@ func _sujeira_passo() -> void:
 ## parte da de agora pro DustColour dele (alfa = WheelDirtAlpha; com alfa 0
 ## só o alfa cai). t sobe giro da FL (W+0x48)·dt·0.002·WheelDirtRate
 ## suavizada (0.95/0.05), x 10·patinada da RL (0x604) se passar de 1. Na água
-## (veículo+0xae8) o alvo é o registro DAT_007f4bf8+0x20 (o RX01 não tem
-## água). Confere com a RAM: tests/teste_derrapagem.gd.
+## (veículo+0xae8) o alvo é o registro DAT_007f4bf8+0x20 (AGUA_REG). Confere com a RAM: tests/teste_derrapagem.gd.
 func _roda_suja_passo(dt: float) -> void:
 	if not SUJEIRA or grounded == 0 or terrain == null:
 		return
 	var fl: Dictionary = wheels[0]
-	if fl.mat < 0 or fl.mat >= terrain.materials.size():
+	# na água o alvo é o registro da água (material -2, como na RAM)
+	var mid: int = -2 if agua != null else fl.mat
+	if mid != -2 and (fl.mat < 0 or fl.mat >= terrain.materials.size()):
 		return
 	var p: float = fl.omega * dt * 0.002
 	var pat := clampf(wheels[2].sr, 0.0, 1.0)
 	if pat * 10.0 > 1.0:
 		p *= pat * 10.0
-	if fl.mat != roda_mat:
-		var m: Dictionary = terrain.materials[fl.mat]
+	if mid != roda_mat:
+		var m: Dictionary = AGUA_REG if mid == -2 else terrain.materials[mid]
 		var alfa := float(m.get("WheelDirtAlpha", 0.0))
 		var poeira: Color = m.get("DustColour", Color(0, 0, 0, 0))
-		roda_mat = fl.mat
+		roda_mat = mid
 		roda_t = 0.0
 		roda_de = roda_cor
 		roda_taxa_alvo = float(m.get("WheelDirtRate", 0.0))
@@ -2278,10 +2292,40 @@ func limpar_sujeira() -> void:
 
 ## 0x20e5e8: tamanho do arrasto (N). Em kN = (Air_drag_coefficient x 0.00065 +
 ## Damping médio (0x788) x Ground_drag_coefficient x 0.01) x v², nunca mais do
-## que para o carro neste passo. O de água (veículo+0xae8, Water_drag_*) não
-## está portado.
+## que para o carro neste passo. Água (veículo+0xae8): média d das
+## profundidades das rodas (todas, se d > 0) soma Water_drag_coefficient x
+## min(d / Water_drag_max_wheel_depth, 1) x 0.01 x v² (0.1 e 0.5 m nos XMLs:
+## na poça do RX01, d ~0.17, ~95 N a 60 km/h, quase nada)
 func _arrasto(spd: float, dt: float) -> float:
-	return minf((P.air_drag * 0.65 + amort_medio * P.ground_drag * 10.0) * spd * spd, mass * spd / dt)
+	var k: float = P.air_drag * 0.65 + amort_medio * P.ground_drag * 10.0
+	if agua != null:
+		var d := 0.0
+		for i in mini(wheels.size(), agua_prof.size()):
+			d += agua_prof[i]
+		d /= float(wheels.size())
+		if d > 0.0:
+			var c: float = P.water_drag
+			if d < P.water_depth:
+				c *= d / P.water_depth
+			k += c * 10.0
+	return minf(k * spd * spd, mass * spd / dt)
+
+
+## 0x201c20: profundidade de cada roda na água (fundo = centro - raio em y, no
+## mundo) pela caixa da água (objetos_rx01.agua_em = 0x1bb098); a água que fica
+## é a da última roda, testando antes a do quadro anterior
+func _agua_passo() -> void:
+	var ant = agua
+	agua = null
+	if objetos == null or objetos.aguas.is_empty():
+		return
+	var xf := global_transform
+	for i in mini(wheels.size(), agua_prof.size()):
+		var w: Dictionary = wheels[i]
+		var c: Vector3 = xf * Vector3(w.px, w.y0 + w.x, w.pz)
+		var r: Array = objetos.agua_em(c - Vector3(0, w.r, 0), ant)
+		agua = r[0]
+		agua_prof[i] = r[1]
 
 
 ## 0x20d568: médias do atrito (0x780) e do Damping (0x788) das rodas no chão.

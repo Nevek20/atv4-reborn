@@ -235,6 +235,7 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	car = Car.new()
 	configurar(car, v)
 	car.terrain = terrain
+	car.objetos = objetos
 	add_child(car)
 	car.manual = manual
 	car.reset_to(pos, yaw)

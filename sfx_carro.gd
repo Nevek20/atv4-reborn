@@ -154,9 +154,15 @@ static func _curva(x: float) -> float:
 
 
 func _roda(o: Dictionary, dt: float, v: float) -> void:
-	var w: Dictionary = car.wheels[car.jit_order[o.idx]]
+	var ri: int = car.jit_order[o.idx]
+	var w: Dictionary = car.wheels[ri]
 	var m: int = maxi(w.mat, 0)                # 0x158: -1 vira o material 0
 	var mat: Dictionary = materiais.get(_sfx_chao(m), materiais.get("Default", {}))
+	# 0x370548: na água (veículo+0xae8) com a roda a mais de -5 cm da superfície
+	# (veículo+0xaec+4i > -0.05) o material de som é o "Water" do SoundDatabase
+	if car.agua != null and car.agua_prof[ri] > -0.05 and materiais.has("Water"):
+		m = -3
+		mat = materiais["Water"]
 	var p: Dictionary = patches.get(mat.get("SecondaryPatch" if o.sec else "SurfacePatch", "Default"), {})
 	var som: SomJogo = o.som
 	if not p.has("looping") or _f(p.looping.volume, "Volume") == 0.0:

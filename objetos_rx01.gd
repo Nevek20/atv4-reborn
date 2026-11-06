@@ -37,6 +37,14 @@ var corpo: StaticBody3D = null
 var carregados := {}                     # modelo -> true (só eles ganham colisão)
 var _mats := {}                          # material do .mtl -> nosso (cache)
 var _presas := {}                        # materiais com a textura presa na borda (modelos.json)
+var _misturadas := {}                    # materiais de lote transparente no .pingu (modelos.json)
+## água (0x1bb098): uma caixa por instância WATER_* = a caixa do modelo (x, z)
+## no frame da instância, superfície = o y mais alto dela. Na RAM do Matheus
+## (Renegade_dentro_da_agua.p2s) o objeto em 0x10cad20 tem centro, giro (15°),
+## meia-largura 21.01 x 19.88 m e superfície 206.017 = os da WATER_puddle01
+var aguas: Array = []                    # [{inv, cx, cz, hx, hz, y, cor}]
+## cor da água no objeto (+0x70; o espirro usa com alfa x 0.6), da RAM do RX01
+const COR_AGUA := Color(0.5882, 0.6067, 0.6143, 1.0)
 
 
 func montar() -> bool:
@@ -51,6 +59,8 @@ func montar() -> bool:
 			for m in info:
 				for nome in info[m].get("textura_presa", []):
 					_presas[nome] = true
+				for nome in info[m].get("misturada", []):
+					_misturadas[nome] = true
 	var por := {}
 	for it in j.instancias:
 		if not por.has(it.modelo):
@@ -68,6 +78,14 @@ func montar() -> bool:
 		carregados[modelo] = true
 		var bantam: bool = String(modelo).ends_with(".bantam")
 		var lista: Array = por[modelo]
+		if String(modelo).to_upper().begins_with("WATER_"):
+			var bb := malha.get_aabb()
+			for it in lista:
+				var x := xf(it)
+				var c := bb.get_center()
+				aguas.append({"inv": x.affine_inverse(), "cx": c.x, "cz": c.z,
+					"hx": bb.size.x * 0.5, "hz": bb.size.z * 0.5,
+					"y": (x * Vector3(c.x, bb.end.y, c.z)).y, "cor": COR_AGUA})
 		_materiais(malha, bantam)
 		modelos += 1
 		if bantam:
@@ -147,10 +165,15 @@ func _materiais(malha: Mesh, bantam: bool) -> void:
 				# borda transparente; presa na borda (material +0x38 = 5)
 				if _presas.has(m0.resource_name):
 					m.texture_repeat = false
+			if not bantam and _misturadas.has(m0.resource_name):
+				# lote transparente do .pingu (+0x00 = 1): mistura pelo alfa da
+				# textura (PS2: 0x80 = 1.0; o da poça vai de 0.75 a ~2)
+				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				m.render_priority = -1
 			m.roughness = 1.0
 			m.metallic = 0.0
 			m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-			if m.albedo_texture and _tem_alfa(m.albedo_texture):
+			if m.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED and m.albedo_texture and _tem_alfa(m.albedo_texture):
 				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 				m.alpha_scissor_threshold = 0.5
 			_mats[chave] = m
@@ -163,6 +186,23 @@ static func _tem_alfa(t: Texture2D) -> bool:
 		img = img.duplicate()
 		img.decompress()
 	return img != null and img.detect_alpha() != Image.ALPHA_NONE
+
+
+## 0x1bb098: a água que contém o ponto (o fundo da roda) e a profundidade
+## (superfície - y). Testa antes a da roda anterior (`antes`), como o jogo.
+## Dentro = profundidade >= 0 e |x|, |z| no frame da caixa < meia-largura.
+## A profundidade sai da última caixa testada, mesmo fora dela (o jogo grava
+## assim em veículo+0xaec); sem água nenhuma, 0
+func agua_em(p: Vector3, antes) -> Array:
+	var prof := 0.0
+	var lista: Array = aguas if antes == null else [antes] + aguas
+	for a in lista:
+		prof = a.y - p.y
+		if prof >= 0.0:
+			var l: Vector3 = a.inv * p
+			if absf(l.x - a.cx) < a.hx and absf(l.z - a.cz) < a.hz:
+				return [a, prof]
+	return [null, prof]
 
 
 ## aviso pro HUD (vazio = tudo carregado)
