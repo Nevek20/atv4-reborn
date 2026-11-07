@@ -583,7 +583,15 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   saem com o alfa do PS2 x 2 (recorte). NOSSO: todos com a mesma animação
   andam juntos (a fase do controle 0x27b930 não foi achada). As pessoas
   paradas pintadas nas arquibancadas (Crowd_01/02) são do modelo e paradas
-  no jogo também.
+  no jogo também (o Matheus conferiu no jogo, nov/2026). Camisetas
+  coloridas (nov/2026): o lote da US_Bleacher_Wood_02 tem 2 texturas, a
+  Crowd_02 e a Crowd_ColourChange (camisetas no mesmo lugar, 2º UV = 1º)
+  como camada (registro +0x18). tools/rx01_objetos.py exporta toda camada
+  em <modelo>_camada<slot>.obj (modelos.json "camadas") e o objetos_rx01.gd
+  desenha por cima, misturada pelo alfa, só as de CAMADAS_LIGADAS. Outras:
+  Start_DirtOverlay no arco (pelo alfa lava as faixas de cinza: desligada) e
+  5 de alfa cheio em celeiros/cabanas (madeira, ferrugem, concreto: cobririam
+  o modelo); o modo de mistura delas no GS não foi achado.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
