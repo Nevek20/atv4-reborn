@@ -550,7 +550,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   Disparo NOSSO (não achado no exe): impulso do passo no fardo (massa x
   variação da velocidade sem a gravidade; o Godot dá 0 no impulso dos
   contatos) > Impulse 0.2 liga a emissão por Timeout 0.1 s: ~1 palhinha por
-  ponto por batida (teste_quebra: até 6 no ar).
+  ponto por batida (teste_quebra: até 6 no ar). Matheus (nov/2026): "sai
+  poucas palhinhas, mas dá pra ver, ficou bom". FECHADO.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
@@ -1163,7 +1164,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
 - RX01, falta: multidão (RX01_Crowds.wahoo, posições dentro dele), cercas
-  das entidades (cFenceNode/Link + .clm), palha e som das cercas/fardos, LOD das árvores, reposição (cInstantRespotBox),
+  das entidades (cFenceNode/Link + .clm), LOD das árvores, reposição (cInstantRespotBox),
   câmera de introdução, as 2 luzes direcionais. A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.
