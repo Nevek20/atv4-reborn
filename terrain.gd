@@ -310,8 +310,8 @@ static var _sh_chao: Shader = null
 ## DETALHE_M=x trocam (diagnóstico). Sem assets/terrain/rx01_detalhe.png
 ## (tools/rx01_objetos.py) o chão fica liso como antes.
 const DETALHE_ARQ := "res://assets/terrain/rx01_detalhe.png"
-const DETALHE_M := 1.6
-const DETALHE_FORCA := 0.9
+const DETALHE_M := 2.4
+const DETALHE_FORCA := 0.55
 const DETALHE_SOME := Vector2(4.0, 20.0)    # NOSSO: apaga de 4 a 20 m (o grão do jogo some antes que o nosso)
 
 

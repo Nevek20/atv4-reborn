@@ -646,9 +646,11 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   assets/terrain/rx01_detalhe.png, no git). env.header +0x2c = 5.0 e o
   0x29ed98 (x16) = 80 repetições por bloco de 128 m (1.6 m cada; leitura
   nossa). A mistura fica no VU1 (não achada): NOSSO terrain.gd fator 1 +
-  0.9 x (alfa/média - 1), mesmo brilho médio, apagando de 4 a 20 m da
-  câmera. Calibrado pelo desvio do grão fino (imagem a 640 px): jogo 14.2
-  perto / 4.5 meio; remake 0.2 / 1.7 sem detalhe, 11.3 / 5.3 agora.
+  0.55 x (alfa/média - 1), mesmo brilho médio, repetindo a cada 2.4 m,
+  apagando de 4 a 20 m da câmera. Primeiro calibrado pelo desvio do grão
+  fino (0.9, 1.6 m: 11.3 perto / 5.3 meio x jogo 14.2 / 4.5); depois o
+  Matheus (nov/2026): "tá bem preto e roubando a cor do chão, deixa mais
+  fraca e estica um pouco" -> 0.55 e 2.4 m (6.7 / 4.2).
   DETALHE=x, DETALHE_M=x, DETALHE_SOME=a,b (diagnóstico).
   ERRO NOSSO que custou caro ("parece ruído, não parece o chão do jogo",
   Matheus): textura com MIPMAP no .gob (0x158 = tamanho de todos os níveis,
