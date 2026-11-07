@@ -1,0 +1,416 @@
+<Root FileVersion="1.0000000">
+   <ParticleSystem Name="ChimneySmoke" MaxParticles="60">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourHeightenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourWind" RandomDir="0" MinStrength=".5" MaxStrength="1" MinTime="1" MaxTime="2"/>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="15" MaxValue="25"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.25" R=".8" G=".8" B=".8"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="15"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="4" MaxValue="7.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="10" MaxValue="25"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="1" MaxValue="3"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="4" MaxValue="8"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1.5"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="Tumbleweeds" MaxParticles="2">
+      <Behaviour Name="cBehaviourLifetimeOutOfSight" Distance="100.0"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourAngularMomentum"/>
+      <Behaviour Name="cBehaviourDampMomentum" HalfLife="3.0"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-9.8" Z="0"/>
+      </Behaviour>
+      <Behaviour Name="cBehaviourWind" RandomDir="15" MinStrength="7.0" MaxStrength="12.0" MinTime="2.0" MaxTime="5.0"/>
+      <Behaviour Name="cBehaviourRoll"/>
+      <Behaviour Name="cBehaviourCollideWithTerrain" PerpAtt="0.5" ParAtt="0.8"/>
+      <Behaviour Name="cBehaviourCollideWithPlayers" Mass="1.0" EnergyRetention="1.5"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Renderer Name="cRendererModelParticle" ModelPath="/Levels/Grass/Models/Pingus" TexturePath="/Levels/Grass/Models/Textures" Model="BUSH_TumbleWeed.pingu">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="100.0" MaxValue="100.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="1.0" R="0.6" G="0.45" B="0.35"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Radius" Value="1.0"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="NearestCamera" Value="0.0"/>
+      <Initialiser Name="cInitialiserFixVector3" ValueName="OrientationLook">
+         <Value X="0.0" Y="0.0" Z="1.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixVector3" ValueName="OrientationRight">
+         <Value X="1.0" Y="0.0" Z="0.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixVector3" ValueName="OrientationUp">
+         <Value X="0.0" Y="1.0" Z="0.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="1.0" MaxValue="1.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.0" MaxValue="1.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="0" MaxValue="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="0" MaxValue="0"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.0"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="0.0"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Angle" MinValue="0.0" MaxValue="3.14159"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="AngularVelocity" MinValue="0.0" MaxValue="0.0"/>
+   </ParticleSystem>
+   <ParticleSystem Name="RedFirePowder" MaxParticles="100">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourHeightenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-50" Z="0"/>
+      </Behaviour>
+      <Behaviour Name="cBehaviourCollideWithTerrain" PerpAtt="0.1" ParAtt="0.8"/>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="3.0" MaxValue="6.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.35" R="0.7" G="0.15" B="0.15"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.5" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.0" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="50" MaxValue="70"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="50" MaxValue="70"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="3"/>
+   </ParticleSystem>
+   <ParticleSystem Name="CropDusterSpray" MaxParticles="100">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourHeightenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-10" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="1.5" MaxValue="3"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.8" R="1.0" G="1.0" B="1.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.5" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.0" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="10" MaxValue="15"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="5" MaxValue="7"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="3"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="FireSmoke" MaxParticles="80">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourHeightenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourWind" RandomDir="0" MinStrength="0.0" MaxStrength="0.0" MinTime="1" MaxTime="2"/>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="5" MaxValue="15"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.5" R=".3" G=".3" B=".3"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="1"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="2                                                                                                                                " MaxValue="7.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="25" MaxValue="50"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="3" MaxValue="4"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="2" MaxValue="5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.7"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1.5"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="TreeImpactDust" MaxParticles="100">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourHeightenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourCollideWithTerrain" PerpAtt="0.1" ParAtt="0.8"/>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="1.5" MaxValue="3"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.4" R="0.57" G="0.51" B="0.45"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.5" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.0" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="30" MaxValue="40"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="25" MaxValue="35"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="3"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="Sandstorm" MaxParticles="300">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourExpandFromBase"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="1.5" MaxValue="3"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.8" R="0.51" G="0.46" B="0.41"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.0" MaxValue="0.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="0.0" MaxValue="0.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="ExpandRate" MinValue="0.4" MaxValue="0.7"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="3"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="WoodChips" MaxParticles="200">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-12" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Gravel0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="1.5" MaxValue="1.8"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A=".8" R=".75" G=".7" B=".5"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Angle" MinValue="-2" MaxValue="2"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="2" MaxValue="3"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="2" MaxValue="3"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value=".6"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="ExpandRate" MinValue="0" MaxValue="0"/>
+      <Behaviour Name="cBehaviourExpandFromCentre"/>
+   </ParticleSystem>
+   <ParticleSystem Name="SnowBlower" MaxParticles="70">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourExpandFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-9.8" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="1.5" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="1.0" R="0.7" G="0.7" B="0.8"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="1.0" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.0" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="ExpandRate" MinValue="1.0" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1"/>
+   </ParticleSystem>
+   <ParticleSystem Name="orangesmoke" MaxParticles="200">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourExpandFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="2.5" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="2.25" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.35" R="0.7" G="0.15" B="0.15"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="1.5" MaxValue="2.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.5" MaxValue="2.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="ExpandRate" MinValue="0.25" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="bluesmoke" MaxParticles="200">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourExpandFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="2.5" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="2.25" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.35" R="0.15" G="0.15" B="0.7"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="1.5" MaxValue="2.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.5" MaxValue="2.0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="ExpandRate" MinValue="0.25" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="Life"/>
+   </ParticleSystem>
+   <ParticleSystem Name="BailedHay" MaxParticles="30">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-9.8" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="snow"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="0.5" MaxValue="1.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="1.0" R="0.9" G="0.75" B="0.55"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Angle" MinValue="0" MaxValue="6"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.05" MaxValue="0.07"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="0.4" MaxValue="0.7"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1"/>
+   </ParticleSystem>
+   <ParticleSystem Name="Leaves" MaxParticles="150">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourAngularMomentum"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-3" Z="0"/>
+      </Behaviour>
+      <Behaviour Name="cBehaviourCollideWithTerrain" PerpAtt="0.1" ParAtt="0.98"/>
+      <Renderer Name="cRendererMixedFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/LeafParticles"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="3" MaxValue="5"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="1.0" R="1.0" G="1.0" B="1.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Angle" MinValue="0" MaxValue="6"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="AngularVelocity" MinValue="0" MaxValue="1.2"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.15" MaxValue="0.3"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="0.15" MaxValue="0.3"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.2"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="0.3"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Radius" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixUV" ValueName="TopLeft">
+         <Value U="0.0" V="0.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixUV" ValueName="BottomRight">
+         <Value U="1.0" V="1.0"/>
+      </Initialiser>
+   </ParticleSystem>
+   <ParticleSystem Name="ExplosionSmoke" MaxParticles="60">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourHeightenFromBase"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Renderer Name="cRendererSimpleFacemeGouraud" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="3" MaxValue="5"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="ColourTL">
+         <Value A="0.9" R="0.7" G="0.7" B="0.7"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="ColourTR">
+         <Value A="0.9" R="0.7" G="0.7" B="0.7"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="ColourBL">
+         <Value A="0.9" R="0.7" G="0.7" B="0.7"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="ColourBR">
+         <Value A="0.9" R="0.7" G="0.7" B="0.7"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="5" MaxValue="7"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="4" MaxValue="7.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="20" MaxValue="30"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="20" MaxValue="30"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1.5"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+      <Initialiser Name="cInitialiserFixUV" ValueName="TopLeft">
+         <Value V="0.0" U="0.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixUV" ValueName="BottomRight">
+         <Value V="1.0" U="1.0"/>
+      </Initialiser>
+   </ParticleSystem>
+   <ParticleSystem Name="WaterSpout" MaxParticles="70">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourExpandFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Behaviour Name="cBehaviourGravity">
+         <Gravity X="0" Y="-9.8" Z="0"/>
+      </Behaviour>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="Dust0"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="2.0" MaxValue="3.0"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.5" R="0.7" G="0.7" B="0.85"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="1.0" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="1.0" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="ExpandRate" MinValue="1.0" MaxValue="1.5"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1"/>
+   </ParticleSystem>
+   <ParticleSystem Name="WaterSplash" MaxParticles="20">
+      <Behaviour Name="cBehaviourLifetime"/>
+      <Behaviour Name="cBehaviourMomentum"/>
+      <Behaviour Name="cBehaviourHeightenFromBase"/>
+      <Behaviour Name="cBehaviourWidenFromCentre"/>
+      <Behaviour Name="cBehaviourFadeInOut"/>
+      <Renderer Name="cRendererSimpleFaceme" BlendMode="0">
+         <ParticleInfo Texture="Sprites/Particles" Box="WaterSplash"/>
+      </Renderer>
+      <Initialiser Name="cInitialiserFixS32" ValueName="Index" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Life" MinValue="0.5" MaxValue="0.8"/>
+      <Initialiser Name="cInitialiserFixARGB" ValueName="Colour">
+         <Value A="0.8" R="1.0" G="1.0" B="1.0"/>
+      </Initialiser>
+      <Initialiser Name="cInitialiserFixF32" ValueName="Angle" Value="0"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Width" MinValue="0.6" MaxValue="0.8"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="Height" MinValue="0.6" MaxValue="0.8"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="WidthRate" MinValue="0.3" MaxValue="0.6"/>
+      <Initialiser Name="cInitialiserSquareRandF32" ValueName="HeightRate" MinValue="3" MaxValue="6"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeInTime" Value="0.1"/>
+      <Initialiser Name="cInitialiserFixF32" ValueName="FadeOutTime" Value="1.0"/>
+      <Initialiser Name="cInitialiserMultiplyF32" ModifiedName="FadeOutTime" ModifierName="Life"/>
+   </ParticleSystem>
+</Root>

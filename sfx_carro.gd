@@ -57,6 +57,9 @@ var rodas: Array = []             # objetos de som das rodas
 var _susp_ret := {"Small": 0.0, "Large": 0.0}
 var _susp_flag := {"Small": false, "Large": false}
 var _uma_vez: Array = []          # sons curtos tocando (suspensão, pouso)
+var objetos_som := {}             # Collisions/InteractiveObjects (PLASTIC_FENCE, HAY...)
+var batidas: Array = []           # [CollisionSample, sample, volume] tocados
+var colisoes := {}                # atributos do <Collisions> (MinRetriggerTime 0.2)
 var spd := 0.0
 var side := 0.0
 var ws := 0.0
@@ -100,6 +103,10 @@ func carregar(c) -> bool:
 			materiais[n] = a
 		elif caminho == "Root/Vehicles/Suspension/Buggy":
 			susp[n] = a
+		elif caminho == "Root/Collisions/InteractiveObjects":
+			objetos_som[n] = a
+		elif caminho == "Root" and n == "Collisions":
+			colisoes = a
 		elif caminho == "Root/Vehicles/Model" and n == car.vehicle_id:
 			modelo = a
 		if not x.is_empty():
@@ -252,6 +259,19 @@ func _pouso() -> void:
 	var vol: float = car.pouso * _f(l, "Volume") * _f(l, "Volume") * _f(master, "SFXVolume", 1.0)
 	if vol > 0.0:
 		_tocar_uma(l.get("Bank", "Coll_Big"), l.get("FirstSample", ""), vol, _f(l, "Pitch", 1.0))
+
+
+## batida em objeto da pista (0x36b998, chamado pelo 0x153390 em cada contato
+## do carro com o objeto): o CollisionSample do InstanceDatabase.xml ->
+## Collisions/InteractiveObjects; volume = Volume x CollisionVolume (0.8) x
+## SFXVolume, tom = Pitch, no carro (o jogo passa a posição do veículo)
+func batida_objeto(amostra: String) -> void:
+	var e: Dictionary = objetos_som.get(amostra, {})
+	if e.is_empty():
+		return
+	var vol := _f(e, "Volume", 1.0) * _f(master, "CollisionVolume", 0.8) * _f(master, "SFXVolume", 1.0)
+	batidas.append([amostra, e.get("FirstSample", ""), vol])     # conferência (teste_quebra)
+	_tocar_uma(e.get("Bank", "Coll_Big"), e.get("FirstSample", ""), vol, _f(e, "Pitch", 1.0))
 
 
 func _tocar_uma(b: String, n: String, vol: float, tom: float) -> void:

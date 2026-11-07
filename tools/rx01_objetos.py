@@ -644,7 +644,71 @@ def colisao(unpacked, ind, nomes):
     return out, sobra
 
 
-def quebraveis(ind, nomes):
+def particula_pts(unpacked, ind, nome):
+    """pontos de partícula do modelo (Levels/RX_01/Models/PtS/Bantams/<m>.pts:
+    "POINT 1.00", u32 n em +16, n x [nome 32 bytes "particle <Efeito>",
+    posição (3 floats), matriz 3x3 (x 0.01)]) + o efeito (Setup/Particles.xml
+    -> data/particles.xml) e o sistema (Effects/WorldFX.xml ->
+    data/world_fx.xml)"""
+    import xml.etree.ElementTree as ET
+    cam = "Levels/RX_01/Models/PtS/Bantams/%s.pts" % nome.rsplit(".", 1)[0]
+    if cam not in ind:
+        return {}
+    d = bloco(unpacked, ind, cam)
+    if not d.startswith(b"POINT"):
+        return {}
+    n = u32(d, 16)
+    pontos = []
+    efeito = ""
+    for k in range(n):
+        o = 20 + k * 80
+        nm = d[o:o + 32].split(b"\0")[0].decode("latin1")
+        if not nm.lower().startswith("particle "):
+            continue
+        efeito = nm[9:]
+        pontos.append(list(struct.unpack_from("<3f", d, o + 32)))
+    out = {"pontos": pontos, "efeito": efeito}
+    pe = None
+    for e in ET.parse(os.path.join(PROJ, "data", "particles.xml")).getroot():
+        if e.get("Name") == efeito:
+            pe = e
+    if pe is None:
+        return out
+    di = pe.find("Direction")
+    out["taxa"] = float(pe.get("ParticlesPerSec", 0))
+    out["vel"] = [float(pe.get("VelocityVariationMin", 0)), float(pe.get("VelocityVariationMax", 0))]
+    out["spray"] = float(pe.get("Spray", 0))
+    out["dir"] = [float(di.get(k, 0)) for k in "XYZ"] if di is not None else [0, 1, 0]
+    sis = pe.get("System")
+    for ps in ET.parse(os.path.join(PROJ, "data", "world_fx.xml")).getroot():
+        if ps.get("Name") != sis:
+            continue
+        s = {"max": int(ps.get("MaxParticles", 0))}
+        for b in ps.findall("Behaviour"):
+            g = b.find("Gravity")
+            if g is not None:
+                s["gravidade"] = [float(g.get(k, 0)) for k in "XYZ"]
+        r = ps.find("Renderer/ParticleInfo")
+        if r is not None:
+            s["textura"] = r.get("Texture")
+            s["caixa"] = r.get("Box")
+        for i in ps.findall("Initialiser"):
+            v = i.get("ValueName")
+            if i.get("MinValue") is not None:
+                s[v] = [float(i.get("MinValue")), float(i.get("MaxValue"))]
+            elif v == "Colour":
+                c = i.find("Value")
+                s[v] = [float(c.get(k, 1)) for k in "RGBA"]
+            elif i.get("Value") is not None:
+                try:
+                    s[v] = float(i.get("Value"))
+                except ValueError:
+                    s[v] = i.get("Value")
+        out["sistema"] = s
+    return out
+
+
+def quebraveis(ind, nomes, unpacked=None):
     """objetos interativos da pista pelo Setup/InstanceDatabase.xml
     (data/instance_database.xml; ModelName sem diferenciar maiúscula):
     classe (cObjectFlimsyFence = cerca que quebra, cObjectTrackBlock = bloco
@@ -690,6 +754,8 @@ def quebraveis(ind, nomes):
         if pt is not None:
             q["particula"] = {"tipo": pt.get("Type"), "impulso": float(pt.get("Impulse", 0)),
                               "espera": float(pt.get("Timeout", 0))}
+            if unpacked:
+                q["particula"].update(particula_pts(unpacked, ind, nome))
         out[nome] = q
     return out
 
@@ -707,7 +773,7 @@ def main():
     print("instâncias: %d (pingus %d, bantams %d), entidades %d" % (
         len(inst), sum(i["tipo"] == "pingu" for i in inst), sum(i["tipo"] == "bantam" for i in inst), len(ents)))
     nomes = set(i["modelo"] for i in inst)
-    qb = quebraveis(ind, nomes)
+    qb = quebraveis(ind, nomes, a.unpacked)
     pecas = set(p["modelo"] for q in qb.values() for p in q.get("pecas", []))
     print("interativos: %s; peças: %s" % (", ".join("%s (%s)" % (k, v["classe"]) for k, v in qb.items()),
                                          ", ".join(sorted(pecas))))

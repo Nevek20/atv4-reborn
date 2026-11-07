@@ -79,6 +79,13 @@ def main():
     box = (round(u0 * w), round(v0 * h), round(u1 * w), round(v1 * h))
     im.crop(box).save(os.path.join(saida, "fumaca.png"))
     print("Dust0", box, "->", os.path.join(saida, "fumaca.png"))
+    # palha do fardo: sistema BailedHay (Effects/WorldFX.xml) pede a caixa
+    # "snow", que não existe no Particles.bed (tem Snow0 e Snow1): a 1ª que
+    # começa com "snow" sem diferenciar maiúscula (nossa leitura)
+    u0, v0, u1, v1 = caixa(bed, "Snow0")
+    box = (round(u0 * w), round(v0 * h), round(u1 * w), round(v1 * h))
+    im.crop(box).save(os.path.join(saida, "palha.png"))
+    print("Snow0", box, "->", os.path.join(saida, "palha.png"))
 
     for nome, png in (("Vehicles/Generic/Textures/GEN_DIRT_DIRT.bog", "sujeira.png"),
                       ("Characters/Textures/Dirt/GEN_DIRT_DIRT.bog", "sujeira_piloto.png"),

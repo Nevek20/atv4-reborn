@@ -47,6 +47,7 @@ luzes.gd             lanterna de freio e luz de ré acesas (melhoria nossa): len
 farol.gd             farol aceso (melhoria nossa, no estilo da lanterna de freio) nas lentes de farol do modelo; H liga
 terrain.gd           relevo e material do chão da pista RX01 (do stream do jogo)
 objetos_rx01.gd      objetos da pista RX01 (porta do jogo): casas, arquibancadas, arco, placas, guard-rail, pedras, árvores + colisão KDt
+palha.gd             palha do fardo (porta do jogo: .pts + Particles.xml + WorldFX.xml), disparada pelo objetos_rx01.gd
 ceu.gd               céu da pista (porta do jogo): cúpulas do SkyDome do Environment.xml (nuvens + montanhas) presas na câmera
 data/                XMLs do jogo (física buggy_NN.xml, pontos, câmeras, peças)
 assets/              modelos do pingu2obj: renegade, sphinx, buggy_NN, truck_NN, rodas; sfx (sons) e fx (fumaça) do jogo (fora do git)
@@ -146,7 +147,7 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 
 :: sons de pneu, suspensão e pouso do jogo -> assets/sfx (wav + sons.json com o ADSR de cada tom)
 python tools/sfx_jogo.py <unpacked>
-:: textura da fumaça (Sprites/Particles, caixa Dust0), da sujeira (GEN_DIRT_DIRT), da lama do pneu (UNI_TyreOverlay) e da poeira (WorldFXdust) -> assets/fx
+:: textura da fumaça (Sprites/Particles, caixa Dust0), da palha (Snow0), da sujeira (GEN_DIRT_DIRT), da lama do pneu (UNI_TyreOverlay) e da poeira (WorldFXdust) -> assets/fx
 python tools/fx_jogo.py <unpacked>
 :: + print_tela com SUJEIRA=0.8 força o nível da sujeira, PAINEL=6900,137 fixa rpm e km/h no painel,
 ::   SEM_PAINEL=1 esconde o nosso (pra ver o que sobrou do modelo)
@@ -531,9 +532,25 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   0x140758 não dá massa) que não bate no carro; fardo volta 10 s depois de
   mexido (> 0.5 m), com o carro a > 4 m; AngResistance -> angular_damp.
   teste_quebra: a 60 km/h a cerca quebra e o carro segue a 63; a 4 km/h
-  (impulso 1.3) segura; fardo sai 13 m e volta. Falta: palha do fardo
-  (ParticleTrigger Impact 0.2) e o som de batida (CollisionSample
-  PLASTIC_FENCE / HAY).
+  (impulso 1.3) segura; fardo sai 13 m e volta.
+  Som da batida (PORTA, 0x36b998, chamado pelo 0x153390 em cada contato):
+  CollisionSample do objeto -> SoundDatabase Collisions/InteractiveObjects
+  (PLASTIC_FENCE = FencePlastic, HAY = Hay, do Collide.bnk), volume Volume x
+  CollisionVolume 0.8 x SFXVolume, tom Pitch, na posição do carro. O jogo
+  repete por quadro (até 4): aqui 1 a cada MinRetriggerTime 0.2 s por objeto
+  (nossa). sfx_carro.batida_objeto. No fardo (corpo solto) o caminho do exe
+  não foi achado: toca no impacto com o carro (nossa).
+  Palha do fardo (palha.gd; dados PORTA): 2 pontos "particle Hay" do
+  PtS/Bantams/GEN_HayBale.pts (formato: "POINT 1.00", n em +16, n x [nome
+  32 + posição + matriz 3x3 x 0.01]), efeito Hay do Setup/Particles.xml
+  (data/particles.xml: 10/s, vel 0.5..1, Spray 6, pra cima) e sistema
+  BailedHay do Effects/WorldFX.xml (data/world_fx.xml: até 30, vida 0.5..1,
+  gravidade, cor de palha, 0.05..0.07 x 0.4..0.7 x 0.6 como a poeira, caixa
+  "snow" = Snow0 do Particles.bed, tools/fx_jogo.py -> assets/fx/palha.png).
+  Disparo NOSSO (não achado no exe): impulso do passo no fardo (massa x
+  variação da velocidade sem a gravidade; o Godot dá 0 no impulso dos
+  contatos) > Impulse 0.2 liga a emissão por Timeout 0.1 s: ~1 palhinha por
+  ponto por batida (teste_quebra: até 6 no ar).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

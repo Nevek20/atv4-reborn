@@ -22,6 +22,7 @@ var t := 0.0
 var alvo: Dictionary
 var bloco: Dictionary
 var v0 := 0.0
+var max_palha := 0
 
 
 func _initialize() -> void:
@@ -132,6 +133,10 @@ func _physics_process(dt: float) -> bool:
 		print("  60 km/h na cerca: quebrou %s, %d peças, carro a %.0f km/h depois de 2 s" % [alvo.quebrada, n_pecas, vk])
 		_checa(alvo.quebrada and n_pecas == 2, "cerca quebra e solta as 2 peças")
 		_checa(vk > 35.0, "carro passa (não para na cerca)")
+		var bat: Array = car.sfx.batidas if car.sfx and is_instance_valid(car.sfx) else []
+		print("  sons de batida: %s" % [bat])
+		_checa(not bat.is_empty() and bat[0][1] == "FencePlastic" and absf(bat[0][2] - 0.8) < 0.01,
+			"som FencePlastic, volume 1.0 x CollisionVolume 0.8")
 		# outra cerca devagar
 		for c in objetos.cercas:
 			if c != alvo and not c.quebrada and String(c.it.modelo).begins_with("GEN_Barrier_RallyFence") and _livre(c):
@@ -154,8 +159,14 @@ func _physics_process(dt: float) -> bool:
 		return false
 	if fase == 3:
 		t += dt
+		if objetos.palha:
+			max_palha = maxi(max_palha, objetos.palha.vivas.size())
 		if t < 2.0:
 			return false
+		var bat3: Array = car.sfx.batidas if car.sfx and is_instance_valid(car.sfx) else []
+		print("  fardo: até %d palhinhas no ar, sons %s" % [max_palha, bat3])
+		_checa(max_palha > 0, "palha sai do fardo (ParticleTrigger Impact)")
+		_checa(bat3.any(func(e): return e[1] == "Hay"), "som Hay na batida do fardo")
 		var andou: float = (bloco.corpo as Node3D).global_position.distance_to((bloco.xf0 as Transform3D).origin)
 		print("  fardo a 30 km/h: andou %.2f m" % andou)
 		_checa(andou > 0.5, "fardo sai empurrado")

@@ -70,6 +70,8 @@ const COR_AGUA := Color(0.5882, 0.6067, 0.6143, 1.0)
 ## vira angular_damp. Faltam: a palha do fardo (ParticleTrigger Impact 0.2)
 ## e o som de batida (CollisionSample PLASTIC_FENCE / HAY).
 const INTERATIVOS := true
+const Palha := preload("res://palha.gd")
+var palha = null                         # palha.gd (palha do fardo)
 const MASSA_PECA := 10.0                 # kg, nossa
 const ESTOQUE_PECAS := 20                # por modelo (0x140318: até 0x13)
 const BIT_CARRO := 1 << 10               # camada só do carro, pra consulta das cercas
@@ -345,8 +347,18 @@ func _interativo(it: Dictionary, q: Dictionary, malha: Mesh, col: Dictionary) ->
 		rb.add_child(_malha_no(malha, it, cx.affine_inverse() * x))
 		add_child(rb)
 		rb.global_transform = cx
+		var pq: Dictionary = q.get("particula", {})
+		if not pq.get("pontos", []).is_empty():
+			rb.contact_monitor = true         # impulso dos contatos (ParticleTrigger)
+			rb.max_contacts_reported = 8
 		blocos.append({"corpo": rb, "xf0": cx, "mexido": false, "t": 0.0,
-			"reset": float(q.get("reset", 0.0))})
+			"reset": float(q.get("reset", 0.0)), "q": q, "malha_local": cx.affine_inverse() * x,
+			"acum": [0.0, 0.0, 0.0, 0.0], "emite": 0.0, "som_t": 0.0})
+		if palha == null and not pq.get("pontos", []).is_empty() and Palha.pronta():
+			palha = Palha.new()
+			palha.name = "Palha"
+			add_child(palha)
+			palha.montar(pq)
 
 
 ## 0x141640 antes do passo: o carro vai encostar na cerca neste passo? com
@@ -404,6 +416,7 @@ func _physics_process(dt: float) -> void:
 				(pr as RigidBody3D).add_collision_exception_with(carro)
 	for b in blocos:
 		var rb: RigidBody3D = b.corpo
+		_bloco_batida(b, dt)
 		if not b.mexido and rb.global_position.distance_to((b.xf0 as Transform3D).origin) > 0.5:
 			b.mexido = true
 			b.t = 0.0
@@ -412,9 +425,12 @@ func _physics_process(dt: float) -> void:
 			if b.t >= b.reset and rb.global_position.distance_to(pc) > 4.0:
 				# ActiveResetTimeout: volta pro lugar
 				rb.global_transform = b.xf0
+				b.erase("v_ant")
 				rb.linear_velocity = Vector3.ZERO
 				rb.angular_velocity = Vector3.ZERO
 				b.mexido = false
+	if palha:
+		palha.passo(dt)
 
 
 ## 0x153390: impulso do contato do carro com um corpo parado (a cerca), em
@@ -438,6 +454,8 @@ func impulso_contato(n: Vector3, ponto: Vector3) -> float:
 ## 0x141a48 + 0x153390: impulso > ShatterImpulse quebra; aí o carro leva o
 ## empurrão de no máximo 0.25 t·m/s (giro com o braço x 0.2) e atravessa
 func _bate_cerca(c: Dictionary, imp: float, n: Vector3, ponto: Vector3) -> bool:
+	if imp > 0.0:
+		_som(c, String(c.q.get("som", "")))
 	var lim := float(c.q.get("quebra", 0.0))
 	if c.quebrada or lim <= 0.0 or imp <= lim:
 		return false
@@ -447,6 +465,54 @@ func _bate_cerca(c: Dictionary, imp: float, n: Vector3, ponto: Vector3) -> bool:
 	carro.apply_central_impulse(dj)
 	carro.apply_torque_impulse(((ponto - com) * 0.2).cross(dj))
 	return true
+
+
+## som da batida (0x36b998 em cada contato do 0x153390): CollisionSample do
+## objeto; o jogo repete por quadro (até 4 por quadro): aqui no máximo um a
+## cada MinRetriggerTime do <Collisions> (0.2 s) por objeto (nossa)
+func _som(o: Dictionary, amostra: String) -> void:
+	if amostra == "" or carro == null or not is_instance_valid(carro) or carro.get("sfx") == null:
+		return
+	var agora := Time.get_ticks_msec() / 1000.0
+	var sfx = carro.sfx
+	if not is_instance_valid(sfx):
+		return
+	if agora - float(o.get("som_ultimo", -10.0)) < float(sfx.colisoes.get("MinRetriggerTime", 0.2)):
+		return
+	o["som_ultimo"] = agora
+	sfx.batida_objeto(amostra)
+
+
+## fardo: impulso dos contatos do passo (t·m/s) > Impulse do ParticleTrigger
+## liga a palha por Timeout s; batida com o carro toca o CollisionSample (HAY)
+func _bloco_batida(b: Dictionary, dt: float) -> void:
+	var rb: RigidBody3D = b.corpo
+	if not rb.contact_monitor:
+		return
+	var pq: Dictionary = b.q.get("particula", {})
+	# impulso que o fardo recebeu no passo (t·m/s) = massa x (variação da
+	# velocidade - gravidade): o Godot não informa o impulso dos contatos
+	var v := rb.linear_velocity
+	var g := Vector3(0, -float(ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)), 0)
+	var imp := 0.0
+	if b.has("v_ant") and not rb.sleeping:
+		imp = rb.mass / 1000.0 * (v - (b.v_ant as Vector3) - g * dt).length()
+	b.v_ant = v
+	if imp > float(pq.get("impulso", 0.2)):
+		b.emite = float(pq.get("espera", 0.1))
+		var no_carro := false
+		var st := PhysicsServer3D.body_get_direct_state(rb.get_rid())
+		if st and carro:
+			for i in st.get_contact_count():
+				if st.get_contact_collider_object(i) == carro:
+					no_carro = true
+		if no_carro or (carro and is_instance_valid(carro) and rb.global_position.distance_to(carro.global_position) < 4.0):
+			_som(b, String(b.q.get("som", "")))
+		if _dbg:
+			print("    fardo imp %.3f carro %s v %.1f" % [imp, no_carro, v.length()])
+	if b.emite > 0.0 and palha:
+		palha.emitir(b, minf(dt, b.emite))
+		b.emite -= dt
 
 
 ## roda do carro (raio da suspensão) encostando numa cerca: o jogo trata as
