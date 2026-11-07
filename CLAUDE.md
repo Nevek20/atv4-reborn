@@ -639,6 +639,17 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   piloto, InShadow, Overbright (ActualBrightness 1.756, uso não achado).
   Falta: o vermelho da lateral do Renegade fica 98 x 72 do jogo (pintura?).
   AMB_E / SOL_E = força da luz no Godot (diagnóstico).
+  Grão do chão (nov/2026, "o chão do jogo tem mais qualidade", prints do
+  Matheus no mesmo lugar): o renderer do relevo (0x1eb758) põe por cima a
+  textura "detail" da pista (Levels/RX_01/Env/Default/Default/DETAIL.bog,
+  128 x 128, desenho no ALFA; tools/rx01_objetos.py ->
+  assets/terrain/rx01_detalhe.png, no git). env.header +0x2c = 5.0 e o
+  0x29ed98 (x16) = 80 repetições por bloco de 128 m (1.6 m cada; leitura
+  nossa). A mistura fica no VU1 (não achada): NOSSO terrain.gd fator 1 +
+  1.15 x (alfa/média - 1), mesmo brilho médio, apagando de 5 a 25 m da
+  câmera. Calibrado pelo desvio do grão fino (imagem a 640 px): jogo 14.2
+  perto / 4.5 meio; remake 0.2 / 1.7 antes, 13.5 / 6.1 agora. DETALHE=x,
+  DETALHE_M=x, DETALHE_SOME=a,b (diagnóstico).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

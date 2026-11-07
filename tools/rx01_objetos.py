@@ -911,6 +911,25 @@ def main():
     json.dump(info, open(os.path.join(a.out, "modelos.json"), "w"), indent=1)
     print("modelos em %s: %d" % (a.out, len(info)))
     print("céu: %s" % ", ".join(ceu(a.unpacked, ind, a.out)))
+    print("detalhe do chão: %s" % detalhe_chao(a.unpacked, ind))
+
+
+ARQ_DETALHE = "Levels/RX_01/Env/Default/Default/DETAIL.bog"
+
+
+def detalhe_chao(unpacked, ind):
+    """textura de detalhe do relevo (o renderer do chão 0x1eb758 carrega o
+    "detail" da pasta Env da pista): 128 x 128, cor cinza fixa (131) e o
+    desenho no ALFA (do PS2, 0x80 = 1.0; 12..190 no RX01). Sai o alfa cru
+    num PNG cinza (valor = alfa do PS2 0..255) em assets/terrain/rx01_detalhe.png"""
+    if ARQ_DETALHE not in ind or not ind[ARQ_DETALHE][3].startswith("gob/"):
+        return "não achado"
+    from gob_tex2png import convert
+    im, _ = convert(os.path.join(unpacked, ind[ARQ_DETALHE][3]))
+    alfa = im.convert("RGBA").getchannel("A")
+    destino = os.path.join(PROJ, "assets", "terrain", "rx01_detalhe.png")
+    alfa.save(destino)
+    return "%s (%dx%d)" % (os.path.relpath(destino, PROJ), alfa.size[0], alfa.size[1])
 
 
 if __name__ == "__main__":

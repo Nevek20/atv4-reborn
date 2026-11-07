@@ -965,6 +965,14 @@ vazios). Tudo vem do evento:
 - Chão: a textura do relevo (assets/terrain/rx01_terrain.jpg) tem a luz
   assada (sombra do arco, arquibancadas, morros). No print do jogo o chão da
   largada é 78, 72, 66 e a textura ali 85, 75, 65: desenhada sem luz.
+- Detalhe do chão: o renderer do relevo (0x1eb758, objeto com o
+  env.header de 0x48 bytes em +0x10: tile 128 m em +0x24, +0x3c = 5.0)
+  carrega "<pasta Env>/detail" (RX01: DETAIL.bog, 128 x 128 4 bits, RGB 131
+  fixo e alfa 12..190) em +0xd0 e "/Init/White" em +0xd4. +0x3c vai pro
+  renderer 0x7f6718 +0x1e4 (padrão 5.0 no 0x29ce38; 2x no LOD de longe em
+  0x1ec898) e o 0x29ed98 faz +0x138/+0x148 = +0x1e4 x 16 x +0x1e8/+0x1ec.
+  O renderer também guarda o ActualBrightness (+0xe4). A mistura e o +0x1e8
+  ficam no VU1 (não achados).
 - PS2 sem tonemap. Godot faz a luz em espaço linear e o PS2 na cor da tela:
   o mesmo ambiente 0.66 clareava muito mais no remake.
 

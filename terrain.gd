@@ -264,6 +264,16 @@ func _build_mesh() -> void:
 	if textura:
 		mat.set_shader_parameter("tex", textura)
 	mat.set_shader_parameter("sombra", SOMBRA)
+	var det := _detalhe()
+	if det:
+		mat.set_shader_parameter("detalhe", det)
+		mat.set_shader_parameter("det_forca", DETALHE_FORCA if not OS.has_environment("DETALHE") else float(OS.get_environment("DETALHE")))
+		mat.set_shader_parameter("det_metros", DETALHE_M if not OS.has_environment("DETALHE_M") else float(OS.get_environment("DETALHE_M")))
+		var some := DETALHE_SOME
+		if OS.has_environment("DETALHE_SOME"):
+			var ps := OS.get_environment("DETALHE_SOME").split(",")
+			some = Vector2(float(ps[0]), float(ps[1]))
+		mat.set_shader_parameter("det_some", some)
 
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
@@ -287,6 +297,35 @@ const SOMBRA := 0.66
 static var _sh_chao: Shader = null
 
 
+## Detalhe do chão (PORTA parcial, nov/2026, "o chão do jogo tem mais
+## qualidade", prints do Matheus): o renderer do relevo (0x1eb758) carrega a
+## textura "detail" da pasta Env da pista (RX01: DETAIL.bog, 128 x 128, cinza
+## fixo com o desenho no ALFA, 12..190 do PS2) e a repete por cima da textura
+## do chão. env.header +0x2c = 5.0 vai pro renderer +0x1e4 e o 0x29ed98 faz
+## 5 x 16 x (+0x1e8): lido como 80 repetições por bloco de 128 m (1.6 m cada).
+## O jeito de misturar fica no VU1 (não achado). NOSSO: fator = 1 + força x
+## (alfa / média - 1), média do brilho igual (a cor média já batia com o
+## jogo) e só o grão; DETALHE_FORCA calibrada no desvio do grão fino dos
+## prints do jogo (perto do carro ~13 de 255, largada ~11). DETALHE=x e
+## DETALHE_M=x trocam (diagnóstico). Sem assets/terrain/rx01_detalhe.png
+## (tools/rx01_objetos.py) o chão fica liso como antes.
+const DETALHE_ARQ := "res://assets/terrain/rx01_detalhe.png"
+const DETALHE_M := 1.6
+const DETALHE_FORCA := 1.15
+const DETALHE_SOME := Vector2(5.0, 25.0)    # NOSSO: apaga de 5 a 25 m (o grão do jogo some antes que o nosso)
+
+
+func _detalhe() -> Texture2D:
+	if not FileAccess.file_exists(DETALHE_ARQ):
+		return null
+	var img := Image.load_from_file(ProjectSettings.globalize_path(DETALHE_ARQ))
+	if img == null or img.is_empty():
+		return null
+	img.convert(Image.FORMAT_L8)
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+
 static func _shader_chao() -> Shader:
 	if _sh_chao == null:
 		_sh_chao = Shader.new()
@@ -295,8 +334,22 @@ shader_type spatial;
 render_mode cull_disabled, ambient_light_disabled, specular_disabled;
 uniform sampler2D tex : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform float sombra = 0.66;
+uniform sampler2D detalhe : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float det_forca = 0.0;
+uniform float det_metros = 1.6;
+uniform vec2 det_some = vec2(5.0, 25.0);   // de / até (m da câmera)
+const float DET_MEDIA = 0.3594;   // média do alfa do DETAIL.bog do RX01 (91.6 / 255)
+varying vec3 mundo;
+void vertex() {
+	mundo = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
 void fragment() {
-	ALBEDO = texture(tex, UV).rgb;
+	vec3 c = texture(tex, UV).rgb;
+	float d = texture(detalhe, mundo.xz / det_metros).r;
+	// fator na cor da tela (sRGB): mesmo brilho médio, só o grão
+	float longe = clamp((length(VERTEX) - det_some.x) / (det_some.y - det_some.x), 0.0, 1.0);
+	float f = max(1.0 + det_forca * (1.0 - longe) * (d / DET_MEDIA - 1.0), 0.0);
+	ALBEDO = c * pow(f, 2.2);
 	ROUGHNESS = 1.0;
 }
 void light() {
