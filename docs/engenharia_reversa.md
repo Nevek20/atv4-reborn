@@ -907,9 +907,12 @@ vazios). Tudo vem do evento:
   volta do quadrado da textura, de borda transparente: textura presa na
   borda (repetindo, os cantos do triângulo mostravam pedaços cortados da
   textura, "placas soltas" no céu). O bit exato não foi conferido no exe.
-- Não portado: a multidão (RX01_Crowds.wahoo, other/12403, posições próprias
-  dentro), as cercas das entidades (cFenceNode/Link + .clm), quebrar cerca e
-  fardo, LOD (TREE_*_LOD1), cor de luz por instância, cIntroCamera,
+- Cercas das entidades (cFenceNodeEntity/cFenceLinkEntity): só do editor. O
+  exe não tem essas classes (lista de nomes de entidade em 0x579480..); as
+  peças foram geradas por uma curva pelos nós (~3.2 m) e gravadas como
+  bantams no #def5772a. 2 das 6 correntes não têm peça gravada e não
+  aparecem no jogo (conferido pelo Matheus).
+- Não portado: LOD (TREE_*_LOD1), cor de luz por instância, cIntroCamera,
   cInstantRespotBox (reposição), cGenTrigger, cCrowdEffectBox, as 2 luzes.
 
 - Camada do lote de pingu (2ª textura pelo 2º UV), como o GS desenha:

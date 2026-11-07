@@ -610,6 +610,13 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   posição vai com as mesmas 6 casas do .obj. Conferido no lavapipe: sem
   isso o arco sai limpo, com isso a sujeira aparece. Matheus (nov/2026):
   "agora sim ficou bom". FECHADO.
+  Cercas das entidades (cFenceNodeEntity/cFenceLinkEntity do RALLYCROSS.bin,
+  32 nós + 26 ligações em 6 correntes): só do EDITOR. A lista de classes que
+  o exe cria (nomes em 0x579480..) não tem nenhuma cFence; o editor gerou as
+  peças por uma curva pelos nós (~3.2 m cada) e gravou como bantams comuns
+  no #def5772a (4 correntes; o remake já desenha). As outras 2 (GEN do lado
+  da torre do locutor, SAM no meio das moitas) não têm peça gravada e não
+  existem no jogo (o Matheus conferiu, nov/2026). FECHADO.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
@@ -1221,7 +1228,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- RX01, falta: cercas das entidades (cFenceNode/Link + .clm), LOD das árvores, reposição (cInstantRespotBox),
+- RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
   câmera de introdução, as 2 luzes direcionais. A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.
