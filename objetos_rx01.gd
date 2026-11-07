@@ -56,17 +56,22 @@ const COR_AGUA := Color(0.5882, 0.6067, 0.6143, 1.0)
 ##    e nasce na pose da cerca, parada (0x140cf0 copia posição e giro).
 ##  - cObjectTrackBlock (o fardo): corpo solto de Mass 0.1 t, Friction 0.2,
 ##    ActiveResetTimeout 10 s.
+##  - 0x153390 (carro e rodas x cerca parada): impulso de cada contato
+##    j = -(1 + e) vn / (1/m + n.((I^-1 (r x n)) x r)), o maior; 0x141a48
+##    quebra com j > ShatterImpulse e aí o carro só leva n x min(j, 0.25)
+##    (0x54d190) e o contato some: perde no máximo 0.75 km/h (Renegade).
+##    Abaixo de 2 (~6 km/h de frente) a cerca segura.
 ## No remake (aproximações, marcadas): o impulso é medido ANTES do passo da
-## física (massa do carro x velocidade contra a cerca), pra o carro atravessar
-## no mesmo passo em vez de bater numa parede e só depois ela sumir; as
-## peças têm 10 kg (o construtor 0x140758 não dá massa); o fardo volta pro
+## física, pra o carro atravessar no mesmo passo em vez de bater numa parede
+## e só depois ela sumir; as peças têm 10 kg (o construtor 0x140758 não dá
+## massa) e não batem no carro nem na roda (no jogo a cerca não freia,
+## Matheus); o fardo volta pro
 ## lugar 10 s depois de mexido, se o carro não estiver em cima; AngResistance
 ## vira angular_damp. Faltam: a palha do fardo (ParticleTrigger Impact 0.2)
 ## e o som de batida (CollisionSample PLASTIC_FENCE / HAY).
 const INTERATIVOS := true
 const MASSA_PECA := 10.0                 # kg, nossa
 const ESTOQUE_PECAS := 20                # por modelo (0x140318: até 0x13)
-const SEPARA := 3.5                     # m: a peça só volta a bater no carro longe dele (nossa)
 const BIT_CARRO := 1 << 10               # camada só do carro, pra consulta das cercas
 const CAMADA := 2                       # bit das cercas: a consulta só olha elas
 var carro: RigidBody3D = null            # main.gd põe (o que bate nas cercas)
@@ -74,8 +79,14 @@ var cercas: Array = []                   # [{corpo, forma, malha, q, xf, quebrad
 var blocos: Array = []                   # [{corpo, xf0, mexido, t}]
 var pecas := {}                          # modelo -> [RigidBody3D] (o estoque)
 var quebradas := 0
-var _separando: Array = []               # peças ainda sem colidir com o carro
+var _separando: Array = []               # peças (não batem no carro nem na roda)
+var _carro_ant = null
 var _col_cache := {}                     # "colisao" do JSON (cascos das peças)
+var _cerca_do_corpo := {}                # id do StaticBody3D -> índice em cercas
+## 0x153390: depois de quebrar, o carro recebe só n x min(impulso, 0.25)
+## (0x54d190) e o contato é jogado fora (0x153658 não cria contato com a
+## cerca quebrada): perde no máximo 0.25 / 1.2 t = 0.2 m/s
+const EMPURRAO_MAX := 0.25               # t·m/s
 
 
 func montar() -> bool:
@@ -280,6 +291,7 @@ func _interativo(it: Dictionary, q: Dictionary, malha: Mesh, col: Dictionary) ->
 		return
 	var mat := PhysicsMaterial.new()
 	mat.friction = q.get("atrito", 0.2)
+	mat.bounce = q.get("dureza", 0.2)       # Hardness = restituição (0x142698 -> corpo+0xbc)
 	if q.classe == "cObjectFlimsyFence":
 		var sb := StaticBody3D.new()
 		sb.name = "Cerca"
@@ -310,6 +322,7 @@ func _interativo(it: Dictionary, q: Dictionary, malha: Mesh, col: Dictionary) ->
 		var eixos := [x.basis.x, x.basis.y, x.basis.z]
 		var tam := [bb.size.x, bb.size.y, bb.size.z]
 		var fino := 0 if tam[0] <= tam[2] else 2
+		_cerca_do_corpo[sb.get_instance_id()] = cercas.size()
 		cercas.append({"corpo": sb, "forma": cs, "malha": mi, "q": q, "xf": x, "it": it,
 			"quebrada": false, "normal": (eixos[fino] as Vector3).normalized()})
 	else:
@@ -348,6 +361,8 @@ func _physics_process(dt: float) -> void:
 		# só o carro (bit próprio, ninguém mais usa)
 		carro.collision_layer |= BIT_CARRO
 		var imp := 0.0
+		var n_imp := Vector3.ZERO
+		var p_imp := Vector3.ZERO
 		var corpo_xf: Transform3D = (c.corpo as Node3D).global_transform
 		for cs in c.forma:
 			var qp := PhysicsShapeQueryParameters3D.new()
@@ -366,21 +381,20 @@ func _physics_process(dt: float) -> void:
 			var info: Dictionary = espaco.get_rest_info(qp)
 			if info.is_empty() or info.collider_id != carro.get_instance_id():
 				continue
-			# o jogo soma os impulsos dos contatos (0x141640): aqui o maior,
-			# massa x velocidade na normal do contato (centro a centro)
-			var n: Vector3 = info.normal
-			imp = maxf(imp, carro.mass / 1000.0 * absf(v.dot(n.normalized())))
-		if imp > float(c.q.get("quebra", 0.0)):
-			quebrar(c)
-	# a peça nasce dentro do carro (na pose da cerca): no Godot a separação de
-	# 10 kg dentro de 1.2 t parava o carro. Ela ignora o carro até ficar a
-	# SEPARA m dele (nossa; no jogo a física não faz isso)
-	for k in range(_separando.size() - 1, -1, -1):
-		var pr = _separando[k]
-		if not is_instance_valid(pr) or not tem_carro or (pr as Node3D).global_position.distance_to(pc) > SEPARA:
-			if is_instance_valid(pr) and tem_carro:
-				(pr as RigidBody3D).remove_collision_exception_with(carro)
-			_separando.remove_at(k)
+			# 0x153390: o maior impulso entre os contatos, contra corpo parado
+			var j := impulso_contato(-(info.normal as Vector3).normalized(), info.point)
+			if j > imp:
+				imp = j
+				n_imp = -(info.normal as Vector3).normalized()
+				p_imp = info.point
+		_bate_cerca(c, imp, n_imp, p_imp)
+	# peças não batem no carro (nossa, pelo que o Matheus vê no jogo: a cerca
+	# laranja não freia). Carro novo (menu): exceção com todas
+	if tem_carro and carro != _carro_ant:
+		_carro_ant = carro
+		for pr in _separando:
+			if is_instance_valid(pr):
+				(pr as RigidBody3D).add_collision_exception_with(carro)
 	for b in blocos:
 		var rb: RigidBody3D = b.corpo
 		if not b.mexido and rb.global_position.distance_to((b.xf0 as Transform3D).origin) > 0.5:
@@ -394,6 +408,56 @@ func _physics_process(dt: float) -> void:
 				rb.linear_velocity = Vector3.ZERO
 				rb.angular_velocity = Vector3.ZERO
 				b.mexido = false
+
+
+## 0x153390: impulso do contato do carro com um corpo parado (a cerca), em
+## t·m/s: j = -(1 + e) vn / (1/m + n . ((I^-1 (r x n)) x r)), vn = velocidade
+## do ponto na normal (n aponta pra fora da cerca, pro carro), e = a
+## Restitution do carro (+0xbc)
+func impulso_contato(n: Vector3, ponto: Vector3) -> float:
+	var com: Vector3 = carro.global_transform * carro.center_of_mass
+	var r := ponto - com
+	var vn := (carro.linear_velocity + carro.angular_velocity.cross(r)).dot(n)
+	if vn >= 0.0:
+		return 0.0
+	var e := 0.0
+	if carro.physics_material_override:
+		e = carro.physics_material_override.bounce
+	var ii: Basis = carro.get_inverse_inertia_tensor() * 1000.0     # 1/(t·m²)
+	var den := 1000.0 / carro.mass + n.dot((ii * r.cross(n)).cross(r))
+	return -(1.0 + e) * vn / den
+
+
+## 0x141a48 + 0x153390: impulso > ShatterImpulse quebra; aí o carro leva o
+## empurrão de no máximo 0.25 t·m/s (giro com o braço x 0.2) e atravessa
+func _bate_cerca(c: Dictionary, imp: float, n: Vector3, ponto: Vector3) -> bool:
+	var lim := float(c.q.get("quebra", 0.0))
+	if c.quebrada or lim <= 0.0 or imp <= lim:
+		return false
+	quebrar(c)
+	var com: Vector3 = carro.global_transform * carro.center_of_mass
+	var dj := n * minf(imp, EMPURRAO_MAX) * 1000.0                  # kg·m/s
+	carro.apply_central_impulse(dj)
+	carro.apply_torque_impulse(((ponto - com) * 0.2).cross(dj))
+	return true
+
+
+## roda do carro (raio da suspensão) encostando numa cerca: o jogo trata as
+## rodas pelo mesmo 0x153390 (0x154088). true = quebrou (refazer o raio)
+func roda_na_cerca(corpo: Object, ponto: Vector3, normal: Vector3) -> bool:
+	if corpo == null or not _cerca_do_corpo.has(corpo.get_instance_id()):
+		return false
+	var c: Dictionary = cercas[_cerca_do_corpo[corpo.get_instance_id()]]
+	return _bate_cerca(c, impulso_contato(normal.normalized(), ponto), normal.normalized(), ponto)
+
+
+## peças que ainda não batem no carro: o raio da roda também ignora
+func ignorar_roda() -> Array:
+	var r := []
+	for p in _separando:
+		if is_instance_valid(p):
+			r.append((p as RigidBody3D).get_rid())
+	return r
 
 
 ## 0x141908: a cerca sai do mundo e as peças nascem na pose dela, paradas
@@ -437,12 +501,13 @@ func quebrar(c: Dictionary) -> void:
 		rb.global_transform = cx
 		rb.linear_velocity = Vector3.ZERO
 		rb.angular_velocity = Vector3.ZERO
-		# a peça nasce dentro do carro (na pose da cerca): no Godot a separação
-		# de 10 kg dentro de 1.2 t freava o carro de 61 pra 13 km/h. Ela ignora
-		# o carro por SEPARA s (nossa; no jogo a física não faz isso)
+		# a peça não bate no carro (nossa): nascendo dentro dele (na pose da
+		# cerca) freava de 61 pra 13 km/h, e solta no chão logo depois da
+		# batida em ângulo tirava mais 4 a 12 km/h. Rola e cai só no chão
+		if not _separando.has(rb):
+			_separando.append(rb)
 		if carro and is_instance_valid(carro):
 			rb.add_collision_exception_with(carro)
-			_separando.append(rb)
 		lista.append(rb)
 		pecas[p.modelo] = lista
 

@@ -1083,3 +1083,17 @@ JSON "interativos"). tests/teste_quebra.gd.
   pra cada peça pega uma livre no estoque (0x1406f0; 0x140318 cria até 20
   por modelo) e 0x140cf0 põe ela na posição e no giro da cerca, parada.
   0x140758 (construtor da peça) não dá massa.
+- 0x153390 (contato de um corpo com objeto parado; chamado pelo 0x153658 /
+  0x154520 pra corpos e 0x154088 pras rodas do carro, corpo = veículo+0x70):
+  pra cada ponto, j = -(1 + e) vn / (1/m + n.((I^-1 (r x n)) x r)) com o
+  corpo de +0xc0 (1/m), +0x100 (I^-1 no mundo), +0xbc (restituição) e
+  vn = (v + w x r).n; fica o maior. 0x141a48(j, cerca): ShatterImpulse > 0 e
+  j > ShatterImpulse -> 0x141908. Se a cerca está quebrada (+0x110) soma
+  n x min(j, 0.25) (0x54d190) em +0x150 (impulso: o integrador 0x23efa8 faz
+  v += +0x150 x 1/m) e (0.2 r) x isso em +0x160, e devolve 1: o chamador NÃO
+  cria contato. Já quebrada, devolve 1 direto. O 0.25 só é lido ali.
+- 0x142698 (corpo do objeto): dinâmico se Mass > 1e-6, massa = Mass (t, a
+  mesma unidade do carro), +0xb8 = Friction, +0xbc = Hardness (restituição);
+  0x23eb88 guarda a massa em +0x78 e 1/m em +0xc0. A cerca (Mass 0) é
+  parada; o 0x141640 (soma dos contatos) só age em corpo com massa, então
+  quem quebra a cerca é o 0x153390.

@@ -119,6 +119,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --headless --path . -s res://tests/teste_objetos.gd       :: objetos do RX01: 707 instâncias, no chão, céu, largada livre, guard-rail segura o carro
 %GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
 %GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
+set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quanto o carro perde na cerca e no fardo (0/30/60°), com x sem o objeto
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
@@ -502,16 +503,31 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   0.1 t, atrito 0.2, ActiveResetTimeout 10 s. Contato da cerca = as ESFERAS
   do .hsc (como o casco dos carros): com a caixa fina, batendo na ponta, o
   Godot dava a normal da placa e as cercas de lado viravam parede.
+  Batida (nov/2026, "a cerca laranja não freia no jogo", Matheus): o
+  0x153390 (carro E rodas x cerca parada, 0x154088) mede o impulso de cada
+  contato contra corpo parado, j = -(1 + e) vn / (1/m + n.((I^-1 (r x n))
+  x r)) em t·m/s, pega o maior e o 0x141a48 quebra com j > ShatterImpulse
+  (2). Quebrou: o carro só leva n x min(j, 0.25) (0x54d190, giro com o braço
+  x 0.2) e o contato é jogado fora: perde no máximo 0.75 km/h no Renegade.
+  O fardo NÃO tem essa trava (o 0.25 só é usado ali): 0.1 t na mesma unidade
+  do carro (1.2 t) = 100 kg, Hardness 0.2 = restituição (0x142698 -> corpo
+  +0xbc). O que freava no remake era nosso: o raio da suspensão via cerca,
+  peça e fardo como chão fixo (a roda subia na cerca; o fardo virava rampa
+  parada) e as peças soltas batiam no carro logo depois (até 12 km/h em
+  ângulo). Agora a roda quebra a cerca pela mesma conta, a reação da roda vai
+  no corpo solto e as peças nunca batem no carro nem na roda.
+  tests/medir_perda.gd (mesmo caminho com e sem o objeto): cerca 0.1 a 0.8
+  km/h a 30 e 60 km/h em 0/30/60°, fardo 1.5 km/h a 20 e ~5 a 55 (física de
+  100 kg contra 1.2 t).
   Aproximações NOSSAS (marcadas no código): a quebra é decidida ANTES do
-  passo (massa x velocidade na normal do contato, varrendo o passo com
-  cast_motion: a esfera de 10 cm pulava o contato a 60 km/h), pra o carro
-  atravessar; peça de 10 kg (o construtor 0x140758 não dá massa) que ignora o
-  carro até ficar a 3.5 m dele (nascendo dentro do carro, o Godot parava ele
-  de 61 pra 13 km/h); fardo volta 10 s depois de mexido (> 0.5 m), com o
-  carro a > 4 m; AngResistance -> angular_damp. teste_quebra: a 60 km/h a
-  cerca quebra e o carro segue a 63; a 4 km/h (impulso 1.3) segura; fardo
-  sai 13 m e volta. Falta: palha do fardo (ParticleTrigger Impact 0.2) e o
-  som de batida (CollisionSample PLASTIC_FENCE / HAY).
+  passo (varrendo o passo com cast_motion: a esfera de 10 cm pulava o
+  contato a 60 km/h), pra o carro atravessar; peça de 10 kg (o construtor
+  0x140758 não dá massa) que não bate no carro; fardo volta 10 s depois de
+  mexido (> 0.5 m), com o carro a > 4 m; AngResistance -> angular_damp.
+  teste_quebra: a 60 km/h a cerca quebra e o carro segue a 63; a 4 km/h
+  (impulso 1.3) segura; fardo sai 13 m e volta. Falta: palha do fardo
+  (ParticleTrigger Impact 0.2) e o som de batida (CollisionSample
+  PLASTIC_FENCE / HAY).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

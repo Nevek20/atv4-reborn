@@ -2043,13 +2043,18 @@ func _physics_process(dt: float) -> void:
 	var rear_g := 0
 	var h_sum := 0.0
 	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
+	var ignorar: Array = objetos.ignorar_roda() if objetos else []
 	for w in wheels:
 		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
 		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
 		var reach: float = (w.max - w.min) + w.r + 0.05
 		var q := PhysicsRayQueryParameters3D.create(top, top - up * reach)
-		q.exclude = [get_rid()]
+		q.exclude = [get_rid()] + ignorar
 		var hit := space.intersect_ray(q)
+		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
+		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
+			q.exclude = q.exclude + [hit.rid]
+			hit = space.intersect_ray(q)
 		w.hit = false
 		var pen := 0.0
 		if not hit.is_empty():
@@ -2085,6 +2090,11 @@ func _physics_process(dt: float) -> void:
 		var f_s: float = _spring(w, w.x) + _damper(w, w.v)
 		w.f = f_s
 		apply_force(hn * f_s, attach - global_position)
+		# roda em cima de corpo solto (fardo, peça da cerca): a reação vai
+		# nele, senão ele vira rampa fixa (no jogo é contato entre os dois)
+		if hit.collider is RigidBody3D and f_s > 0.0:
+			(hit.collider as RigidBody3D).sleeping = false
+			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
 
 	_passo_esferas_rodas(space, up)
 	_material_medio()
