@@ -329,7 +329,9 @@ def camada_tris(d, strips):
             for k in tri:
                 uv = uvs[k]
                 s, t = uv[2:4] if len(uv) == 4 else uv[:2]
-                out += [round(v, 5) for v in verts[k]] + [round(v, 4) for v in normals[k]]
+                # posição com as MESMAS 6 casas do .obj do modelo (a camada fica no plano
+                # dele: com 5 casas o teste de profundidade brigava e piscava)
+                out += [float("%.6f" % v) for v in verts[k]] + [round(v, 4) for v in normals[k]]
                 out += [round(cor_obj(c), 4) for c in colors[k]] + [round(min(al[k] / 128.0, 1.0), 4)]
                 out += [round(s, 5), round(t, 5)]
     return out

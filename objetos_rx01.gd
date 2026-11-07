@@ -232,17 +232,11 @@ func _desenha_camadas(modelo: String, lista: Array) -> void:
 		if malha == null:
 			continue
 		var tex: Texture2D = load(tex_c)
-		var m := StandardMaterial3D.new()
-		m.albedo_texture = tex
-		m.vertex_color_use_as_albedo = true
-		m.vertex_color_is_srgb = true
-		m.albedo_color = Color(COR_K_SRGB, COR_K_SRGB, COR_K_SRGB, 1.0)
-		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+		var m := ShaderMaterial.new()
+		m.shader = _shader_camada()
+		m.set_shader_parameter("tex", tex)
+		m.set_shader_parameter("k", pow((COR_K_SRGB + 0.055) / 1.055, 2.4))
 		m.render_priority = 1
-		m.roughness = 1.0
-		m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-		m.cull_mode = BaseMaterial3D.CULL_BACK
 		if lista.size() == 1:
 			var mi := MeshInstance3D.new()
 			mi.name = "Camada_" + String(c.obj).get_basename()
@@ -267,6 +261,40 @@ func _desenha_camadas(modelo: String, lista: Array) -> void:
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(mmi)
 			mmi.global_transform = Transform3D.IDENTITY
+
+
+static var _sh_camada: Shader = null
+
+
+## a camada: textura x cor do vértice (sRGB, x COR_K como o resto do .pingu),
+## alfa = textura x vértice, misturada por cima sem gravar profundidade.
+## NOSSO: ela fica no MESMO plano do modelo e o teste de profundidade do Godot
+## brigava com ele (piscava ou sumia); vai 0.05% da distância pra perto da
+## câmera (5 mm a 10 m), sem mudar nada na tela
+static func _shader_camada() -> Shader:
+	if _sh_camada == null:
+		_sh_camada = Shader.new()
+		_sh_camada.code = """
+shader_type spatial;
+render_mode blend_mix, depth_draw_never, cull_back, specular_disabled;
+uniform sampler2D tex : source_color, filter_linear_mipmap, repeat_enable;
+uniform float k = 1.0;
+vec3 lin(vec3 c) {
+	return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
+void vertex() {
+	vec4 v = MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
+	v.xyz *= 0.9995;
+	POSITION = PROJECTION_MATRIX * v;
+}
+void fragment() {
+	vec4 t = texture(tex, UV);
+	ALBEDO = t.rgb * lin(COLOR.rgb) * k;
+	ALPHA = t.a * COLOR.a;
+	ROUGHNESS = 1.0;
+}
+"""
+	return _sh_camada
 
 
 ## malha da camada pelo "tris" do modelos.json (por vértice: x y z, normal,
