@@ -163,12 +163,20 @@ func montar() -> bool:
 			add_child(mi)
 			mi.global_transform = xf(lista[0])
 		else:
+			# o MultiMesh do Godot NÃO vira a face com instância espelhada
+			# (det < 0: todas as do RX01, matriz do jogo + transposição) e
+			# mostrava o lado de dentro (chevron, torre, celeiro 02,
+			# arquibancadas; prints do Matheus). O espelho vai pra malha e a
+			# instância fica sem ele; o MeshInstance3D sozinho já vira certo
+			var esp := _espelhada(malha)
 			var mm := MultiMesh.new()
 			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = malha
+			mm.mesh = esp
 			mm.instance_count = lista.size()
+			var sx := Transform3D(Basis.from_scale(Vector3(-1, 1, 1)), Vector3.ZERO)
 			for k in lista.size():
-				mm.set_instance_transform(k, xf(lista[k]))
+				var x := xf(lista[k])
+				mm.set_instance_transform(k, x * sx if x.basis.determinant() < 0.0 else x)
 			var mmi := MultiMeshInstance3D.new()
 			mmi.name = String(modelo).get_basename()
 			mmi.multimesh = mm
@@ -178,6 +186,59 @@ func montar() -> bool:
 	_col_cache = j.get("colisao", {})
 	_colisao(j)
 	return instancias > 0
+
+
+## cópia da malha espelhada em x (x negado, ordem dos vértices trocada),
+## mesmos materiais: instância espelhada x esta = sem espelho
+static func _espelhada(malha: Mesh) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for s in malha.get_surface_count():
+		var a := malha.surface_get_arrays(s)
+		var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		for i in v.size():
+			v[i].x = -v[i].x
+		a[Mesh.ARRAY_VERTEX] = v
+		if a[Mesh.ARRAY_NORMAL] != null:
+			var n: PackedVector3Array = a[Mesh.ARRAY_NORMAL]
+			for i in n.size():
+				n[i].x = -n[i].x
+			a[Mesh.ARRAY_NORMAL] = n
+		if a[Mesh.ARRAY_TANGENT] != null:
+			var t: PackedFloat32Array = a[Mesh.ARRAY_TANGENT]
+			for i in range(0, t.size(), 4):
+				t[i] = -t[i]
+				t[i + 3] = -t[i + 3]
+			a[Mesh.ARRAY_TANGENT] = t
+		if a[Mesh.ARRAY_INDEX] != null:
+			var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX]
+			for i in range(0, idx.size(), 3):
+				var tmp := idx[i + 1]
+				idx[i + 1] = idx[i + 2]
+				idx[i + 2] = tmp
+			a[Mesh.ARRAY_INDEX] = idx
+		else:
+			# sem índice: troca o 2º e o 3º vértice de cada triângulo em tudo
+			for k in a.size():
+				var arr = a[k]
+				if arr == null or k == Mesh.ARRAY_INDEX:
+					continue
+				var por := 1
+				if k == Mesh.ARRAY_TANGENT:
+					por = 4
+				elif k in [Mesh.ARRAY_BONES, Mesh.ARRAY_WEIGHTS]:
+					continue
+				var nv := v.size()
+				if arr.size() != nv * por:
+					continue
+				for i in range(0, nv - 2, 3):
+					for c in por:
+						var t1 = arr[(i + 1) * por + c]
+						arr[(i + 1) * por + c] = arr[(i + 2) * por + c]
+						arr[(i + 2) * por + c] = t1
+				a[k] = arr
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+		out.surface_set_material(s, malha.surface_get_material(s))
+	return out
 
 
 ## matriz do jogo da instância -> transformação do remake

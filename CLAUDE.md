@@ -455,6 +455,12 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   -0.3..1.4, borda transparente): textura PRESA na borda nos materiais com
   +0x38 = 5 (só Alder, pinheiro e moita); repetindo, os cantos mostravam
   pedaços cortados ("placas soltas" no céu).
+  Face sumindo / lado de dentro aparecendo (prints do Matheus, nov/2026:
+  placa de chevron, telhado do celeiro, tela da torre): TODAS as instâncias
+  do RX01 são espelhadas (det < 0: matriz do jogo + transposição) e o
+  MultiMesh do Godot não vira a face por instância (o MeshInstance3D vira).
+  Os .pingu com mais de 1 instância usam uma cópia espelhada da malha
+  (_espelhada) e a matriz sem espelho. Bantam não tem isso (2 faces).
 - Céu (PORTA, nov/2026; ceu.gd, docs Céu): "a skybox tá faltando" (Matheus).
   SkyDome do Environment.xml: SKY_Bright_LowCloud (nuvens) +
   BACKDROP_Asia_1 (montanhas azuis), .pingu de Levels/SkyDomes (o XML diz
