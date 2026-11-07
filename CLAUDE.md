@@ -608,7 +608,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   brigava (camisetas e celeiro piscando). NOSSO: o shader da camada
   (_shader_camada) puxa ela 0.05% da distância pra câmera (5 mm a 10 m) e a
   posição vai com as mesmas 6 casas do .obj. Conferido no lavapipe: sem
-  isso o arco sai limpo, com isso a sujeira aparece.
+  isso o arco sai limpo, com isso a sujeira aparece. Matheus (nov/2026):
+  "agora sim ficou bom". FECHADO.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
