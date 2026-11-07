@@ -783,6 +783,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   CHAO_SUAVE (0.4 m, pela profundidade da tela) some a nuvem onde encosta no
   chão. SUAVE=0 desliga os 2 (diagnóstico). No Compatibility do xvfb a poeira
   não aparece: conferir em Forward+ (lavapipe).
+  FECHADO pelo Matheus (nov/2026, escala 0.6): "não quero mexer mais, senão
+  vira caça-rato". Só reabrir com save state ou vídeo novo que mostre erro.
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o
