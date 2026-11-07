@@ -529,8 +529,11 @@ def modelos(unpacked, ind, out, nomes):
                     ctxt, _, cnt = pingu2obj.to_obj(sts, "%s_camada%d" % (base, c0), uv2=True)
                     open(os.path.join(out, "%s_camada%d.obj" % (base, c0)), "w").write(
                         "# camada %s\n" % t[0] + ctxt)
+                    # "tris": a mesma malha com o alfa do vértice (o .obj
+                    # perde; o objetos_rx01.gd monta por ela)
                     info[nome].setdefault("camadas", []).append(
-                        {"obj": "%s_camada%d.obj" % (base, c0), "textura": t[0]})
+                        {"obj": "%s_camada%d.obj" % (base, c0), "textura": t[0],
+                         "tris": pingu2obj.camada_tris(d, sts)})
         elif ext == "bantam":
             cam = "Levels/RX_01/Models/Bantams/%s" % nome
             d = bloco(unpacked, ind, cam)

@@ -912,6 +912,32 @@ vazios). Tudo vem do evento:
   fardo, LOD (TREE_*_LOD1), cor de luz por instância, cIntroCamera,
   cInstantRespotBox (reposição), cGenTrigger, cCrowdEffectBox, as 2 luzes.
 
+- Camada do lote de pingu (2ª textura pelo 2º UV), como o GS desenha:
+  - O registro do lote (0x50 bytes em 0xD0 + i·0x50) passa pelo 0x289228:
+    +0x08 = quantas texturas, +0x10 modo, +0x14 slot, +0x18 slot da camada
+    (vira ponteiro na carga), +0x20 = marca do tipo (0x11111111 uma
+    textura, 0x22222222 com camada). 0x289148 ajusta o modo pelas flags do
+    modelo e põe +0x08 = 2 se +0x18 != 0.
+  - Tipos do renderer (cPinguRenderer, construtor 0x28d340): 0x28dad8 =
+    0x11111111 (DAT_007f4814), 0x28db40 = 0x22222222 (DAT_007f4818), 0x28dba8
+    = 0x2e2e2e2e (DAT_007fdcac: modo & 0x40 com 2 texturas, +0x04 = 1), 0x28da78
+    = sem textura. Cada um guarda 2 endereços de programa do VU1 (0x283/0x303
+    no de camada).
+  - Estado do GS: palavra de 64 bits por contexto (0x658b40 -> registradores
+    no 0x658f50): bits 0..15 = ALPHA (0x42/0x43), 16..21 = PRMODE (IIP,
+    TME, FGE invertidos; ABE, AA1, FST), 24 = FBA, 25.. = TEST (ATE, ATST,
+    AREF, ...). Contexto 2 (+0x150) = a 2ª passada.
+  - 0x2897f0 (lote com camada, chamado no 0x289908): 2ª passada = 0x36080044
+    (0x360c0044 sem névoa): ALPHA 0x44 = (Cs - Cd) x As + Cd, ABE ligado,
+    teste de alfa GEQUAL 1: a mistura comum.
+  - As = alfa da textura (0x80 = 1.0) x alfa do vértice (V4-8 de cor, 0x80 =
+    1.0). Nos carros o pintor de sujeira mexe nesse alfa (Sujeira); nos
+    objetos da pista o artista pintou: GEN_PRO_StartArch02 (Start_DirtOverlay,
+    textura preta com alfa 0..0x78) 40..128 por vértice, US_Barn_1 madeira e
+    ferrugem ~0.4 em média, celeiro/cabana idem, Crowd_ColourChange ~0.8.
+    O import de .obj do Godot não lê o alfa do vértice (v x y z r g b a):
+    o rx01_objetos.py manda a malha da camada no modelos.json ("tris").
+
 ## Céu (SkyDome)
 
 Porta em ceu.gd (nov/2026). Environment.xml da pista (Levels/RX_01/Env/

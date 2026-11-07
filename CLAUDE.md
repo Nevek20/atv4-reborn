@@ -586,12 +586,22 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   no jogo também (o Matheus conferiu no jogo, nov/2026). Camisetas
   coloridas (nov/2026): o lote da US_Bleacher_Wood_02 tem 2 texturas, a
   Crowd_02 e a Crowd_ColourChange (camisetas no mesmo lugar, 2º UV = 1º)
-  como camada (registro +0x18). tools/rx01_objetos.py exporta toda camada
-  em <modelo>_camada<slot>.obj (modelos.json "camadas") e o objetos_rx01.gd
-  desenha por cima, misturada pelo alfa, só as de CAMADAS_LIGADAS. Outras:
-  Start_DirtOverlay no arco (pelo alfa lava as faixas de cinza: desligada) e
-  5 de alfa cheio em celeiros/cabanas (madeira, ferrugem, concreto: cobririam
-  o modelo); o modo de mistura delas no GS não foi achado.
+  como camada (registro +0x18).
+  Camadas (PORTA, nov/2026, docs Objetos da pista; "o arco do jogo é meio
+  cinza gasto desde o início", prints do Matheus): lote com camada = tipo
+  0x22222222 do renderer de pingu (0x28db40, montado no 0x289228 ->
+  0x289908); a 2ª passada usa a palavra de estado 0x36080044 (0x2897f0) =
+  ALPHA 0x44, a mistura comum (Cs - Cd) x As + Cd, com teste de alfa >= 1.
+  As = alfa da textura x ALFA DO VÉRTICE, e o artista pintou o alfa do
+  vértice pra dizer onde a camada aparece (arco 40..128, celeiros ~0.4 em
+  média). O import de .obj do Godot joga fora o alfa do vértice: por isso a
+  sujeira do arco saía cheia (cinza riscado) e as camadas de madeira,
+  ferrugem e concreto pareciam cobrir os celeiros. tools/rx01_objetos.py põe
+  a malha da camada com o alfa no modelos.json ("tris",
+  pingu2obj.camada_tris) e o objetos_rx01.gd monta por ela: TODAS ligadas
+  (arco, camisetas, celeiros, cabana, persiana do alto-falante). Sem o
+  "tris" (rx01_objetos.py antigo) só as camisetas (CAMADAS_SEM_ALFA), como
+  antes.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

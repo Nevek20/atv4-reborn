@@ -38,7 +38,7 @@ var carregados := {}                     # modelo -> true (só eles ganham colis
 var _mats := {}                          # material do .mtl -> nosso (cache)
 var _presas := {}                        # materiais com a textura presa na borda (modelos.json)
 const POCA_ALFA := 0.5                   # NOSSO (ver _materiais), calibrado no print do jogo
-const CAMADAS_LIGADAS := ["Crowd_ColourChange"]   # as conferidas (ver _desenha_camadas)
+const CAMADAS_SEM_ALFA := ["Crowd_ColourChange"]   # sem o "tris" do modelos.json (ver _desenha_camadas)
 var _camadas := {}                       # modelo -> [{obj, textura}] (2ª textura pelo 2º UV)
 var _misturadas := {}                    # materiais de lote transparente no .pingu (modelos.json)
 ## água (0x1bb098): uma caixa por instância WATER_* = a caixa do modelo (x, z)
@@ -206,23 +206,32 @@ func montar() -> bool:
 
 
 ## camada do lote (2ª textura pelo 2º UV, registro do .pingu +0x18): por
-## cima do modelo, misturada pelo alfa da textura (PS2 x 2) x cor do vértice.
-## Na pista: as camisetas coloridas da US_Bleacher_Wood_02
-## (Crowd_ColourChange sobre a Crowd_02) e a sujeira do arco de largada
-## (Start_DirtOverlay, DESLIGADA: misturada pelo alfa ela lava as faixas de
-## cinza; deve ser outra conta no GS, não achada). Camadas com alfa cheio (madeira, ferrugem, concreto
-## em celeiros e cabanas) ficam de fora: desenhadas assim cobririam o modelo
-## e o modo de mistura delas não foi achado
+## cima do modelo. PORTA: lote com camada = tipo 0x22222222 do renderer de
+## pingu (0x28db40; montado no 0x289228 -> 0x289908); a 2ª passada usa a
+## palavra de estado 0x36080044 do 0x2897f0 = ALPHA 0x44 ((Cs - Cd) x As + Cd,
+## a mistura comum), ABE ligado e teste de alfa >= 1. As = alfa da textura x
+## alfa do VÉRTICE (0x80 = 1.0): é ele que diz onde a camada aparece (o
+## artista pintou; no arco 40..128, nos celeiros a madeira e a ferrugem ~0.4
+## em média). Na pista: as camisetas coloridas da
+## US_Bleacher_Wood_02, a sujeira do arco de largada, madeira/ferrugem/
+## concreto em celeiros e cabanas e a persiana do alto-falante. O .obj da
+## camada perde o alfa do vértice (o import do Godot não lê): modelos.json
+## "tris" traz a malha com ele; sem ele (rx01_objetos.py antigo) só as
+## camisetas, como antes
 func _desenha_camadas(modelo: String, lista: Array) -> void:
 	for c in _camadas.get(modelo, []):
 		var caminho: String = PASTA + String(c.obj)
 		var tex_c: String = PASTA + "tex/" + String(c.textura)
-		if not ResourceLoader.exists(caminho) or not ResourceLoader.exists(tex_c):
+		if not ResourceLoader.exists(tex_c):
 			continue
-		if not String(c.textura).get_basename() in CAMADAS_LIGADAS:
+		var malha: Mesh = null
+		if c.has("tris"):
+			malha = _malha_camada(c.tris)
+		elif String(c.textura).get_basename() in CAMADAS_SEM_ALFA and ResourceLoader.exists(caminho):
+			malha = load(caminho)
+		if malha == null:
 			continue
 		var tex: Texture2D = load(tex_c)
-		var malha: Mesh = load(caminho)
 		var m := StandardMaterial3D.new()
 		m.albedo_texture = tex
 		m.vertex_color_use_as_albedo = true
@@ -258,6 +267,36 @@ func _desenha_camadas(modelo: String, lista: Array) -> void:
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(mmi)
 			mmi.global_transform = Transform3D.IDENTITY
+
+
+## malha da camada pelo "tris" do modelos.json (por vértice: x y z, normal,
+## r g b do .obj, alfa, s t; já na ordem de giro do Godot)
+static func _malha_camada(t: Array) -> ArrayMesh:
+	var n := t.size() / 12
+	var v := PackedVector3Array()
+	var nr := PackedVector3Array()
+	var cor := PackedColorArray()
+	var uv := PackedVector2Array()
+	v.resize(n)
+	nr.resize(n)
+	cor.resize(n)
+	uv.resize(n)
+	for i in n:
+		var k := i * 12
+		v[i] = Vector3(t[k], t[k + 1], t[k + 2])
+		nr[i] = Vector3(t[k + 3], t[k + 4], t[k + 5])
+		cor[i] = Color(t[k + 6], t[k + 7], t[k + 8], t[k + 9])
+		uv[i] = Vector2(t[k + 10], t[k + 11])
+	var a := []
+	a.resize(Mesh.ARRAY_MAX)
+	a[Mesh.ARRAY_VERTEX] = v
+	a[Mesh.ARRAY_NORMAL] = nr
+	a[Mesh.ARRAY_COLOR] = cor
+	a[Mesh.ARRAY_TEX_UV] = uv
+	var m := ArrayMesh.new()
+	if n > 0:
+		m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+	return m
 
 
 ## cópia da malha espelhada em x (x negado, ordem dos vértices trocada),
