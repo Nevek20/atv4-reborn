@@ -285,6 +285,9 @@ func _materiais(malha: Mesh, bantam: bool) -> void:
 				# textura (PS2: 0x80 = 1.0; o da poça vai de 0.75 a ~2)
 				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 				m.render_priority = -1
+				# tela da torre (TEMP_Wire_fence): o modelo só tem uma face e no
+				# jogo ela aparece dos 2 lados (Matheus, nov/2026)
+				m.cull_mode = BaseMaterial3D.CULL_DISABLED
 			m.roughness = 1.0
 			m.metallic = 0.0
 			m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
