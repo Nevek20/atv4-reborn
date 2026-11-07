@@ -602,6 +602,13 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   (arco, camisetas, celeiros, cabana, persiana do alto-falante). Sem o
   "tris" (rx01_objetos.py antigo) só as camisetas (CAMADAS_SEM_ALFA), como
   antes.
+  Piscando / sumindo (nov/2026, prints do Matheus): a camada fica no MESMO
+  plano do modelo; no Forward+ o Godot grava a profundidade do modelo numa
+  passada antes e a camada perdia o empate (sumia inteira: arco limpo) ou
+  brigava (camisetas e celeiro piscando). NOSSO: o shader da camada
+  (_shader_camada) puxa ela 0.05% da distância pra câmera (5 mm a 10 m) e a
+  posição vai com as mesmas 6 casas do .obj. Conferido no lavapipe: sem
+  isso o arco sai limpo, com isso a sujeira aparece.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
