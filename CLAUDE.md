@@ -118,6 +118,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --path . --write-movie motor.avi --fixed-fps 60 -s res://tests/gravar_motor.gd -- 7   :: prévia: lenta, 7000 e volta (CAM_OFF/CAM_ALVO)
 %GODOT% --path . --write-movie fumaca.avi --fixed-fps 60 -s res://tests/gravar_fumaca.gd -- 0  :: câmera presa no cano acelerando (FUMACA_COR=1 vermelha)
 %GODOT% --headless --path . -s res://tests/teste_poeira.gd        :: poeira dos pneus na largada do RX01: parado não, asfalto não, terra sim, rastro no pulo
+%GODOT% --path . -s res://tests/print_largada.gd -- largada.png   :: largada do RX01 na câmera de corrida sem HUD (comparar cor com print do jogo; QUADRO=n)
 %GODOT% --headless --path . -s res://tests/teste_objetos.gd       :: objetos do RX01: 707 instâncias, no chão, céu, largada livre, guard-rail segura o carro
 %GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
 %GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
@@ -617,6 +618,27 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   no #def5772a (4 correntes; o remake já desenha). As outras 2 (GEN do lado
   da torre do locutor, SAM no meio das moitas) não têm peça gravada e não
   existem no jogo (o Matheus conferiu, nov/2026). FECHADO.
+- Luz e névoa (PORTA, nov/2026, "a cor tá muito clara", prints do Matheus na
+  largada; docs Luz e névoa; main.gd ler_ambiente/_make_environment): o
+  leitor do Environment.xml é o 0x1c15d8. Medido no mesmo enquadramento
+  (tests/print_largada.gd, Forward+): o remake estava 30-50% mais claro. (1)
+  O chão tem a LUZ ASSADA na textura (sombra do arco, arquibancadas, morros):
+  o jogo desenha a cor dela (chão 78, 72, 66 no print x textura 85, 75, 65).
+  terrain.gd: sem luz nem ambiente do Godot, só a sombra dinâmica do carro
+  (SOMBRA 0.66 na tela, NOSSO medido no print; o jogo usa Intensity 0.5 x
+  ((1 - s) + InShadowMultiply 0.8 x s), 0x1b3fe0, mas a textura da sombra
+  não foi achada). Objetos não fazem sombra dinâmica (já está na textura).
+  (2) PS2 sem tonemap: linear (o filmic achatava). (3) Névoa LINEAR de Start
+  87.5 até End = DrawDistance Terrain 400 (0x390a80 põe na câmera), cor
+  (0.48, 0.44, 0.42); antes era exponencial nossa. (4) Ambiente 0.66 x cor e
+  sol 1.0 x cor do XML; o PS2 soma a luz na cor da TELA e o Godot em linear,
+  então a força vai ^2.2 (ambiente 0.40). Resultado (jogo x antes x agora):
+  chão 53-78 x 98-111 x 62-73; para-choque 123 x 95 x 115; tampa branca 135
+  x 162 x 142; arquibancada 109 x ? x 116; azul do céu 115,144,178 x 122,150,
+  180 agora. Não portado: luz própria do carro (Vehicle/VehicleSun) e do
+  piloto, InShadow, Overbright (ActualBrightness 1.756, uso não achado).
+  Falta: o vermelho da lateral do Renegade fica 98 x 72 do jogo (pintura?).
+  AMB_E / SOL_E = força da luz no Godot (diagnóstico).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.

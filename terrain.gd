@@ -255,18 +255,15 @@ func _build_mesh() -> void:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
-	var mat := StandardMaterial3D.new()
 	var textura: Texture2D = _textura_hd() if CHAO_HD else null
 	if textura == null:
 		textura = _carrega(texture_path)
 	print("chão: ", textura_usada)
+	var mat := ShaderMaterial.new()
+	mat.shader = _shader_chao()
 	if textura:
-		mat.albedo_texture = textura
-	else:
-		mat.albedo_color = Color(0.45, 0.38, 0.3)
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	mat.roughness = 1.0
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		mat.set_shader_parameter("tex", textura)
+	mat.set_shader_parameter("sombra", SOMBRA)
 
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
@@ -275,6 +272,40 @@ func _build_mesh() -> void:
 
 
 var textura_usada := "nenhuma (cor lisa)"
+
+## A textura do chão já vem com a luz assada (sombra do arco, das
+## arquibancadas e dos morros nela): o jogo desenha a cor dela direto. Medido
+## no print do Matheus na largada (nov/2026): chão 78, 72, 66 x textura 85, 75,
+## 65 ali. Antes o Godot iluminava de novo (sol 1.2 + ambiente 0.8 + filmic):
+## o chão saía ~105 cinza frio. Sem luz nem ambiente do Godot; só a sombra
+## dinâmica (o carro) escurece. Os objetos não fazem sombra dinâmica (a deles
+## já está na textura).
+## SOMBRA: NOSSO, medida no mesmo print (chão na sombra do carro / no sol =
+## 0.66 na tela; o DynamicShadow Intensity 0.5 / InShadowMultiply 0.8 do
+## Environment.xml não foram achados no exe)
+const SOMBRA := 0.66
+static var _sh_chao: Shader = null
+
+
+static func _shader_chao() -> Shader:
+	if _sh_chao == null:
+		_sh_chao = Shader.new()
+		_sh_chao.code = """
+shader_type spatial;
+render_mode cull_disabled, ambient_light_disabled, specular_disabled;
+uniform sampler2D tex : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform float sombra = 0.66;
+void fragment() {
+	ALBEDO = texture(tex, UV).rgb;
+	ROUGHNESS = 1.0;
+}
+void light() {
+	// sem luz: a cor da textura no sol, x sombra (na tela, sRGB) na sombra
+	float k = pow(sombra, 2.2);
+	DIFFUSE_LIGHT += vec3(mix(k, 1.0, ATTENUATION));
+}
+"""
+	return _sh_chao
 
 
 ## a versão ampliada: qualquer imagem em assets/terrain/hd/ com o nome da

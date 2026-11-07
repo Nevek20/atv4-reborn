@@ -941,6 +941,33 @@ vazios). Tudo vem do evento:
     O import de .obj do Godot não lê o alfa do vértice (v x y z r g b a):
     o rx01_objetos.py manda a malha da camada no modelos.json ("tris").
 
+## Luz e névoa (Environment.xml)
+
+- Leitor 0x1c15d8 (chamado na carga da pista pelo 0x174398; objeto global
+  [0x7f48e0], 0x570 bytes). Lighting/Overbright: só ActualBrightness (+0x290)
+  e GrassBrightness (+0x294) são lidos (TargetBrightness, Threshold, Power e
+  Colour não). InSun (i = 0) e InShadow (i = 1), base +0x110·i: pares
+  (Ambient, Sun), (Bantam, __dummy__), (Rider, RiderSun), (Vehicle,
+  VehicleSun), um par por 0x40: 1º Strength +0x90 / Colour +0x80, 2º
+  Strength +0xb0 / Colour +0xa0; Dir só no Sun do InSun (+0x70).
+  DynamicShadow: Intensity +0x3c4, InShadowMultiply +0x3c8. Fog: Start
+  +0x2c0, End +0x2c4 (sem End = DrawDistance Terrain +0x29c; +0x34 = 1),
+  Density +0x2c8, Colour +0x2d0. DrawDistance: Terrain +0x29c, Instances
+  +0x2a0.
+- Névoa: 0x390a80 / 0x38f238 põem na câmera o far = DrawDistance Terrain
+  (400 no RX01), Start/End em câmera+0x170/0x174 e a cor em +0x190. RX01:
+  linear de 87.5 a 400 m, cor (0.48, 0.44, 0.42), cúpulas do céu sem névoa
+  (Fog="0").
+- Sombra dinâmica (0x1b3fe0): força = k x Intensity x ((1 - s) + s x
+  InShadowMultiply) x ... (s = quanto o objeto está na sombra assada);
+  RX01: 0.5 no sol. Na tela (print do Matheus na largada) o chão na sombra
+  do carro fica 0.66 do chão no sol.
+- Chão: a textura do relevo (assets/terrain/rx01_terrain.jpg) tem a luz
+  assada (sombra do arco, arquibancadas, morros). No print do jogo o chão da
+  largada é 78, 72, 66 e a textura ali 85, 75, 65: desenhada sem luz.
+- PS2 sem tonemap. Godot faz a luz em espaço linear e o PS2 na cor da tela:
+  o mesmo ambiente 0.66 clareava muito mais no remake.
+
 ## Céu (SkyDome)
 
 Porta em ceu.gd (nov/2026). Environment.xml da pista (Levels/RX_01/Env/

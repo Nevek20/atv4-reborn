@@ -245,7 +245,60 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	cam_ready = false
 
 
+## luz e névoa da pista (PORTA, nov/2026; docs Luz e névoa): o leitor do
+## Environment.xml é o 0x1c15d8 (Lighting/InSun e InShadow: pares Ambient/Sun,
+## Bantam, Rider/RiderSun, Vehicle/VehicleSun com Strength + Colour, Dir só no
+## Sun; Fog: Start, End (sem End = DrawDistance Terrain), Density, Colour).
+## No RX01: ambiente 0.66 x (0.92, 0.95, 0.96), sol 1.0 x (0.98, 0.97, 0.90),
+## névoa linear de 87.5 m até 400 m na cor (0.48, 0.44, 0.42). O PS2 não tem
+## tonemap: saída linear (o filmic do Godot achatava e clareava tudo)
+const AMBIENTE_XML := "res://data/environment_rx01.xml"
+
+
+static func ler_ambiente(caminho: String = AMBIENTE_XML) -> Dictionary:
+	var out := {"ambiente": [0.66, Color(0.9231, 0.9525, 0.9647)], "sol": [1.0, Color(0.98, 0.9676, 0.9035)],
+		"sol_dir": Vector3(0.396, -0.780, 0.483), "nevoa": [87.5, -1.0, Color(0.4784, 0.4367, 0.4221)],
+		"terreno": 400.0}
+	var x := XMLParser.new()
+	if x.open(caminho) != OK:
+		return out
+	var pilha: Array[String] = []
+	var cor_de := ""
+	while x.read() == OK:
+		if x.get_node_type() == XMLParser.NODE_ELEMENT_END:
+			pilha.pop_back()
+			continue
+		if x.get_node_type() != XMLParser.NODE_ELEMENT:
+			continue
+		var nome := x.get_node_name()
+		var dentro := "/".join(pilha)
+		var a := {}
+		for i in x.get_attribute_count():
+			a[x.get_attribute_name(i)] = x.get_attribute_value(i)
+		if dentro == "Root/Lighting/InSun" and nome in ["Ambient", "Sun"]:
+			cor_de = "ambiente" if nome == "Ambient" else "sol"
+			out[cor_de][0] = float(a.get("Strength", out[cor_de][0]))
+		elif nome == "Colour" and dentro.begins_with("Root/Lighting/InSun/") and cor_de != "":
+			if dentro.ends_with("Ambient") or dentro.ends_with("/Sun"):
+				out[cor_de][1] = Color(float(a.R), float(a.G), float(a.B))
+		elif nome == "Dir" and dentro == "Root/Lighting/InSun/Sun":
+			out.sol_dir = Vector3(float(a.X), float(a.Y), float(a.Z))
+		elif nome == "Fog" and dentro == "Root":
+			out.nevoa[0] = float(a.get("Start", 87.5))
+			out.nevoa[1] = float(a.get("End", -1.0))
+		elif nome == "Colour" and dentro == "Root/Fog":
+			out.nevoa[2] = Color(float(a.R), float(a.G), float(a.B))
+		elif nome == "DrawDistance" and dentro == "Root":
+			out.terreno = float(a.get("Terrain", 400.0))
+		if not x.is_empty():
+			pilha.append(nome)
+	if out.nevoa[1] < 0.0:
+		out.nevoa[1] = out.terreno           # 0x1c15d8: sem End vale o DrawDistance Terrain
+	return out
+
+
 func _make_environment() -> void:
+	var amb := ler_ambiente()
 	var sky_mat := ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color(0.36, 0.52, 0.74)
 	sky_mat.sky_horizon_color = Color(0.78, 0.74, 0.66)
@@ -256,22 +309,34 @@ func _make_environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.8
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = amb.ambiente[1]
+	# o PS2 soma a luz na cor da tela e o Godot em linear: a força do XML vai
+	# ^2.2 (a cor o Godot já converte). Ambiente 0.66 -> 0.40; sol 1.0 -> 1.0
+	env.ambient_light_energy = pow(amb.ambiente[0], 2.2)
+	if OS.has_environment("AMB_E"):              # diagnóstico: força da luz no Godot
+		env.ambient_light_energy = float(OS.get_environment("AMB_E"))
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.72, 0.68, 0.6)
-	env.fog_density = 0.0012
-	env.fog_sky_affect = 0.15   # sem isso a névoa pinta o céu inteiro de bege
+	env.fog_mode = Environment.FOG_MODE_DEPTH
+	env.fog_light_color = amb.nevoa[2]
+	env.fog_density = 1.0
+	env.fog_depth_begin = amb.nevoa[0]
+	env.fog_depth_end = amb.nevoa[1]
+	env.fog_depth_curve = 1.0
+	env.fog_sky_affect = 0.0                 # cúpulas do céu: Fog="0" (ceu.gd)
 
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
 
 	var sun := DirectionalLight3D.new()
-	# Sun Dir do Environment.xml do RX_01 (12282), passado pro remake
-	sun.basis = Basis.looking_at(Terrain.dir_do_jogo(Vector3(0.396, -0.780, 0.483)))
-	sun.light_energy = 1.2
+	sun.basis = Basis.looking_at(Terrain.dir_do_jogo(amb.sol_dir))
+	sun.light_color = amb.sol[1]
+	sun.light_energy = pow(amb.sol[0], 2.2)
+	if OS.has_environment("SOL_E"):
+		sun.light_energy = float(OS.get_environment("SOL_E"))
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 150.0
 	add_child(sun)

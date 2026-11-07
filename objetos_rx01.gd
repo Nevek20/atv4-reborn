@@ -167,6 +167,7 @@ func montar() -> bool:
 			var mi := MeshInstance3D.new()
 			mi.name = String(modelo).get_basename()
 			mi.mesh = malha
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF   # a sombra já está na textura do chão (terrain.gd)
 			add_child(mi)
 			mi.global_transform = xf(lista[0])
 		else:
@@ -187,6 +188,7 @@ func montar() -> bool:
 			var mmi := MultiMeshInstance3D.new()
 			mmi.name = String(modelo).get_basename()
 			mmi.multimesh = mm
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(mmi)
 			mmi.global_transform = Transform3D.IDENTITY
 		if not bantam:
