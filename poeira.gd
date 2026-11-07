@@ -39,6 +39,18 @@ const TEXTURA := "res://assets/fx/poeira.png"
 ## atlas 2 x 3 da poeira, só as 4 de cima desenhadas). Sem ela não espirra
 const TEXTURA_AGUA := "res://assets/fx/agua.png"
 const TIPOS := ["Light", "Medium", "Heavy", "Water"]
+## tamanho do Dust.xml -> metros. O desenho é no VU1 (como os halos, que
+## saíram Width/Height x 0.3 m medidos nos prints). Medido de novo no
+## Screenshot do Renegade_andando_na_agua.p2s: o espirro (0.5 -> 3.0 no XML)
+## fica abaixo do para-choque (~0.6 m); com 1.0 subia acima do carro e a
+## poeira virava nuvens de 10 m ("muito grandes", Matheus, nov/2026)
+const ESCALA := 0.3
+## melhoria nossa (o "quadriculado" que o Matheus viu): as nuvens do atlas
+## encostam na borda da célula (alfa 250 na 1ª linha) e o quadrado corta o
+## chão numa reta. BORDA_SUAVE apaga o alfa perto da borda da célula e
+## CHAO_SUAVE (m) some a nuvem onde ela encosta no chão/objetos (profundidade)
+const BORDA_SUAVE := 0.12
+const CHAO_SUAVE := 0.4
 const COLUNAS := 2                # atlas da WorldFXdust
 const LINHAS := 3
 
@@ -46,8 +58,12 @@ const SHADER := """
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, blend_mix, shadows_disabled;
 uniform sampler2D tex : filter_linear_mipmap, repeat_disable;
+uniform sampler2D prof : hint_depth_texture, filter_nearest;
 uniform vec2 grade = vec2(2.0, 3.0);
 uniform bool diag = false;        // POEIRA_COR=1: vermelho opaco (onde nasce e o tamanho)
+uniform float borda = 0.12;       // BORDA_SUAVE
+uniform float chao = 0.4;         // CHAO_SUAVE
+varying vec2 local_uv;
 
 void vertex() {
 	// quadrado virado pra câmera, com o tamanho da instância
@@ -57,6 +73,7 @@ void vertex() {
 	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
 	float k = INSTANCE_CUSTOM.x;
 	vec2 cel = vec2(mod(k, grade.x), floor(k / grade.x));
+	local_uv = UV;
 	UV = (UV + cel) / grade;
 }
 
@@ -65,7 +82,24 @@ void fragment() {
 	// PS2: textura x cor do vértice (0x80 = 1.0) no espaço de cor da tela
 	vec3 c = t.rgb * COLOR.rgb;
 	ALBEDO = mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
-	ALPHA = t.a * COLOR.a;
+	// alfa da textura no PS2: 0x80 = 1.0 (as da poeira e do espirro vão até
+	// ~250 = satura); lido como 255 = 1.0 saía com metade da opacidade
+	ALPHA = min(t.a * (255.0 / 128.0), 1.0) * COLOR.a;
+	// borda da célula: sobe de 0 a 1 nos primeiros `borda` de cada lado
+	if (borda > 0.0) {
+		vec2 b = smoothstep(vec2(0.0), vec2(borda), local_uv) * smoothstep(vec2(0.0), vec2(borda), 1.0 - local_uv);
+		ALPHA *= b.x * b.y;
+	}
+	// perto do que já está desenhado atrás (chão, objetos): some aos poucos
+	if (chao > 0.0) {
+	float z = texture(prof, SCREEN_UV).r;
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+	z = z * 2.0 - 1.0;
+#endif
+	vec4 v = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, z, 1.0);
+	float atras = -v.z / v.w;
+	ALPHA *= clamp((atras - (-VERTEX.z)) / chao, 0.0, 1.0);
+	}
 	if (diag) {
 		ALBEDO = vec3(1.0, 0.0, 0.0);
 		ALPHA = 1.0;
@@ -135,6 +169,9 @@ func _multimesh(arq: String, nome: String) -> MultiMesh:
 	mat.set_shader_parameter("tex", ImageTexture.create_from_image(img))
 	mat.set_shader_parameter("grade", Vector2(COLUNAS, LINHAS))
 	mat.set_shader_parameter("diag", OS.get_environment("POEIRA_COR") == "1")
+	var suave := OS.get_environment("SUAVE") != "0"      # SUAVE=0: sem as 2 melhorias (diagnóstico)
+	mat.set_shader_parameter("borda", BORDA_SUAVE if suave else 0.0)
+	mat.set_shader_parameter("chao", CHAO_SUAVE if suave else 0.0)
 	var q := QuadMesh.new()
 	q.size = Vector2.ONE
 	q.material = mat
@@ -313,7 +350,7 @@ func _process(delta: float) -> void:
 	for k in n:
 		var tg := clampf(n_idade[k] / n_max[k], 0.0, 1.0)
 		var f := 1.0 - pow(1.0 - tg, 4.0)
-		var tam := n_ini[k] * (1.0 - f) + n_alvo[k] * f
+		var tam := (n_ini[k] * (1.0 - f) + n_alvo[k] * f) * ESCALA
 		var t := n_idade[k] / n_vida[k]
 		var a := n_a0[k] * (1.0 - t * t)
 		var p := n_pos[k]

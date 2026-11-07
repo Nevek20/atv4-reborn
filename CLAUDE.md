@@ -768,6 +768,18 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   (teste_poeira, 11 s) sai rastro por 0.78 s depois de sair do chão; antes
   parava na hora. O raio da suspensão só alcança 5 cm abaixo da roda: a folga
   no ar é um raio a mais (poeira._folga, até 0.3 m).
+  "Muito grandes e quadriculadas" (Matheus, nov/2026, poeira e espirro): (1)
+  TAMANHO: o do Dust.xml vai x 0.3 pra metros (poeira.gd ESCALA, o mesmo fator
+  dos halos, que também são desenhados no VU1); medido no Screenshot do
+  Renegade_andando_na_agua: o espirro (0.5 -> 3.0) fica abaixo do
+  para-choque. Com 1.0 a poeira virava nuvens de 10 m. (2) ALFA: o da
+  textura é do PS2 (0x80 = 1.0, a poeira vai até 250 = satura); lido como
+  255 = 1.0 saía com metade da opacidade. (3) Melhoria nossa: as nuvens do
+  atlas encostam na borda da célula e o quadrado cortava o chão numa reta
+  (os "quadrados"): BORDA_SUAVE apaga o alfa perto da borda da célula e
+  CHAO_SUAVE (0.4 m, pela profundidade da tela) some a nuvem onde encosta no
+  chão. SUAVE=0 desliga os 2 (diagnóstico). No Compatibility do xvfb a poeira
+  não aparece: conferir em Forward+ (lavapipe).
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o
