@@ -304,6 +304,10 @@ func _materiais(malha: Mesh, bantam: bool) -> void:
 			if m.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED and m.albedo_texture and _tem_alfa(m.albedo_texture):
 				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 				m.alpha_scissor_threshold = 0.5
+				# recorte num .pingu = placa de uma face só (os torcedores da
+				# cabine do locutor, WahooCrowdTex01): no jogo aparece dos 2
+				# lados (print do Matheus, nov/2026)
+				m.cull_mode = BaseMaterial3D.CULL_DISABLED
 			m.set_meta("rx01", true)
 			_mats[chave] = m
 		malha.surface_set_material(s, _mats[chave])

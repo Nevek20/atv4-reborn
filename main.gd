@@ -540,6 +540,9 @@ func _update_camera(delta: float) -> void:
 		car.piloto.visible = cam_mode <= 1 or cam_mode == 4
 		car.piloto.sem_cabeca = cam_mode == 4
 
+	# borrão da câmera do piloto: apaga em qualquer outra câmera (antes ficava
+	# congelado na tela ao trocar de câmera em alta, Matheus nov/2026)
+	cam_piloto.atualizar_tela(cam_mode == 4)
 	if cam_mode <= 1:
 		gcams[cam_mode].apply(cam, s.tp)
 		if ORBITA:
@@ -550,7 +553,6 @@ func _update_camera(delta: float) -> void:
 	if cam_piloto.car != car:
 		cam_piloto.car = car
 		cam_piloto.reiniciar()
-	cam_piloto.atualizar_tela(cam_mode == 4)
 	if cam_mode == 4:
 		# primeira pessoa (não é do jogo): nos olhos do piloto, com os efeitos
 		# de velocidade e o olhar livre do camera_piloto.gd
