@@ -322,8 +322,40 @@ func _detalhe() -> Texture2D:
 	if img == null or img.is_empty():
 		return null
 	img.convert(Image.FORMAT_L8)
+	_iguala_linhas(img)
 	img.generate_mipmaps()
 	return ImageTexture.create_from_image(img)
+
+
+## NOSSO (nov/2026, "tá tendo divisões", print do Matheus): o terço de baixo
+## da DETAIL.bog tem bem menos contraste que o resto (desvio 15-29 x ~40) e
+## repetida a cada 1.6 m virava faixa no chão; no jogo não aparece. Cada linha
+## vai pra mesma média e o mesmo desvio da textura inteira (o desenho fica)
+static func _iguala_linhas(img: Image) -> void:
+	var w := img.get_width()
+	var h := img.get_height()
+	var tot := 0.0
+	var tot2 := 0.0
+	for y in h:
+		for x in w:
+			var v := img.get_pixel(x, y).r
+			tot += v
+			tot2 += v * v
+	var n := float(w * h)
+	var media := tot / n
+	var desvio := sqrt(maxf(tot2 / n - media * media, 1e-6))
+	for y in h:
+		var m := 0.0
+		var m2 := 0.0
+		for x in w:
+			var v := img.get_pixel(x, y).r
+			m += v
+			m2 += v * v
+		m /= float(w)
+		var d := sqrt(maxf(m2 / float(w) - m * m, 1e-6))
+		for x in w:
+			var v := (img.get_pixel(x, y).r - m) / d * desvio + media
+			img.set_pixel(x, y, Color(clampf(v, 0.0, 1.0), 0, 0))
 
 
 static func _shader_chao() -> Shader:

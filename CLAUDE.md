@@ -650,6 +650,11 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   câmera. Calibrado pelo desvio do grão fino (imagem a 640 px): jogo 14.2
   perto / 4.5 meio; remake 0.2 / 1.7 antes, 13.5 / 6.1 agora. DETALHE=x,
   DETALHE_M=x, DETALHE_SOME=a,b (diagnóstico).
+  Faixas ("tá tendo divisões", print do Matheus): o terço de baixo da
+  DETAIL.bog tem bem menos contraste (desvio 15-29 x ~40) e repetida a cada
+  1.6 m virava faixa diagonal no chão; no jogo não aparece. NOSSO:
+  terrain._iguala_linhas deixa cada linha com a média e o desvio da textura
+  na carga (o arquivo fica cru). Grão agora 12.6 perto / 5.7 meio.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
