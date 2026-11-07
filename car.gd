@@ -599,6 +599,12 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 		q.transform = Transform3D(Basis(), global_transform * c)
 		q.exclude = [get_rid()]
 		var info := space.get_rest_info(q)
+		# roda de lado na cerca: o jogo mede pelo 0x153390 (0x154088, rodas)
+		# antes do contato; quebrou, a esfera não liga (senão vira parede)
+		if objetos and not info.is_empty() and (info.normal as Vector3).dot(up) < w.cos_max \
+				and objetos.roda_na_cerca(instance_from_id(info.collider_id), info.point, info.normal):
+			q.exclude = q.exclude + [info.rid]
+			info = space.get_rest_info(q)
 		cs.set_deferred("disabled", info.is_empty() or (info.normal as Vector3).dot(up) >= w.cos_max)
 
 

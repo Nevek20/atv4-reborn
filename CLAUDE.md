@@ -516,6 +516,12 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   parada) e as peças soltas batiam no carro logo depois (até 12 km/h em
   ângulo). Agora a roda quebra a cerca pela mesma conta, a reação da roda vai
   no corpo solto e as peças nunca batem no carro nem na roda.
+  De lado ("vira parede", Matheus): quem encosta é a esfera da roda
+  (_esferas_das_rodas), que só liga depois da checagem; agora ela também
+  passa pelo roda_na_cerca antes de ligar. Pedaços brancos/amarelos: o
+  load() devolve a mesma malha a cada cerca e o _materiais dobrava a cor de
+  novo (x4, x8); material nosso agora tem meta "rx01" e não é refeito.
+  DEBUG_CERCA=1 imprime o impulso de cada contato.
   tests/medir_perda.gd (mesmo caminho com e sem o objeto): cerca 0.1 a 0.8
   km/h a 30 e 60 km/h em 0/30/60°, fardo 1.5 km/h a 20 e ~5 a 55 (física de
   100 kg contra 1.2 t).

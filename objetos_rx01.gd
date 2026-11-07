@@ -81,6 +81,7 @@ var pecas := {}                          # modelo -> [RigidBody3D] (o estoque)
 var quebradas := 0
 var _separando: Array = []               # peças (não batem no carro nem na roda)
 var _carro_ant = null
+var _dbg := OS.get_environment("DEBUG_CERCA") == "1"
 var _col_cache := {}                     # "colisao" do JSON (cascos das peças)
 var _cerca_do_corpo := {}                # id do StaticBody3D -> índice em cercas
 ## 0x153390: depois de quebrar, o carro recebe só n x min(impulso, 0.25)
@@ -193,7 +194,10 @@ static func _v(a: Array) -> Vector3:
 func _materiais(malha: Mesh, bantam: bool) -> void:
 	for s in malha.get_surface_count():
 		var m0 := malha.surface_get_material(s) as StandardMaterial3D
-		if m0 == null:
+		if m0 == null or m0.has_meta("rx01"):
+			# já é um material nosso: a mesma malha volta a cada cerca quebrada
+			# (load() devolve a do cache) e o x2 da cor ia acumulando (x4, x8:
+			# pedaços amarelos e brancos, print do Matheus)
 			continue
 		var chave := "%d:%s" % [m0.get_instance_id(), bantam]
 		if not _mats.has(chave):
@@ -224,6 +228,7 @@ func _materiais(malha: Mesh, bantam: bool) -> void:
 			if m.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED and m.albedo_texture and _tem_alfa(m.albedo_texture):
 				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 				m.alpha_scissor_threshold = 0.5
+			m.set_meta("rx01", true)
 			_mats[chave] = m
 		malha.surface_set_material(s, _mats[chave])
 
@@ -383,6 +388,8 @@ func _physics_process(dt: float) -> void:
 				continue
 			# 0x153390: o maior impulso entre os contatos, contra corpo parado
 			var j := impulso_contato(-(info.normal as Vector3).normalized(), info.point)
+			if _dbg:
+				print("    cerca f %.2f n %s j %.2f v %.1f" % [f[1], info.normal, j, v.length() * 3.6])
 			if j > imp:
 				imp = j
 				n_imp = -(info.normal as Vector3).normalized()
@@ -448,6 +455,8 @@ func roda_na_cerca(corpo: Object, ponto: Vector3, normal: Vector3) -> bool:
 	if corpo == null or not _cerca_do_corpo.has(corpo.get_instance_id()):
 		return false
 	var c: Dictionary = cercas[_cerca_do_corpo[corpo.get_instance_id()]]
+	if _dbg:
+		print("    roda na cerca %d: n %s j %.2f" % [_cerca_do_corpo[corpo.get_instance_id()], normal, impulso_contato(normal.normalized(), ponto)])
 	return _bate_cerca(c, impulso_contato(normal.normalized(), ponto), normal.normalized(), ponto)
 
 
