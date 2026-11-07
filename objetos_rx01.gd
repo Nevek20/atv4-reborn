@@ -38,6 +38,8 @@ var carregados := {}                     # modelo -> true (só eles ganham colis
 var _mats := {}                          # material do .mtl -> nosso (cache)
 var _presas := {}                        # materiais com a textura presa na borda (modelos.json)
 const POCA_ALFA := 0.5                   # NOSSO (ver _materiais), calibrado no print do jogo
+const CAMADAS_LIGADAS := ["Crowd_ColourChange"]   # as conferidas (ver _desenha_camadas)
+var _camadas := {}                       # modelo -> [{obj, textura}] (2ª textura pelo 2º UV)
 var _misturadas := {}                    # materiais de lote transparente no .pingu (modelos.json)
 ## água (0x1bb098): uma caixa por instância WATER_* = a caixa do modelo (x, z)
 ## no frame da instância, superfície = o y mais alto dela. Na RAM do Matheus
@@ -109,6 +111,8 @@ func montar() -> bool:
 					_presas[nome] = true
 				for nome in info[m].get("misturada", []):
 					_misturadas[nome] = true
+				if info[m].has("camadas"):
+					_camadas[m] = info[m].camadas
 	var por := {}
 	for it in j.instancias:
 		if not por.has(it.modelo):
@@ -185,6 +189,8 @@ func montar() -> bool:
 			mmi.multimesh = mm
 			add_child(mmi)
 			mmi.global_transform = Transform3D.IDENTITY
+		if not bantam:
+			_desenha_camadas(modelo, lista)
 		instancias += lista.size()
 	_col_cache = j.get("colisao", {})
 	_colisao(j)
@@ -197,6 +203,61 @@ func montar() -> bool:
 			multidao.queue_free()
 			multidao = null
 	return instancias > 0
+
+
+## camada do lote (2ª textura pelo 2º UV, registro do .pingu +0x18): por
+## cima do modelo, misturada pelo alfa da textura (PS2 x 2) x cor do vértice.
+## Na pista: as camisetas coloridas da US_Bleacher_Wood_02
+## (Crowd_ColourChange sobre a Crowd_02) e a sujeira do arco de largada
+## (Start_DirtOverlay, DESLIGADA: misturada pelo alfa ela lava as faixas de
+## cinza; deve ser outra conta no GS, não achada). Camadas com alfa cheio (madeira, ferrugem, concreto
+## em celeiros e cabanas) ficam de fora: desenhadas assim cobririam o modelo
+## e o modo de mistura delas não foi achado
+func _desenha_camadas(modelo: String, lista: Array) -> void:
+	for c in _camadas.get(modelo, []):
+		var caminho: String = PASTA + String(c.obj)
+		var tex_c: String = PASTA + "tex/" + String(c.textura)
+		if not ResourceLoader.exists(caminho) or not ResourceLoader.exists(tex_c):
+			continue
+		if not String(c.textura).get_basename() in CAMADAS_LIGADAS:
+			continue
+		var tex: Texture2D = load(tex_c)
+		var malha: Mesh = load(caminho)
+		var m := StandardMaterial3D.new()
+		m.albedo_texture = tex
+		m.vertex_color_use_as_albedo = true
+		m.vertex_color_is_srgb = true
+		m.albedo_color = Color(COR_K_SRGB, COR_K_SRGB, COR_K_SRGB, 1.0)
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+		m.render_priority = 1
+		m.roughness = 1.0
+		m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+		m.cull_mode = BaseMaterial3D.CULL_BACK
+		if lista.size() == 1:
+			var mi := MeshInstance3D.new()
+			mi.name = "Camada_" + String(c.obj).get_basename()
+			mi.mesh = malha
+			mi.material_override = m
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(mi)
+			mi.global_transform = xf(lista[0])
+		else:
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.mesh = _espelhada(malha)
+			mm.instance_count = lista.size()
+			var sx := Transform3D(Basis.from_scale(Vector3(-1, 1, 1)), Vector3.ZERO)
+			for k in lista.size():
+				var x := xf(lista[k])
+				mm.set_instance_transform(k, x * sx if x.basis.determinant() < 0.0 else x)
+			var mmi := MultiMeshInstance3D.new()
+			mmi.name = "Camada_" + String(c.obj).get_basename()
+			mmi.multimesh = mm
+			mmi.material_override = m
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(mmi)
+			mmi.global_transform = Transform3D.IDENTITY
 
 
 ## cópia da malha espelhada em x (x negado, ordem dos vértices trocada),

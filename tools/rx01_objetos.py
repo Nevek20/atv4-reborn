@@ -515,6 +515,22 @@ def modelos(unpacked, ind, out, nomes):
             info[nome] = {"tipo": "pingu", "faces": nf, "texturas": [t[0] for t in texs.values()],
                           "alfa": any(t[1] for t in texs.values()),
                           "misturada": [m for s_, m in mats.items() if s_ in transp]}
+            # camada (2ª textura do lote pelo 2º UV, +0x18 do registro): na
+            # pista, as camisetas coloridas da US_Bleacher_Wood_02
+            # (Crowd_ColourChange por cima da Crowd_02) -> <modelo>_camada.obj
+            cams = pingu2obj.assign_batches(strips, lotes, "camada") if lotes else [-1] * len(strips)
+            por_cam = {}
+            for st_, c in zip(strips, cams):
+                if c is not None and 0 <= c < len(tnomes):
+                    por_cam.setdefault(c, []).append(st_)
+            for c0, sts in sorted(por_cam.items()):
+                t = textura(unpacked, ind, tnomes[c0].strip(), os.path.join(out, "tex"), feitas, mistura=True)
+                if t:
+                    ctxt, _, cnt = pingu2obj.to_obj(sts, "%s_camada%d" % (base, c0), uv2=True)
+                    open(os.path.join(out, "%s_camada%d.obj" % (base, c0)), "w").write(
+                        "# camada %s\n" % t[0] + ctxt)
+                    info[nome].setdefault("camadas", []).append(
+                        {"obj": "%s_camada%d.obj" % (base, c0), "textura": t[0]})
         elif ext == "bantam":
             cam = "Levels/RX_01/Models/Bantams/%s" % nome
             d = bloco(unpacked, ind, cam)
