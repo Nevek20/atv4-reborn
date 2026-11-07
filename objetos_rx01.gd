@@ -37,6 +37,7 @@ var corpo: StaticBody3D = null
 var carregados := {}                     # modelo -> true (só eles ganham colisão)
 var _mats := {}                          # material do .mtl -> nosso (cache)
 var _presas := {}                        # materiais com a textura presa na borda (modelos.json)
+const POCA_ALFA := 0.5                   # NOSSO (ver _materiais), calibrado no print do jogo
 var _misturadas := {}                    # materiais de lote transparente no .pingu (modelos.json)
 ## água (0x1bb098): uma caixa por instância WATER_* = a caixa do modelo (x, z)
 ## no frame da instância, superfície = o y mais alto dela. Na RAM do Matheus
@@ -301,6 +302,12 @@ func _materiais(malha: Mesh, bantam: bool) -> void:
 				# (mancha escura recortada, print do Matheus)
 				if not String(m0.resource_name).to_lower().contains("water"):
 					m.cull_mode = BaseMaterial3D.CULL_DISABLED
+				else:
+					# poça: o alfa da textura (~0x80) pela conta do PS2 dá ~92%
+					# opaca, mas no jogo ela é bem transparente (print do
+					# Matheus, nov/2026). O modo de mistura do lote (+0x10 = 4)
+					# não foi achado no exe; NOSSO: alfa lido de 0..255 (~50%)
+					m.albedo_color.a *= POCA_ALFA
 			m.roughness = 1.0
 			m.metallic = 0.0
 			m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED

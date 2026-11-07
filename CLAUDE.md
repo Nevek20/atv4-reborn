@@ -502,7 +502,13 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   water_puddle tem alfa do PS2 0.75..2 (o PNG velho vinha sem alfa e a malha
   cinza opaca ficava azulada no Godot: o "pedaço azul"); agora sai com o alfa
   (x 2, modelos.json "misturada"). Precisa rodar de novo o rx01_objetos.py e
-  o fx_jogo.py.
+  o fx_jogo.py. Transparência (nov/2026, "MUITO azul, não dá pra ver o
+  fundo", print do jogo do Matheus): pela conta do PS2 (alfa ~0x80, vértice
+  94/128) a poça fica ~92% opaca, mas no jogo é bem transparente. O lote tem
+  +0x10 = 4 no registro do .pingu (a tela da torre 6, peças opacas 0 ou 2:
+  bit 2 = 2 faces, bit 4 = transparente); o modo de mistura do GS desse
+  lote não foi achado. NOSSO: objetos_rx01.gd POCA_ALFA 0.5 (= alfa lido de
+  0..255), calibrado no print.
 - Cercas e fardos (PORTA, nov/2026; objetos_rx01.gd INTERATIVOS,
   tests/teste_quebra.gd, docs Objetos interativos): Setup/InstanceDatabase.xml
   (data/instance_database.xml) diz a classe de cada modelo (registro das
