@@ -118,6 +118,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --headless --path . -s res://tests/teste_poeira.gd        :: poeira dos pneus na largada do RX01: parado não, asfalto não, terra sim, rastro no pulo
 %GODOT% --headless --path . -s res://tests/teste_objetos.gd       :: objetos do RX01: 707 instâncias, no chão, céu, largada livre, guard-rail segura o carro
 %GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
+%GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
@@ -439,8 +440,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   (moitas 0.00 m), guard-rail, fardos e cercas na borda da pista no mapa de
   material, "START" do arco legível (espelho certo). Colisão = KDt
   (triângulos: face + 3 arestas), nome = crc32('<modelo>.kdt'); 11 sem nome
-  casados pela caixa (KDT_POR_CAIXA). Cerca de plástico/madeira e fardo só
-  têm HsC e QUEBRAM no jogo: sem colisão por enquanto. teste_objetos: o
+  casados pela caixa (KDT_POR_CAIXA). Cerca de plástico/madeira e fardo
+  (PORTA, nov/2026, ver "Cercas e fardos" abaixo) são interativos. teste_objetos: o
   Renegade a 60 km/h para no guard-rail (sem os objetos atravessa 29 m).
   Sem assets/rx01 (rodar o tools/rx01_objetos.py no PC) nada aparece e não
   entra parede invisível; o HUD avisa.
@@ -490,6 +491,27 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   cinza opaca ficava azulada no Godot: o "pedaço azul"); agora sai com o alfa
   (x 2, modelos.json "misturada"). Precisa rodar de novo o rx01_objetos.py e
   o fx_jogo.py.
+- Cercas e fardos (PORTA, nov/2026; objetos_rx01.gd INTERATIVOS,
+  tests/teste_quebra.gd, docs Objetos interativos): Setup/InstanceDatabase.xml
+  (data/instance_database.xml) diz a classe de cada modelo (registro das
+  classes no 0x547738). As 2 cercas (GEN plástico, SAM madeira) são
+  cObjectFlimsyFence: paradas até o impulso das batidas passar de
+  ShatterImpulse (0x141640 compara a soma com 2² = 4); aí 0x141908 tira a
+  cerca e as peças (Fragment, *_Particle_01/02) nascem paradas na pose dela,
+  de um estoque de 20 por modelo. O fardo é cObjectTrackBlock: corpo solto de
+  0.1 t, atrito 0.2, ActiveResetTimeout 10 s. Contato da cerca = as ESFERAS
+  do .hsc (como o casco dos carros): com a caixa fina, batendo na ponta, o
+  Godot dava a normal da placa e as cercas de lado viravam parede.
+  Aproximações NOSSAS (marcadas no código): a quebra é decidida ANTES do
+  passo (massa x velocidade na normal do contato, varrendo o passo com
+  cast_motion: a esfera de 10 cm pulava o contato a 60 km/h), pra o carro
+  atravessar; peça de 10 kg (o construtor 0x140758 não dá massa) que ignora o
+  carro até ficar a 3.5 m dele (nascendo dentro do carro, o Godot parava ele
+  de 61 pra 13 km/h); fardo volta 10 s depois de mexido (> 0.5 m), com o
+  carro a > 4 m; AngResistance -> angular_damp. teste_quebra: a 60 km/h a
+  cerca quebra e o carro segue a 63; a 4 km/h (impulso 1.3) segura; fardo
+  sai 13 m e volta. Falta: palha do fardo (ParticleTrigger Impact 0.2) e o
+  som de batida (CollisionSample PLASTIC_FENCE / HAY).
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
@@ -1102,8 +1124,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
 - RX01, falta: multidão (RX01_Crowds.wahoo, posições dentro dele), cercas
-  das entidades (cFenceNode/Link + .clm), quebrar cerca e fardo (bantams
-  *_Particle_*, HsC), LOD das árvores, reposição (cInstantRespotBox),
+  das entidades (cFenceNode/Link + .clm), palha e som das cercas/fardos, LOD das árvores, reposição (cInstantRespotBox),
   câmera de introdução, as 2 luzes direcionais. A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.

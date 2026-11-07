@@ -363,7 +363,20 @@ def hsc(d):
     nesf = u32(d, p)
     p += 16
     esferas = [list(struct.unpack_from("<4f", d, p + 16 * i)) for i in range(nesf)]
-    return {"planos": planos, "esferas": esferas}
+    # cantos da caixa dos planos (n.p + d <= 0 dentro, como o casco.py): a
+    # forma convexa dos objetos interativos no remake
+    import itertools
+    import numpy as np
+    P = np.array(planos, dtype=float)
+    vs = []
+    for i, j, k in itertools.combinations(range(len(P)), 3):
+        A = P[[i, j, k], :3]
+        if abs(np.linalg.det(A)) < 1e-6:
+            continue
+        x = np.linalg.solve(A, -P[[i, j, k], 3])
+        if np.all(P[:, :3] @ x + P[:, 3] <= 1e-4) and not any(np.linalg.norm(x - y) < 1e-4 for y in vs):
+            vs.append(x)
+    return {"planos": planos, "esferas": esferas, "vertices": [[float(c) for c in v] for v in vs]}
 
 
 # ------------------------------------------------------------------ texturas
@@ -631,6 +644,56 @@ def colisao(unpacked, ind, nomes):
     return out, sobra
 
 
+def quebraveis(ind, nomes):
+    """objetos interativos da pista pelo Setup/InstanceDatabase.xml
+    (data/instance_database.xml; ModelName sem diferenciar maiúscula):
+    classe (cObjectFlimsyFence = cerca que quebra, cObjectTrackBlock = bloco
+    solto), massa (t), atrito, dureza, ActiveResetTimeout, AngResistance,
+    ShatterImpulse e as peças (Fragment: modelo + casco)"""
+    import xml.etree.ElementTree as ET
+    arq = os.path.join(PROJ, "data", "instance_database.xml")
+    if not os.path.exists(arq):
+        return {}
+    raiz = ET.parse(arq).getroot()
+    por_nome = {}
+    for e in raiz:
+        mn = e.get("ModelName")
+        it = e.find("Interactive")
+        if mn is None or it is None:
+            continue
+        por_nome[mn.lower()] = (e, it)
+    bantams = {k.rsplit("/", 1)[1].rsplit(".", 1)[0].lower(): k.rsplit("/", 1)[1]
+               for k in ind if k.startswith("Levels/RX_01/Models/Bantams/")}
+    out = {}
+    for nome in sorted(nomes):
+        base = nome.rsplit(".", 1)[0].lower()
+        if base not in por_nome:
+            continue
+        e, it = por_nome[base]
+        f = lambda k, p=0.0: float(it.get(k, p))
+        ang = it.find("AngResistance")
+        if ang is None:
+            ang = e.find("AngResistance")
+        q = {"classe": it.get("ClassName") or it.get("Classname") or "cObjectInteractive",
+             "massa": f("Mass"), "atrito": f("Friction"), "dureza": f("Hardness"),
+             "reset": f("ActiveResetTimeout"), "som": e.get("CollisionSample", ""),
+             "ang": [float(ang.get(k, 0)) for k in "XYZ"] if ang is not None else [0, 0, 0]}
+        de = it.find("Destructible")
+        if de is not None:
+            q["quebra"] = float(de.get("ShatterImpulse", 0))
+            q["pecas"] = []
+            for fr in de.findall("Fragment"):
+                m = bantams.get(fr.get("Model", "").lower())
+                if m:
+                    q["pecas"].append({"modelo": m, "casco": fr.get("CollSkin", "").rsplit(".", 1)[0]})
+        pt = it.find("ParticleTrigger")
+        if pt is not None:
+            q["particula"] = {"tipo": pt.get("Type"), "impulso": float(pt.get("Impulse", 0)),
+                              "espera": float(pt.get("Timeout", 0))}
+        out[nome] = q
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unpacked")
@@ -644,16 +707,26 @@ def main():
     print("instâncias: %d (pingus %d, bantams %d), entidades %d" % (
         len(inst), sum(i["tipo"] == "pingu" for i in inst), sum(i["tipo"] == "bantam" for i in inst), len(ents)))
     nomes = set(i["modelo"] for i in inst)
-    col, sobra = colisao(a.unpacked, ind, nomes)
+    qb = quebraveis(ind, nomes)
+    pecas = set(p["modelo"] for q in qb.values() for p in q.get("pecas", []))
+    print("interativos: %s; peças: %s" % (", ".join("%s (%s)" % (k, v["classe"]) for k, v in qb.items()),
+                                         ", ".join(sorted(pecas))))
+    col, sobra = colisao(a.unpacked, ind, nomes | pecas)
+    # casco das peças pelo nome do CollSkin (a 2ª peça da cerca SAM usa o da 1ª)
+    for q in qb.values():
+        for p in q.get("pecas", []):
+            c = colisao(a.unpacked, ind, {p["casco"] + ".bantam"})[0]
+            if c:
+                col[p["casco"] + ".casco"] = list(c.values())[0]
     print("colisão: %d modelos com KDt, %d com HsC; KDt sem modelo: %d" % (
         sum("triangulos" in c for c in col.values()), sum("esferas" in c for c in col.values()), len(sobra)))
     json.dump({"fonte": [ARQ_INSTANCIAS, ARQ_ENTIDADES], "instancias": inst, "entidades": ents,
-               "colisao": col},
+               "colisao": col, "interativos": qb},
               open(os.path.join(PROJ, "data", "rx01_objetos.json"), "w"), separators=(",", ":"))
     if a.so_json:
         return
     os.makedirs(a.out, exist_ok=True)
-    info = modelos(a.unpacked, ind, a.out, nomes)
+    info = modelos(a.unpacked, ind, a.out, nomes | pecas)
     json.dump(info, open(os.path.join(a.out, "modelos.json"), "w"), indent=1)
     print("modelos em %s: %d" % (a.out, len(info)))
     print("céu: %s" % ", ".join(ceu(a.unpacked, ind, a.out)))

@@ -894,7 +894,7 @@ vazios). Tudo vem do evento:
   da torcida, alto-falante. Models/HsC/*.hsc ("CSH", o casco dos carros):
   só a cerca de plástico, a de madeira e o fardo (15 esferas); no jogo eles
   quebram (bantams *_Particle_*, pontos "particle Hay" no GEN_HayBale.pts):
-  não portado. Moitas sem colisão nenhuma.
+  ver Objetos interativos. Moitas sem colisão nenhuma.
 - Mundo do remake: base = colunas das linhas da matriz com x <-> z
   (Terrain.dir_do_jogo), posição Terrain.do_jogo: determinante -1, o Godot
   desenha espelhado certo (o "START" do arco sai legível).
@@ -1059,3 +1059,27 @@ Renegade_andando_na_agua.p2s (61 km/h). tests/teste_agua.gd.
   "Water" (string 0x5b1008) do SoundDatabase (Surface/Water em loop).
 - Desenho: o lote da poça é transparente (+0x00 = 1) e a water_puddle
   (128 x 128, cinza 105) tem alfa 96..254 (PS2: 0x80 = 1.0). Vértices 0.73.
+
+
+## Objetos interativos (cercas e fardos)
+
+Porta em objetos_rx01.gd (INTERATIVOS) + tools/rx01_objetos.py (quebraveis,
+JSON "interativos"). tests/teste_quebra.gd.
+- Setup/InstanceDatabase.xml (xml 14849; data/instance_database.xml): por
+  ModelName, <Interactive CollSkin Mass Friction Hardness ActiveResetTimeout
+  AIObserve ClassName> + AngResistance, Destructible ShatterImpulse com os
+  Fragment (Model + CollSkin), ParticleTrigger, CollisionSample (som). No
+  RX01: Gen_Barrier_Rallyfence e SAM_Barrier_RallyFence = cObjectFlimsyFence
+  (Mass 0, ShatterImpulse 2, 2 peças; a 2ª da SAM usa o casco da 1ª) e
+  GEN_HayBale = cObjectTrackBlock (Mass 0.1, ActiveResetTimeout 10,
+  ParticleTrigger Impact 0.2 / 0.1 s).
+- 0x547738 registra as classes: cObjectFlimsyFence (base
+  cObjectDestructibleFixed, fábrica 0x547b70, vtable 0x600a78),
+  cObjectTrackBlock e cObjectTrackDebris (base cObjectInteractive, 0x547c30 /
+  0x547c78, vtables 0x600500 / 0x600958), cInstantRespotBox, cNoRespotBox...
+- 0x141640 (por passo, cerca): com o corpo ativo soma +0x60 dos contatos do
+  corpo (lista em +0x180) e se ShatterImpulse² (+0x104) < soma chama 0x141908.
+- 0x141908: uma vez só (+0x110), tira o corpo da cerca do mundo (0x23f970) e
+  pra cada peça pega uma livre no estoque (0x1406f0; 0x140318 cria até 20
+  por modelo) e 0x140cf0 põe ela na posição e no giro da cerca, parada.
+  0x140758 (construtor da peça) não dá massa.
