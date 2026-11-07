@@ -831,8 +831,8 @@ nuvens; tools/fx_jogo.py -> assets/fx/poeira.png).
   2^Power valores pela posição no grupo, MaxParticleAge / PowerRatio^nível
   (Power 1: MaxParticleAge, MaxParticleAge/PowerRatio, alternando).
 - Desenho (0x3af590 só grava tamanho em +0x10/+0x14 e o alfa = (1 - t²) x
-  alfa0 x 128 nos 4 vértices; o quadrado sai no VU1): tamanho do XML x 0.3 =
-  metros (medido no print do espirro; o mesmo fator dos halos). Alfa da
+  alfa0 x 128 nos 4 vértices; o quadrado sai no VU1): tamanho do XML x 0.6 =
+  metros (calibrado em prints do jogo; a conta do VU1 não foi lida). Alfa da
   textura do PS2: 0x80 = 1.0.
 - Não portado ainda: Dirt (pedrinhas WheelSpinDirt e WheelDirtTrail do
   Effects/#3ffdac18, DirtKickupChance), o canto escuro, a sombra. A água

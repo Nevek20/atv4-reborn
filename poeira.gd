@@ -39,12 +39,14 @@ const TEXTURA := "res://assets/fx/poeira.png"
 ## atlas 2 x 3 da poeira, só as 4 de cima desenhadas). Sem ela não espirra
 const TEXTURA_AGUA := "res://assets/fx/agua.png"
 const TIPOS := ["Light", "Medium", "Heavy", "Water"]
-## tamanho do Dust.xml -> metros. O desenho é no VU1 (como os halos, que
-## saíram Width/Height x 0.3 m medidos nos prints). Medido de novo no
-## Screenshot do Renegade_andando_na_agua.p2s: o espirro (0.5 -> 3.0 no XML)
-## fica abaixo do para-choque (~0.6 m); com 1.0 subia acima do carro e a
-## poeira virava nuvens de 10 m ("muito grandes", Matheus, nov/2026)
-const ESCALA := 0.3
+## tamanho do Dust.xml -> metros. O desenho é no VU1 (não decifrado) e a
+## unidade não sai do exe: calibrado nos prints do Matheus (nov/2026). Com
+## 1.0 a poeira cobria o carro ("muito grande"), com 0.3 ficava fina
+## ("fininho"); com 0.6 fica como nos prints do jogo: na altura das rodas,
+## atrás e dos lados, sem passar do para-choque. POEIRA_ESCALA=x troca
+## (diagnóstico)
+const ESCALA := 0.6
+var escala := float(OS.get_environment("POEIRA_ESCALA")) if OS.get_environment("POEIRA_ESCALA") != "" else ESCALA
 ## melhoria nossa (o "quadriculado" que o Matheus viu): as nuvens do atlas
 ## encostam na borda da célula (alfa 250 na 1ª linha) e o quadrado corta o
 ## chão numa reta. BORDA_SUAVE apaga o alfa perto da borda da célula e
@@ -350,7 +352,7 @@ func _process(delta: float) -> void:
 	for k in n:
 		var tg := clampf(n_idade[k] / n_max[k], 0.0, 1.0)
 		var f := 1.0 - pow(1.0 - tg, 4.0)
-		var tam := (n_ini[k] * (1.0 - f) + n_alvo[k] * f) * ESCALA
+		var tam := (n_ini[k] * (1.0 - f) + n_alvo[k] * f) * escala
 		var t := n_idade[k] / n_vida[k]
 		var a := n_a0[k] * (1.0 - t * t)
 		var p := n_pos[k]
