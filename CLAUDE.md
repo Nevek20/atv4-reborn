@@ -462,7 +462,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   MultiMesh do Godot não vira a face por instância (o MeshInstance3D vira).
   Os .pingu com mais de 1 instância usam uma cópia espelhada da malha
   (_espelhada) e a matriz sem espelho. Bantam não tem isso (2 faces).
-  Lote transparente (tela da torre, poça) e recorte de .pingu (torcedores
+  Lote transparente (tela da torre; a poça NÃO, com as 2 faces ela ficou
+  preta no Forward+, nov/2026) e recorte de .pingu (torcedores
   da cabine do locutor, WahooCrowdTex01) desenham as 2 faces.
 - Céu (PORTA, nov/2026; ceu.gd, docs Céu): "a skybox tá faltando" (Matheus).
   SkyDome do Environment.xml: SKY_Bright_LowCloud (nuvens) +

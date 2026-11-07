@@ -296,8 +296,11 @@ func _materiais(malha: Mesh, bantam: bool) -> void:
 				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 				m.render_priority = -1
 				# tela da torre (TEMP_Wire_fence): o modelo só tem uma face e no
-				# jogo ela aparece dos 2 lados (Matheus, nov/2026)
-				m.cull_mode = BaseMaterial3D.CULL_DISABLED
+				# jogo ela aparece dos 2 lados (Matheus, nov/2026). A poça NÃO:
+				# com as 2 faces a parte de baixo da malha aparecia por cima
+				# (mancha escura recortada, print do Matheus)
+				if not String(m0.resource_name).to_lower().contains("water"):
+					m.cull_mode = BaseMaterial3D.CULL_DISABLED
 			m.roughness = 1.0
 			m.metallic = 0.0
 			m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
