@@ -760,6 +760,92 @@ def quebraveis(ind, nomes, unpacked=None):
     return out
 
 
+ARQ_MULTIDAO = "Levels/RX_01/Models/Wahoos/RX01_Crowds.wahoo"
+ARQ_MULTIDAO_NOMES = "Levels/RX_01/Models/Wahoos/#5d1b7d96"    # o .wfn (nomes)
+
+
+def anims_uv():
+    """Setup/UVRGBAAnim.xml (data/uv_anim.xml): AnimUV1 name -> [[duração,
+    u, v], ...] + ping_pong"""
+    import xml.etree.ElementTree as ET
+    out = {}
+    for a in ET.parse(os.path.join(PROJ, "data", "uv_anim.xml")).getroot():
+        if a.tag != "AnimUV1":
+            continue
+        ks = []
+        for k in a.iter("Key_Frame"):
+            uv = k.find("Set_UV")
+            if uv is None:
+                continue
+            ks.append([float(k.get("time", 0)), float(uv.get("u", 0)), float(uv.get("v", 0))])
+        out[a.get("name")] = {"chaves": ks, "ping_pong": a.find("Ping_Pong") is not None}
+    return out
+
+
+def multidao(unpacked, ind):
+    """RX01_Crowds.wahoo ("OHAW" 1.3; carregador 0x2821c8 / 0x2825b8):
+    cabeçalho +0x84 n texturas (nomes no .wfn, 0x80 cada), +0x9c n objetos
+    de 0x60 em +0xa0, +0x104 -> {ptr, n} materiais de 0x40 (+0 índice, +4 =
+    textura do .wfn). Objeto: +0x00 esfera, +0x30 material, +0x48 animação
+    {+0 ?, +4 índice no 2º nome do .wfn (AnimUV1 do UVRGBAAnim.xml), +8/+0xc
+    -1}, +0x50 dados VIF. Dados: UNPACK V4-32 posição (mundo do jogo; w com
+    0x8000 = vértice sem triângulo, tira de 4 por pessoa), V3-8 normal,
+    V2-32 UV, V4-8 cor (0x80 = 1.0)"""
+    if ARQ_MULTIDAO not in ind or ARQ_MULTIDAO_NOMES not in ind:
+        return None
+    d = bloco(unpacked, ind, ARQ_MULTIDAO)
+    w = bloco(unpacked, ind, ARQ_MULTIDAO_NOMES)
+    nt, _, na = struct.unpack_from("<3I", w, 0)
+    texs = [w[12 + i * 0x80:12 + i * 0x80 + 0x80].split(b"\0")[0].decode() for i in range(nt)]
+    o = 12 + nt * 0x80
+    nomes_anim = [w[o + i * 0x20:o + i * 0x20 + 0x20].split(b"\0")[0].decode() for i in range(na)]
+    nobj, pobj = struct.unpack_from("<2I", d, 0x9c)
+    pmat = struct.unpack_from("<I", d, 0x104)[0]
+    mp, mn = struct.unpack_from("<2I", d, pmat)
+    mat_tex = [struct.unpack_from("<i", d, mp + k * 0x40 + 4)[0] for k in range(mn)]
+    objs = []
+    for k in range(nobj):
+        b = pobj + k * 0x60
+        mat, = struct.unpack_from("<I", d, b + 0x30)
+        pa, pdados, pfim = struct.unpack_from("<3I", d, b + 0x48)[0], struct.unpack_from("<I", d, b + 0x50)[0], \
+            struct.unpack_from("<I", d, b + 0x54)[0]
+        anim = None
+        if pa:
+            ia = struct.unpack_from("<i", d, pa + 4)[0]
+            if 0 <= ia < len(nomes_anim):
+                anim = nomes_anim[ia]
+        lotes = []
+        p = pdados
+        atual = None
+        while p < pfim:
+            c = struct.unpack_from("<I", d, p)[0]
+            cmd = c >> 24
+            if cmd & 0x60 != 0x60:
+                p += 4
+                continue
+            num = (c >> 16) & 0xff
+            vn, vl = (cmd >> 2) & 3, cmd & 3
+            tam = ((32 >> vl) * (vn + 1) * num + 31) // 32 * 4
+            q = p + 4
+            if cmd == 0x6c and num > 1:
+                atual = {"pos": [], "sem": [], "uv": [], "cor": []}
+                lotes.append(atual)
+                for i in range(num):
+                    x, y, z, ww = struct.unpack_from("<3fI", d, q + i * 16)
+                    atual["pos"].append([x, y, z])
+                    atual["sem"].append(1 if ww & 0x8000 else 0)
+            elif cmd == 0x64 and atual is not None:
+                for i in range(num):
+                    atual["uv"].append(list(struct.unpack_from("<2f", d, q + i * 8)))
+            elif cmd == 0x6e and atual is not None:
+                for i in range(num):
+                    atual["cor"].append(list(struct.unpack_from("<4B", d, q + i * 4)))
+            p = q + tam
+        objs.append({"textura": texs[mat_tex[mat]] if 0 <= mat < len(mat_tex) else "", "anim": anim,
+                     "lotes": [l for l in lotes if len(l["uv"]) == len(l["pos"])]})
+    return {"fonte": ARQ_MULTIDAO, "texturas": texs, "objetos": objs, "anims": anims_uv()}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unpacked")
@@ -786,13 +872,23 @@ def main():
                 col[p["casco"] + ".casco"] = list(c.values())[0]
     print("colisão: %d modelos com KDt, %d com HsC; KDt sem modelo: %d" % (
         sum("triangulos" in c for c in col.values()), sum("esferas" in c for c in col.values()), len(sobra)))
+    md = multidao(a.unpacked, ind)
+    if md:
+        print("multidão: %d objetos, %d com animação, %d placas" % (len(md["objetos"]),
+              sum(o["anim"] is not None for o in md["objetos"]),
+              sum(sum(len(l["pos"]) for l in o["lotes"]) for o in md["objetos"]) // 4))
     json.dump({"fonte": [ARQ_INSTANCIAS, ARQ_ENTIDADES], "instancias": inst, "entidades": ents,
-               "colisao": col, "interativos": qb},
+               "colisao": col, "interativos": qb, "multidao": md},
               open(os.path.join(PROJ, "data", "rx01_objetos.json"), "w"), separators=(",", ":"))
     if a.so_json:
         return
     os.makedirs(a.out, exist_ok=True)
     info = modelos(a.unpacked, ind, a.out, nomes | pecas)
+    if md:
+        # texturas da multidão: alfa do PS2 levado pro PNG (recorte das pessoas)
+        feitas = {}
+        for t in md["texturas"]:
+            textura(a.unpacked, ind, t, os.path.join(a.out, "tex"), feitas, mistura=True)
     json.dump(info, open(os.path.join(a.out, "modelos.json"), "w"), indent=1)
     print("modelos em %s: %d" % (a.out, len(info)))
     print("céu: %s" % ", ".join(ceu(a.unpacked, ind, a.out)))

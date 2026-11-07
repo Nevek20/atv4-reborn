@@ -1,0 +1,1087 @@
+<Root FileVersion="1.0">
+   <!--Lightflashes-->
+   <AnimRGBA name="Lightflash">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="Lightflash_GREEN">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.0" g="0.4" b="0.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.0" g="0.4" b="0.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.0" g="0.4" b="0.0" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="Lightflash_RED">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.3" g="0.0" b="0.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.3" g="0.0" b="0.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.3" g="0.0" b="0.0" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="Lightflashtransparent">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.1" g="0.1" b="0.1" a="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="Lightflash2">
+      <Key_Frame time="0.4">
+         <Set_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="Lightflash3">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="Lightflash4">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.1" g="1.0" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="0.1" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.1" g="0.1" b="0.1" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <!--BalloonFlares_Waterfallsetc-->
+   <AnimRGBA name="balloonflare">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.8" g="0.8" b="0.8" a="0.8"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.75" g="0.75" b="0.75" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.75" g="0.75" b="0.75" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time=".2">
+         <Move_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.75" g="0.75" b="0.75" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Move_RGBA r="0.8" g="0.8" b="0.8" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.7" g="0.7" b="0.7" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="balloonflare2">
+      <Key_Frame time="2">
+         <Set_RGBA r="0.3" g="0.3" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="2">
+         <Move_RGBA r="1" g="1" b="1" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.3" g="0.3" b="0.5" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_RGBA r="0.3" g="0.3" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimUV1 name="Waterfall">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Scroll_U u="0"/>
+         <Scroll_V v="1"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="TankTrack">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_UV u="1.0" v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="TankWheel">
+      <Key_Frame time="0.05">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.05">
+         <Set_V v="0.5"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="TwisterCore">
+      <Key_Frame time="0.0">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Scroll_V v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="WindSock">
+      <Key_Frame time="0.0">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_V v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <!--Minigame_Accessories-->
+   <AnimRGBA name="TargetFlash">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+   </AnimRGBA>
+   <AnimRGBA name="MiniArrow">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_RGBA r="0.25" g="0.25" b="0.25" a="1.0"/>
+      </Key_Frame>
+   </AnimRGBA>
+   <AnimUV1 name="TrainingTarget">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Set_UV u="0.0" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Set_UV u="0.5" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Set_UV u="0.5" v="0.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="TCArrow">
+      <Key_Frame time="0.0">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.75">
+         <Move_V v="-1.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="TCArrow_slow">
+      <Key_Frame time="0.0">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="2">
+         <Move_V v="-1.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV2 name="TCArrow_slowPASS2">
+      <Key_Frame time="0.0">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_V v="-1.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV2>
+   <AnimUV2 name="TCArrow_fastPASS2">
+      <Key_Frame time="0.0">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_V v="-1.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV2>
+   <AnimUV1 name="Banner01">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_U u="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="0.25"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV2 name="KOTHBeamV">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_V v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV2>
+   <!--Adboards-->
+   <AnimUV1 name="Adboard_vertical">
+      <Key_Frame time="30"/>
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_V v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Adboard_horizontal">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_u u="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <!--BannersAndFlags-->
+   <AnimUV1 name="Banner02">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.25" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_U u="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="0.5"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Banner03">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.5" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_U u="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="0.75"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Banner04">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.75" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_U u="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="1.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Banner05">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_U u="0.25" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="0.25" v="0.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Banner06">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.25" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_U u="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="0.5"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="flag1">
+      <Key_Frame time="0.125">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.25" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.75" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0" v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.25" v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.5" v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.75" v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.25" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.5" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.75" v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0" v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.25" v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.5" v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.125">
+         <Set_UV u="0.75" v="0.75"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Banner07">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.5" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_U u="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="0.75"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Banner08">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.75" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_U u="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="5">
+         <Move_U u="1.0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <!--water-->
+   <AnimUV1 name="Water">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="140">
+         <Move_UV u="1.0" v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Water_fast">
+      <Key_Frame time="0.0">
+         <Set_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="70">
+         <Move_UV u="1.0" v="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Water2">
+      <Key_Frame time="0.0">
+         <Set_UV u="1.0" v="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="90">
+         <Move_UV u="0.0" v="0.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Pennant">
+      <Key_Frame time="0.0">
+         <Set_U u="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.25">
+         <Move_U u="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <!--Tests_and_Unused-->
+   <AnimRGBA name="fire">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="0.4"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Move_A a="0.35"/>
+         <Move_B b="0.5"/>
+         <Move_G g="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Move_A a="0.25"/>
+         <Move_G g="1.0"/>
+         <Move_B b="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Move_RGBA r="1.0" g="1.0" b="1.0" a="0.4"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="rainbow">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_G g="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_G g="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_B b="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_B b="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="0.0"/>
+         <Move_G g="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="1.0"/>
+         <Move_G g="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_B b="0.0"/>
+         <Move_G g="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_B b="1.0"/>
+         <Move_G g="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="0.0"/>
+         <Move_B b="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="1.0"/>
+         <Move_B b="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="colourChang">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="0.2"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="0.0"/>
+         <Move_G g="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_R r="1.0"/>
+         <Move_G g="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="eyeAnim">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_B b="0.0"/>
+         <Move_G g="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_B b="1.0"/>
+         <Move_G g="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="testRGBA">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="1.0" g="1.0" b="1.0" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_A a="0.0"/>
+         <Move_R r="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="1.0">
+         <Move_A a="1.0"/>
+         <Move_R r="1.0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="JP_Test">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="1" g="0" b="0" a="0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <AnimRGBA name="rodeo">
+      <Key_Frame time="2">
+         <Set_RGBA r="0.3" g="0.3" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="0.3" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_RGBA r="0.3" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_RGBA r="1" g=".3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="1">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.01">
+         <Move_RGBA r="1" g="1" b="1" a="1"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Move_RGBA r="1" g="0.3" b="1" a="1"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <!--Crowds_and_Spectators-->
+   <AnimUV1 name="Crowd_Anim1">
+      <Key_Frame time="0.15">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.164"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.328"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.492"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.656"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.820"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="JP_UV_Test">
+      <Key_Frame time="0.3">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.3">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_Crowd_anim">
+      <Key_Frame time="0.1">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.05">
+         <Set_UV u="0.25" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.05">
+         <Set_UV u="0.50" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.75">
+         <Set_UV u="0.75" v="0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_Crowd_3frame">
+      <Key_Frame time="0.3">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Set_UV u="0.66" v="0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_MexDude_anim">
+      <Key_Frame time="1">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0" v="0"/>
+         <Key_Frame time="0.5">
+            <Set_UV u="0.5" v="0"/>
+         </Key_Frame>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_YoungMan_anim">
+      <Key_Frame time="1">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_Leaningman_anim">
+      <Key_Frame time="1">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Set_UV u="0.66" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Crowd_Anim2">
+      <Key_Frame time="0.2">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.164"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.328"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.492"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.656"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.820"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Crowd_Anim3">
+      <Key_Frame time="0.2">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.164"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.328"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.492"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.656"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.820"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="CrowdTest">
+      <Key_Frame time="3">
+         <Set_U u="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="3">
+         <Set_U u="0.5"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_ArmWaiver_anim">
+      <Key_Frame time="1">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Set_UV u="0.66" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_ArmWaiver_anis">
+      <Key_Frame time="0.25">
+         <Set_UV u="0.5" v="0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="FEX_ArmWaiver_ani">
+      <Key_Frame time="1">
+         <Set_UV u="0" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.5">
+         <Set_UV u="0.66" v="0"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_UV u="0.33" v="0"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Bleacher_Anim1">
+      <Key_Frame time="1.08">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Bleacher_Anim2">
+      <Key_Frame time="1.51">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.05">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.07">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.05">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.45">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <AnimUV1 name="Bleacher_Anim3">
+      <Key_Frame time="1.865">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.12">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.175">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Key_Frame time="0.45">
+         <Set_V v="0.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.5"/>
+      </Key_Frame>
+      <Key_Frame time="0.1">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimUV1>
+   <!-- //dh-NEW_MINI_GAMES -->
+   <AnimRGBA name="ROF_Anim1">
+      <Key_Frame time="0.0">
+         <Set_RGBA r="0.5" g="0.5" b="0.5" a="1.0"/>
+      </Key_Frame>
+      <Key_Frame time="0.4">
+         <Move_RGBA r="1" g="0" b="0" a="0"/>
+      </Key_Frame>
+      <Loop/>
+   </AnimRGBA>
+   <!--Stadium Crowd Anims-->
+   <AnimUV1 name="Stadium_Crowd_Anim1">
+      <Key_Frame time="0.15">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.15">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+   <AnimUV1 name="Stadium_Crowd_Anim2">
+      <Key_Frame time="0.2">
+         <Set_V v="0.000"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.25"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.50"/>
+      </Key_Frame>
+      <Key_Frame time="0.2">
+         <Set_V v="0.75"/>
+      </Key_Frame>
+      <Ping_Pong/>
+   </AnimUV1>
+</Root>

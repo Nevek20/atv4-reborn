@@ -47,6 +47,7 @@ luzes.gd             lanterna de freio e luz de ré acesas (melhoria nossa): len
 farol.gd             farol aceso (melhoria nossa, no estilo da lanterna de freio) nas lentes de farol do modelo; H liga
 terrain.gd           relevo e material do chão da pista RX01 (do stream do jogo)
 objetos_rx01.gd      objetos da pista RX01 (porta do jogo): casas, arquibancadas, arco, placas, guard-rail, pedras, árvores + colisão KDt
+multidao.gd          multidão do RX01 (porta do jogo: RX01_Crowds.wahoo, fotos de gente em placas, UV animado pelo UVRGBAAnim.xml)
 palha.gd             palha do fardo (porta do jogo: .pts + Particles.xml + WorldFX.xml), disparada pelo objetos_rx01.gd
 ceu.gd               céu da pista (porta do jogo): cúpulas do SkyDome do Environment.xml (nuvens + montanhas) presas na câmera
 data/                XMLs do jogo (física buggy_NN.xml, pontos, câmeras, peças)
@@ -559,6 +560,22 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   contatos) > Impulse 0.2 liga a emissão por Timeout 0.1 s: ~1 palhinha por
   ponto por batida (teste_quebra: até 6 no ar). Matheus (nov/2026): "sai
   poucas palhinhas, mas dá pra ver, ficou bom". FECHADO.
+- Multidão (PORTA, nov/2026; multidao.gd, tools/rx01_objetos.py multidao(),
+  docs Multidão): Levels/RX_01/Models/Wahoos/RX01_Crowds.wahoo ("OHAW" 1.3,
+  carregador 0x2821c8/0x2825b8, renderer cWahooRenderer) + o .wfn
+  (#5d1b7d96: 7 texturas de 0x80 e 20 nomes de animação de 0x20). 26
+  objetos de 0x60 (+0x30 material, +0x48 animação, +0x50/+0x54 VIF);
+  material (+0x104 -> tabela de 0x40, +4 = textura do .wfn: a ordem NÃO é a
+  do objeto). VIF: V4-32 posição no mundo do jogo (w 0x8000 = sem
+  triângulo, tira de 4 = 1 pessoa), V3-8 normal, V2-32 UV, V4-8 cor. 233
+  pessoas (fotos da equipe: Rory, Rupert, Graham, Jez, Trev, Joe/Ben/Rob +
+  WahooCrowdTex01), 20 objetos animados pelo Setup/UVRGBAAnim.xml
+  (data/uv_anim.xml: FEX_Crowd_anim 4 quadros de 0.25 com 0.1/0.05/0.05/0.75
+  s, FEX_Crowd_3frame 3 de 0.33, ping-pong; Set_UV soma no UV). As texturas
+  saem com o alfa do PS2 x 2 (recorte). NOSSO: todos com a mesma animação
+  andam juntos (a fase do controle 0x27b930 não foi achada). As pessoas
+  paradas pintadas nas arquibancadas (Crowd_01/02) são do modelo e paradas
+  no jogo também.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
@@ -1170,8 +1187,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- RX01, falta: multidão (RX01_Crowds.wahoo, posições dentro dele), cercas
-  das entidades (cFenceNode/Link + .clm), LOD das árvores, reposição (cInstantRespotBox),
+- RX01, falta: cercas das entidades (cFenceNode/Link + .clm), LOD das árvores, reposição (cInstantRespotBox),
   câmera de introdução, as 2 luzes direcionais. A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.

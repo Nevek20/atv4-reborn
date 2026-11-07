@@ -71,6 +71,8 @@ const COR_AGUA := Color(0.5882, 0.6067, 0.6143, 1.0)
 ## e o som de batida (CollisionSample PLASTIC_FENCE / HAY).
 const INTERATIVOS := true
 const Palha := preload("res://palha.gd")
+const Multidao := preload("res://multidao.gd")
+var multidao = null                      # multidao.gd
 var palha = null                         # palha.gd (palha do fardo)
 const MASSA_PECA := 10.0                 # kg, nossa
 const ESTOQUE_PECAS := 20                # por modelo (0x140318: até 0x13)
@@ -185,6 +187,14 @@ func montar() -> bool:
 		instancias += lista.size()
 	_col_cache = j.get("colisao", {})
 	_colisao(j)
+	# multidão (RX01_Crowds.wahoo): placas de gente animadas (multidao.gd)
+	if j.get("multidao") is Dictionary:
+		multidao = Multidao.new()
+		multidao.name = "Multidao"
+		add_child(multidao)
+		if not multidao.montar(j.multidao):
+			multidao.queue_free()
+			multidao = null
 	return instancias > 0
 
 
