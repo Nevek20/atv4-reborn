@@ -972,7 +972,8 @@ vazios). Tudo vem do evento:
   renderer 0x7f6718 +0x1e4 (padrão 5.0 no 0x29ce38; 2x no LOD de longe em
   0x1ec898) e o 0x29ed98 faz +0x138/+0x148 = +0x1e4 x 16 x +0x1e8/+0x1ec.
   O renderer também guarda o ActualBrightness (+0xe4). A mistura e o +0x1e8
-  ficam no VU1 (não achados).
+  ficam no VU1 (não achados). O .gob tem os 4 níveis de mipmap (0x158 =
+  10880 bytes a partir do 0x15c): o nível 0 é o primeiro.
 - PS2 sem tonemap. Godot faz a luz em espaço linear e o PS2 na cor da tela:
   o mesmo ambiente 0.66 clareava muito mais no remake.
 

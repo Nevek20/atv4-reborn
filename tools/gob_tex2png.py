@@ -128,6 +128,11 @@ def convert(path):
     sz, off = u32(d, 0x158), u32(d, 0x15C)
     if sz == img_size and off + sz <= len(d):
         pix = d[off:off + sz]
+    elif sz > img_size and off + img_size <= len(d) and off + sz <= len(d):
+        # com mipmaps (ex: DETAIL.bog das pistas, 10880 = 128x128 + 64 + 32 +
+        # 16 em 4 bits): o nível 0 vem primeiro. Antes caía no "fim do
+        # arquivo" e misturava os níveis menores (saía ruído embaralhado)
+        pix = d[off:off + img_size]
     else:
         pix = d[len(d) - img_size:]
 

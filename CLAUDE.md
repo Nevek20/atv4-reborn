@@ -646,15 +646,18 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   assets/terrain/rx01_detalhe.png, no git). env.header +0x2c = 5.0 e o
   0x29ed98 (x16) = 80 repetições por bloco de 128 m (1.6 m cada; leitura
   nossa). A mistura fica no VU1 (não achada): NOSSO terrain.gd fator 1 +
-  1.15 x (alfa/média - 1), mesmo brilho médio, apagando de 5 a 25 m da
+  0.9 x (alfa/média - 1), mesmo brilho médio, apagando de 4 a 20 m da
   câmera. Calibrado pelo desvio do grão fino (imagem a 640 px): jogo 14.2
-  perto / 4.5 meio; remake 0.2 / 1.7 antes, 13.5 / 6.1 agora. DETALHE=x,
-  DETALHE_M=x, DETALHE_SOME=a,b (diagnóstico).
-  Faixas ("tá tendo divisões", print do Matheus): o terço de baixo da
-  DETAIL.bog tem bem menos contraste (desvio 15-29 x ~40) e repetida a cada
-  1.6 m virava faixa diagonal no chão; no jogo não aparece. NOSSO:
-  terrain._iguala_linhas deixa cada linha com a média e o desvio da textura
-  na carga (o arquivo fica cru). Grão agora 12.6 perto / 5.7 meio.
+  perto / 4.5 meio; remake 0.2 / 1.7 sem detalhe, 11.3 / 5.3 agora.
+  DETALHE=x, DETALHE_M=x, DETALHE_SOME=a,b (diagnóstico).
+  ERRO NOSSO que custou caro ("parece ruído, não parece o chão do jogo",
+  Matheus): textura com MIPMAP no .gob (0x158 = tamanho de todos os níveis,
+  ex: DETAIL.bog 10880 = 128x128 + 64 + 32 + 16 em 4 bits) caía no "pega o
+  fim do arquivo" do gob_tex2png e saía embaralhada (ruído puro, e o terço
+  de baixo diferente = os níveis menores). Agora o nível 0 vem do 0x15c. 477
+  das 15681 texturas do unpacked têm mipmap: quase todas DETAIL das pistas
+  (PlaceHolder), "dirt" vazias dos carros e umas de menu; nada do RX01 nem
+  dos carros que já usávamos.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
