@@ -2,7 +2,7 @@
 sfx_jogo.py
 ===========
 Extrai os sons do jogo que o carro usa (pneu, suspensão, pouso) pra
-assets/sfx (fora do git): um .wav por "tom" e o sons.json com o programa de
+assets/sons (fora do git): um .wav por "tom" e o sons.json com o programa de
 cada som. Quem toca é o som_jogo.gd, quem decide quando é o sfx_carro.gd.
 
 Bancos (Audio/*.bnk, achados pelo data/arquivos.tsv; os únicos que o jogo
@@ -34,7 +34,7 @@ reimplementado no jak-project; quem roda é o som_jogo.gd):
     faixa; tom com volume < 0 lê o registrador).
 
 Uso:
-    python tools/sfx_jogo.py <unpacked> [saida=assets/sfx]
+    python tools/sfx_jogo.py <unpacked> [saida=assets/sons]
 """
 
 import json
@@ -196,7 +196,7 @@ def main():
         print(__doc__)
         sys.exit(1)
     unpacked = sys.argv[1]
-    saida = sys.argv[2] if len(sys.argv) > 2 else os.path.join(PROJ, "assets", "sfx")
+    saida = sys.argv[2] if len(sys.argv) > 2 else os.path.join(PROJ, "assets", "sons")
     arqs = ler_arquivos()
     sample_banks = ler_bloco(unpacked, arqs, "Audio/SampleBanks.xml").decode("latin-1")
     tudo = {"versao": 2, "tick_hz": 240, "bancos": {}}

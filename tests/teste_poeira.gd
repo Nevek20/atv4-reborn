@@ -49,7 +49,7 @@ func _physics_process(dt: float) -> bool:
 		var p: Vector2 = Main.SPAWN_XZ
 		car.reset_to(Vector3(p.x, terrain.height_at(p.x, p.y) + 0.8, p.y), deg_to_rad(Main.SPAWN_YAW))
 		if car.poeira == null:
-			print("teste_poeira: FALHA (sem poeira: falta assets/fx/poeira.png? rode tools/fx_jogo.py)")
+			print("teste_poeira: FALHA (sem poeira: falta assets/efeitos/poeira.png? rode tools/fx_jogo.py)")
 			return true
 	t += dt
 	car.test_input.thr = 1.0 if t > 1.5 else 0.0

@@ -75,7 +75,7 @@ set VEL=110 & %GODOT% --headless --path . res://tests/teste_entrada.tscn   :: re
 :: + SOLTA=1.3 solta o volante (DEPOIS=-1 contra-esterça, ACEL=0 solta o acelerador), DUR=8 segundos depois de virar
 %GODOT% --headless --path . -s res://tests/medir_tremor.gd -- 60 tremor.csv  :: distância câmera-carro por quadro
 
-:: carro extra NOSSO de um .glb no padrão Assetto Corsa (WHEEL_LF..., STEER_HR) -> assets/<nome> + data/vehicles/<nome>*
+:: carro extra NOSSO de um .glb no padrão Assetto Corsa (WHEEL_LF..., STEER_HR) -> assets/carros/<nome> + data/vehicles/<nome>*
 python tools/carro_glb.py <modelo.glb> Escort [--estatico 0.114,0.074] [--escala 1.25] [--massa 0.9] [--base buggy_12]
 %GODOT% --headless --path . -s res://tests/teste_extra.gd   :: extras: curso parado x estático, casco, 0-100 e velocidade
 set TEMPO_CARGA=1& %GODOT% --headless --path . -s res://tests/tempo_carga.gd   :: ms de cada etapa da carga (VEH=26 Escort)
@@ -84,17 +84,17 @@ set TEMPO_CARGA=1& %GODOT% --headless --path . -s res://tests/tempo_carga.gd   :
 python tools/casco.py <unpacked>          :: --tabela mostra a caixa de todos os cascos do archive
 
 :: terreno do RX01 (alturas + material) a partir do stream do jogo
-python tools/extrair_material.py <dados>/stream/RX01.000 assets/terrain --materiais <dados>/unpacked/xml/12280
+python tools/extrair_material.py <dados>/stream/RX01.000 assets/pista/terreno --materiais <dados>/unpacked/xml/12280
 :: objetos e céu do RX01 (posições + colisão -> data/rx01_objetos.json, Environment.xml -> data/environment_rx01.xml;
-:: modelos, texturas e cúpulas do céu -> assets/rx01)
+:: modelos, texturas e cúpulas do céu -> assets/pista/rx01)
 python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
 
 :: checar um script sem abrir o editor
 %GODOT% --headless --path . --check-only --script res://carro/car.gd
 
-:: sons de pneu, suspensão e pouso do jogo -> assets/sfx (wav + sons.json com o ADSR de cada tom)
+:: sons de pneu, suspensão e pouso do jogo -> assets/sons (wav + sons.json com o ADSR de cada tom)
 python tools/sfx_jogo.py <unpacked>
-:: textura da fumaça (Sprites/Particles, caixa Dust0), da palha (Snow0), da sujeira (GEN_DIRT_DIRT), da lama do pneu (UNI_TyreOverlay) e da poeira (WorldFXdust) -> assets/fx
+:: textura da fumaça (Sprites/Particles, caixa Dust0), da palha (Snow0), da sujeira (GEN_DIRT_DIRT), da lama do pneu (UNI_TyreOverlay) e da poeira (WorldFXdust) -> assets/efeitos
 python tools/fx_jogo.py <unpacked>
 :: + print_tela com SUJEIRA=0.8 força o nível da sujeira, PAINEL=6900,137 fixa rpm e km/h no painel,
 ::   SEM_PAINEL=1 esconde o nosso (pra ver o que sobrou do modelo)
@@ -102,13 +102,16 @@ python tools/fx_jogo.py <unpacked>
 :: piloto (malha, esqueleto, animação da direção, textura) -> assets/piloto
 python tools/piloto.py <unpacked>
 
-:: assets dos 12 buggies (modelo, peças, freios, rodas, pintura; + <modelo>_camada.obj com o 2º UV)
+:: assets/ das pastas antigas (renegade, sphinx, fx, sfx, rx01, terrain...) pras novas (carros/, pista/, efeitos/, sons/)
+python tools/migrar_assets.py            :: --ver só mostra; depois %GODOT% --headless --path . --import
+
+:: assets dos 12 buggies (modelo, peças, freios, rodas, pintura; + <modelo>_camada.obj com o 2º UV) -> assets/carros/buggy_NN
 python tools/gerar_buggies.py <unpacked> [<texturas>]   :: sem a pasta: "texturas" do lado da unpacked; para se não achar .png
-python tools/gerar_buggies.py <unpacked> [<texturas>] --classe truck   :: os 12 trucks -> assets/truck_NN, data/vehicles/truck_NN*
+python tools/gerar_buggies.py <unpacked> [<texturas>] --classe truck   :: os 12 trucks -> assets/carros/truck_NN, data/vehicles/truck_NN*
 :: só o alfa das texturas com furo (redes das janelas, treliça do Trident); o gerar_buggies já chama
 python tools/alfa_texturas.py <unpacked>
 :: só a pintura (cores, logos e número "00"; --numero 27, --sem-decalques); depois reimportar no Godot
-python tools/gerar_pintura.py <unpacked> BUGGY_10 assets/renegade
+python tools/gerar_pintura.py <unpacked> BUGGY_10 assets/carros/buggy_10
 python tests/teste_pintura.py <unpacked>      :: caixas do .bed x quadros do número (12 carros) e logos do DefaultDecals
 
 :: motores do Engine Simulator (12 .mr) e dinamômetro sem tela (Linux)

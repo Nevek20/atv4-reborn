@@ -4,7 +4,7 @@ extends Node3D
 ## Mesmo gerente das pedrinhas (0x3bade8), estoque +0x18: modelo
 ## Levels/Grass/Models/Bantams/Particle_Debris.bantam (pedacinho de ~25 x 7 x
 ## 22 cm, sombra assada no vértice, textura Debris branca), no máximo 8 vivas
-## (RAM). tools/fx_jogo.py -> assets/fx/lasca.json + lasca.png.
+## (RAM). tools/fx_jogo.py -> assets/efeitos/lasca.json + lasca.png.
 ##
 ## Emissão 0x3bbd60, chamada pelo 0x1515e0 em cada contato do veículo com o
 ## mundo fixo (par de colisão 2 x 0, registrado no 0x14d458; o mesmo contato
@@ -29,8 +29,8 @@ extends Node3D
 ## Conferido no crash_Storm (parede de pedra): 4 recém-soltas (0.216 s), giro
 ## 0.5, tamanhos 0.71..1.29 e uma comprida 2.58; uma de 2.24 s parada no chão.
 
-const MODELO := "res://assets/fx/lasca.json"
-const TEXTURA := "res://assets/fx/lasca.png"
+const MODELO := "res://assets/efeitos/lasca.json"
+const TEXTURA := "res://assets/efeitos/lasca.png"
 const MAX := 8                        # NumParticlesPerGroup 8 x 1 grupo (0x3bade8; RAM)
 const MPH := 0.44694445
 const MUNDO := [30.0, 80.0, 25.0, 35.0, 2.0, 1.5, 2, 6, 0.7]   # gerente +0x64 (0x1515e0)

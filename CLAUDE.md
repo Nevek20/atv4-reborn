@@ -62,7 +62,8 @@ pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, mu
 som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
-assets/              modelos, texturas, sons e efeitos gerados pelos tools (fora do git)
+assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
+                     truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
 tests/               testes sem tela (rodar_tudo.py roda todos), prints e gravações
 tools/               scripts Python de extração (pingu2obj, pintura, savestate, efeitos, sons)
 re/                  engenharia reversa: scripts do Ghidra, exe_util, dumps
@@ -127,6 +128,9 @@ Arquivos, modelos e pintura
   SOMAM. Final: Level0/1 = 0.45/0.53, Level2+ = a custom 0.61.
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
+- Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os
+  arquivos têm o número do bloco no nome (rastreável); pecas.json é o índice.
+  PC com as pastas antigas: `python tools/migrar_assets.py`.
 - .obj só reimporta quando ELE muda (o .mtl não conta). Pintura nova precisa
   reimportar (`--headless --import`). Sem pintura.png o carro fica branco.
 - Cor do vértice do .pingu (0x80 = 1.0, até 2.0) multiplica a textura.

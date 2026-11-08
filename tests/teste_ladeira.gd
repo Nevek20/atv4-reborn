@@ -82,7 +82,7 @@ func _physics_process(dt: float) -> bool:
 		ant_bruto = false
 		return false
 	if car.sfx == null:
-		print("teste_ladeira: FALHA (sem assets/sfx)")
+		print("teste_ladeira: FALHA (sem assets/sons)")
 		return true
 	car.test_input = {"thr": 0.0}
 	t += dt

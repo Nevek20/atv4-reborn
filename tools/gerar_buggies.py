@@ -49,8 +49,6 @@ PROJ = os.path.dirname(AQUI)
 # ordem da lista do jogo (FEOrder) e nome que aparece no menu do jogo
 NOMES = ["Mosquito", "Inferno", "Trident", "Sphinx", "Bulldog", "Phantom",
          "Kraken V8", "McKenzies", "Viper", "Renegade", "Hurricane", "Storm"]
-# pasta em assets/ (Renegade e Sphinx mantêm as pastas antigas)
-PASTA = {4: "sphinx", 10: "renegade"}
 # trucks: nome do menu do jogo (text/15205_en.txt, TRUCK_NN)
 NOMES_TRUCK = ["Buccaneer", "Shockwave", "Shinto", "Jericho", "Punisher", "Panther",
                "Herbst Truggy", "Herbst TT", "Hammerhead", "Fireball", "Goliath", "Chimera"]
@@ -67,7 +65,7 @@ BONUS = {
 }
 CLASSES = {
     "buggy": {"id": "BUGGY", "pasta": "Buggy", "nomes": NOMES,
-              "assets": lambda n: PASTA.get(n, "buggy_%02d" % n), "dados": "buggy_%02d"},
+              "assets": lambda n: "buggy_%02d" % n, "dados": "buggy_%02d"},
     "truck": {"id": "TRUCK", "pasta": "Truck", "nomes": NOMES_TRUCK,
               "assets": lambda n: "truck_%02d" % n, "dados": "truck_%02d"},
 }
@@ -197,7 +195,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unpacked")
     ap.add_argument("texturas", nargs="?")
-    ap.add_argument("--assets", default=os.path.join(PROJ, "assets"))
+    ap.add_argument("--assets", default=os.path.join(PROJ, "assets", "carros"))
     ap.add_argument("--so", help="só esses carros (ex: 2,3; 13 = o bônus dos trucks)")
     ap.add_argument("--tabela", action="store_true", help="só mostra os blocos")
     ap.add_argument("--classe", default="buggy", choices=sorted(CLASSES))

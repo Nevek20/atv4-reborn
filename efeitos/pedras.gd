@@ -41,8 +41,8 @@ extends Node3D
 ## 0.6 da poeira; no vídeo do Matheus (nov/2026) a pedra tem ~10 px ao lado da
 ## roda de trás (~140 px/m) = 0.14 x 0.6 x 85% da caixa.
 
-const TEXTURA := "res://assets/fx/pedras.png"
-const CAIXAS := "res://assets/fx/pedras.json"
+const TEXTURA := "res://assets/efeitos/pedras.png"
+const CAIXAS := "res://assets/efeitos/pedras.json"
 const ESCALA := 0.6
 ## melhoria nossa (a mesma da poeira): o borrifo nasce no chão e o quadrado
 ## cortaria o chão numa reta; some onde encosta (só no borrifo, a pedra não)

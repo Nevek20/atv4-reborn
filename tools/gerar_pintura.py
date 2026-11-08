@@ -33,9 +33,9 @@ save state mostra 2 dígitos pretos). Rotação positiva = anti-horária na
 imagem.
 
 Uso:
-    python gerar_pintura.py unpacked BUGGY_10 renegade
-    python gerar_pintura.py unpacked BUGGY_04 sphinx
-    python gerar_pintura.py unpacked BUGGY_04 sphinx --nome pintura_speedrun.png --base 225,225,230 --primary 215,85,20 --secondary 45,35,175
+    python gerar_pintura.py unpacked BUGGY_10 assets/carros/buggy_10
+    python gerar_pintura.py unpacked BUGGY_04 assets/carros/buggy_04
+    python gerar_pintura.py unpacked BUGGY_04 assets/carros/buggy_04 --nome pintura_speedrun.png --base 225,225,230 --primary 215,85,20 --secondary 45,35,175
 
 As cores padrão são as do XML (as de fábrica). --base/--primary/--secondary
 trocam a cor, como na oficina de pintura do jogo. --numero troca o número,

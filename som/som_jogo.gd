@@ -1,6 +1,6 @@
 extends Node
 ## Toca um som do jogo (989snd) extraído por tools/sfx_jogo.py pra
-## assets/sfx: cada som é um programa de grãos (sons.json), rodado como o
+## assets/sons: cada som é um programa de grãos (sons.json), rodado como o
 ## BlockSoundHandler do 989snd (reimplementado no jak-project, mesma
 ## biblioteca): o relógio dos grãos anda a 240 Hz e a espera de cada grão vale
 ## ANTES dele (contagem = espera do próximo + o que o grão devolveu).
@@ -28,7 +28,7 @@ extends Node
 ## 0x370548). Ex.: Dirt sobe em ~0.5 s e desce em 0.17 s; o loop do cascalho
 ## (GRAVELEMENT2) entra na hora.
 
-const PASTA := "res://assets/sfx"
+const PASTA := "res://assets/sons"
 const MAX_VOZES := 6
 const TICK_HZ := 240.0            # relógio dos grãos do 989snd (48000 / 200)
 const SPU_HZ := 48000.0           # o envelope do SPU2 anda um passo por amostra

@@ -16,12 +16,12 @@ extends Node3D
 ## HeightMapShape3D do Godot (Godot Physics e Jolt, testado). Inverter só o x
 ## trocaria a diagonal.
 
-@export var height_path := "res://assets/terrain/rx01_height.bin"
-@export var material_path := "res://assets/terrain/rx01_material.bin"
+@export var height_path := "res://assets/pista/terreno/rx01_height.bin"
+@export var material_path := "res://assets/pista/terreno/rx01_material.bin"
 @export var materials_xml := "res://data/materials_rx01.xml"
-@export var texture_path := "res://assets/terrain/rx01_terrain.jpg"
+@export var texture_path := "res://assets/pista/terreno/rx01_terrain.jpg"
 ## melhoria nossa: textura do chão ampliada (Upscayl do Matheus) em
-## assets/terrain/hd/ com o nome da original, .png ou .jpg (fora do git); sem
+## assets/pista/terreno/hd/ com o nome da original, .png ou .jpg (fora do git); sem
 ## ela (ou false) usa a do jogo (2048 x 2048, ~1 m por pixel)
 const CHAO_HD := true
 @export var size := 1025          # pontos por lado
@@ -313,9 +313,9 @@ static var _sh_chao: Shader = null
 ## (alfa / média - 1), média do brilho igual (a cor média já batia com o
 ## jogo) e só o grão; DETALHE_FORCA calibrada no desvio do grão fino dos
 ## prints do jogo (perto do carro ~13 de 255, largada ~11). DETALHE=x e
-## DETALHE_M=x trocam (diagnóstico). Sem assets/terrain/rx01_detalhe.png
+## DETALHE_M=x trocam (diagnóstico). Sem assets/pista/terreno/rx01_detalhe.png
 ## (tools/rx01_objetos.py) o chão fica liso como antes.
-const DETALHE_ARQ := "res://assets/terrain/rx01_detalhe.png"
+const DETALHE_ARQ := "res://assets/pista/terreno/rx01_detalhe.png"
 const DETALHE_M := 2.4
 const DETALHE_FORCA := 0.55
 const DETALHE_SOME := Vector2(4.0, 20.0)    # NOSSO: apaga de 4 a 20 m (o grão do jogo some antes que o nosso)
@@ -368,7 +368,7 @@ void light() {
 	return _sh_chao
 
 
-## a versão ampliada: qualquer imagem em assets/terrain/hd/ com o nome da
+## a versão ampliada: qualquer imagem em assets/pista/terreno/hd/ com o nome da
 ## original no começo (o Upscayl põe "_upscayl_2x..." no fim). Lida direto do
 ## arquivo pelo CONTEÚDO (PNG, JPG ou WEBP, seja qual for a extensão), sem
 ## depender do import do Godot; null se não tiver

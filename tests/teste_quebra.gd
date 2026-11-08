@@ -94,7 +94,7 @@ func _physics_process(dt: float) -> bool:
 		if not objetos.is_inside_tree():
 			return false
 		if not objetos.montar() or objetos.cercas.is_empty():
-			print("teste_quebra: FALHA (sem assets/rx01 ou sem interativos: rode tools/rx01_objetos.py)")
+			print("teste_quebra: FALHA (sem assets/pista/rx01 ou sem interativos: rode tools/rx01_objetos.py)")
 			return true
 		print("  %d cercas e %d fardos interativos" % [objetos.cercas.size(), objetos.blocos.size()])
 		_checa(objetos.cercas.size() == 128 and objetos.blocos.size() == 51, "103 + 25 cercas e 51 fardos")

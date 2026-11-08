@@ -159,7 +159,7 @@ var piloto: Node3D = null
 const SOM_MOTOR := true
 var som: Node = null
 # sons de pneu, suspensão e pouso do jogo (sfx_carro.gd, portados do exe com
-# os samples do jogo em assets/sfx: tools/sfx_jogo.py). false = sem eles
+# os samples do jogo em assets/sons: tools/sfx_jogo.py). false = sem eles
 const SOM_PNEU := true
 var sfx: Node = null
 # fumaça do escapamento (melhoria nossa, fumaca.gd: o efeito ExhaustSmokeTrail
@@ -237,7 +237,7 @@ const FAROL := true
 var farol: Node = null
 var body_mi: MeshInstance3D = null
 # sujeira do jogo (0x223e68, _sujeira_passo) e desenho dela (sujeira.gd, com a
-# textura GEN_DIRT_DIRT em assets/fx: tools/fx_jogo.py). false = carro limpo
+# textura GEN_DIRT_DIRT em assets/efeitos: tools/fx_jogo.py). false = carro limpo
 const SUJEIRA := true
 # painel funcional (melhoria nossa, painel.gd): ponteiros, marcha e luz de troca
 const PAINEL := true

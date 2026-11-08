@@ -68,7 +68,7 @@ func _physics_process(dt: float) -> bool:
 		if not objetos.is_inside_tree():
 			return false
 		if not objetos.montar() or objetos.aguas.is_empty():
-			print("teste_agua: FALHA (sem assets/rx01 ou sem a WATER_puddle01: rode tools/rx01_objetos.py)")
+			print("teste_agua: FALHA (sem assets/pista/rx01 ou sem a WATER_puddle01: rode tools/rx01_objetos.py)")
 			return true
 		var a: Dictionary = objetos.aguas[0]
 		print("  água: superfície %.3f (RAM 206.017), meia-largura %.2f x %.2f (RAM 21.01 x 19.88)" % [
@@ -131,8 +131,8 @@ func _physics_process(dt: float) -> bool:
 			medidas.agua_max, medidas.drag_max, medidas.espirro, medidas.som])
 		_checa(medidas.agua_max > 20, "passou pela água")
 		_checa(medidas.drag_max > 0.0 and medidas.drag_max < 400.0, "arrasto da água pequeno (< 400 N)")
-		_checa(car.poeira == null or medidas.espirro > 0, "espirro de água" + ("" if car.poeira else " (sem assets/fx: pulado)"))
-		_checa(car.sfx == null or medidas.som, "som Water" + ("" if car.sfx else " (sem assets/sfx: pulado)"))
+		_checa(car.poeira == null or medidas.espirro > 0, "espirro de água" + ("" if car.poeira else " (sem assets/efeitos: pulado)"))
+		_checa(car.sfx == null or medidas.som, "som Water" + ("" if car.sfx else " (sem assets/sons: pulado)"))
 		print("teste_agua: %s" % ("ok" if falhas == 0 else "%d falhas" % falhas))
 		return true
 	return false

@@ -11,7 +11,7 @@ extends Node3D
 ## uma base com determinante -1 (o Godot desenha espelhado certo, como o nó
 ## "espelho" do carro).
 ##
-## Desenho: .obj do tools/rx01_objetos.py em assets/rx01 (pingu pelo
+## Desenho: .obj do tools/rx01_objetos.py em assets/pista/rx01 (pingu pelo
 ## pingu2obj, bantam pelo decodificador de lá), cor do vértice x textura como
 ## os carros (car.gd material_do_jogo: 0x80 = 1.0, até 2.0). Bantam não tem
 ## normal no jogo (luz assada na cor): SEM luz do Godot, sem sombra dinâmica,
@@ -26,7 +26,7 @@ extends Node3D
 
 const Terrain := preload("res://pista/terrain.gd")
 const ARQ := "res://data/rx01_objetos.json"
-const PASTA := "res://assets/rx01/"
+const PASTA := "res://assets/pista/rx01/"
 const COR_K_SRGB := 255.0 / 128.0       # car.gd: no albedo vira o COR_K do pingu2obj
 
 var instancias := 0
@@ -819,7 +819,7 @@ func _colisao(j: Dictionary) -> void:
 	var faces := PackedVector3Array()
 	for it in j.instancias:
 		var c: Dictionary = col.get(it.modelo, {})
-		# sem o modelo desenhado (assets/rx01 não gerado) não põe parede invisível
+		# sem o modelo desenhado (assets/pista/rx01 não gerado) não põe parede invisível
 		if not c.has("triangulos") or not carregados.has(it.modelo):
 			continue
 		var t := xf(it)

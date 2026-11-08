@@ -1,6 +1,6 @@
 extends Node
 ## Sons de pneu, suspensão e pouso do jogo (portados do exe), tocados com os
-## samples do próprio jogo (tools/sfx_jogo.py -> assets/sfx, som_jogo.gd).
+## samples do próprio jogo (tools/sfx_jogo.py -> assets/sons, som_jogo.gd).
 ## Parâmetros: data/sound_database.xml (Audio/SoundDatabase.xml do jogo).
 ## Roda a cada passo do jogo (50 Hz), chamado pelo car.gd depois do _vibracao.
 ##

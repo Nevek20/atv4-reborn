@@ -21,9 +21,9 @@ extends RefCounted
 ## a posição animada fazia o braço andar por dentro da textura) com o nível
 ## do carro. O jeito do jogo no piloto não foi achado.
 
-const TEX := "res://assets/fx/sujeira.png"
-const TEX_PILOTO := "res://assets/fx/sujeira_piloto.png"
-const TEX_LAMA := "res://assets/fx/lama_pneu.png"
+const TEX := "res://assets/efeitos/sujeira.png"
+const TEX_PILOTO := "res://assets/efeitos/sujeira_piloto.png"
+const TEX_LAMA := "res://assets/efeitos/lama_pneu.png"
 const ESCALA_PILOTO := 0.6    # metros por repetição no piloto (nosso)
 
 const SHADER_CAMADA := """
@@ -85,7 +85,7 @@ var aviso := ""                    # o que falta gerar (o HUD mostra)
 var byte := -1
 
 
-## põe as camadas. Sem as texturas (assets/fx, tools/fx_jogo.py) ou sem os
+## põe as camadas. Sem as texturas (assets/efeitos, tools/fx_jogo.py) ou sem os
 ## _camada.obj (tools/gerar_buggies.py) não desenha e devolve false.
 func montar(car) -> bool:
 	if not ResourceLoader.exists(TEX):

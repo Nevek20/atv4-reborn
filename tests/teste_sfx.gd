@@ -6,7 +6,7 @@ extends SceneTree
 ## tom de cada roda com o registrador de pitch das vozes do SPU
 ## (tests/ref_som_pneu.json).
 ## Também confere o sample (Dirt/Tarmac/Screech pelo SFX do material).
-## Precisa de assets/sfx (python tools/sfx_jogo.py <unpacked>).
+## Precisa de assets/sons (python tools/sfx_jogo.py <unpacked>).
 ## Uso: godot --headless --path . -s res://tests/teste_sfx.gd
 
 const Car := preload("res://carro/car.gd")
@@ -51,7 +51,7 @@ func _physics_process(_dt: float) -> bool:
 		return false
 	car.set_physics_process(false)
 	if car.sfx == null:
-		print("teste_sfx: FALHA (sem assets/sfx: python tools/sfx_jogo.py <unpacked>)")
+		print("teste_sfx: FALHA (sem assets/sons: python tools/sfx_jogo.py <unpacked>)")
 		return true
 	if fila.is_empty():
 		for a in mapa_ram:

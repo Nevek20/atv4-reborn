@@ -8,13 +8,13 @@ extends Node3D
 ##   (ExpandFromCentre), ângulo sorteado 0..pi, some nos últimos 30% da vida
 ##   (FadeOutTime 0.3 x Life), Momentum sem velocidade inicial = rastro parado
 ##   no mundo, no máximo 60 partículas por cano, textura Sprites/Particles
-##   caixa Dust0 (tools/fx_jogo.py -> assets/fx/fumaca.png).
+##   caixa Dust0 (tools/fx_jogo.py -> assets/efeitos/fumaca.png).
 ## O que o XML não tem (era do código que não existe) é escolha nossa: a taxa
 ## (TAXA_LENTA na marcha lenta até 120/s com o motor cheio, pela carga e pelo
 ## rpm) e uma saída de SAIDA m/s na direção do cano (linha 2 da matriz do
 ## ponto).
 
-const TEXTURA := "res://assets/fx/fumaca.png"
+const TEXTURA := "res://assets/efeitos/fumaca.png"
 const VIDA := 0.5
 const MAX := 60                     # MaxParticles
 const TAMANHO := 0.2

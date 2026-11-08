@@ -108,7 +108,7 @@ func _load_model() -> void:
 	elif model_path != "" and ResourceLoader.exists(model_path):
 		mesh = load(model_path) as Mesh
 	if mesh == null:
-		push_warning("Modelo não encontrado em %s. Copie a pasta renegade pra assets/renegade." % model_path)
+		push_warning("Modelo não encontrado em %s. Rode o tools/gerar_buggies.py (docs/comandos.md)." % model_path)
 		var bm := BoxMesh.new()
 		bm.size = Vector3(2.2, 1.0, 4.6)
 		mi.mesh = bm

@@ -29,15 +29,15 @@ extends Node3D
 ## (0x3af170 grava alfa x força de volta no registro do tipo): no mesmo quadro
 ## a 1ª sai com força, a 2ª com força², ... (o jogo é assim).
 ## Desenho: textura Sprites/WorldFXdust (atlas 2 x 3 de nuvens, tools/fx_jogo.py
-## -> assets/fx/poeira.png), quadrado virado pra câmera, centrado no ponto,
+## -> assets/efeitos/poeira.png), quadrado virado pra câmera, centrado no ponto,
 ## cor = textura x DustColour (PS2: 0x80 = 1.0). Não portado: o canto escuro
 ## (o vértice 0 sai com a cor x 0.3; a ordem dos cantos não foi achada), a
 ## luz do lugar (corpo+0xc0) e a água.
 
-const TEXTURA := "res://assets/fx/poeira.png"
+const TEXTURA := "res://assets/efeitos/poeira.png"
 ## espirro na água (tipo Water do Dust.xml, Sprites/WorldFXwater_dust; mesmo
 ## atlas 2 x 3 da poeira, só as 4 de cima desenhadas). Sem ela não espirra
-const TEXTURA_AGUA := "res://assets/fx/agua.png"
+const TEXTURA_AGUA := "res://assets/efeitos/agua.png"
 const TIPOS := ["Light", "Medium", "Heavy", "Water"]
 ## tamanho do Dust.xml -> metros. O desenho é no VU1 (não decifrado) e a
 ## unidade não sai do exe: calibrado nos prints do Matheus (nov/2026). Com

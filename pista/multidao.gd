@@ -11,7 +11,7 @@ extends Node3D
 ## um controle por objeto no 0x27b930; a fase não foi achada).
 
 const Terrain := preload("res://pista/terrain.gd")
-const PASTA := "res://assets/rx01/tex/"
+const PASTA := "res://assets/pista/rx01/tex/"
 const COR_K_SRGB := 255.0 / 128.0
 
 var anims := {}                  # nome -> {chaves, ping_pong}

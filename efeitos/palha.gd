@@ -8,13 +8,13 @@ extends MultiMeshInstance3D
 ## até 30, vida 0.5..1 s, gravidade -9.8, cor (0.9, 0.75, 0.55), largura
 ## 0.05..0.07 x altura 0.4..0.7, giro 0..6 rad, entra em 0.1 s e some em 1 s,
 ## virada pra câmera (cRendererSimpleFaceme), textura Sprites/Particles
-## caixa "snow" (no .bed é Snow0: tools/fx_jogo.py -> assets/fx/palha.png).
+## caixa "snow" (no .bed é Snow0: tools/fx_jogo.py -> assets/efeitos/palha.png).
 ## Leituras NOSSAS (o código que dispara não foi achado no exe): impacto =
 ## soma dos impulsos de contato do passo (t·m/s) > Impulse liga a emissão por
 ## Timeout s; velocidade = (direção + esfera x Spray) x VelocityVariation,
 ## mais a do fardo no ponto; tamanho x 0.6 como a poeira (poeira.gd ESCALA).
 
-const TEXTURA := "res://assets/fx/palha.png"
+const TEXTURA := "res://assets/efeitos/palha.png"
 const ESCALA := 0.6
 
 var q: Dictionary = {}           # "particula" do JSON

@@ -64,6 +64,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   tools/alfa_texturas.py devolve o alfa delas e o car.gd vira recorte
   (_tem_alfa); as outras têm alfa cheio e não mudam.
 
+- Pastas dos assets (nov/2026, arrumação): eram 32 pastas soltas em assets/
+  (renegade e sphinx com nome, os outros buggy_NN, fx, sfx, rx01, terrain).
+  Agora carros/ (pelo número do jogo: renegade -> buggy_10, sphinx ->
+  buggy_04), pista/ (rx01, terreno), efeitos/ e sons/; piloto/ igual.
+  Os nomes dos arquivos (número do bloco) ficaram de propósito: voltam no
+  data/arquivos.tsv e o pecas.json já diz o que é cada um; renomear exigiria
+  gerar tudo de novo. O git só tinha o terreno e 25 arquivos velhos do
+  Renegade (o modelo 21711 de antes do Models_4K): os 4 que o Renegade novo
+  ainda usa foram junto pra carros/buggy_10, o resto e os .import saíram. Os
+  .import não vão mais pro git (cada máquina gera o seu). PC com as pastas
+  antigas: tools/migrar_assets.py move sem gerar nada e apaga os .import
+  velhos (o Godot reimporta).
+
 ## Física do carro
 
 - Suspensão = cCompPlace_* do exe (docs/engenharia_reversa.md, Peças): eixo

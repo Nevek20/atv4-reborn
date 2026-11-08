@@ -117,7 +117,7 @@ func _physics_process(dt: float) -> bool:
 		if not objetos.is_inside_tree():
 			return false
 		if not objetos.montar():
-			print("medir_perda: sem assets/rx01")
+			print("medir_perda: sem assets/pista/rx01")
 			return true
 		for ang in [0.0, 30.0, 60.0]:
 			for c in objetos.cercas:
