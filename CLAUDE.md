@@ -40,6 +40,7 @@ sfx_carro.gd         som de pneu, suspensão e pouso do jogo (portado do exe); s
 fumaca.gd            fumaça do escapamento (melhoria nossa com o efeito ExhaustSmokeTrail que o jogo não usa)
 poeira.gd            poeira dos pneus (porta do jogo: Setup/Dust.xml, DustType/DustColour do chão, 0x225108)
 pedras.gd            pedrinhas e borrifo de terra das rodas de trás patinando (porta do jogo: 0x3bb618, Sprites/dirt_rocks)
+lascas.gd            lasquinhas da batida (porta do jogo: 0x3bbd60, Particle_Debris.bantam na cor base da pintura)
 sujeira.gd           sujeira do jogo na pintura e lama nas rodas, pelo 2º UV (_camada.obj); nível e cor vêm do car.gd
 painel.gd            painel funcional (melhoria nossa): ponteiros, marcha e luz de troca, amador x PRO
 motor_treme.gd       motor e escape tremendo (melhoria nossa): separa as peças do cofre da carroceria
@@ -127,6 +128,8 @@ set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quan
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 %GODOT% --headless --path . -s res://tests/teste_pedras.gd        :: pedrinhas: larga na terra, vira (VIRA=7): parado não, ~80 vivas, pro lado derrapando
 %GODOT% --path . --fixed-fps 60 -s res://tests/gravar_pedras.gd -- 0 pedras   :: prints da largada na terra (QUANDO=0.6,1.0,1.4; SEM_PEDRAS=1, PEDRAS_COR=1, VIRA=1)
+set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_lascas.gd   :: lasquinhas: Storm numa parede (20 m/s = 3, 10 m/s = 0, até 8 vivas, 4 s)
+%GODOT% --path . --fixed-fps 60 -s res://tests/gravar_lascas.gd -- 0 lascas    :: prints depois da batida (QUANDO=0.1,0.3,1.0; VEL=25, LASCAS_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
 set VEL=110 & %GODOT% --headless --path . res://tests/teste_entrada.tscn   :: reto até VEL e vira tudo: quando passa de 20° (jogo: 110 não derrapa)
@@ -986,8 +989,17 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   lado (|β| 1 rad) = 45° pro lado em que escorrega; cor = DirtColour.
   Conferido no save state drr2 (80 vivas, 2 por quadro, tamanhos e
   velocidades). Tamanho x 0.6 como a poeira (vídeo do Matheus: pedra de ~10
-  px do lado da roda). O mesmo gerente tem o estoque das lasquinhas da
-  batida (Particle_Debris.bantam, 0x3bbd60): ainda não portado.
+  px do lado da roda). FECHADO (Matheus: "ficou perfeito").
+- Lasquinhas da batida (PORTA, nov/2026; lascas.gd, docs Lasquinhas): mesmo
+  gerente, Particle_Debris.bantam (tools/fx_jogo.py -> lasca.json/png) na
+  COR BASE da pintura (RAM bate com o 150xx; gerar_pintura agora grava
+  pintura.json; sem ele, a cor que mais aparece na pintura.png, NOSSO). Sai
+  em cada contato do CASCO com o mundo fixo (chão e paredes; o par 2 x 0 do
+  exe também lê o material do chão), a >= 1 m do anterior e >= 30 mph:
+  int((2 + 4 t) x de frente) lascas (mínimo 1), 12..35 mph pra fora e pra
+  cima da parede + 70% do deslize; vivem 4 s, quicam com 0.5, giram; no
+  máximo 8 de uma vez. Carro com carro (25..45 mph) fica pra quando tiver IA.
+  Conferido no crash_Storm (5 vivas, tamanhos, giro). teste_lascas.
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o

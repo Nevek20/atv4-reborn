@@ -882,6 +882,42 @@ um gerente próprio achado pela string "dirt_rocks" (0x5b98e0).
   (dt 0.0196), pedras 0.14 e borrifos 2.0 + idade, recém-soltas com v - v do
   carro = (5.4, 4.8, 6.0): ~45° pra cima e pro lado da velocidade.
 
+## Lasquinhas da batida (Particle_Debris)
+Porta em lascas.gd (nov/2026). Estoque +0x18 do mesmo gerente das pedrinhas:
+Levels/Grass/Models/Bantams/Particle_Debris.bantam (36 triângulos, ~25 x 7 x
+22 cm, sombra assada no vértice) + Levels/Grass/Models/Textures/Debris.bog
+(64x64 branca). Configuração (construtor 0x3bade8, conferida na RAM): 8 x 1
+grupo = 8 no máximo, vida +0xa8 4 s, gravidade +0xa4 30, some +0xb0 1/s,
+giro +0xd0 30 (x 1/60 por quadro), chão 2 por quadro (+0xd4), quica +0xd8
+0.5, chão + 0.02 (+0xdc).
+- Quem chama: tabela de pares de colisão montada no 0x14d458
+  (FUN_00254070(tipo A, tipo B, handler)). Par (2, 0) -> handler 0x561a58,
+  +0x14 = 0x1515e0 (veículo x mundo fixo; o mesmo contato lê o material do
+  chão, +0x3c, e suja o carro com o casco na terra sem roda no chão:
+  0x2240c8 com WheelDirtRate). Par (2, 2) -> 0x561918 -> 0x1529d0 (carro x
+  carro, só do mais rápido). Os dois chamam 0x3bbd60 por contato.
+- 0x3bbd60(gerente, {corpo, ?, ponto, normal}, outro): se o ponto fica a
+  >= 1 m de veículo+0xb50 (gravado em seguida), v = corpo+0x20 (com outro:
+  v relativa), |v| = corpo+0x70. Números (mph x 0.44694445): mundo
+  gerente+0x64 = (30, 80, 25, 35, 2, 1.5, 2, 6, 0.7), carro x carro +0x88 =
+  (25, 45, 24, 27, 4, 3, 4, 6, 0.7). |v| >= f0: t = (|v| - f0)/(f1 - f0)
+  preso, saída = f2 + t (f3 - f2), quantas = int((f6 + t (f7 - f6)) x
+  -(v̂.n)) (mínimo 1), base 0x61e010(n, cima): linha 3 = n, linha 1 = cima x
+  n normalizada, linha 2 = n x linha 1. Cada uma: tamanho por eixo 0.7..1.3
+  (x 0.5 com veículo+0xa6c+0x8c+0x18 != 0) e, em 1/3, o x ou o z x
+  1.5..2.5; direção = linha1 x sorteio(±f4) + linha2 x (sorteio(±f4) + f5)
+  + n, normalizada; velocidade = direção x saída x sorteio(0.5..1) + (v -
+  n (v.n)) x f8. Cor = veículo+0x9d0+0xc4+0x78+0xb0 = BASE da pintura (RAM:
+  Renegade 220,231,235, Storm 190,26,16, Bulldog, Phantom, Inferno batem com
+  o 150xx) x sombra ((1 - veículo+0xc0) + veículo+0xc0 x env+0x3c0).
+- 0x3b96f8 (tipo 2, bantam): eixo de giro sorteado, giro = 30/60 rad por
+  quadro. 0x3ba650 tipo 2: idade > 4 some; vy -= 30 dt, pos += v dt, alfa =
+  min((4 - idade) x 1, 1); abaixo do chão: vy = -vy, v x 0.5, y = chão, eixo
+  novo e giro x 0.5; base x giro por quadro.
+- Conferido no crash_Storm (parede de pedra): 5 vivas, 4 com 0.216 s (giro
+  0.5, tamanhos 0.71..1.29 e uma 2.58) e uma de 2.24 s parada no chão (vel
+  só a do quique, giro 0). No remake: tests/teste_lascas.gd.
+
 ## Objetos da pista (RX01)
 
 Porta em objetos_rx01.gd + tools/rx01_objetos.py (nov/2026). O RX01 não tem

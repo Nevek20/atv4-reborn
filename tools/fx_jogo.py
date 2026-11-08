@@ -16,6 +16,7 @@ piloto: Characters/Textures/Dirt (256x256). Marrom com alfa de mancha.
 Lama dos pneus: UNI_TyreOverlay (128x128, 4 bits; igual nos pneus do jogo),
 só o alfa conta (o jogo troca a cor da paleta pela lama do chão).
 Pedrinhas do pneu (pedras.gd): Sprites/dirt_rocks (atlas + caixas em pedras.json).
+Lasquinhas da batida (lascas.gd): Particle_Debris.bantam + Debris -> lasca.json/png.
 Poeira dos pneus (poeira.gd): Sprites/WorldFXdust (e o espirro na água,
 Sprites/WorldFXwater_dust -> agua.png) (Setup/Dust.xml, tipos
 Light/Medium/Heavy), 128x128, atlas de 6 nuvens (2 x 3), cinza com o alfa.
@@ -105,6 +106,34 @@ def main():
     with open(os.path.join(saida, "pedras.json"), "w", encoding="utf-8") as f:
         json.dump(caixas, f, indent=1)
     print("dirt_rocks", im.size, caixas, "->", os.path.join(saida, "pedras.png"))
+
+    # lasquinhas da batida (lascas.gd, 0x3bbd60): Particle_Debris.bantam (tiras
+    # com a cor assada no vértice, 0x80 = 1.0) + textura Debris -> lasca.json
+    # (triângulos já montados: posição, uv, cor) e lasca.png
+    import rx01_objetos
+    arq, off, tam = caminho(unpacked, arqs, "Levels/Grass/Models/Bantams/Particle_Debris.bantam")
+    with open(arq, "rb") as f:
+        f.seek(off)
+        d = f.read(tam) if off else f.read()   # bloco comprimido ("c"): o arquivo todo
+    tris = []
+    for verts, uvs, cores, adc, slot in rx01_objetos.bantam(d):
+        for i in range(2, len(verts)):
+            if adc[i]:
+                continue
+            a, b, c = i - 2, i - 1, i
+            if i % 2:
+                a, b = b, a
+            for k in (a, c, b):           # a ordem do obj_bantam
+                tris.append([round(x, 5) for x in verts[k]] + [round(x, 5) for x in uvs[k]]
+                            + [round(x, 4) for x in cores[k]])
+    with open(os.path.join(saida, "lasca.json"), "w", encoding="utf-8") as f:
+        json.dump({"fonte": "Levels/Grass/Models/Bantams/Particle_Debris.bantam", "tris": tris}, f)
+    gob, _, _ = caminho(unpacked, arqs, "Levels/Grass/Models/Textures/Debris.bog")
+    im, info = convert(gob)
+    if im is None:
+        raise SystemExit("Debris.bog: " + str(info))
+    im.convert("RGBA").save(os.path.join(saida, "lasca.png"))
+    print("Particle_Debris", len(tris) // 3, "triângulos, Debris", im.size, "->", os.path.join(saida, "lasca.png"))
 
     for nome, png in (("Vehicles/Generic/Textures/GEN_DIRT_DIRT.bog", "sujeira.png"),
                       ("Characters/Textures/Dirt/GEN_DIRT_DIRT.bog", "sujeira_piloto.png"),

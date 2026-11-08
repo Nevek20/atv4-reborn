@@ -187,6 +187,10 @@ var poeira: Node3D = null
 # pedras.gd): pedras e borrifos de terra das rodas de trás patinando na terra
 const PEDRAS := true
 var pedras: Node3D = null
+# lasquinhas da batida (porta do jogo: 0x3bbd60, Particle_Debris.bantam na cor
+# base da pintura; lascas.gd): o casco batendo no chão ou parede a >= 30 mph
+const LASCAS := true
+var lascas: Node3D = null
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas
@@ -526,6 +530,7 @@ func _ready() -> void:
 	_load_fumaca()
 	_load_poeira()
 	_load_pedras()
+	_load_lascas()
 	_casco()
 	_marca("som+fumaça+casco")
 	contact_monitor = true            # batida: contatos do casco (_batida_passo)
@@ -1617,6 +1622,17 @@ func _load_pedras() -> void:
 		pedras = null
 
 
+func _load_lascas() -> void:
+	if not (LASCAS and _tem("lascas")):
+		return
+	lascas = preload("res://lascas.gd").new()
+	lascas.name = "Lascas"
+	add_child(lascas)
+	if not lascas.montar(self):
+		lascas.queue_free()
+		lascas = null
+
+
 func _load_painel() -> void:
 	if not (PAINEL and _tem("painel")):
 		return
@@ -2261,6 +2277,8 @@ func _physics_process(dt: float) -> void:
 			poeira.passo(1.0 / JIT_HZ, v)
 		if pedras:
 			pedras.passo(1.0 / JIT_HZ, v)
+		if lascas:
+			lascas.passo(1.0 / JIT_HZ)
 		if sfx:
 			sfx.passo(1.0 / JIT_HZ, v.dot(left), v_f)
 	_update_visuals(dt, v_f)
@@ -2283,8 +2301,27 @@ func _batida_passo() -> void:
 		for i in st.get_contact_count():
 			var vp := _v_antes + _w_antes.cross(st.get_contact_local_position(i) - com)
 			batida = maxf(batida, absf(vp.dot(st.get_contact_local_normal(i))))
+			if lascas and _contato_mundo(st, i):
+				# 0x1515e0 -> 0x3bbd60: contato do casco com o mundo fixo (par 2 x 0),
+				# normal saindo do que foi batido, velocidade do corpo de antes do passo
+				var p := st.get_contact_local_position(i)
+				var n := st.get_contact_local_normal(i)
+				if n.dot(com - p) < 0.0:
+					n = -n
+				lascas.batida(p, n, _v_antes)
 	_v_antes = linear_velocity
 	_w_antes = angular_velocity
+
+
+## contato do CASCO (não a esfera da roda) com o mundo fixo: relevo e colisão
+## dos objetos (StaticBody), sem cerca que quebra nem corpo solto (fardo)
+func _contato_mundo(st: PhysicsDirectBodyState3D, i: int) -> bool:
+	var dono := shape_find_owner(st.get_contact_local_shape(i))
+	var no = shape_owner_get_owner(dono) if dono >= 0 else null
+	if no == null or not String(no.name).begins_with("Casco"):
+		return false
+	var outro = st.get_contact_collider_object(i)
+	return outro is StaticBody3D and String(outro.name) != "Cerca"
 
 
 func _sujeira_passo() -> void:
