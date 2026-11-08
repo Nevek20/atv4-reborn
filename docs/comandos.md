@@ -53,6 +53,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --headless --path . -s res://tests/teste_motor_treme.gd   :: peças e faces do motor que treme nos 25 carros (VEHS=13,14 só esses)
 %GODOT% --headless --path . -s res://tests/teste_motor_anima.gd   :: ventoinhas, polias e correia nos 25 (nada some, correia encosta)
 %GODOT% --headless --path . -s res://tests/teste_luzes.gd         :: cor do vértice nos materiais e lanterna de freio e ré nos 25 (acende e apaga)
+set GIRO_DEBUG=1 & %GODOT% --headless --path . -s res://tests/teste_luzes.gd   :: + quantos triângulos com o giro trocado do jogo cada carro consertou (carro_montagem _acertar_giro)
 %GODOT% --headless --path . -s res://tests/teste_farol.gd         :: farol: lentes achadas (Hurricane 2, Storm 6, 4 trucks e o Lazarus), lente e brilho, acende e apaga
 :: + print_tela com FAROL=1/0 força o farol aceso/apagado
 :: + print_tela com FREIO=1/0 e RE=1/0 forçam lanterna e ré acesas/apagadas, COR_VERTICE=0 tira a cor do vértice

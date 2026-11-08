@@ -199,8 +199,20 @@ const ESCAPE_NOSSO := {
 # jogo fica no ar (perto de uma chapa escura), as de verdade são as caixinhas
 # cinza do lado das de freio no teto (textura chassis_tri02); Hammerhead:
 # as lanternas grandes dos lados (pedido dele)
+# (nov/2026, prints do Matheus) Buccaneer e Herbst TT: o jogo põe a
+# ré só na direita, a esquerda é o espelho; no Panther e no TT o ponto do
+# jogo fica 6-10 cm atrás da lente (só um canto acendia): vai pro centro dela.
+# Shockwave: a lente de freio desce até 1.30 m e o ponto do jogo está em
+# 1.53 (raio 15 cm cortava a ponta de baixo): mais um ponto embaixo em cada
 const LUZES_NOSSAS := {
-	"TRUCK_02": {"REVERSE_LIGHT": [Vector3(0.94, 1.71, -3.03), Vector3(-0.94, 1.71, -3.03)]},
+	"TRUCK_01": {"REVERSE_LIGHT": [Vector3(0.783, 0.755, -1.938), Vector3(-0.770, 0.755, -1.938)]},
+	"TRUCK_02": {"REVERSE_LIGHT": [Vector3(0.94, 1.71, -3.03), Vector3(-0.94, 1.71, -3.03)],
+		"BRAKE_LIGHT": [Vector3(-0.957, 1.533, -3.029), Vector3(0.953, 1.529, -3.027),
+			Vector3(-0.957, 1.38, -3.0), Vector3(0.953, 1.38, -3.0)]},
+	# Panther: a lente da esquerda é a mesma, mas o jogo pinta de âmbar (cor do
+	# vértice 0.37, 0.22, 0.04): não é ré, fica só a da direita (no centro)
+	"TRUCK_06": {"REVERSE_LIGHT": [Vector3(0.706, 1.696, -2.308)]},
+	"TRUCK_08": {"REVERSE_LIGHT": [Vector3(0.615, 2.235, -1.452), Vector3(-0.625, 2.235, -1.452)]},
 	"TRUCK_05": {"BRAKE_LIGHT": [Vector3(-0.55, 2.39, -1.00), Vector3(0.55, 2.39, -1.00),
 			Vector3(-0.98, 1.53, -3.19), Vector3(0.98, 1.53, -3.19)],
 		"REVERSE_LIGHT": [Vector3(-0.98, 1.34, -3.19), Vector3(0.98, 1.34, -3.19)]},

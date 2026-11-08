@@ -115,6 +115,8 @@ func _load_model() -> void:
 		mi.position = Vector3(0, 1.0, 0)
 		model_root.add_child(mi)
 		return
+	if not glb and mesh is ArrayMesh:
+		mesh = _acertar_giro(mesh)
 	mi.mesh = mesh
 	# pintura: a carroceria usa a textura "white", que o jogo gera em tempo
 	# real juntando camadas (Base/Primary/Secondary/Detail + cores do XML).
@@ -212,6 +214,157 @@ func _load_motor_anima() -> void:
 	else:
 		motor_anima.free()
 		motor_anima = null
+
+
+## Triângulo com o giro trocado no modelo do jogo (nov/2026, ELF atrás da
+## cabine do Hammerhead): num quadrado, um dos 2 triângulos vem virado pro
+## outro lado. No PS2 não aparece (empate na profundidade: ganha o último
+## desenhado), aqui com a face de trás descartada vira buraco, ou o forro de
+## dentro fica pra fora no plano da pintura e briga com ela (a diagonal no
+## ELF). Vizinhos que são o MESMO pedaço de superfície: mesma superfície,
+## aresta com os mesmos 2 pontos E o mesmo UV, quase no mesmo plano (|cos|
+## > 0.7) e um de cada lado da aresta (sobrepostos = painel de 2 lados, fica).
+## Em cada grupo ligado assim, vira os triângulos que discordam da maioria
+## (área); empate ou grupo contraditório fica como está. O virado ganha
+## vértices próprios, com a normal do lado da convenção do modelo.
+static func _acertar_giro(mesh: ArrayMesh) -> ArrayMesh:
+	var novo := ArrayMesh.new()
+	var total := 0
+	for s in mesh.get_surface_count():
+		var a := mesh.surface_get_arrays(s)
+		var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var ix := PackedInt32Array(range(vs.size()))
+		if a[Mesh.ARRAY_INDEX] != null:
+			ix = a[Mesh.ARRAY_INDEX]
+		var uvs = a[Mesh.ARRAY_TEX_UV]
+		var nt := ix.size() / 3
+		var nrm := PackedVector3Array()
+		var area := PackedFloat32Array()
+		nrm.resize(nt)
+		area.resize(nt)
+		for t in nt:
+			var c := (vs[ix[3 * t + 1]] - vs[ix[3 * t]]).cross(vs[ix[3 * t + 2]] - vs[ix[3 * t]])
+			area[t] = c.length()
+			nrm[t] = c / area[t] if area[t] > 1e-12 else Vector3.ZERO
+		var pk := func(i: int) -> Vector4i:
+			var p: Vector3 = vs[i]
+			var u: Vector2 = uvs[i] if uvs != null else Vector2.ZERO
+			return Vector4i(roundi(p.x * 1e4), roundi(p.y * 1e4), roundi(p.z * 1e4),
+				roundi(u.x * 1e4) * 100003 + roundi(u.y * 1e4))
+		var arestas := {}
+		for t in nt:
+			if area[t] <= 1e-12:
+				continue
+			for e in 3:
+				var i0 := ix[3 * t + e]
+				var i1 := ix[3 * t + (e + 1) % 3]
+				var k0: Vector4i = pk.call(i0)
+				var k1: Vector4i = pk.call(i1)
+				var frente := k0 < k1
+				var k := [k0, k1] if frente else [k1, k0]
+				if not arestas.has(k):
+					arestas[k] = []
+				arestas[k].append([t, frente, i0, i1, ix[3 * t + (e + 2) % 3]])
+		var viz := {}                 # t -> [[outro, mesmo_giro]]
+		for k in arestas:
+			var l: Array = arestas[k]
+			if l.size() != 2:
+				continue
+			var t1: int = l[0][0]
+			var t2: int = l[1][0]
+			if t1 == t2 or absf(nrm[t1].dot(nrm[t2])) < 0.7:
+				continue
+			var p0: Vector3 = vs[l[0][2]]
+			var ed: Vector3 = (vs[l[0][3]] - p0).normalized()
+			var w1: Vector3 = vs[l[0][4]] - p0
+			var w2: Vector3 = vs[l[1][4]] - p0
+			w1 -= ed * w1.dot(ed)
+			w2 -= ed * w2.dot(ed)
+			if w1.dot(w2) >= 0.0:
+				continue              # sobrepostos: painel de 2 lados
+			var mesmo: bool = l[0][1] != l[1][1]
+			if not viz.has(t1):
+				viz[t1] = []
+			if not viz.has(t2):
+				viz[t2] = []
+			viz[t1].append([t2, mesmo])
+			viz[t2].append([t1, mesmo])
+		var vira := {}
+		var visto := {}
+		for t0 in viz:
+			if visto.has(t0):
+				continue
+			var lado := {t0: false}
+			var fila := [t0]
+			var ok := true
+			visto[t0] = true
+			while not fila.is_empty():
+				var t: int = fila.pop_back()
+				for v in viz[t]:
+					var quer: bool = lado[t] if v[1] else not lado[t]
+					if lado.has(v[0]):
+						if lado[v[0]] != quer:
+							ok = false
+					else:
+						lado[v[0]] = quer
+						visto[v[0]] = true
+						fila.append(v[0])
+			if not ok:
+				continue
+			var a0 := 0.0
+			var a1 := 0.0
+			for t in lado:
+				if lado[t]:
+					a1 += area[t]
+				else:
+					a0 += area[t]
+			if absf(a0 - a1) < 1e-9:
+				continue
+			for t in lado:
+				if lado[t] == (a1 < a0):
+					vira[t] = true
+		if vira.is_empty():
+			novo.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+		else:
+			# vértices próprios pros virados (com a normal trocada)
+			var b: Array = a.duplicate()
+			var novos_ix := PackedInt32Array(ix)
+			for att in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2, Mesh.ARRAY_COLOR]:
+				if b[att] != null:
+					b[att] = b[att].duplicate()
+			b[Mesh.ARRAY_TANGENT] = null
+			# sinal da normal: o mesmo dos triângulos certos do modelo (normal
+			# do vértice x normal do giro). O jogo às vezes erra só o giro e
+			# deixa a normal certa: inverter sempre escurecia o triângulo
+			var conv := 1.0
+			var ns = a[Mesh.ARRAY_NORMAL]
+			if ns != null:
+				var soma := 0.0
+				for t in nt:
+					if not vira.has(t):
+						soma += (ns[ix[3 * t]] + ns[ix[3 * t + 1]] + ns[ix[3 * t + 2]]).dot(nrm[t]) * area[t]
+				conv = 1.0 if soma >= 0.0 else -1.0
+			var n0: int = vs.size()
+			var k := 0
+			for t in vira:
+				for j in [0, 2, 1]:
+					var i := ix[3 * t + j]
+					for att in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2, Mesh.ARRAY_COLOR]:
+						if b[att] != null:
+							b[att].append(b[att][i])
+					if b[Mesh.ARRAY_NORMAL] != null:
+						var nv: Vector3 = ns[i]
+						b[Mesh.ARRAY_NORMAL].append(nv if nv.dot(-nrm[t]) * conv >= 0.0 else -nv)
+					novos_ix[3 * t + [0, 2, 1].find(j)] = n0 + k
+					k += 1
+			b[Mesh.ARRAY_INDEX] = novos_ix
+			novo.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, b)
+			total += vira.size()
+		novo.surface_set_material(s, mesh.surface_get_material(s))
+		novo.surface_set_name(s, mesh.surface_get_name(s))
+	if total > 0 and OS.has_environment("GIRO_DEBUG"):
+		print("acertar_giro: %d triângulos virados" % total)
+	return novo
 
 
 ## copia virada (ordem dos vértices e normal) de cada triângulo que não tem

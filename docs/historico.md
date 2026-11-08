@@ -704,6 +704,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   reprovou). Hammerhead: as lanternas grandes dos lados também (LUZES_NOSSAS).
   Ferramenta de cor das lentes: o PICK do print_tela dá o ponto no frame
   do model_root (= ponto do jogo + model_offset do car.gd).
+  Ré e freio dos trucks, 2ª rodada (nov/2026, prints do Matheus): o jogo só
+  tem REVERSE_LIGHT na direita no Buccaneer, no Panther e no Herbst TT (a
+  esquerda é o espelho, LUZES_NOSSAS); no Panther e no TT o ponto do jogo
+  fica 6-10 cm atrás da lente (vai pro centro dela). Lente meio na sombra
+  (cor do vértice assada): o branco da ré ganhou limiar de brilho por carro
+  (luzes.gd MASCARA_CARRO "claro"; padrão 0.15-0.30): Buccaneer e Truggy
+  0.06-0.12 (metade da faixa em 0.18; a caixinha cinza do Truggy em 0.29 só
+  acendia ~15%, ficava fraca), TT 0.10-0.16 com raio 7 cm (o friso de metal
+  logo embaixo da lente acendia junto). Shockwave: a lente de freio vai até
+  1.30 m e o ponto está em 1.53 (raio 15 cm cortava a ponta de baixo): mais
+  um ponto em 1.38 de cada lado. Panther: a lente esquerda é a mesma da
+  direita, mas o jogo pinta de âmbar (cor do vértice 0.37, 0.22, 0.04): não
+  é ré, fica apagada (perguntar ao Matheus se quer acender).
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels
@@ -836,6 +849,18 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   133 -> 14, Storm 187 -> 31, Hammerhead 44 -> 38; os que sobram são
   decalques do próprio modelo colados a < 1 mm da chapa (faixas "ban" na
   lateral da caçamba do Hammerhead).
+  O ELF ainda piscava (nov/2026, "ainda tem conflito de faces"): no modelo
+  do jogo, num quadrado do ELF e num do forro de carbono atrás dele, um dos
+  2 triângulos vem com o giro trocado. O do forro ficava virado pra fora no
+  plano do ELF (a diagonal) e o do ELF virado pra dentro (buraco tapado pela
+  cópia do _com_costas). No PS2 não aparece: no empate de profundidade ganha
+  o último desenhado. carro_montagem.gd _acertar_giro, ao carregar: vizinhos
+  da mesma superfície com a aresta igual também no UV, quase no mesmo plano
+  e um de cada lado da aresta (sobrepostos = painel de 2 lados, fica) formam
+  um grupo; os que discordam da maioria (área) viram. Frota: 0 a 15
+  triângulos por carro (Hammerhead 9, Mosquito 15). A sombra que sobra na
+  metade do ELF é da normal do próprio modelo (suavizada torta no canto do
+  painel), não briga de face.
 
 - Volantes gerados (melhoria nossa, car.gd VOLANTE_NOSSO, volantes.gd): o
   do jogo tem aro de 6 a 12 lados e raios tortos; 8 carros usam o mesmo X

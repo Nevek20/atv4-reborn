@@ -133,6 +133,8 @@ Arquivos, modelos e pintura
   PC com as pastas antigas: `python tools/migrar_assets.py`.
 - .obj só reimporta quando ELE muda (o .mtl não conta). Pintura nova precisa
   reimportar (`--headless --import`). Sem pintura.png o carro fica branco.
+- Triângulo com giro trocado no modelo do jogo (quadrado com 1 dos 2 virado):
+  carro_montagem.gd _acertar_giro conserta ao carregar (ELF do Hammerhead).
 - Cor do vértice do .pingu (0x80 = 1.0, até 2.0) multiplica a textura.
   Alfa: só mesh_grey, Buggy_05_framework e driver têm furo.
 - Texturas .gob com mipmap: o nível 0 começa no 0x15c.
