@@ -58,7 +58,7 @@ sobrealimentação: energia do combustível maior faz o papel).
 | Shinto (03) | Chevrolet C10/K10 "quadradona" 1981-87 | alta | 255 / 1500 | Chevy 350 carburado, escape único | o da C10 |
 | Jericho (04) | Ford F-150 SuperCab 1997-2003 (ou Tundra) | média | 288 / 1600 | Ford 5.4 Triton SOHC V8 | o da F-150 |
 | Punisher (05) | trophy truck sem marca | - | 504 / 1800 | Ford 351 Windsor, carburador | escolha nossa |
-| Panther (06) | truggy de tubo | - | 510 / 1700 | Toyota 2JZ-GTE 6 em linha (turbo de mentira) | escolha nossa, o diferente do grupo |
+| Panther (06) | truggy de tubo | - | 510 / 1700 | GM LS V8 com coletor custom (.mr feito à mão) | escolhido pelo Matheus de ouvido (nov/2026); o som do jogo dele (TRUCK1_06) é V8 cruzado |
 | Herbst Truggy (07) | "Landshark" da Terrible Herbst (Smithbuilt, 1995) | alta | 540 / 2000 | Ford 460 big-block | o real era Ford V8 (cilindrada não achada) |
 | Herbst TT (08) | Ford F-150 Trophy Truck da Terrible Herbst | alta | 638 / 2200 | Ford 427 Windsor (Roush) | Ford V8 de trophy truck |
 | Hammerhead (09) | trophy truck (frente lembra Silverado 99-02) | baixa | 504 / 1800 | Dodge 360 Magnum | escolha nossa (Mopar) |

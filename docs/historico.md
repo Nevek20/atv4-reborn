@@ -1233,7 +1233,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Trucks (out/2026): 13 motores (t01..t12 + t13 Lazarus, motor da Silverado), carro real pelo
   modelo 3D ou escolha nossa variando a família (docs/som_motor.md, Trucks);
   o som do motor ficou fora do car.gd PENDENTES_TRUCK (toca nos trucks); pasta pelo id (motor_som.pasta_do_carro, tNN_) ou pela
-  entrada "som" do main.gd (bônus). Falta o Matheus ouvir.
+  entrada "som" do main.gd (bônus). O Matheus aprovou todos menos o Panther.
+  Panther (nov/2026, FECHADO: "ficou bem massa"): o 2JZ era escolha nossa sem
+  fonte. Nada no jogo diz o motor (LongName "Truggy 1 - Pro", motor tampado no
+  modelo); o som do jogo dele é o TRUCK1_06 (o mesmo do Shockwave), e a conta
+  na lenta (frequências 4:3, batidas alternando 7.5/9.5 ms) dá V8 cruzado.
+  Reprovados de ouvido: 2JZ com 3 escapes, Chevy 383 (parecido demais com os
+  outros V8), 383 com coletor 180° ("péssimo") e diesel Duramax 6.6. Ficou o
+  .mr que o Matheus achou (GM LS com coletor custom, 510 cv, lenta ~690),
+  feito à mão e fora do gerar_motores.py. No caminho: o ruído do
+  gravar_loops.py ganhou folga de ±1 faixa da FFT (som muito tonal dava ~100%
+  num loop limpo) e o gravar_som.gd ganhou SOM_PASTA (comparar variantes). O
+  "buraco" de força em 5500-6500 no dinamômetro (Panther, Chimera, Punisher)
+  é da medida, não do motor: o nível dos loops não cai ali.
 - Piloto: montar a textura dele como o jogo (5 camadas por parte + cores do
   perfil; hoje usa o rider_fury pronto), LOD MID/LOW, piloto feminino.
 - Câmera do piloto: referência do Matheus = cockpit do Dirt Rally 2.0

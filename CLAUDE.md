@@ -198,7 +198,6 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: reposição (cInstantRespotBox), câmera de introdução, 2 luzes
   direcionais, LOD das árvores.
-- Som do motor do Panther (o Matheus achou ruim); trucks: falta ouvir.
 - Lasquinhas e som da batida carro com carro (quando tiver IA).
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.
 - Erro antigo com tela: "Condition !v.is_finite()" quando o carro pula fora
