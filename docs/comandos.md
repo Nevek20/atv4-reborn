@@ -70,7 +70,7 @@ set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quan
 set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_lascas.gd   :: lasquinhas e som da batida: Storm numa parede (20 m/s = 3 lascas + BigImpact, 10 m/s = 0 + SmallImpact, até 8 vivas, 4 s)
 %GODOT% --path . --fixed-fps 60 -s res://tests/gravar_lascas.gd -- 0 lascas    :: prints depois da batida (QUANDO=0.1,0.3,1.0; VEL=25, LASCAS_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
-%GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
+%GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1, SOM_PASTA=<pasta dos loops> troca o motor pra comparar variantes)
 set VEL=110 & %GODOT% --headless --path . res://tests/teste_entrada.tscn   :: reto até VEL e vira tudo: quando passa de 20° (jogo: 110 não derrapa)
 :: + SOLTA=1.3 solta o volante (DEPOIS=-1 contra-esterça, ACEL=0 solta o acelerador), DUR=8 segundos depois de virar
 %GODOT% --headless --path . -s res://tests/medir_tremor.gd -- 60 tremor.csv  :: distância câmera-carro por quadro
