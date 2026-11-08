@@ -40,7 +40,11 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 esconde, F2 FPS), menu de carros (Tab, V);
                      VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro/               o carro
-  car.gd               física portada do exe + montagem do carro (malha, rodas, piloto, efeitos)
+  car.gd               a FÍSICA portada do exe (suspensão, pneus, motor, câmbio, pedais, casco,
+                       batida) e o _ready; herda do carro_montagem.gd, que herda do carro_base.gd
+  carro_montagem.gd    montagem e visual: modelo, rodas, cabine, piloto, volante, carga dos
+                       efeitos, sujeira, vibração, visual por quadro (não mexe na física)
+  carro_base.gd        constantes, variáveis de estado e ajudantes pequenos (corpo, jogo, chave)
   vehicle_data.gd      leitor dos XMLs (base + veículo) e peças de fábrica
   suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
   carro_glb.gd         carros extras nossos (.glb no frame do jogo)
@@ -173,8 +177,12 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Mãos no aro por IK com tabela por carro. Mão de fora parar escorregando
   pelo aro foi reprovado: não voltar. Banco, eixo do volante e braço aberto
   por carro: car.gd BANCO_NOSSO, VOLANTE_EIXO, BRACO_ABERTO.
-- Motor treme e anima, painel, cabine fechada: tabelas por carro em car.gd
-  e nos scripts deles (AJUSTES, NO_LUGAR...).
+- Motor treme e anima, painel, cabine fechada: tabelas por carro em
+  carro_base.gd e nos scripts deles (AJUSTES, NO_LUGAR...).
+- car.gd em 3 camadas por herança (base -> montagem -> física): função nova
+  vai na camada do assunto; a de baixo não pode chamar a de cima (o Godot
+  recusa ao compilar). As tabelas por carro (BANCO_NOSSO, VOLANTE_EIXO...)
+  ficam no carro_base.gd.
 
 Frota
 - 12 buggies, 12 trucks, o bônus Lazarus (CHASSIS_Truck_04, física própria
