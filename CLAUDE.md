@@ -867,6 +867,12 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   dobrava 28°/42° com o volante reto. O nosso volante fica reto a 30° (como
   Goliath, Chimera e Lazarus): 20°/27°, braço 90% (era 101%). Banco de lado
   quase não muda. VOL_EIXO=x,y,z testa.
+  Braços iguais (piloto.gd PAREDE_SIMETRICA, nov/2026, "o esquerdo mais
+  torto que o direito", Matheus): a pegada já era espelhada, mas só o
+  cotovelo esquerdo batia na porta (ia pra -2°) e o direito ficava a +56°
+  pra fora. Agora a folga da porta vale pros 2 (o cotovelo espelhado no
+  plano do volante contra a parede do outro lado): no Fireball, com o
+  volante reto, D pulso 26° cotovelo -1°, E 27° e -2°.
 - Volante: no jogo NÃO gira (é parte da carroceria). Girar é melhoria nossa
   (VOLANTE_GIRA no car.gd; tools/volante.py acha o aro). O que gira no jogo
   são os braços do piloto (piloto.gd).
