@@ -59,7 +59,10 @@ func _falha(s: String) -> void:
 
 func _process(_dt: float) -> bool:
 	frames += 1
-	if frames < 3:
+	# espera uns passos de física: o olho usa a posição INTERPOLADA do modelo,
+	# que no 3º quadro às vezes ainda estava 1 passo atrás (falhava ~1 em 2
+	# vezes no Bulldog, 8.5 cm, sem nada errado no carro)
+	if frames < 12:
 		return false
 	for p in carros:
 		_conferir(p[0], p[1])
@@ -83,8 +86,9 @@ func _conferir(nome: String, c) -> void:
 		_falha("%s carroceria fora do frame do jogo (%.3f m)" % [nome, vis.distance_to(fis)])
 	if (cx.affine_inverse() * vis).x <= 0.0:
 		_falha("%s volante fora da esquerda do jogo (+X)" % nome)
-	if c.driver_eye().distance_to(cx * c.corpo(c.DRIVER_EYE)) > 0.001:
-		_falha("%s olho do piloto fora do lugar" % nome)
+	var olho_d: float = c.driver_eye().distance_to(cx * c.corpo(c.DRIVER_EYE))
+	if olho_d > 0.001:
+		_falha("%s olho do piloto fora do lugar (%.4f m)" % [nome, olho_d])
 	# B
 	var base: Transform3D = cx * Transform3D(Basis.from_scale(c.ESPELHO), Vector3.ZERO) \
 		* Transform3D(Basis(), c.model_offset)

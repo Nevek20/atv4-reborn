@@ -37,7 +37,8 @@ func _process(_dt: float) -> bool:
 		return false
 	for nome in ref:
 		_conferir(nome, carros[nome], ref[nome])
-	print("teste_pecas: %d de %d matrizes batem com a RAM (tolerância %s m)%s" % [total - falhas, total, TOL,
+	print("teste_pecas: %s (%d de %d matrizes batem com a RAM, tolerância %s m)%s" % [
+		"ok" if falhas == 0 and total > 0 and lado_errado == 0 else "FALHA", total - falhas, total, TOL,
 		"" if lado_errado == 0 else ", %d cantos com a roda da física do lado errado" % lado_errado])
 	quit(1 if falhas > 0 or total == 0 or lado_errado > 0 else 0)
 	return true

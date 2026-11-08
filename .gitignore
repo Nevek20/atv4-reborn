@@ -24,3 +24,6 @@ som/loops/**/*.import
 assets/escort/
 assets/rx01/
 assets/terrain/hd/
+
+# logs do tests/rodar_tudo.py
+tests/.saida/
