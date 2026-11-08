@@ -72,13 +72,18 @@ const MAX_CENTROS := 8        # pontos por tipo no shader
 #   da faixa branca em 0.18 linear), Herbst TT (cantos em 0.22; raio 7 cm,
 #   a lente tem ~5 de meia-largura e o friso de metal logo embaixo acendia) e Herbst
 #   Truggy (caixinha cinza 0.29: só ~15% passava, ficava fraca)
-# razao / verm / claro = as duas pontas do smoothstep (padrão 2-4, 0.02-0.05 e 0.15-0.30)
+# - Chimera: o quadrado branco da ré é pintado na pintura e a metade de baixo
+#   tem a cor do vértice mais escura e azulada (brilho 0.25, saturação 0.49):
+#   só a metade de cima acendia; a pintura azul em volta tem saturação > 0.8
+# razao / verm / claro / satur = as duas pontas do smoothstep (padrão 2-4,
+# 0.02-0.05, 0.15-0.30 e 0.40-0.55)
 const MASCARA_CARRO := {
 	"TRUCK_01": {"re": {"claro": Vector2(0.06, 0.12)}},
 	"TRUCK_07": {"re": {"claro": Vector2(0.06, 0.12)}},
 	"TRUCK_08": {"re": {"claro": Vector2(0.10, 0.16), "raio": 0.07}},
 	"TRUCK_05": {"freio": {"razao": Vector2(4.0, 6.0)}},
-	"TRUCK_12": {"freio": {"verm": Vector2(0.14, 0.18), "raio": 0.26}},
+	"TRUCK_12": {"freio": {"verm": Vector2(0.14, 0.18), "raio": 0.26},
+		"re": {"claro": Vector2(0.08, 0.14), "satur": Vector2(0.60, 0.70)}},
 }
 const PASSO := 0.01           # m: amostras no triângulo (grade baricêntrica), até 20 por lado
 
@@ -92,7 +97,7 @@ float mascara(vec3 c, int qual) {
 		return smoothstep(razao.x, razao.y, c.r / max(max(c.g, c.b), 1e-4)) * smoothstep(verm.x, verm.y, c.r);
 	}
 	float sat = (mx - mn) / max(mx, 1e-4);
-	return smoothstep(claro.x, claro.y, mx) * (1.0 - smoothstep(0.40, 0.55, sat));
+	return smoothstep(claro.x, claro.y, mx) * (1.0 - smoothstep(satur.x, satur.y, sat));
 }
 """
 
@@ -110,6 +115,7 @@ uniform int modo = 0;            // 0 vermelho (freio), 1 branco (ré)
 uniform vec2 razao = vec2(2.0, 4.0);   // vermelho / (verde ou azul), MASCARA_CARRO
 uniform vec2 verm = vec2(0.02, 0.05);  // vermelho mínimo (linear)
 uniform vec2 claro = vec2(0.15, 0.30); // brilho mínimo do branco da ré (linear), MASCARA_CARRO
+uniform vec2 satur = vec2(0.40, 0.55); // saturação máxima do branco da ré, MASCARA_CARRO
 uniform float brilho_max = 100.0;
 uniform vec3 centros[8];         // pontos da luz (frame do modelo); n_centros 0 = sem raio (farol)
 uniform int n_centros = 0;
@@ -203,6 +209,7 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 	var razao: Vector2 = aj.get("razao", Vector2(2.0, 4.0))
 	var verm: Vector2 = aj.get("verm", Vector2(0.02, 0.05))
 	var claro: Vector2 = aj.get("claro", Vector2(0.15, 0.30))
+	var satur: Vector2 = aj.get("satur", Vector2(0.40, 0.55))
 	var pts: Array[Vector3] = []
 	for k in car.points:
 		for p in def.pontos:
@@ -266,7 +273,7 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 					if cols != null and k_cor > 0.0:
 						var cv: Color = (cols[i[0]] * b.x + cols[i[1]] * b.y + cols[i[2]] * b.z).srgb_to_linear()
 						cor = Color(cor.r * cv.r * k_cor, cor.g * cv.g * k_cor, cor.b * cv.b * k_cor)
-					if _mascara(cor, modo, razao, verm, claro) > 0.5:
+					if _mascara(cor, modo, razao, verm, claro, satur) > 0.5:
 						acesas.append([p, perto])
 						if not pintura:
 							lente[perto] += 1
@@ -319,6 +326,7 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 		mat.set_shader_parameter("razao", razao)
 		mat.set_shader_parameter("verm", verm)
 		mat.set_shader_parameter("claro", claro)
+		mat.set_shader_parameter("satur", satur)
 		var mio: Color = def.miolo
 		mat.set_shader_parameter("miolo", Vector3(mio.r, mio.g, mio.b))
 		malha.surface_set_material(malha.get_surface_count() - 1, mat)
@@ -413,10 +421,10 @@ static func _amostra(img: Image, uv: Vector2) -> Color:
 
 ## a máscara do shader (GLSL_MASCARA) na CPU
 static func _mascara(c: Color, qual: int, razao := Vector2(2.0, 4.0), verm := Vector2(0.02, 0.05),
-		claro := Vector2(0.15, 0.30)) -> float:
+		claro := Vector2(0.15, 0.30), satur := Vector2(0.40, 0.55)) -> float:
 	var mx := maxf(c.r, maxf(c.g, c.b))
 	var mn := minf(c.r, minf(c.g, c.b))
 	if qual == 0:
 		return smoothstep(razao.x, razao.y, c.r / maxf(maxf(c.g, c.b), 1e-4)) * smoothstep(verm.x, verm.y, c.r)
 	var sat := (mx - mn) / maxf(mx, 1e-4)
-	return smoothstep(claro.x, claro.y, mx) * (1.0 - smoothstep(0.40, 0.55, sat))
+	return smoothstep(claro.x, claro.y, mx) * (1.0 - smoothstep(satur.x, satur.y, sat))

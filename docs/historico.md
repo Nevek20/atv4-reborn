@@ -716,7 +716,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   1.30 m e o ponto está em 1.53 (raio 15 cm cortava a ponta de baixo): mais
   um ponto em 1.38 de cada lado. Panther: a lente esquerda é a mesma da
   direita, mas o jogo pinta de âmbar (cor do vértice 0.37, 0.22, 0.04): não
-  é ré, fica apagada (perguntar ao Matheus se quer acender).
+  é ré, fica apagada (o Matheus: "já que é âmbar não precisa mexer").
+  Chimera: o quadrado branco da ré é pintado na pintura e a metade de baixo
+  tem a cor do vértice mais escura e azulada (brilho 0.25, saturação 0.49):
+  só a metade de cima acendia. MASCARA_CARRO ganhou "satur" (padrão
+  0.40-0.55); Chimera claro 0.08-0.14 e satur 0.60-0.70 (a pintura azul em
+  volta passa de 0.8). Hammerhead: o amortecedor da frente sai pelo capô
+  no curso máximo, igual no jogo (o Matheus testou): fica.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels
