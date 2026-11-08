@@ -8,7 +8,7 @@ extends SceneTree
 ## as outras ficam paradas onde a introdução da corrida deixou.
 ## Uso: godot --headless --path . -s res://tests/teste_camera_ram.gd
 
-const GameCamera := preload("res://game_camera.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
 const CAM_XML := "res://data/cameras.xml"
 const TOL := 0.02                       # m
 const TOL_ZOOM := 0.001

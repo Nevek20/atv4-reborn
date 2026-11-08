@@ -5,9 +5,9 @@ extends SceneTree
 ## que têm o ponto), se os materiais do jogo usam a cor do vértice e se as
 ## luzes acendem (freando, de ré) e apagam.
 ## Uso: godot --headless --path . -s res://tests/teste_luzes.gd
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Luzes := preload("res://luzes.gd")
+const Luzes := preload("res://carro/luzes.gd")
 
 var i := -1
 var car = null

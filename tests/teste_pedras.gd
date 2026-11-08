@@ -10,9 +10,9 @@ extends SceneTree
 ## pedras saem pro lado em que o carro escorrega (o jogo, drr2).
 ## Uso: godot --headless --path . -s res://tests/teste_pedras.gd [-- veh]
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 
 var terrain
 var car

@@ -12,11 +12,11 @@ extends SceneTree
 ##     ele para antes do plano da barreira; sem, ele atravessa.
 ## Uso: godot --headless --path . -s res://tests/teste_objetos.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
-const Objetos := preload("res://objetos_rx01.gd")
-const Ceu := preload("res://ceu.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const Objetos := preload("res://pista/objetos_rx01.gd")
+const Ceu := preload("res://pista/ceu.gd")
 
 var terrain
 var objetos

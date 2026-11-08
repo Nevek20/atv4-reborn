@@ -46,7 +46,7 @@ extends SceneTree
 ##   VISTAS=lado0,frente0,tras0,lado0_sc CURSOS=nat,0,max,min MEDIR=1 xvfb-run -a $GODOT --path . \
 ##     --rendering-driver opengl3 -s res://tests/print_tela.gd -- /tmp/inf.png lado 4
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 
 var frames := 0
 var main

@@ -5,9 +5,9 @@ extends SceneTree
 ## correia encosta nas polias (cada ponto dela fica a meia espessura da borda
 ## de uma polia ou no trecho reto entre as duas).
 ## Uso: godot --headless --path . -s res://tests/teste_motor_anima.gd
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const MotorAnima := preload("res://motor_anima.gd")
+const MotorAnima := preload("res://carro/motor_anima.gd")
 
 # esperado (levantamento das texturas, out/2026): placas de ventoinha e pares de polias
 const ESPERADO := {"BUGGY_10": [2, 0], "BUGGY_04": [2, 0], "BUGGY_01": [2, 0], "BUGGY_02": [2, 0],

@@ -16,7 +16,7 @@ extends Node3D
 ## sempre ficam na frente pelo teste de profundidade normal; as montanhas
 ## ficam mais perto que o céu (39 x 43 m), como na ordem do jogo.
 
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const ARQ := "res://data/environment_rx01.xml"
 const PASTA := "res://assets/rx01/ceu/"
 const ESCALA := 70.0                     # 43 m -> 3 km (a câmera vê até 4 km)

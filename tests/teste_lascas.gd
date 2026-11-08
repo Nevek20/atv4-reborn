@@ -6,9 +6,9 @@ extends SceneTree
 ## saem da parede pra fora e pra cima (25..35 mph); quicam e param no chão.
 ## Uso: godot --headless --path . -s res://tests/teste_lascas.gd   (VEL=20)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const TesteP := preload("res://tests/teste_pedras.gd")
 
 var terrain

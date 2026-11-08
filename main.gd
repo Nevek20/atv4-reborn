@@ -114,14 +114,14 @@ var veh_idx := 0
 const SPAWN_XZ := Vector2(540.3, 580.8)
 const SPAWN_YAW := -154.9                 # graus, frente = +Z do carro
 
-const Car := preload("res://car.gd")
-const Terrain := preload("res://terrain.gd")
-const SomJogo := preload("res://som_jogo.gd")
-const CameraPiloto := preload("res://camera_piloto.gd")
-const CameraOrbita := preload("res://camera_orbita.gd")
-const Farol := preload("res://farol.gd")
-const ObjetosRX01 := preload("res://objetos_rx01.gd")
-const Ceu := preload("res://ceu.gd")
+const Car := preload("res://carro/car.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const SomJogo := preload("res://som/som_jogo.gd")
+const CameraPiloto := preload("res://camera/camera_piloto.gd")
+const CameraOrbita := preload("res://camera/camera_orbita.gd")
+const Farol := preload("res://carro/farol.gd")
+const ObjetosRX01 := preload("res://pista/objetos_rx01.gd")
+const Ceu := preload("res://pista/ceu.gd")
 
 var car  # instância de car.gd (sem tipo estático de propósito: métodos próprios do script)
 var cam: Camera3D
@@ -531,7 +531,7 @@ func _chao() -> String:
 	return "   ".join(out)
 
 
-const GameCamera := preload("res://game_camera.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
 const CAM_XML := "res://data/cameras.xml"
 const CAM_NAMES := ["perto", "longe", "capô", "para-choque", "piloto"]
 var gcams := []                           # câmeras do jogo, uma por modo (0..3)

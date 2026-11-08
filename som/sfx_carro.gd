@@ -36,7 +36,7 @@ extends Node
 ## (giro x raio / v - 1) divide por quase zero e o som ligava e desligava a
 ## cada quadro.
 
-const SomJogo := preload("res://som_jogo.gd")
+const SomJogo := preload("res://som/som_jogo.gd")
 const XML := "res://data/sound_database.xml"
 const GANHO := 1.0                # suspensão e pouso
 const GANHO_PNEU := 0.6           # loops das rodas (estavam altos)

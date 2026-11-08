@@ -6,7 +6,7 @@ extends SceneTree
 ## o truck Goliath: frames, freios e eixo rígido, suspension_visual.pose_truck).
 ## Uso: godot --headless --path . -s res://tests/teste_pecas.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 const TOL := 1e-3
 

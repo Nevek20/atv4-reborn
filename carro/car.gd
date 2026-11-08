@@ -17,8 +17,8 @@ extends RigidBody3D
 ## Unidades do jogo: massa em toneladas, torque/força em kN, velocidades em mph
 ## e desacelerações em mph/s. Tudo é convertido pra SI ao carregar.
 
-const VehicleData := preload("res://vehicle_data.gd")
-const CarroGlb := preload("res://carro_glb.gd")
+const VehicleData := preload("res://carro/vehicle_data.gd")
+const CarroGlb := preload("res://carro/carro_glb.gd")
 const MPH := 0.44704
 const G := 9.81
 const RPM2RAD := TAU / 60.0
@@ -158,7 +158,7 @@ const BRACO_ABERTO := {"TRUCK_10": Vector2(25.0, 0.06)}
 const COLUNA_RAIO := 0.025     # m (coluna nossa)
 const COLUNA_MAX := 0.6        # m: até o painel, no máximo
 var sw_coluna: MeshInstance3D
-const Volantes := preload("res://volantes.gd")
+const Volantes := preload("res://carro/volantes.gd")
 var volante_estilo := ""      # "" = o do carro (Volantes.POR_CARRO); B no jogo troca
 var sw_malha: MeshInstance3D
 var sw_avanco := 0.0          # volante gerado avançado pro piloto pra coluna não atravessar o cubo
@@ -547,7 +547,7 @@ func _ready() -> void:
 	_esferas_das_rodas()
 	_marca("rodas")
 	if suspension and not pecas.is_empty() and not points.is_empty():
-		susp_vis = preload("res://suspension_visual.gd").new()
+		susp_vis = preload("res://carro/suspension_visual.gd").new()
 		espelho.add_child(susp_vis)
 		var spare_mesh: Mesh = null
 		if ResourceLoader.exists(wheel_rear_file):
@@ -1269,7 +1269,7 @@ func _load_model() -> void:
 func _load_motor_treme() -> void:
 	if not (MOTOR_TREME and _tem("motor_treme")) or body_mi == null:
 		return
-	motor_treme = preload("res://motor_treme.gd").new()
+	motor_treme = preload("res://carro/motor_treme.gd").new()
 	motor_treme.name = "MotorTreme"
 	# trucks e extras: só o escape; extra (200 mil triângulos): só busca a 1 m da boca
 	if motor_treme.separar(body_mi, points, vehicle_id, vehicle_id.begins_with("TRUCK") or motor_escondido,
@@ -1283,7 +1283,7 @@ func _load_motor_treme() -> void:
 func _load_luzes() -> void:
 	if not (LUZ_FREIO and _tem("luzes")) or body_mi == null:
 		return
-	luzes = preload("res://luzes.gd").new()
+	luzes = preload("res://carro/luzes.gd").new()
 	luzes.name = "Luzes"
 	if luzes.montar(self):
 		add_child(luzes)
@@ -1295,7 +1295,7 @@ func _load_luzes() -> void:
 func _load_farol() -> void:
 	if not (FAROL and _tem("farol")) or body_mi == null:
 		return
-	farol = preload("res://farol.gd").new()
+	farol = preload("res://carro/farol.gd").new()
 	farol.name = "Farol"
 	if farol.montar(self):
 		add_child(farol)
@@ -1309,7 +1309,7 @@ func _load_motor_anima() -> void:
 		return
 	if (vehicle_id.begins_with("TRUCK") and not (chave() in ANIMA_TRUCKS)) or motor_escondido:
 		return
-	motor_anima = preload("res://motor_anima.gd").new()
+	motor_anima = preload("res://carro/motor_anima.gd").new()
 	motor_anima.name = "MotorAnima"
 	if motor_anima.montar(self):
 		add_child(motor_anima)
@@ -1479,7 +1479,7 @@ static func _tem_alfa(t: Texture2D) -> bool:
 func _load_piloto() -> void:
 	if not points.has("ARSE"):
 		return
-	piloto = preload("res://piloto.gd").new()
+	piloto = preload("res://carro/piloto.gd").new()
 	if not piloto.carregar(PILOTO_DIR, MODEL_CULL):
 		piloto.free()
 		piloto = null
@@ -1596,7 +1596,7 @@ func avanco_volante() -> float:
 func _load_fumaca() -> void:
 	if not (FUMACA and _tem("fumaca")):
 		return
-	fumaca = preload("res://fumaca.gd").new()
+	fumaca = preload("res://efeitos/fumaca.gd").new()
 	fumaca.name = "Fumaca"
 	add_child(fumaca)
 	if not fumaca.montar(self):
@@ -1607,7 +1607,7 @@ func _load_fumaca() -> void:
 func _load_poeira() -> void:
 	if not (POEIRA and _tem("poeira")):
 		return
-	poeira = preload("res://poeira.gd").new()
+	poeira = preload("res://efeitos/poeira.gd").new()
 	poeira.name = "Poeira"
 	add_child(poeira)
 	if not poeira.montar(self):
@@ -1618,7 +1618,7 @@ func _load_poeira() -> void:
 func _load_pedras() -> void:
 	if not (PEDRAS and _tem("pedras")):
 		return
-	pedras = preload("res://pedras.gd").new()
+	pedras = preload("res://efeitos/pedras.gd").new()
 	pedras.name = "Pedras"
 	add_child(pedras)
 	if not pedras.montar(self):
@@ -1629,7 +1629,7 @@ func _load_pedras() -> void:
 func _load_lascas() -> void:
 	if not (LASCAS and _tem("lascas")):
 		return
-	lascas = preload("res://lascas.gd").new()
+	lascas = preload("res://efeitos/lascas.gd").new()
 	lascas.name = "Lascas"
 	add_child(lascas)
 	if not lascas.montar(self):
@@ -1640,7 +1640,7 @@ func _load_lascas() -> void:
 func _load_painel() -> void:
 	if not (PAINEL and _tem("painel")):
 		return
-	painel = preload("res://painel.gd").new()
+	painel = preload("res://carro/painel.gd").new()
 	painel.name = "Painel"
 	painel.position = model_offset
 	model_root.add_child(painel)
@@ -1656,7 +1656,7 @@ func _load_sujeira() -> void:
 		sujeira_nivel = clampf(float(OS.get_environment("SUJEIRA")), 0.0, 1.0)
 		if terrain and terrain.materials.size() > 0:
 			roda_cor = Color(terrain.materials[0].get("DustColour", Color.BLACK), 0.8 * sujeira_nivel)
-	sujeira = preload("res://sujeira.gd").new()
+	sujeira = preload("res://carro/sujeira.gd").new()
 	if not sujeira.montar(self):
 		sujeira = null
 		return
@@ -1666,7 +1666,7 @@ func _load_sujeira() -> void:
 func _load_sfx() -> void:
 	if not SOM_PNEU:
 		return
-	sfx = preload("res://sfx_carro.gd").new()
+	sfx = preload("res://som/sfx_carro.gd").new()
 	sfx.name = "SomPneu"
 	add_child(sfx)
 	if not sfx.carregar(self):
@@ -1677,10 +1677,10 @@ func _load_sfx() -> void:
 func _load_som() -> void:
 	if not (SOM_MOTOR and _tem("som_motor")):
 		return
-	var dir: String = som_pasta if som_pasta != "" else preload("res://motor_som.gd").pasta_do_carro(vehicle_id)
+	var dir: String = som_pasta if som_pasta != "" else preload("res://som/motor_som.gd").pasta_do_carro(vehicle_id)
 	if dir == "":
 		return
-	som = preload("res://motor_som.gd").new()
+	som = preload("res://som/motor_som.gd").new()
 	som.name = "SomMotor"
 	if som.carregar(dir):
 		add_child(som)

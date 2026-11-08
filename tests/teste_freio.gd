@@ -10,7 +10,7 @@ extends SceneTree
 ##     o deslize do contato.
 ## Uso: godot --headless --path . -s res://tests/teste_freio.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var car

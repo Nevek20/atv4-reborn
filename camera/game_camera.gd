@@ -10,7 +10,7 @@ extends RefCounted
 ##   -> zoom por velocidade (0x3806a0) -> suavização final (0x387320).
 ## Parâmetros: data/cameras.xml (14880), defaults de 0x38d498.
 
-const CameraJitter := preload("res://camera_jitter.gd")
+const CameraJitter := preload("res://camera/camera_jitter.gd")
 const STEP := 1.0 / 60.0
 const MPH := 2.2374146          # m/s -> mph, mesma constante do exe
 

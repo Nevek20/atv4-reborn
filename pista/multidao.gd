@@ -10,7 +10,7 @@ extends Node3D
 ## NOSSO: todos os objetos com a mesma animação andam juntos (o jogo cria
 ## um controle por objeto no 0x27b930; a fase não foi achada).
 
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const PASTA := "res://assets/rx01/tex/"
 const COR_K_SRGB := 255.0 / 128.0
 

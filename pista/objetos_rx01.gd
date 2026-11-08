@@ -24,7 +24,7 @@ extends Node3D
 ## fardo de feno só têm HsC (esferas) e no jogo QUEBRAM (bantams *_Particle_*,
 ## pontos "particle Hay"): ficam sem colisão até portar isso.
 
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const ARQ := "res://data/rx01_objetos.json"
 const PASTA := "res://assets/rx01/"
 const COR_K_SRGB := 255.0 / 128.0       # car.gd: no albedo vira o COR_K do pingu2obj
@@ -73,8 +73,8 @@ const COR_AGUA := Color(0.5882, 0.6067, 0.6143, 1.0)
 ## vira angular_damp. Faltam: a palha do fardo (ParticleTrigger Impact 0.2)
 ## e o som de batida (CollisionSample PLASTIC_FENCE / HAY).
 const INTERATIVOS := true
-const Palha := preload("res://palha.gd")
-const Multidao := preload("res://multidao.gd")
+const Palha := preload("res://efeitos/palha.gd")
+const Multidao := preload("res://pista/multidao.gd")
 var multidao = null                      # multidao.gd
 var palha = null                         # palha.gd (palha do fardo)
 const MASSA_PECA := 10.0                 # kg, nossa

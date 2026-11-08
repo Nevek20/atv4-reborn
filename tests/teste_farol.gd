@@ -7,10 +7,10 @@ extends SceneTree
 ## de farol; no Mosquito a light_64 é a lanterna de trás. Trucks: Shockwave,
 ## Jericho, Goliath e Chimera (2 cada). Os outros ficam sem (ok).
 ## Uso: godot --headless --path . -s res://tests/teste_farol.gd
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Farol := preload("res://farol.gd")
-const Luzes := preload("res://luzes.gd")
+const Farol := preload("res://carro/farol.gd")
+const Luzes := preload("res://carro/luzes.gd")
 # lâmpadas por carro, pelo nome (o bônus tem o id do Jericho)
 const ESPERADO := {"Hurricane": 2, "Storm": 6,
 	"Shockwave": 2, "Jericho": 2, "Goliath": 2, "Chimera": 2, "Lazarus": 2}

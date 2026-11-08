@@ -107,7 +107,7 @@ def rodar(g: str, arq: str, relatorio: bool) -> dict:
         resumo = next((l.strip() for l in linhas if ERRO_RE.search(l)), "erro de script")
     elif relatorio:
         estado = "rodou"
-        uteis = [l for l in linhas if not re.match(r"\s*(ERROR|WARNING|SCRIPT ERROR):", l)]
+        uteis = [l for l in linhas if not re.match(r"\s*(ERROR|WARNING|SCRIPT ERROR):|\s*GDScript backtrace|\s*\[\d+\] ", l)]
         resumo = uteis[-1].strip() if uteis else ""
     elif not final:
         estado = "ERRO"

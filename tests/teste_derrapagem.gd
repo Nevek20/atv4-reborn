@@ -11,9 +11,9 @@ extends SceneTree
 ## Uso: godot --headless --path . -s res://tests/teste_derrapagem.gd [-- curva]
 ##      (com "curva" imprime a derrapagem passo a passo)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const PASSO := 1.0 / 50.0
 
 var terrain

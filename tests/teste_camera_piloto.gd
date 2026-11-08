@@ -4,7 +4,7 @@ extends SceneTree
 ## visão, borrão e olhar livre (mouse). Confere os números de projeto
 ## (CABECA_*, FOV_*, CURVA_*, LIVRE_*) e que tudo volta pro centro.
 ## Uso: godot --headless --path . -s res://tests/teste_camera_piloto.gd
-const CameraPiloto := preload("res://camera_piloto.gd")
+const CameraPiloto := preload("res://camera/camera_piloto.gd")
 const DT := 1.0 / 50.0            # passo da física
 const DQ := 1.0 / 60.0            # quadro
 

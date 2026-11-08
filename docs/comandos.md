@@ -90,7 +90,7 @@ python tools/extrair_material.py <dados>/stream/RX01.000 assets/terrain --materi
 python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
 
 :: checar um script sem abrir o editor
-%GODOT% --headless --path . --check-only --script res://car.gd
+%GODOT% --headless --path . --check-only --script res://carro/car.gd
 
 :: sons de pneu, suspensão e pouso do jogo -> assets/sfx (wav + sons.json com o ADSR de cada tom)
 python tools/sfx_jogo.py <unpacked>

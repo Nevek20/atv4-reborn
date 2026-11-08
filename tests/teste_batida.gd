@@ -9,10 +9,10 @@ extends SceneTree
 ##  3. o sorteio fica dentro de [-amp, amp) (tremida - Perlin);
 ##  4. encostado na parede depois não é batida (< CollisionSpeedForStartJitter).
 ## Uso: godot --headless --path . -s res://tests/teste_batida.gd   (VEL=20)
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const GameCamera := preload("res://game_camera.gd")
-const CameraJitter := preload("res://camera_jitter.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
+const CameraJitter := preload("res://camera/camera_jitter.gd")
 
 const PAREDE_Z := 20.0
 var vel := 20.0

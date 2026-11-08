@@ -15,7 +15,7 @@ extends Node3D
 ## Chimera (2 cada), Lazarus nos 2 redondos do para-choque; no Shinto e no Punisher a light_64 é luz de teto virada
 ## pra trás e a cadilac_light do Fireball é lanterna.
 
-const Luzes := preload("res://luzes.gd")
+const Luzes := preload("res://carro/luzes.gd")
 # nome da textura (minúsculo) das lentes. Trucks: a desert_jeep_style_light
 # (Shockwave) é um atlas de farol + lanterna e a trophy_truck_light (Goliath)
 # de farol + relógio, a preRunnerTruck_light (Lazarus) de farol + lanterna;

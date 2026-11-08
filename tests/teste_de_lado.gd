@@ -9,7 +9,7 @@ extends SceneTree
 ## de lado); a carroceria pode passar uns cm onde a malha sai das esferas.
 ## Uso: godot --headless --path . -s res://tests/teste_de_lado.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var carros := []        # [car, nome, giro]

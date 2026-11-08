@@ -9,9 +9,9 @@ extends SceneTree
 ## sobra um rastro curto (o jogo, 0x225108). Imprime quanto tempo soltou no ar.
 ## Uso: godot --headless --path . -s res://tests/teste_poeira.gd [-- veh]
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 
 var terrain
 var car

@@ -8,10 +8,10 @@ extends SceneTree
 ##     depois do ActiveResetTimeout (10 s) com o carro longe.
 ## Uso: godot --headless --path . -s res://tests/teste_quebra.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
-const Objetos := preload("res://objetos_rx01.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const Objetos := preload("res://pista/objetos_rx01.gd")
 
 var terrain
 var objetos

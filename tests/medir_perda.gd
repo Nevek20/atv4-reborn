@@ -6,10 +6,10 @@ extends SceneTree
 ## no máximo 0.25 t·m/s / 1.2 t = 0.75 km/h.
 ## Uso: godot --headless --path . -s res://tests/medir_perda.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
-const Objetos := preload("res://objetos_rx01.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const Objetos := preload("res://pista/objetos_rx01.gd")
 
 var terrain
 var objetos

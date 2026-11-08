@@ -15,9 +15,9 @@ extends SceneTree
 ##  G. largada (main.gd SPAWN_XZ/SPAWN_YAW) = média dos save states
 ## Uso: godot --headless --path . -s res://tests/teste_mao.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const PECAS := ["frame", "brake", "shock", "chamber", "piston"]
 
 var carros := []                 # [nome, carro]

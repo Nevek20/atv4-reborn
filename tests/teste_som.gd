@@ -5,7 +5,7 @@ extends SceneTree
 ## buraco nem estouro), que o tom fica perto de 1 nos rpm gravados e que a
 ## marcha lenta do jogo toca a lenta.wav no tom dela.
 ## Uso: godot --headless --path . -s res://tests/teste_som.gd
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var i := -1

@@ -37,42 +37,32 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 ## Estrutura
 
 ```
-car.gd               física do carro (portada do exe), visual das rodas
-game_camera.gd       câmera de corrida do jogo (componentes do exe, 1/60 s)
-camera_jitter.gd     tremida da câmera (Perlin por velocidade, só na terra, e sorteio na batida)
-camera_piloto.gd     câmera do piloto (melhoria nossa): força G na cabeça, FOV e borrão pela velocidade, olhar pra curva e olhar livre
-camera_orbita.gd     órbita da câmera de corrida (melhoria nossa, o Forza): analógico direito / mouse giram em volta do carro, soltou volta
-suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
-vehicle_data.gd      leitor dos XMLs (base + veículo) e peças de fábrica
-main.gd              cena: terreno, carro, câmera, HUD (F1 esconde, F2 contador de FPS), menu de carros (Tab, V); VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
-carro_glb.gd         carros extras nossos: junta as malhas do .glb no frame do jogo (carroceria, rodas, volante)
-piloto.gd            piloto do jogo sentado no ARSE, braços pela direção (STEER_LEFT)
-volantes.gd          volantes gerados, um estilo por carro (melhoria nossa, no lugar do do jogo)
-motor_som.gd         som do motor: loops do Engine Simulator por rpm e carga (melhoria nossa)
-sfx_carro.gd         som de pneu, suspensão e pouso do jogo (portado do exe); som_jogo.gd toca os sons 989snd
-fumaca.gd            fumaça do escapamento (melhoria nossa com o efeito ExhaustSmokeTrail que o jogo não usa)
-poeira.gd            poeira dos pneus (porta do jogo: Setup/Dust.xml, DustType/DustColour do chão, 0x225108)
-pedras.gd            pedrinhas e borrifo de terra das rodas de trás patinando (porta do jogo: 0x3bb618, Sprites/dirt_rocks)
-lascas.gd            lasquinhas da batida (porta do jogo: 0x3bbd60, Particle_Debris.bantam na cor base da pintura)
-sujeira.gd           sujeira do jogo na pintura e lama nas rodas, pelo 2º UV (_camada.obj); nível e cor vêm do car.gd
-painel.gd            painel funcional (melhoria nossa): ponteiros, marcha e luz de troca, amador x PRO
-motor_treme.gd       motor e escape tremendo (melhoria nossa): separa as peças do cofre da carroceria
-motor_anima.gd       ventoinhas girando e polias + correia 3D (melhoria nossa) por cima do desenho do jogo
-luzes.gd             lanterna de freio e luz de ré acesas (melhoria nossa): lente pelos pixels da cor da luz
-farol.gd             farol aceso (melhoria nossa, no estilo da lanterna de freio) nas lentes de farol do modelo; H liga
-terrain.gd           relevo e material do chão da pista RX01 (do stream do jogo)
-objetos_rx01.gd      objetos da pista RX01 (porta do jogo): casas, arquibancadas, arco, placas, guard-rail, pedras, árvores + colisão KDt
-multidao.gd          multidão do RX01 (porta do jogo: RX01_Crowds.wahoo, fotos de gente em placas, UV animado pelo UVRGBAAnim.xml)
-palha.gd             palha do fardo (porta do jogo: .pts + Particles.xml + WorldFX.xml), disparada pelo objetos_rx01.gd
-ceu.gd               céu da pista (porta do jogo): cúpulas do SkyDome do Environment.xml (nuvens + montanhas) presas na câmera
-data/                XMLs do jogo (física buggy_NN.xml, pontos, câmeras, peças)
-assets/              modelos do pingu2obj: renegade, sphinx, buggy_NN, truck_NN, rodas; sfx (sons) e fx (fumaça) do jogo (fora do git)
-tests/               teste de física sem tela + rodar_testes.py
-tools/               scripts Python de extração (pingu2obj, pintura, savestate)
-som/engine_sim/      um .mr do Engine Simulator por buggy (NN_) e por truck (tNN_, t13 = Lazarus), tools/gerar_motores.py
-som/loops/           loops .wav de cada motor (lenta, on/off a cada 500 rpm), tools/gravar_loops.py
+main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 esconde, F2 FPS), menu de carros (Tab, V);
+                     VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
+carro/               o carro
+  car.gd               física portada do exe + montagem do carro (malha, rodas, piloto, efeitos)
+  vehicle_data.gd      leitor dos XMLs (base + veículo) e peças de fábrica
+  suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
+  carro_glb.gd         carros extras nossos (.glb no frame do jogo)
+  piloto.gd            piloto do jogo no ARSE, braços pela direção (STEER_LEFT) e mãos no aro
+  volantes.gd          volantes gerados, um estilo por carro (melhoria nossa)
+  painel.gd            painel funcional (melhoria nossa)
+  motor_treme.gd       motor e escape tremendo (melhoria nossa)
+  motor_anima.gd       ventoinhas, polias e correia girando (melhoria nossa)
+  luzes.gd, farol.gd   lanterna de freio, ré e farol acesos (melhoria nossa)
+  sujeira.gd           sujeira do jogo na pintura e lama nas rodas
+camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
+                     camera_piloto.gd e camera_orbita.gd (melhorias nossas)
+efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
+pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd
+som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
+                     som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
+data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
+assets/              modelos, texturas, sons e efeitos gerados pelos tools (fora do git)
+tests/               testes sem tela (rodar_tudo.py roda todos), prints e gravações
+tools/               scripts Python de extração (pingu2obj, pintura, savestate, efeitos, sons)
 re/                  engenharia reversa: scripts do Ghidra, exe_util, dumps
-docs/                engenharia_reversa.md (mapa do exe), derrapagem.md (código da derrapagem legível), assets.md, som_motor.md
+docs/                historico.md, engenharia_reversa.md, comandos.md, derrapagem.md, assets.md, som_motor.md
 ```
 
 ## Comandos do dia a dia
@@ -83,7 +73,7 @@ python tests/rodar_tudo.py                    :: todos os testes de conferência
 python tests/rodar_tudo.py --relatorios       :: + relatórios (capota, largada...) e o rodar_testes
 python tests/rodar_tudo.py volante pedras     :: só esses
 python tests/rodar_testes.py                  :: física: aceleração dos 3 carros x referências
-%GODOT% --headless --path . --check-only --script res://car.gd   :: checar um script
+%GODOT% --headless --path . --check-only --script res://carro/car.gd   :: checar um script
 %GODOT% --path . -s res://tests/print_tela.gd -- print.png lado  :: print do carro (variáveis: docs/comandos.md)
 python tools/ler_savestate.py arquivo.p2s     :: save state do PCSX2 -> valores reais do jogo
 python re/exe_util.py SCES_546.88 str NOME | jal 0xEND | words 0xEND 32   :: caçar no exe

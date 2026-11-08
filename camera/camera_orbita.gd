@@ -15,7 +15,7 @@ extends RefCounted
 ## ela mira, veículo +0xaa0), mirando no mesmo ponto. Sem mexer no analógico
 ## nada muda (0 de giro = a câmera do jogo).
 
-const GameCamera := preload("res://game_camera.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
 
 const ZONA_MORTA := 0.2           # analógico
 const CHEIO := 0.75               # deflexão (fora da zona morta) do ângulo todo

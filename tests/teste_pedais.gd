@@ -3,7 +3,7 @@ extends SceneTree
 ## automático parado, ré pelo freio, volta pra frente e corte no ar.
 ## Uso: godot --headless --path . -s res://tests/teste_pedais.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const MPH_G := 0.44694445
 const DT := 0.02
 

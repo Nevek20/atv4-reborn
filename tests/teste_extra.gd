@@ -7,7 +7,7 @@ extends SceneTree
 ## Uso: godot --headless --path . -s res://tests/teste_extra.gd   (EXTRA=0 só o 1º;
 ## FROTA=16,25 compara carros da frota, ex. Jericho x Lazarus)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var carros := []        # [car, v, estado]

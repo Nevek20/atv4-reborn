@@ -9,10 +9,10 @@ extends SceneTree
 ## Precisa de assets/sfx (python tools/sfx_jogo.py <unpacked>).
 ## Uso: godot --headless --path . -s res://tests/teste_sfx.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
-const SomJogo := preload("res://som_jogo.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const SomJogo := preload("res://som/som_jogo.gd")
 const PASSO := 1.0 / 50.0
 const TOL := 0.02
 
