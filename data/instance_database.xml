@@ -1,0 +1,467 @@
+<Root FileVersion="1.0000000">
+   <AdBoards_new ModelName="GEN_AD_01" Wildcard="true" CollisionSample="ADDBOARD">
+      <Interactive CollSkin="GEN_AD_01.hsc" Mass="0.075" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </AdBoards_new>
+   <RoundHayBale ModelName="GEN_RoundHayBale" Wildcard="true" CollisionSample="OIL_BARREL">
+      <Interactive CollSkin="GEN_RoundHayBale.hsc" Mass="0.8" Friction="0.9" Hardness="0.5" ActiveResetTimeout="10" AIObserve="true"/>
+      <AngResistance X="0.5" Y="0.5" Z="0"/>
+   </RoundHayBale>
+   <Barrier_Crowd ModelName="GEN_Barrier_Crowd" Wildcard="true" CollisionSample="COLLISIBARRIER">
+      <Interactive CollSkin="GEN_Barrier_Crowd.hsc" Mass="0.125" Friction="0.2" Hardness="0.2" AIObserve="true">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </Barrier_Crowd>
+   <Barrier_Crowd_tall ModelName="GEN_Barrier_Crowd_Tall" Wildcard="true" CollisionSample="COLLISIBARRIER">
+      <Interactive CollSkin="GEN_Barrier_Crowd_tall.hsc" Mass="0.125" Friction="0.2" Hardness="0.2" AIObserve="true">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </Barrier_Crowd_tall>
+   <Barrier_RoadBlock_new ModelName="GEN_Adbarrier_Ysohimura" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_Adbarrier_Ysohimura.hsc" Mass="2" Friction=".9" Hardness=".9" ActiveResetTimeout="10.0" AIObserve="false">
+         <AngResistance X="0.3" Y="0.3" Z="0.3"/>
+      </Interactive>
+   </Barrier_RoadBlock_new>
+   <Barrier_PlasticBlock ModelName="GEN_Barrier_PlasticBlock" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_Barrier_PlasticBlock.hsc" Mass="0.1" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.1" Y="0" Z="0"/>
+      </Interactive>
+   </Barrier_PlasticBlock>
+   <Barrier_RoadBlock ModelName="GEN_Adbarrier_Yoshimura" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_Adbarrier_Ysohimura.hsc" Mass="2" Friction=".9" Hardness=".9" ActiveResetTimeout="10.0" AIObserve="false">
+         <AngResistance X="0.3" Y="0.3" Z="0.3"/>
+      </Interactive>
+   </Barrier_RoadBlock>
+   <Barrier_Sponsor ModelName="GEN_Barrier_Sponsor" Wildcard="true" CollisionSample="COLLISIBARRIER">
+      <Interactive CollSkin="GEN_Barrier_Sponsor.hsc" Mass="0.125" Friction="0.2" Hardness="0.2" AIObserve="true" ActiveResetTimeout="10.0">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </Barrier_Sponsor>
+   <Barrier_Tyre ModelName="Gen_barrier_BigTyre" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="Gen_Barrier_BigTyre.hsc" Mass="0.6" Friction="0.8" Hardness="0.5" AIObserve="true" ActiveResetTimeout="10"/>
+   </Barrier_Tyre>
+   <Barrier_Tyre_Med ModelName="Gen_barrier_MedTyre" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="Gen_Barrier_MedTyre.hsc" Mass="0.4" Friction="0.8" Hardness="0.4" AIObserve="true" ActiveResetTimeout="10"/>
+   </Barrier_Tyre_Med>
+   <Bouy ModelName="ENV07_Buoy" CollisionSample="SIGNPOST">
+      <Interactive Classname="cObjectSpringing" CollSkin="ENV07_Buoy.hsc" Mass="0.1" Friction="0.2" Hardness="0.0">
+         <Spring Stiffness="0.5" Damping="0.05"/>
+      </Interactive>
+   </Bouy>
+   <Bench_Table ModelName="GEN_PicnicTable_Bantam" CollisionSample="CARBOARD">
+      <Interactive CollSkin="GEN_PicnicTable.hsc" Mass="0.025" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10"/>
+   </Bench_Table>
+   <Bench_USTable ModelName="US_PicnicTable_Bantam" CollisionSample="CARBOARD">
+      <Interactive CollSkin="US_PicnicTable.hsc" Mass="0.025" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10"/>
+   </Bench_USTable>
+   <Bench_USBench ModelName="US_PicnicBench_Bantam" CollisionSample="CARBOARD">
+      <Interactive CollSkin="US_PicnicBench.hsc" Mass="0.025" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10"/>
+   </Bench_USBench>
+   <Bench_Bench ModelName="GEN_PicnicBench_Bantam" CollisionSample="CARBOARD">
+      <Interactive CollSkin="GEN_PicnicBench.hsc" Mass="0.025" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10"/>
+   </Bench_Bench>
+   <CardboardBox_new ModelName="Gen_CardboardBox" CollisionSample="CARBOARD">
+      <Interactive CollSkin="GEN_CardBoardBox.hsc" Mass="0.025" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10"/>
+   </CardboardBox_new>
+   <Crate ModelName="Gen_Crate" CollisionSample="WOODEN_CRATE">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.0" FresnelMax="1.0" SpecularPower="1.0" SpecularMax="0.2"/>
+      <Interactive CollSkin="gen_crate.hsc" Mass="0.25" Friction="0.2" Hardness="0.2">
+         <Destructible ShatterImpulse="5">
+            <Fragment Model="GEN_Crate_Particle_01" CollSkin="GEN_Crate_Particle_01.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_02" CollSkin="GEN_Crate_Particle_02.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_01" CollSkin="GEN_Crate_Particle_01.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_02" CollSkin="GEN_Crate_Particle_02.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_01" CollSkin="GEN_Crate_Particle_01.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_02" CollSkin="GEN_Crate_Particle_02.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_01" CollSkin="GEN_Crate_Particle_01.hsc"/>
+            <Fragment Model="GEN_Crate_Particle_02" CollSkin="GEN_Crate_Particle_02.hsc"/>
+         </Destructible>
+      </Interactive>
+   </Crate>
+   <Digger ModelName="ROADWORKS_DIGGER" CollisionSample="COLLISIONMETAL">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.0" FresnelMax="1.0" SpecularPower="1.0" SpecularMax="0.2"/>
+   </Digger>
+   <FlagSlalom_new ModelName="Gen_FlagSlalom" WildCard="True" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="Gen_FlagSlalom.hsc" Mass="0.075" Friction="0.2" Hardness="0.0" Classname="cObjectSpringing">
+         <Spring Stifness="0.5" Damping="0.05"/>
+      </Interactive>
+   </FlagSlalom_new>
+   <Gen_Ad_Board_01 ModelName="Gen_Ad_Board_01" Wildcard="true" CollisionSample="ADDBOARD">
+      <CollisionMap CollSkin="Gen_Ad_Board_01"/>
+   </Gen_Ad_Board_01>
+   <Gen_Ad_Board_02 ModelName="Gen_Ad_Board_02" Wildcard="true" CollisionSample="ADDBOARD">
+      <CollisionMap CollSkin="Gen_Ad_Board_02"/>
+   </Gen_Ad_Board_02>
+   <Gen_Ad_Board_03 ModelName="Gen_Ad_Board_03" Wildcard="true" CollisionSample="ADDBOARD">
+      <CollisionMap CollSkin="Gen_Ad_Board_03"/>
+   </Gen_Ad_Board_03>
+   <GENBarrierRoadwrxBollard ModelName="GEN_Barrier_Roadwrx_Bollard" Wildcard="true" CollisionSample=".CONE">
+      <Interactive CollSkin="GEN_Barrier_Roadwrx_Bollard.hsc" Mass="0.125" Friction="0.4" Hardness="0.4" ActiveResetTimeout="10" AIObserve="true"/>
+   </GENBarrierRoadwrxBollard>
+   <GENBarrierRoadwrxPlank ModelName="GEN_Barrier_Roadwrx_Plank" CollisionSample="COLLISIBARRIER">
+      <Interactive CollSkin="GEN_Barrier_Roadwrx_Plank.hsc" Mass="0.25" Friction="0.2" Hardness="0.8">
+         <Destructible ShatterImpulse="2.5">
+            <Fragment Model="GEN_Barrier_Roadwrx_Plank_Particle_01" CollSkin="GEN_Barrier_Roadwrx_Plank_Particle_01.hsc"/>
+            <Fragment Model="GEN_Barrier_Roadwrx_Plank_Particle_02" CollSkin="GEN_Barrier_Roadwrx_Plank_Particle_02.hsc"/>
+            <Fragment Model="GEN_Barrier_Roadwrx_Plank_Particle_03" CollSkin="GEN_Barrier_Roadwrx_Plank_Particle_03.hsc"/>
+         </Destructible>
+      </Interactive>
+   </GENBarrierRoadwrxPlank>
+   <GenCrashBarrier1_new ModelName="GEN_Barrier_Roadblock_01" CollisionSample="COLLISIBARRIER">
+      <Interactive CollSkin="GEN_Barrier_Roadblock_01.hsc" Mass="0.25" Friction="0.2" Hardness="0.2">
+         <Destructible ShatterImpulse="4">
+            <Fragment Model="GEN_Barrier_Roadblock_01_Particle_01" CollSkin="GEN_Barrier_Roadblock_01_Particle_01.hsc"/>
+            <Fragment Model="GEN_Barrier_Roadblock_01_Particle_02" CollSkin="GEN_Barrier_Roadblock_01_Particle_02.hsc"/>
+            <Fragment Model="GEN_Barrier_Roadblock_01_Particle_01" CollSkin="GEN_Barrier_Roadblock_01_Particle_01.hsc"/>
+         </Destructible>
+      </Interactive>
+   </GenCrashBarrier1_new>
+   <GenCrashBarrier2_new ModelName="GEN_Barrier_Roadblock_02" CollisionSample="COLLISIBARRIER">
+      <Interactive CollSkin="GEN_Barrier_Roadblock_02.hsc" Mass="0.25" Friction="0.2" Hardness="0.2">
+         <Destructible ShatterImpulse="4">
+            <Fragment Model="GEN_Barrier_Roadblock_02_Particle_01" CollSkin="GEN_Barrier_Roadblock_02_Particle_01.hsc"/>
+            <Fragment Model="GEN_Barrier_Roadblock_02_Particle_02" CollSkin="GEN_Barrier_Roadblock_02_Particle_02.hsc"/>
+         </Destructible>
+      </Interactive>
+   </GenCrashBarrier2_new>
+   <HayBale_new ModelName="GEN_HayBale" CollisionSample="HAY">
+      <Interactive CollSkin="GEN_HayBale.hsc" Mass="0.1" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true" ClassName="cObjectTrackBlock">
+         <ParticleTrigger Type="Impact" Impulse="0.2" Timeout="0.1"/>
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </HayBale_new>
+   <Marker_Bollard_Green ModelName="GEN_Marker_GREEN" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Marker_GREEN.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Marker_Bollard_Green>
+   <Marker_Bollard_Orange ModelName="GEN_Marker_ORANGE" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Marker_ORANGE.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Marker_Bollard_Orange>
+   <OilDrum_new ModelName="GEN_OilDrum" Wildcard="true" CollisionSample="OIL_BARREL">
+      <Interactive CollSkin="GEN_OilDrum.hsc" Mass="0.025" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </OilDrum_new>
+   <OldTyre_new ModelName="GEN_OldTyre" CollisionSample="INFLATABLE">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.04" SpecularPower="4.0" SpecularMax="0.65"/>
+   </OldTyre_new>
+   <MG_Skittle ModelName="MG_Skittle" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="MG_Skittle.hsc" Mass="0.02" Friction="0.1" Hardness="0.1" ActiveResetTimeout="0" AIObserve="false" Classname="cPin">
+         <AngResistance X="0.05" Y="0.0" Z="0"/>
+      </Interactive>
+   </MG_Skittle>
+   <OldTyre_Halved_new ModelName="GEN_OldTyre_Halved" CollisionSample="INFLATABLE">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.04" SpecularPower="4.0" SpecularMax="0.65"/>
+   </OldTyre_Halved_new>
+   <Barrier_WoodSimple ModelName="Gen_Barrier_WoodfenceSimple" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="Gen_Barrier_WoodfenceSimple.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="2">
+            <Fragment Model="Gen_Barrier_WoodfenceSimple_Particle_01" CollSkin="Gen_Barrier_WoodfenceSimple_Particle_01.hsc"/>
+            <Fragment Model="Gen_Barrier_WoodfenceSimple_Particle_02" CollSkin="Gen_Barrier_WoodfenceSimple_Particle_02.hsc"/>
+            <Fragment Model="Gen_Barrier_WoodfenceSimple_Particle_03" CollSkin="Gen_Barrier_WoodfenceSimple_Particle_03.hsc"/>
+         </Destructible>
+      </Interactive>
+   </Barrier_WoodSimple>
+   <Barrier_WoodSimpleEnd ModelName="Gen_Barrier_WoodfenceSimpleEnd" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="Gen_Barrier_WoodfenceSimpleEnd.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="2">
+            <Fragment Model="Gen_Barrier_WoodfenceSimple_Particle_01" CollSkin="Gen_Barrier_WoodfenceSimple_Particle_01.hsc"/>
+         </Destructible>
+      </Interactive>
+   </Barrier_WoodSimpleEnd>
+   <Barrier_StickFence ModelName="SAM_Barrier_FencePlank_Dynamic" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="SAM_Barrier_FencePlank_Dynamic.hsc" Mass=".3" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="4">
+            <Fragment Model="SAM_Barrier_FencePlank_Dynamic_Particle_01" CollSkin="SAM_Barrier_FencePlank_Dynamic_Particle_01.hsc"/>
+            <Fragment Model="SAM_Barrier_FencePlank_Dynamic_Particle_01" CollSkin="SAM_Barrier_FencePlank_Dynamic_Particle_01.hsc"/>
+            <Fragment Model="SAM_Barrier_FencePlank_Dynamic_Particle_01" CollSkin="SAM_Barrier_FencePlank_Dynamic_Particle_01.hsc"/>
+            <Fragment Model="SAM_Barrier_FencePlank_Dynamic_Particle_01" CollSkin="SAM_Barrier_FencePlank_Dynamic_Particle_01.hsc"/>
+         </Destructible>
+      </Interactive>
+   </Barrier_StickFence>
+   <PicketFence ModelName="Gen_Fence_Picket" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="Gen_Fence_Picket.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="2">
+            <Fragment Model="GEN_Fence_Picket_Particle_01" CollSkin="GEN_Fence_Picket_Particle_01.hsc"/>
+            <Fragment Model="GEN_Fence_Picket_Particle_02" CollSkin="GEN_Fence_Picket_Particle_02.hsc"/>
+            <Fragment Model="GEN_Fence_Picket_Particle_02" CollSkin="GEN_Fence_Picket_Particle_02.hsc"/>
+            <Fragment Model="GEN_Fence_Picket_Particle_02" CollSkin="GEN_Fence_Picket_Particle_02.hsc"/>
+         </Destructible>
+      </Interactive>
+   </PicketFence>
+   <PlasticCrate_new ModelName="GEN_Crate_Plastic" CollisionSample="PLASTIC_CHAIRS">
+      <Interactive CollSkin="GEN_Crate_Plastic.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </PlasticCrate_new>
+   <Roadmarker ModelName="EUR_RoadMarker" CollisionSample="SIGNPOST">
+      <Interactive Classname="cObjectSpringing" CollSkin="EUR_RoadMarker.hsc" Mass="0.8" Friction="0.4" Hardness="0.0">
+         <Spring Stiffness="10" Damping=".0.05"/>
+         <AngResistance X="5" Y="5" Z="5"/>
+      </Interactive>
+   </Roadmarker>
+   <Polemarker_blue ModelName="GEN_Polemarker_blue" CollisionSample="SIGNPOST">
+      <Interactive Classname="cObjectSpringing" CollSkin="GEN_Polemarker_blue.hsc" Mass="0.05" Friction="0.2" Hardness="0.0">
+         <Spring Stiffness="0.5" Damping="0.05"/>
+         <AngResistance X="3.0" Y="3.0" Z="3.0"/>
+      </Interactive>
+   </Polemarker_blue>
+   <Polemarker_grey ModelName="GEN_Polemarker_grey" CollisionSample="SIGNPOST">
+      <Interactive Classname="cObjectSpringing" CollSkin="GEN_Polemarker_grey.hsc" Mass="0.05" Friction="0.2" Hardness="0.0">
+         <Spring Stiffness="0.5" Damping="0.05"/>
+         <AngResistance X="3.0" Y="3.0" Z="3.0"/>
+      </Interactive>
+   </Polemarker_grey>
+   <Polemarker_new ModelName="GEN_Polemarker" CollisionSample="SIGNPOST">
+      <Interactive Classname="cObjectSpringing" CollSkin="GEN_Polemarker.hsc" Mass="0.05" Friction="0.2" Hardness="0.0">
+         <Spring Stiffness="0.5" Damping="0.05"/>
+         <AngResistance X="3.0" Y="3.0" Z="3.0"/>
+      </Interactive>
+   </Polemarker_new>
+   <SlalomFlag_blue ModelName="GEN_Flagslalom_blue" CollisionSample="SIGNPOST">
+      <Interactive Classname="cObjectSpringing" CollSkin="GEN_Flagslalom_blue.hsc" Mass="0.05" Friction="0.2" Hardness="0.0">
+         <Spring Stiffness="0.5" Damping="0.05"/>
+         <AngResistance X="3.0" Y="3.0" Z="3.0"/>
+      </Interactive>
+   </SlalomFlag_blue>
+   <Portaloo_new ModelName="GEN_Portaloo" Wildcard="true" CollisionSample="PORTALOO">
+      <Interactive CollSkin="GEN_Portaloo.hsc" Mass="4" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Portaloo_new>
+   <RallyFence_new ModelName="Gen_Barrier_Rallyfence" CollisionSample="PLASTIC_FENCE">
+      <Interactive CollSkin="Gen_Barrier_rallyfence.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="2">
+            <Fragment Model="Gen_Barrier_rallyfence_Particle_01" CollSkin="Gen_Barrier_rallyfence_Particle_01.hsc"/>
+            <Fragment Model="Gen_Barrier_rallyfence_Particle_02" CollSkin="Gen_Barrier_rallyfence_Particle_02.hsc"/>
+         </Destructible>
+      </Interactive>
+   </RallyFence_new>
+   <RuralFence_new ModelName="Gen_barrier_Woodfence" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="Gen_barrier_Woodfence.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="2">
+            <Fragment Model="Gen_barrier_Woodfence_Particle_01" CollSkin="Gen_barrier_Woodfence_Particle_01.hsc"/>
+            <Fragment Model="Gen_barrier_Woodfence_Particle_02" CollSkin="Gen_barrier_Woodfence_Particle_02.hsc"/>
+            <Fragment Model="Gen_barrier_Woodfence_Particle_03" CollSkin="Gen_barrier_Woodfence_Particle_03.hsc"/>
+            <Fragment Model="Gen_barrier_Woodfence_Particle_04" CollSkin="Gen_barrier_Woodfence_Particle_04.hsc"/>
+         </Destructible>
+      </Interactive>
+   </RuralFence_new>
+   <RuralFenceBroken ModelName="Gen_Fence_RuralBroken" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="Gen_Fence_Rural.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="5">
+            <Fragment Model="GEN_Fence_Rural_Particle_01" CollSkin="GEN_Fence_Rural_Particle_01.hsc"/>
+            <Fragment Model="GEN_Fence_Rural_Particle_02" CollSkin="GEN_Fence_Rural_Particle_02.hsc"/>
+            <Fragment Model="GEN_Fence_Rural_Particle_03" CollSkin="GEN_Fence_Rural_Particle_03.hsc"/>
+            <Fragment Model="GEN_Fence_Rural_Particle_04" CollSkin="GEN_Fence_Rural_Particle_04.hsc"/>
+         </Destructible>
+      </Interactive>
+   </RuralFenceBroken>
+   <ASIA_ReedFence_01 ModelName="ASIA_ReedFence_01" CollisionSample="COLLISION_TREE">
+      <Interactive CollSkin="ASIA_ReedFence_01.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="5">
+            <Fragment Model="ASIA_ReedFence_01_Particle_01" CollSkin="ASIA_ReedFence_01_Particle_01.hsc"/>
+            <Fragment Model="ASIA_ReedFence_01_Particle_02" CollSkin="ASIA_ReedFence_01_Particle_02.hsc"/>
+         </Destructible>
+      </Interactive>
+   </ASIA_ReedFence_01>
+   <Scarecrow ModelName="ENV01_Scarecrow" CollisionSample="ATV_COLLISIONS">
+      <Interactive Classname="cObjectWurzel" CollSkin="ENV01_Scarecrow.hsc" Mass="0.05" Friction="0.2" Hardness="0.2">
+         <Spring Stiffness="1.0" Damping="1.0"/>
+      </Interactive>
+   </Scarecrow>
+   <EUR_sign_01 ModelName="EUR_sign_01_hazard" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="EUR_sign_01_hazard.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </EUR_sign_01>
+   <EUR_sign_02 ModelName="EUR_sign_01_Novehicle" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="EUR_sign_01_Novehicle.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </EUR_sign_02>
+   <EUR_sign_03 ModelName="EUR_sign_02_Corners" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="EUR_sign_02_Corners.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </EUR_sign_03>
+   <EUR_sign_04 ModelName="EUR_sign_03_Stop" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="EUR_sign_03_Stop.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </EUR_sign_04>
+   <Sign_01_new ModelName="GEN_SIGN_01" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_01_new>
+   <Sign_02_new ModelName="GEN_SIGN_02" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_02_new>
+   <Sign_03_new ModelName="GEN_SIGN_03" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_03_new>
+   <Sign_04_new ModelName="GEN_SIGN_04" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_04_new>
+   <Sign_05_new ModelName="GEN_SIGN_05" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_05_new>
+   <Sign_06_new ModelName="GEN_SIGN_06" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_06_new>
+   <Sign_07_new ModelName="GEN_SIGN_07" Wildcard="true" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_SIGN_01.hsc" Mass="0.175" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_07_new>
+   <Sign_WarnModerate ModelName="GEN_warn_moderate" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_warn_moderate.hsc" Mass="0.5" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </Sign_WarnModerate>
+   <Sign_WarnSplit ModelName="GEN_warn_splitroute" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_warn_splitroute.hsc" Mass="0.5" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </Sign_WarnSplit>
+   <Sign_WarnHazard ModelName="GEN_warn_hazard" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_warn_hazard.hsc" Mass="0.5" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </Sign_WarnHazard>
+   <Sign_WarnHard ModelName="GEN_warn_hard" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_warn_hard.hsc" Mass="0.5" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </Sign_WarnHard>
+   <Sign_WarnExtreme ModelName="GEN_warn_extreme" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_warn_extreme.hsc" Mass="0.5" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </Sign_WarnExtreme>
+   <Sign_Kangaroo ModelName="AUS_Sign_Kang01" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="AUS_Sign_Kang01.hsc" Mass="0.5" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="true"/>
+   </Sign_Kangaroo>
+   <Sign_GreenArrow ModelName="GEN_Arrow_GREEN" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_GREEN.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_GreenArrow>
+   <Sign_OrangeArrow ModelName="GEN_Arrow_ORANGE" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_ORANGE.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_OrangeArrow>
+   <Sign_GreenArrowRight ModelName="GEN_Arrow_GREEN_Right" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_GREEN_Right.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_GreenArrowRight>
+   <Sign_GreenArrowLeft ModelName="GEN_Arrow_GREEN_Left" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_GREEN_Left.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_GreenArrowLeft>
+   <Sign_OrangeArrowRight ModelName="GEN_Arrow_ORANGE_Right" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_ORANGE_Right.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_OrangeArrowRight>
+   <Sign_OrangeArrowLeft ModelName="GEN_Arrow_ORANGE_Left" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_ORANGE_Left.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_OrangeArrowLeft>
+   <Sign_RedArrow ModelName="GEN_Arrow_RED" CollisionSample="SIGNPOST">
+      <Interactive CollSkin="GEN_Arrow_RED.hsc" Mass="0.05" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </Sign_RedArrow>
+   <Stadium ModelName="SX_UNDERCONSTRUCTION" Wildcard="true" CollisionSample="ATV_COLLISIONS">
+      <Specular SpecularPower="1.0" SpecularMax="0.2"/>
+      <CollisionMap CollSkin="SX_UnderConstruction"/>
+   </Stadium>
+   <StartTrap ModelName="Gen_StartTrap" CollisionSample="GATE"/>
+   <SX_Football ModelName="SX_Football" Wildcard="true">
+      <CollisionMap CollSkin="SX_Football"/>
+   </SX_Football>
+   <SX_Hanger ModelName="SX_Hanger" Wildcard="true">
+      <CollisionMap CollSkin="SX_Hanger"/>
+   </SX_Hanger>
+   <SX_ScenicView ModelName="SX_ScenicView" Wildcard="true">
+      <CollisionMap CollSkin="SX_ScenicView"/>
+   </SX_ScenicView>
+   <SX_Trainyard ModelName="SX_Trainyard" Wildcard="true">
+      <CollisionMap CollSkin="SX_Trainyard"/>
+   </SX_Trainyard>
+   <TrackBloxLong_new ModelName="GEN_TrackBlox_Long" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_TrackBlox_Long.hsc" Mass="0.1" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </TrackBloxLong_new>
+   <TrackBlox_new ModelName="GEN_TrackBlox" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_TrackBlox.hsc" Mass="0.1" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </TrackBlox_new>
+   <TrackDebris ModelName="GEN_Boulder01" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_Boulder01.hsc" Mass="0.75" Friction="0.2" Hardness="0.0" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackDebris">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </TrackDebris>
+   <TrafficCone_new ModelName="GEN_Traffic_Cone" Wildcard="true" CollisionSample="CONE">
+      <Interactive CollSkin="GEN_Traffic_Cone.hsc" Mass="0.005" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10" AIObserve="false"/>
+   </TrafficCone_new>
+   <Urban_Basketball ModelName="TC_UrbanBasketball" Wildcard="true" CollisionSample="ATV_COLLISIONS">
+      <Specular SpecularPower="1.0" SpecularMax="0.2"/>
+   </Urban_Basketball>
+   <VerticalTrackBlox ModelName="GEN_VertBlock" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_VertBlock.hsc" Mass="0.9" Friction="0.9" Hardness="0.8" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.3" Y="0.3" Z="0.3"/>
+      </Interactive>
+   </VerticalTrackBlox>
+   <RF_Ring00 ModelName="RF_ThinRing" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.0001" Friction="-0.5" Hardness="1" Classname="cObjectRing" Global="true">
+         <Ring Value="100" ChainTime="2.5" TrickRing="0" CollectionTotal="0" CollectionFlag="0"/>
+      </Interactive>
+   </RF_Ring00>
+   <RF_Ring01 ModelName="ring" CollisionSample=".COLLISIONS">
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.0001" Friction="-0.5" Hardness="1" Classname="cObjectRing" Global="true">
+         <Ring Value="100" ChainTime="2.5" TrickRing="0" CollectionTotal="0" CollectionFlag="0"/>
+      </Interactive>
+   </RF_Ring01>
+   <RF_TrickRing ModelName="RF_TrickRing" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.0001" Friction="-0.5" Hardness="1.2" Classname="cObjectRing" Global="true">
+         <Ring Value="1" ChainTime="2.5" TrickRing="1" CollectionTotal="0" CollectionFlag="0"/>
+      </Interactive>
+   </RF_TrickRing>
+   <RF_BonusRing ModelName="RF_BonusRing" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.0001" Friction="-0.5" Hardness="1.2" Classname="cObjectRing" Global="true">
+         <Ring Value="100" ChainTime="2.5" TrickRing="2" CollectionTotal="0" CollectionFlag="0"/>
+      </Interactive>
+   </RF_BonusRing>
+   <MG_BasketBall ModelName="MG_BasketBall" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="MG_Basketball.hsc" Mass="0.1" Friction="1.0" Hardness="0.8" Classname="cObjectBasketball" Global="true">
+         <AngResistance X="1.0" Y="1.0" Z="1.0"/>
+      </Interactive>
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="1.000" SpecularMax="0.2219"/>
+   </MG_BasketBall>
+   <MG_Puck ModelName="MG_Puck" CollisionSample=".COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="2.315" SpecularMax="0.8844"/>
+      <Interactive CollSkin="MG_Puck.hsc" Mass="0.1" Friction="0.1" Hardness="0.8" Classname="cObjectPuck" Global="true"/>
+   </MG_Puck>
+   <MG_Football ModelName="MG_Football" CollisionSample="COLLISIONS">
+      <Interactive CollSkin="MG_Football.hsc" Mass="0.1" Friction="1.0" Hardness="0.8" Classname="cObjectFootball" Global="true">
+         <AngResistance X="1.0" Y="1.0" Z="1.0"/>
+      </Interactive>
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="1.000" SpecularMax="0.2219"/>
+   </MG_Football>
+   <MG_Target_green_NEW ModelName="MG_Target_green_NEW" CollisionSample="COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="4.0" SpecularMax="0.65"/>
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.001" Friction="0.5" Hardness="0.0" Classname="cObjectTarget" Global="true"/>
+   </MG_Target_green_NEW>
+   <MG_Target_red_NEW ModelName="MG_Target_red_NEW" CollisionSample="COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="4.0" SpecularMax="0.65"/>
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.001" Friction="0.5" Hardness="0.0" Classname="cObjectTarget" Global="true"/>
+   </MG_Target_red_NEW>
+   <RallyFence_SAM ModelName="SAM_Barrier_RallyFence" CollisionSample="PLASTIC_FENCE">
+      <Interactive CollSkin="SAM_Barrier_RallyFence.hsc" Mass="0" Friction="0.2" Hardness="0.2" Classname="cObjectFlimsyFence">
+         <Destructible ShatterImpulse="2">
+            <Fragment Model="SAM_Barrier_RallyFence_Particle_01" CollSkin="SAM_Barrier_RallyFence_Particle_01.hsc"/>
+            <Fragment Model="SAM_Barrier_RallyFence_Particle_02" CollSkin="SAM_Barrier_RallyFence_Particle_01.hsc"/>
+         </Destructible>
+      </Interactive>
+   </RallyFence_SAM>
+   <MG_Coin_Silver ModelName="MG_Coin_Silver" CollisionSample="COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="4.0" SpecularMax="0.65"/>
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.001" Friction="0.5" Hardness="1" Classname="cObjectTreasure" Global="true">
+         <Treasure IsHard="1"/>
+      </Interactive>
+   </MG_Coin_Silver>
+   <MG_Coin_Bronze ModelName="MG_Coin_Bronze" CollisionSample="COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="4.0" SpecularMax="0.65"/>
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.001" Friction="0.5" Hardness="1" Classname="cObjectTreasure" Global="true">
+         <Treasure IsHard="0"/>
+      </Interactive>
+   </MG_Coin_Bronze>
+   <Gen_A_Frame ModelName="GEN_A_Frame" Wildcard="true">
+      <CollisionMap CollSkin="GEN_A_Frame"/>
+   </Gen_A_Frame>
+   <Training_TrackBlox ModelName="TL_GEN_TrackBlox" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_TrackBlox.hsc" Mass="0.1" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </Training_TrackBlox>
+   <Training_TrackBloxLong ModelName="TL_GEN_TrackBlox_Long" Wildcard="true" CollisionSample="TRACKBLOCKS">
+      <Interactive CollSkin="GEN_TrackBlox_Long.hsc" Mass="0.1" Friction="0.2" Hardness="0.2" ActiveResetTimeout="10.0" AIObserve="true" ClassName="cObjectTrackBlock">
+         <AngResistance X="0.1" Y="0.0" Z="0"/>
+      </Interactive>
+   </Training_TrackBloxLong>
+   <TL_MG_TARGET_GREEN ModelName="TL_MG_TARGET_GREEN" CollisionSample="COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="4.0" SpecularMax="0.65"/>
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.001" Friction="0.5" Hardness="0.0" Classname="cObjectTarget" Global="true"/>
+   </TL_MG_TARGET_GREEN>
+   <TL_MG_TARGET_RED ModelName="TL_MG_TARGET_RED" CollisionSample="COLLISIONS">
+      <Specular MultipassFadeStart="20" MultipassFadeEnd="30" FresnelMin="0.25" FresnelMax="1.0" SpecularPower="4.0" SpecularMax="0.65"/>
+      <Interactive CollSkin="MG_Coin.hsc" Mass="0.001" Friction="0.5" Hardness="0.0" Classname="cObjectTarget" Global="true"/>
+   </TL_MG_TARGET_RED>
+</Root>

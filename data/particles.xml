@@ -1,0 +1,41 @@
+<Root FileVersion="1.0000000">
+   <ParticleEffect ParticlesPerSec="3.0" VelocityVariationMin="0.4" VelocityVariationMax="1.0" System="ChimneySmoke" Name="Small_ChimneySmoke">
+      <Direction Z=".3" Y="1.5" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="0.02" VelocityVariationMin="1.0" VelocityVariationMax="1.5" System="Tumbleweeds" Name="Tumbleweeds">
+      <Direction Z="1.0" Y="0.0" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="20" VelocityVariationMin="1.0" VelocityVariationMax="1.0" System="RedFirePowder" Name="FireDuster">
+      <Direction Z="1.0" Y="0.0" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="20" VelocityVariationMin="1.0" VelocityVariationMax="1.0" System="CropDusterSpray" Name="CropDusterMax">
+      <Direction Z="1.0" Y="0.0" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="8" VelocityVariationMin="1.0" VelocityVariationMax="1.0" System="CropDusterSpray" Name="CropDusterMin">
+      <Direction Z="1.0" Y="0.0" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="15" VelocityVariationMin="0.4" VelocityVariationMax="1.0" System="FireSmoke" Name="FireSmoke">
+      <Direction Z="0.0" Y="1" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="4" VelocityVariationMin="1.0" VelocityVariationMax="1.0" System="TreeImpactDust" Name="TreeImpactDust">
+      <Direction Z="1.0" Y="0.0" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="70" VelocityVariationMin="16" VelocityVariationMax="18" System="WoodChips" Name="WoodChip" Spray="0.15">
+      <Direction Z="1.0" Y=".4" X="0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="70" VelocityVariationMin="10" VelocityVariationMax="12" System="SnowBlower" Name="SnowBlower" Spray="0.3">
+      <Direction Z="1.0" Y="0.3" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="150" VelocityVariationMin="2.5" VelocityVariationMax="5.0" System="orangesmoke" Name="orangesmoke" Spray="0.3">
+      <Direction Z="1.0" Y="0.3" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="150" VelocityVariationMin="2.5" VelocityVariationMax="5.0" System="bluesmoke" Name="bluesmoke" Spray="0.3">
+      <Direction Z="1.0" Y="0.3" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="10" VelocityVariationMin="0.5" VelocityVariationMax="1.0" System="BailedHay" Name="Hay" Spray="6.0">
+      <Direction Z="0.0" Y="1.0" X="0.0"/>
+   </ParticleEffect>
+   <ParticleEffect ParticlesPerSec="30" VelocityVariationMin="10" VelocityVariationMax="11" System="WaterSpout" Name="WaterSpout" Spray="0.1">
+      <Direction Z="0.0" Y="0.0" X="1.0"/>
+   </ParticleEffect>
+</Root>

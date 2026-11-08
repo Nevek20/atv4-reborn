@@ -225,6 +225,7 @@ def main():
 
     rodas_dir = os.path.join(a.assets, "rodas")
     feitas = set()
+    falhas_pintura = []
     dados = os.path.join(PROJ, "data", "vehicles")
     for c in carros:
         if so and c["n"] not in so:
@@ -247,8 +248,13 @@ def main():
             if b not in feitas:
                 pingu(a.unpacked, a.texturas, b, rodas_dir)
                 feitas.add(b)
-        subprocess.run([sys.executable, os.path.join(AQUI, "gerar_pintura.py"),
-                        a.unpacked, c["id"], out, "--chassis", c["chassis"]])
+        r = subprocess.run([sys.executable, os.path.join(AQUI, "gerar_pintura.py"),
+                            a.unpacked, c["id"], out, "--chassis", c["chassis"]])
+        if r.returncode != 0:
+            # sem pintura.png o carro fica todo branco (textura "white"); até
+            # nov/2026 a falha passava calada (Fireball sem pintura)
+            falhas_pintura.append(c["nome"])
+            print("[!] %s: gerar_pintura falhou, o carro vai ficar BRANCO" % c["nome"])
         pos_rodas = c.get("posicoes_roda", [])
         info = {
             "carro": c["nome"], "id": c["id"], "chassis": c["chassis"], "mapa": c["mapa"], "cams": c["cams"],
@@ -278,6 +284,8 @@ def main():
     # redes das janelas e treliça do Trident: alfa do jogo de volta (o
     # gob_tex2png salva sem alfa)
     subprocess.run([sys.executable, os.path.join(AQUI, "alfa_texturas.py"), a.unpacked])
+    if falhas_pintura:
+        print("[!] SEM PINTURA (vão ficar brancos): " + ", ".join(falhas_pintura))
     print("Abra o projeto no Godot uma vez pra ele importar os .obj novos.")
 
 

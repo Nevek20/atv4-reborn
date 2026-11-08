@@ -142,6 +142,19 @@ const VOLANTE_SEM_MODELO := {
 	"TRUCK_02": {"centro": [-0.475, 1.883, 0.523], "eixo": [0.0, 0.41, -0.912], "raio": 0.185},
 	"TRUCK_05": {"centro": [-0.565, 1.706, 0.695], "eixo": [0.0, 0.41, -0.912], "raio": 0.185},
 }
+# melhoria nossa: eixo do volante NOSSO (o do jogo sai). Fireball: o aro do
+# modelo é o mais deitado dos trucks (46° acima da horizontal; os outros 14 a
+# 36°) e torto ~5° pro lado (x 0.059): com a mão a 65° do topo o pulso dobrava
+# 28° / 42° (direita / esquerda) com o volante reto ("braço muito torto",
+# Matheus, nov/2026). Reto e a 30° (como Goliath, Chimera e Lazarus): 20° /
+# 27° e braço 90% esticado (era 101%); 36° dava 24° / 31°. O banco de lado
+# quase não muda (cotovelo esquerdo na porta). VOL_EIXO=x,y,z testa
+const VOLANTE_EIXO := {"TRUCK_10": Vector3(0.0, 0.5, -0.866)}
+# melhoria nossa: braço mais aberto (cotovelo pelo menos x graus pra fora,
+# folga y m da porta). Fireball (nov/2026, "abre um pouco mais o braço, sem
+# varar a porta", Matheus): o IK deixava os cotovelos pra baixo (-2°); com 25°
+# e 6 cm (manga ~5 cm) eles abrem 25° a 32° com o volante reto, pulso 29°/32°
+const BRACO_ABERTO := {"TRUCK_10": Vector2(25.0, 0.06)}
 const COLUNA_RAIO := 0.025     # m (coluna nossa)
 const COLUNA_MAX := 0.6        # m: até o painel, no máximo
 var sw_coluna: MeshInstance3D
@@ -170,6 +183,14 @@ var fumaca: Node3D = null
 # da cor do chão (DustColour) atrás das rodas de trás, pelo DustType do material
 const POEIRA := true
 var poeira: Node3D = null
+# pedrinhas do pneu (porta do jogo: 0x3bb618, textura Sprites/dirt_rocks;
+# pedras.gd): pedras e borrifos de terra das rodas de trás patinando na terra
+const PEDRAS := true
+var pedras: Node3D = null
+# lasquinhas da batida (porta do jogo: 0x3bbd60, Particle_Debris.bantam na cor
+# base da pintura; lascas.gd): o casco batendo no chão ou parede a >= 30 mph
+const LASCAS := true
+var lascas: Node3D = null
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas
@@ -375,6 +396,16 @@ const JIT_K := 0.06392613     # 2.2374146 / 35: amplitude cheia a 35 mph com Whe
 const JIT_HZ := 50.0          # passo de física do PAL (FUN_00172778)
 var surface_jitter := 0.3     # sem terreno (teste no plano): terra (Material_1 DIRT/COMMON)
 var terrain = null            # terrain.gd (main.gd põe): material do chão por roda
+var objetos = null            # objetos_rx01.gd (main.gd põe): caixas de água
+## água (0x201c20, por quadro): veículo+0xae8 = a água da última roda testada
+## (null = fora) e veículo+0xaec+4i = profundidade de cada roda (superfície -
+## fundo da roda; > 0 = dentro). Usada no arrasto, na lama, no espirro e no som
+var agua = null
+var agua_prof := PackedFloat32Array([0.0, 0.0, 0.0, 0.0])
+## registro da água (DAT_007f4bf8+0x20, igual no RX01 e no Hinter Valley):
+## DustColour 0, DustType Water, WheelDirtAlpha 0, WheelDirtRate 30
+const AGUA_REG := {"DustColour": Color(0, 0, 0, 0), "DustType": "Water",
+	"WheelDirtAlpha": 0.0, "WheelDirtRate": 30.0}
 var jit_seed := 0
 var jit_acc := 0.0
 var spd_ground := 0.0         # corpo+0x440: velocidade no plano do chão (m/s)
@@ -387,6 +418,10 @@ var jitter_chao := 0.0        # veículo+0xac0: média do WheelJitter embaixo de
 # contato. No save state da batida (crash_Storm): parede de pedra, outro corpo
 # nenhum, 4.86 m/s num registro velho e 0.08 m/s encostado.
 var batida := 0.0             # corpo+0x7a0: maior velocidade de contato do último passo (m/s)
+# o contato com o mundo fixo mais forte do passo, pro som da batida (0x36e7a8):
+# {vn, r (ponto - centro), mat}; vazio sem contato
+var contato_som := {}
+var batida_max := 0.0         # testes
 var _v_antes := Vector3.ZERO
 var _w_antes := Vector3.ZERO
 
@@ -498,6 +533,8 @@ func _ready() -> void:
 	_load_sfx()
 	_load_fumaca()
 	_load_poeira()
+	_load_pedras()
+	_load_lascas()
 	_casco()
 	_marca("som+fumaça+casco")
 	contact_monitor = true            # batida: contatos do casco (_batida_passo)
@@ -589,6 +626,12 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 		q.transform = Transform3D(Basis(), global_transform * c)
 		q.exclude = [get_rid()]
 		var info := space.get_rest_info(q)
+		# roda de lado na cerca: o jogo mede pelo 0x153390 (0x154088, rodas)
+		# antes do contato; quebrou, a esfera não liga (senão vira parede)
+		if objetos and not info.is_empty() and (info.normal as Vector3).dot(up) < w.cos_max \
+				and objetos.roda_na_cerca(instance_from_id(info.collider_id), info.point, info.normal):
+			q.exclude = q.exclude + [info.rid]
+			info = space.get_rest_info(q)
 		cs.set_deferred("disabled", info.is_empty() or (info.normal as Vector3).dot(up) >= w.cos_max)
 
 
@@ -750,6 +793,8 @@ func _load_physics() -> void:
 	# arrasto e freio
 	P.air_drag = d.f("Misc", "Air_drag_coefficient", 1.0)
 	P.ground_drag = d.f("Misc", "Ground_drag_coefficient", 2.0)
+	P.water_drag = d.f("Misc", "Water_drag_coefficient", 0.1)
+	P.water_depth = d.f("Misc", "Water_drag_max_wheel_depth", 0.5)
 	P.ifd_lo_speed = d.f("Misc", "Internal_friction_drag_lower_speed", 5.0)
 	P.ifd_hi_speed = d.f("Misc", "Internal_friction_drag_upper_speed", 80.0)
 	P.ifd_lo = d.f("Misc", "Internal_friction_drag_lower_speed_decel", 3.0)
@@ -948,6 +993,7 @@ func _load_physics() -> void:
 		var share: float = (WHEEL_Z + com_z) / wb if w.front else (WHEEL_Z - com_z) / wb
 		var x_static := _solve_static(w, mass * G * share * 0.5)
 		w.y0 = WHEEL_Y - x_static
+		w.xs = x_static                     # curso parado (corpo+0x4c0; pedras.gd)
 		if from_points:
 			w.y0 = wpos[info[0]].y          # cubo com a mola solta = ponto do jogo
 		w.x = 0.0                           # curso (0x0e8): + = comprimida, - = esticada
@@ -1442,6 +1488,9 @@ func _load_piloto() -> void:
 	piloto.position = model_offset + banco() - piloto.root_pos
 	model_root.add_child(piloto)
 	piloto.paredes = _paredes_do_piloto()
+	if BRACO_ABERTO.has(chave()) and OS.get_environment("COT_MIN") == "" and OS.get_environment("PAREDE") == "":
+		piloto.cotovelo_min = BRACO_ABERTO[chave()].x
+		piloto.parede_folga = BRACO_ABERTO[chave()].y
 	if MAOS_NO_VOLANTE and VOLANTE_GIRA and _tem("maos") and _tem("volante_gira") and sw_pivot:
 		var vol: Dictionary = pecas.get("volante", {})
 		# aro no frame do esqueleto (o piloto não gira em relação ao modelo)
@@ -1566,6 +1615,28 @@ func _load_poeira() -> void:
 		poeira = null
 
 
+func _load_pedras() -> void:
+	if not (PEDRAS and _tem("pedras")):
+		return
+	pedras = preload("res://pedras.gd").new()
+	pedras.name = "Pedras"
+	add_child(pedras)
+	if not pedras.montar(self):
+		pedras.queue_free()
+		pedras = null
+
+
+func _load_lascas() -> void:
+	if not (LASCAS and _tem("lascas")):
+		return
+	lascas = preload("res://lascas.gd").new()
+	lascas.name = "Lascas"
+	add_child(lascas)
+	if not lascas.montar(self):
+		lascas.queue_free()
+		lascas = null
+
+
 func _load_painel() -> void:
 	if not (PAINEL and _tem("painel")):
 		return
@@ -1660,6 +1731,12 @@ func _load_steering_wheel() -> void:
 	if vol.has("centro"):
 		SW_CENTER = Vector3(vol.centro[0], vol.centro[1], vol.centro[2])
 		SW_AXIS = Vector3(vol.eixo[0], vol.eixo[1], vol.eixo[2])
+	if nosso:
+		var ve := OS.get_environment("VOL_EIXO").split(",")
+		if ve.size() == 3:
+			SW_AXIS = Vector3(float(ve[0]), float(ve[1]), float(ve[2])).normalized()
+		elif VOLANTE_EIXO.has(chave()):
+			SW_AXIS = (VOLANTE_EIXO[chave()] as Vector3).normalized()
 	sw_pivot = Node3D.new()
 	sw_pivot.position = model_offset + SW_CENTER
 	model_root.add_child(sw_pivot)
@@ -2031,13 +2108,18 @@ func _physics_process(dt: float) -> void:
 	var rear_g := 0
 	var h_sum := 0.0
 	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
+	var ignorar: Array = objetos.ignorar_roda() if objetos else []
 	for w in wheels:
 		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
 		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
 		var reach: float = (w.max - w.min) + w.r + 0.05
 		var q := PhysicsRayQueryParameters3D.create(top, top - up * reach)
-		q.exclude = [get_rid()]
+		q.exclude = [get_rid()] + ignorar
 		var hit := space.intersect_ray(q)
+		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
+		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
+			q.exclude = q.exclude + [hit.rid]
+			hit = space.intersect_ray(q)
 		w.hit = false
 		var pen := 0.0
 		if not hit.is_empty():
@@ -2073,6 +2155,11 @@ func _physics_process(dt: float) -> void:
 		var f_s: float = _spring(w, w.x) + _damper(w, w.v)
 		w.f = f_s
 		apply_force(hn * f_s, attach - global_position)
+		# roda em cima de corpo solto (fardo, peça da cerca): a reação vai
+		# nele, senão ele vira rampa fixa (no jogo é contato entre os dois)
+		if hit.collider is RigidBody3D and f_s > 0.0:
+			(hit.collider as RigidBody3D).sleeping = false
+			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
 
 	_passo_esferas_rodas(space, up)
 	_material_medio()
@@ -2161,6 +2248,7 @@ func _physics_process(dt: float) -> void:
 	var res_loc: Vector3 = -Vector3(inertia.x * P.ang_res.x * w_loc.x, inertia.y * P.ang_res.y * w_loc.y, inertia.z * P.ang_res.z * w_loc.z)
 	apply_torque(b * res_loc)
 
+	_agua_passo()
 	# 0x20e5e8: arrasto do ar + do chão, contra a velocidade
 	var f_arr := 0.0
 	if spd > 1e-6:
@@ -2191,8 +2279,13 @@ func _physics_process(dt: float) -> void:
 		_roda_suja_passo(1.0 / JIT_HZ)
 		if poeira:
 			poeira.passo(1.0 / JIT_HZ, v)
+		if pedras:
+			pedras.passo(1.0 / JIT_HZ, v)
+		if lascas:
+			lascas.passo(1.0 / JIT_HZ)
 		if sfx:
 			sfx.passo(1.0 / JIT_HZ, v.dot(left), v_f)
+			sfx.batida_passo(1.0 / JIT_HZ, contato_som, _v_antes)
 	_update_visuals(dt, v_f)
 
 
@@ -2207,14 +2300,42 @@ func _physics_process(dt: float) -> void:
 ## com a velocidade do ponto de antes desse passo (_v_antes, _w_antes)
 func _batida_passo() -> void:
 	batida = 0.0
+	contato_som = {}
 	var st := PhysicsServer3D.body_get_direct_state(get_rid())
 	if st:
 		var com := global_transform * center_of_mass
 		for i in st.get_contact_count():
 			var vp := _v_antes + _w_antes.cross(st.get_contact_local_position(i) - com)
 			batida = maxf(batida, absf(vp.dot(st.get_contact_local_normal(i))))
+			if _contato_mundo(st, i, true):
+				var vn := absf(vp.dot(st.get_contact_local_normal(i)))
+				if contato_som.is_empty() or vn > contato_som.vn:
+					contato_som = {"vn": vn, "r": st.get_contact_local_position(i) - com, "mat": true}
+			if lascas and _contato_mundo(st, i):
+				# 0x1515e0 -> 0x3bbd60: contato do casco com o mundo fixo (par 2 x 0),
+				# normal saindo do que foi batido, velocidade do corpo de antes do passo
+				var p := st.get_contact_local_position(i)
+				var n := st.get_contact_local_normal(i)
+				if n.dot(com - p) < 0.0:
+					n = -n
+				lascas.batida(p, n, _v_antes)
 	_v_antes = linear_velocity
 	_w_antes = angular_velocity
+
+
+## contato do CASCO (não a esfera da roda) com o mundo fixo: relevo e colisão
+## dos objetos (StaticBody), sem cerca que quebra nem corpo solto (fardo)
+## (com_rodas: a esfera da roda de lado também conta, pro som)
+func _contato_mundo(st: PhysicsDirectBodyState3D, i: int, com_rodas := false) -> bool:
+	var dono := shape_find_owner(st.get_contact_local_shape(i))
+	var no = shape_owner_get_owner(dono) if dono >= 0 else null
+	if no == null:
+		return false
+	var nome := String(no.name)
+	if not (nome.begins_with("Casco") or (com_rodas and nome.begins_with("Roda"))):
+		return false
+	var outro = st.get_contact_collider_object(i)
+	return outro is StaticBody3D and String(outro.name) != "Cerca"
 
 
 func _sujeira_passo() -> void:
@@ -2232,23 +2353,24 @@ func _sujeira_passo() -> void:
 ## parte da de agora pro DustColour dele (alfa = WheelDirtAlpha; com alfa 0
 ## só o alfa cai). t sobe giro da FL (W+0x48)·dt·0.002·WheelDirtRate
 ## suavizada (0.95/0.05), x 10·patinada da RL (0x604) se passar de 1. Na água
-## (veículo+0xae8) o alvo é o registro DAT_007f4bf8+0x20 (o RX01 não tem
-## água). Confere com a RAM: tests/teste_derrapagem.gd.
+## (veículo+0xae8) o alvo é o registro DAT_007f4bf8+0x20 (AGUA_REG). Confere com a RAM: tests/teste_derrapagem.gd.
 func _roda_suja_passo(dt: float) -> void:
 	if not SUJEIRA or grounded == 0 or terrain == null:
 		return
 	var fl: Dictionary = wheels[0]
-	if fl.mat < 0 or fl.mat >= terrain.materials.size():
+	# na água o alvo é o registro da água (material -2, como na RAM)
+	var mid: int = -2 if agua != null else fl.mat
+	if mid != -2 and (fl.mat < 0 or fl.mat >= terrain.materials.size()):
 		return
 	var p: float = fl.omega * dt * 0.002
 	var pat := clampf(wheels[2].sr, 0.0, 1.0)
 	if pat * 10.0 > 1.0:
 		p *= pat * 10.0
-	if fl.mat != roda_mat:
-		var m: Dictionary = terrain.materials[fl.mat]
+	if mid != roda_mat:
+		var m: Dictionary = AGUA_REG if mid == -2 else terrain.materials[mid]
 		var alfa := float(m.get("WheelDirtAlpha", 0.0))
 		var poeira: Color = m.get("DustColour", Color(0, 0, 0, 0))
-		roda_mat = fl.mat
+		roda_mat = mid
 		roda_t = 0.0
 		roda_de = roda_cor
 		roda_taxa_alvo = float(m.get("WheelDirtRate", 0.0))
@@ -2278,10 +2400,40 @@ func limpar_sujeira() -> void:
 
 ## 0x20e5e8: tamanho do arrasto (N). Em kN = (Air_drag_coefficient x 0.00065 +
 ## Damping médio (0x788) x Ground_drag_coefficient x 0.01) x v², nunca mais do
-## que para o carro neste passo. O de água (veículo+0xae8, Water_drag_*) não
-## está portado.
+## que para o carro neste passo. Água (veículo+0xae8): média d das
+## profundidades das rodas (todas, se d > 0) soma Water_drag_coefficient x
+## min(d / Water_drag_max_wheel_depth, 1) x 0.01 x v² (0.1 e 0.5 m nos XMLs:
+## na poça do RX01, d ~0.17, ~95 N a 60 km/h, quase nada)
 func _arrasto(spd: float, dt: float) -> float:
-	return minf((P.air_drag * 0.65 + amort_medio * P.ground_drag * 10.0) * spd * spd, mass * spd / dt)
+	var k: float = P.air_drag * 0.65 + amort_medio * P.ground_drag * 10.0
+	if agua != null:
+		var d := 0.0
+		for i in mini(wheels.size(), agua_prof.size()):
+			d += agua_prof[i]
+		d /= float(wheels.size())
+		if d > 0.0:
+			var c: float = P.water_drag
+			if d < P.water_depth:
+				c *= d / P.water_depth
+			k += c * 10.0
+	return minf(k * spd * spd, mass * spd / dt)
+
+
+## 0x201c20: profundidade de cada roda na água (fundo = centro - raio em y, no
+## mundo) pela caixa da água (objetos_rx01.agua_em = 0x1bb098); a água que fica
+## é a da última roda, testando antes a do quadro anterior
+func _agua_passo() -> void:
+	var ant = agua
+	agua = null
+	if objetos == null or objetos.aguas.is_empty():
+		return
+	var xf := global_transform
+	for i in mini(wheels.size(), agua_prof.size()):
+		var w: Dictionary = wheels[i]
+		var c: Vector3 = xf * Vector3(w.px, w.y0 + w.x, w.pz)
+		var r: Array = objetos.agua_em(c - Vector3(0, w.r, 0), ant)
+		agua = r[0]
+		agua_prof[i] = r[1]
 
 
 ## 0x20d568: médias do atrito (0x780) e do Damping (0x788) das rodas no chão.

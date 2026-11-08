@@ -120,12 +120,17 @@ const SomJogo := preload("res://som_jogo.gd")
 const CameraPiloto := preload("res://camera_piloto.gd")
 const CameraOrbita := preload("res://camera_orbita.gd")
 const Farol := preload("res://farol.gd")
+const ObjetosRX01 := preload("res://objetos_rx01.gd")
+const Ceu := preload("res://ceu.gd")
 
 var car  # instância de car.gd (sem tipo estático de propósito: métodos próprios do script)
 var cam: Camera3D
 var hud: Label
+var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
 var terrain
+var objetos                              # objetos_rx01.gd (aviso() no HUD se faltar o assets/rx01)
+var ceu                                  # ceu.gd (null sem assets/rx01/ceu)
 var cam_piloto                           # camera_piloto.gd: efeitos de velocidade e olhar livre
 # órbita da câmera de corrida pelo analógico direito / mouse (melhoria nossa,
 # o Forza; camera_orbita.gd). false = só a câmera do jogo
@@ -137,6 +142,19 @@ func _ready() -> void:
 	_make_environment()
 	terrain = Terrain.new()
 	add_child(terrain)
+	# casas, arquibancadas, placas, guard-rail, pedras, árvores... do evento
+	# Rallycross do RX01 (porta do jogo, objetos_rx01.gd)
+	objetos = ObjetosRX01.new()
+	objetos.name = "Objetos"
+	add_child(objetos)
+	objetos.montar()
+	# céu do jogo (SkyDome do Environment.xml: nuvens + montanhas, ceu.gd)
+	ceu = Ceu.new()
+	ceu.name = "Ceu"
+	add_child(ceu)
+	if not ceu.montar():
+		ceu.queue_free()
+		ceu = null
 
 	spawn_vehicle(0, spawn_point(), deg_to_rad(SPAWN_YAW))
 
@@ -158,6 +176,16 @@ func _ready() -> void:
 	hud.add_theme_color_override("font_outline_color", Color.BLACK)
 	hud.add_theme_constant_override("outline_size", 6)
 	layer.add_child(hud)
+	fps_label = Label.new()
+	fps_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	fps_label.offset_left = -140
+	fps_label.offset_right = -16
+	fps_label.offset_top = 12
+	fps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	fps_label.add_theme_font_size_override("font_size", 18)
+	fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	fps_label.add_theme_constant_override("outline_size", 6)
+	layer.add_child(fps_label)
 	_make_menu(layer)
 	cam_piloto = CameraPiloto.new()
 	cam_piloto.name = "CameraPiloto"
@@ -207,6 +235,9 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	car = Car.new()
 	configurar(car, v)
 	car.terrain = terrain
+	car.objetos = objetos
+	if objetos:
+		objetos.carro = car
 	add_child(car)
 	car.manual = manual
 	car.reset_to(pos, yaw)
@@ -214,7 +245,60 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	cam_ready = false
 
 
+## luz e névoa da pista (PORTA, nov/2026; docs Luz e névoa): o leitor do
+## Environment.xml é o 0x1c15d8 (Lighting/InSun e InShadow: pares Ambient/Sun,
+## Bantam, Rider/RiderSun, Vehicle/VehicleSun com Strength + Colour, Dir só no
+## Sun; Fog: Start, End (sem End = DrawDistance Terrain), Density, Colour).
+## No RX01: ambiente 0.66 x (0.92, 0.95, 0.96), sol 1.0 x (0.98, 0.97, 0.90),
+## névoa linear de 87.5 m até 400 m na cor (0.48, 0.44, 0.42). O PS2 não tem
+## tonemap: saída linear (o filmic do Godot achatava e clareava tudo)
+const AMBIENTE_XML := "res://data/environment_rx01.xml"
+
+
+static func ler_ambiente(caminho: String = AMBIENTE_XML) -> Dictionary:
+	var out := {"ambiente": [0.66, Color(0.9231, 0.9525, 0.9647)], "sol": [1.0, Color(0.98, 0.9676, 0.9035)],
+		"sol_dir": Vector3(0.396, -0.780, 0.483), "nevoa": [87.5, -1.0, Color(0.4784, 0.4367, 0.4221)],
+		"terreno": 400.0}
+	var x := XMLParser.new()
+	if x.open(caminho) != OK:
+		return out
+	var pilha: Array[String] = []
+	var cor_de := ""
+	while x.read() == OK:
+		if x.get_node_type() == XMLParser.NODE_ELEMENT_END:
+			pilha.pop_back()
+			continue
+		if x.get_node_type() != XMLParser.NODE_ELEMENT:
+			continue
+		var nome := x.get_node_name()
+		var dentro := "/".join(pilha)
+		var a := {}
+		for i in x.get_attribute_count():
+			a[x.get_attribute_name(i)] = x.get_attribute_value(i)
+		if dentro == "Root/Lighting/InSun" and nome in ["Ambient", "Sun"]:
+			cor_de = "ambiente" if nome == "Ambient" else "sol"
+			out[cor_de][0] = float(a.get("Strength", out[cor_de][0]))
+		elif nome == "Colour" and dentro.begins_with("Root/Lighting/InSun/") and cor_de != "":
+			if dentro.ends_with("Ambient") or dentro.ends_with("/Sun"):
+				out[cor_de][1] = Color(float(a.R), float(a.G), float(a.B))
+		elif nome == "Dir" and dentro == "Root/Lighting/InSun/Sun":
+			out.sol_dir = Vector3(float(a.X), float(a.Y), float(a.Z))
+		elif nome == "Fog" and dentro == "Root":
+			out.nevoa[0] = float(a.get("Start", 87.5))
+			out.nevoa[1] = float(a.get("End", -1.0))
+		elif nome == "Colour" and dentro == "Root/Fog":
+			out.nevoa[2] = Color(float(a.R), float(a.G), float(a.B))
+		elif nome == "DrawDistance" and dentro == "Root":
+			out.terreno = float(a.get("Terrain", 400.0))
+		if not x.is_empty():
+			pilha.append(nome)
+	if out.nevoa[1] < 0.0:
+		out.nevoa[1] = out.terreno           # 0x1c15d8: sem End vale o DrawDistance Terrain
+	return out
+
+
 func _make_environment() -> void:
+	var amb := ler_ambiente()
 	var sky_mat := ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color(0.36, 0.52, 0.74)
 	sky_mat.sky_horizon_color = Color(0.78, 0.74, 0.66)
@@ -225,22 +309,34 @@ func _make_environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.8
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = amb.ambiente[1]
+	# o PS2 soma a luz na cor da tela e o Godot em linear: a força do XML vai
+	# ^2.2 (a cor o Godot já converte). Ambiente 0.66 -> 0.40; sol 1.0 -> 1.0
+	env.ambient_light_energy = pow(amb.ambiente[0], 2.2)
+	if OS.has_environment("AMB_E"):              # diagnóstico: força da luz no Godot
+		env.ambient_light_energy = float(OS.get_environment("AMB_E"))
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.72, 0.68, 0.6)
-	env.fog_density = 0.0012
-	env.fog_sky_affect = 0.15   # sem isso a névoa pinta o céu inteiro de bege
+	env.fog_mode = Environment.FOG_MODE_DEPTH
+	env.fog_light_color = amb.nevoa[2]
+	env.fog_density = 1.0
+	env.fog_depth_begin = amb.nevoa[0]
+	env.fog_depth_end = amb.nevoa[1]
+	env.fog_depth_curve = 1.0
+	env.fog_sky_affect = 0.0                 # cúpulas do céu: Fog="0" (ceu.gd)
 
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
 
 	var sun := DirectionalLight3D.new()
-	# Sun Dir do Environment.xml do RX_01 (12282), passado pro remake
-	sun.basis = Basis.looking_at(Terrain.dir_do_jogo(Vector3(0.396, -0.780, 0.483)))
-	sun.light_energy = 1.2
+	sun.basis = Basis.looking_at(Terrain.dir_do_jogo(amb.sol_dir))
+	sun.light_color = amb.sol[1]
+	sun.light_energy = pow(amb.sol[0], 2.2)
+	if OS.has_environment("SOL_E"):
+		sun.light_energy = float(OS.get_environment("SOL_E"))
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 150.0
 	add_child(sun)
@@ -261,6 +357,10 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
+			KEY_F1:
+				hud.visible = not hud.visible
+			KEY_F2:
+				fps_label.visible = not fps_label.visible
 			KEY_C:
 				_troca_camera()
 			KEY_G:
@@ -388,6 +488,15 @@ func _process(delta: float) -> void:
 	if car == null:
 		return
 	_update_camera(delta)
+	if ceu:
+		ceu.seguir(cam, delta)
+	if fps_label.visible:
+		var f := Engine.get_frames_per_second()
+		fps_label.text = "%d FPS" % f
+		fps_label.add_theme_color_override("font_color",
+			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
+	if not hud.visible:
+		return
 	var kmh: float = car.linear_velocity.length() * 3.6
 	var fp := ""
 	if cam_mode == 4:
@@ -395,7 +504,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/fx: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
@@ -403,6 +512,8 @@ func _process(delta: float) -> void:
 	var aviso_som: String = SomJogo.aviso()
 	if aviso_som != "":
 		hud.text += "\n" + aviso_som
+	if objetos and objetos.aviso() != "":
+		hud.text += "\n" + objetos.aviso()
 	hud.text += "\n\nchão: " + _chao()
 
 
@@ -494,6 +605,9 @@ func _update_camera(delta: float) -> void:
 		car.piloto.visible = cam_mode <= 1 or cam_mode == 4
 		car.piloto.sem_cabeca = cam_mode == 4
 
+	# borrão da câmera do piloto: apaga em qualquer outra câmera (antes ficava
+	# congelado na tela ao trocar de câmera em alta, Matheus nov/2026)
+	cam_piloto.atualizar_tela(cam_mode == 4)
 	if cam_mode <= 1:
 		gcams[cam_mode].apply(cam, s.tp)
 		if ORBITA:
@@ -504,7 +618,6 @@ func _update_camera(delta: float) -> void:
 	if cam_piloto.car != car:
 		cam_piloto.car = car
 		cam_piloto.reiniciar()
-	cam_piloto.atualizar_tela(cam_mode == 4)
 	if cam_mode == 4:
 		# primeira pessoa (não é do jogo): nos olhos do piloto, com os efeitos
 		# de velocidade e o olhar livre do camera_piloto.gd

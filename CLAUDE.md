@@ -31,7 +31,7 @@ camera_piloto.gd     câmera do piloto (melhoria nossa): força G na cabeça, FO
 camera_orbita.gd     órbita da câmera de corrida (melhoria nossa, o Forza): analógico direito / mouse giram em volta do carro, soltou volta
 suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
 vehicle_data.gd      leitor dos XMLs (base + veículo) e peças de fábrica
-main.gd              cena: terreno, carro, câmera, HUD, menu de carros (Tab, V); VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
+main.gd              cena: terreno, carro, câmera, HUD (F1 esconde, F2 contador de FPS), menu de carros (Tab, V); VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro_glb.gd         carros extras nossos: junta as malhas do .glb no frame do jogo (carroceria, rodas, volante)
 piloto.gd            piloto do jogo sentado no ARSE, braços pela direção (STEER_LEFT)
 volantes.gd          volantes gerados, um estilo por carro (melhoria nossa, no lugar do do jogo)
@@ -39,6 +39,8 @@ motor_som.gd         som do motor: loops do Engine Simulator por rpm e carga (me
 sfx_carro.gd         som de pneu, suspensão e pouso do jogo (portado do exe); som_jogo.gd toca os sons 989snd
 fumaca.gd            fumaça do escapamento (melhoria nossa com o efeito ExhaustSmokeTrail que o jogo não usa)
 poeira.gd            poeira dos pneus (porta do jogo: Setup/Dust.xml, DustType/DustColour do chão, 0x225108)
+pedras.gd            pedrinhas e borrifo de terra das rodas de trás patinando (porta do jogo: 0x3bb618, Sprites/dirt_rocks)
+lascas.gd            lasquinhas da batida (porta do jogo: 0x3bbd60, Particle_Debris.bantam na cor base da pintura)
 sujeira.gd           sujeira do jogo na pintura e lama nas rodas, pelo 2º UV (_camada.obj); nível e cor vêm do car.gd
 painel.gd            painel funcional (melhoria nossa): ponteiros, marcha e luz de troca, amador x PRO
 motor_treme.gd       motor e escape tremendo (melhoria nossa): separa as peças do cofre da carroceria
@@ -46,6 +48,10 @@ motor_anima.gd       ventoinhas girando e polias + correia 3D (melhoria nossa) p
 luzes.gd             lanterna de freio e luz de ré acesas (melhoria nossa): lente pelos pixels da cor da luz
 farol.gd             farol aceso (melhoria nossa, no estilo da lanterna de freio) nas lentes de farol do modelo; H liga
 terrain.gd           relevo e material do chão da pista RX01 (do stream do jogo)
+objetos_rx01.gd      objetos da pista RX01 (porta do jogo): casas, arquibancadas, arco, placas, guard-rail, pedras, árvores + colisão KDt
+multidao.gd          multidão do RX01 (porta do jogo: RX01_Crowds.wahoo, fotos de gente em placas, UV animado pelo UVRGBAAnim.xml)
+palha.gd             palha do fardo (porta do jogo: .pts + Particles.xml + WorldFX.xml), disparada pelo objetos_rx01.gd
+ceu.gd               céu da pista (porta do jogo): cúpulas do SkyDome do Environment.xml (nuvens + montanhas) presas na câmera
 data/                XMLs do jogo (física buggy_NN.xml, pontos, câmeras, peças)
 assets/              modelos do pingu2obj: renegade, sphinx, buggy_NN, truck_NN, rodas; sfx (sons) e fx (fumaça) do jogo (fora do git)
 tests/               teste de física sem tela + rodar_testes.py
@@ -114,7 +120,16 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --path . --write-movie motor.avi --fixed-fps 60 -s res://tests/gravar_motor.gd -- 7   :: prévia: lenta, 7000 e volta (CAM_OFF/CAM_ALVO)
 %GODOT% --path . --write-movie fumaca.avi --fixed-fps 60 -s res://tests/gravar_fumaca.gd -- 0  :: câmera presa no cano acelerando (FUMACA_COR=1 vermelha)
 %GODOT% --headless --path . -s res://tests/teste_poeira.gd        :: poeira dos pneus na largada do RX01: parado não, asfalto não, terra sim, rastro no pulo
+%GODOT% --path . -s res://tests/print_largada.gd -- largada.png   :: largada do RX01 na câmera de corrida sem HUD (comparar cor com print do jogo; QUADRO=n)
+%GODOT% --headless --path . -s res://tests/teste_objetos.gd       :: objetos do RX01: 707 instâncias, no chão, céu, largada livre, guard-rail segura o carro
+%GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
+%GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
+set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quanto o carro perde na cerca e no fardo (0/30/60°), com x sem o objeto
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
+%GODOT% --headless --path . -s res://tests/teste_pedras.gd        :: pedrinhas: larga na terra, vira (VIRA=7): parado não, ~80 vivas, pro lado derrapando
+%GODOT% --path . --fixed-fps 60 -s res://tests/gravar_pedras.gd -- 0 pedras   :: prints da largada na terra (QUANDO=0.6,1.0,1.4; SEM_PEDRAS=1, PEDRAS_COR=1, VIRA=1)
+set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_lascas.gd   :: lasquinhas e som da batida: Storm numa parede (20 m/s = 3 lascas + BigImpact, 10 m/s = 0 + SmallImpact, até 8 vivas, 4 s)
+%GODOT% --path . --fixed-fps 60 -s res://tests/gravar_lascas.gd -- 0 lascas    :: prints depois da batida (QUANDO=0.1,0.3,1.0; VEL=25, LASCAS_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
 set VEL=110 & %GODOT% --headless --path . res://tests/teste_entrada.tscn   :: reto até VEL e vira tudo: quando passa de 20° (jogo: 110 não derrapa)
@@ -131,13 +146,16 @@ python tools/casco.py <unpacked>          :: --tabela mostra a caixa de todos os
 
 :: terreno do RX01 (alturas + material) a partir do stream do jogo
 python tools/extrair_material.py <dados>/stream/RX01.000 assets/terrain --materiais <dados>/unpacked/xml/12280
+:: objetos e céu do RX01 (posições + colisão -> data/rx01_objetos.json, Environment.xml -> data/environment_rx01.xml;
+:: modelos, texturas e cúpulas do céu -> assets/rx01)
+python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
 
 :: checar um script sem abrir o editor
 %GODOT% --headless --path . --check-only --script res://car.gd
 
 :: sons de pneu, suspensão e pouso do jogo -> assets/sfx (wav + sons.json com o ADSR de cada tom)
 python tools/sfx_jogo.py <unpacked>
-:: textura da fumaça (Sprites/Particles, caixa Dust0), da sujeira (GEN_DIRT_DIRT), da lama do pneu (UNI_TyreOverlay) e da poeira (WorldFXdust) -> assets/fx
+:: textura da fumaça (Sprites/Particles, caixa Dust0), da palha (Snow0), da sujeira (GEN_DIRT_DIRT), da lama do pneu (UNI_TyreOverlay) e da poeira (WorldFXdust) -> assets/fx
 python tools/fx_jogo.py <unpacked>
 :: + print_tela com SUJEIRA=0.8 força o nível da sujeira, PAINEL=6900,137 fixa rpm e km/h no painel,
 ::   SEM_PAINEL=1 esconde o nosso (pra ver o que sobrou do modelo)
@@ -420,6 +438,234 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   tests/teste_sfx.gd confere os 2 (material x RAM e "som atrás do chão").
   O "grip" do ref_derrapagem.json NÃO é o atrito do material (0.80 até no
   asfalto).
+- Objetos do RX01 (PORTA, nov/2026; objetos_rx01.gd, tools/rx01_objetos.py,
+  docs Objetos da pista): o RX01 não tem modelo no stream (StreamP/StreamW
+  com "Models Total = 0 bytes"); vem tudo do evento: Event/Rallycross/
+  Default/#def5772a (other/12290) = 57 pingus + 651 bantams com a matriz do
+  jogo (linhas = eixos com escala) e RALLYCROSS.bin = 93 entidades (largadas,
+  reposição, cercas, gatilhos). Formato de chunks F00DABCD/DEADDCBA com chave
+  em hash. Bantam ("TNAB") decifrado: VIF com 2 qwords por vértice (posição
+  + ADC; UV com a cor RGBA no byte de baixo), sem normal (luz assada), lista
+  de texturas no #hash DEPOIS dele. Conferido: posições em cima do relevo
+  (moitas 0.00 m), guard-rail, fardos e cercas na borda da pista no mapa de
+  material, "START" do arco legível (espelho certo). Colisão = KDt
+  (triângulos: face + 3 arestas), nome = crc32('<modelo>.kdt'); 11 sem nome
+  casados pela caixa (KDT_POR_CAIXA). Cerca de plástico/madeira e fardo
+  (PORTA, nov/2026, ver "Cercas e fardos" abaixo) são interativos. teste_objetos: o
+  Renegade a 60 km/h para no guard-rail (sem os objetos atravessa 29 m).
+  Sem assets/rx01 (rodar o tools/rx01_objetos.py no PC) nada aparece e não
+  entra parede invisível; o HUD avisa.
+  Árvores "meio diferentes" (prints do jogo do Matheus, nov/2026): bantam é
+  PRÉ-ILUMINADO (sem normal): sem luz do Godot (as placas de folha de costas
+  pro sol ficavam pretas, as de frente amareladas), textura x cor do vértice
+  (Alder: folha oliva x 0.70 = oliva escuro como no jogo), sem sombra
+  dinâmica. Folha = placa TRIANGULAR em volta do quadrado da textura (UV
+  -0.3..1.4, borda transparente): textura PRESA na borda nos materiais com
+  +0x38 = 5 (só Alder, pinheiro e moita); repetindo, os cantos mostravam
+  pedaços cortados ("placas soltas" no céu).
+  Face sumindo / lado de dentro aparecendo (prints do Matheus, nov/2026:
+  placa de chevron, telhado do celeiro, tela da torre): TODAS as instâncias
+  do RX01 são espelhadas (det < 0: matriz do jogo + transposição) e o
+  MultiMesh do Godot não vira a face por instância (o MeshInstance3D vira).
+  Os .pingu com mais de 1 instância usam uma cópia espelhada da malha
+  (_espelhada) e a matriz sem espelho. Bantam não tem isso (2 faces).
+  Lote transparente (tela da torre; a poça NÃO, com as 2 faces ela ficou
+  preta no Forward+, nov/2026) e recorte de .pingu (torcedores
+  da cabine do locutor, WahooCrowdTex01) desenham as 2 faces.
+- Céu (PORTA, nov/2026; ceu.gd, docs Céu): "a skybox tá faltando" (Matheus).
+  SkyDome do Environment.xml: SKY_Bright_LowCloud (nuvens) +
+  BACKDROP_Asia_1 (montanhas azuis), .pingu de Levels/SkyDomes (o XML diz
+  .clm). 0x1d6500: na posição da câmera + yOffset, giro em Y pela rotation,
+  cor = tint (1.0) com o alpha, sem gravar profundidade, céu e depois
+  montanhas. No remake x70 em volta da câmera (cabe no far de 4 km, relevo e
+  objetos na frente pelo teste de profundidade), sem luz nem névoa.
+  Céu HD (melhoria nossa, ceu.gd CEU_HD): o Matheus ampliou as 2 texturas
+  x4 no Upscayl; o alfa das montanhas do jogo é liga/desliga em blocos de 4 px
+  (escadinha nos picos), refeito borrando e cortando com curva suave. Ficam em
+  assets/rx01/ceu/hd/ com o nome da original (fora do git); sem elas, a do jogo.
+  Chão HD (terrain.gd CHAO_HD): qualquer imagem em assets/terrain/hd/ cujo
+  nome começa com rx01_terrain (o Upscayl põe sufixo), lida DIRETO do arquivo
+  pelo conteúdo (PNG/JPG/WEBP, qualquer extensão), sem o import do Godot. PNG
+  renomeado pra .jpg pelo import deixava o chão branco, e sem textura nenhuma
+  ficava a cor lisa marrom. O console diz "chão: <arquivo usado> (LxA)".
+  Lida assim ela ia CRUA pra placa (4096 = ~85 MB): acima de 2048 vira DXT1
+  (~11 MB, 156 ms na carga). Disco: 2x em JPG qualidade 90 (~2-4 MB); o PNG
+  do Upscayl dá 13-20 MB. 4x+ não muda nada na altura do carro (Matheus).
+- Água (PORTA, nov/2026; save states do Matheus Renegade_dentro_da_agua e
+  _andando_na_agua; tests/teste_agua.gd, docs Água): o RX01 TEM água, a poça
+  WATER_puddle01 (pingu) perto da largada. Não é material do chão: o jogo
+  cria uma caixa por instância WATER_* (0x1bb098) = caixa do modelo no frame
+  dela, superfície = o y mais alto (RAM: centro, giro 15°, 21.01 x 19.88 m,
+  206.017 = os da malha). 0x201c20 por quadro: profundidade de cada roda =
+  superfície - (centro - raio) em y (veículo+0xaec, ordem FL RL FR RR) e
+  veículo+0xae8 = a água da última roda. Usada em: arrasto 0x20e5e8
+  (Water_drag 0.1 x min(média/0.5, 1) x 0.01 x v²: ~95 N a 60 km/h, quase
+  nada, como o Matheus lembrava), lama da roda (registro AGUA_REG: cor 0,
+  alfa 0, taxa 30 = lava), espirro (0x225108 ramo da água: tipo Water do
+  Dust.xml, textura WorldFXwater_dust -> assets/fx/agua.png, cor do objeto
+  +0x70 com alfa x 0.6, no meio entre o fundo da roda e a superfície) e som
+  (0x370548: roda a mais de -5 cm da superfície = material "Water" do
+  SoundDatabase). Desenho: o lote da poça é transparente (+0x00 = 1) e a
+  water_puddle tem alfa do PS2 0.75..2 (o PNG velho vinha sem alfa e a malha
+  cinza opaca ficava azulada no Godot: o "pedaço azul"); agora sai com o alfa
+  (x 2, modelos.json "misturada"). Precisa rodar de novo o rx01_objetos.py e
+  o fx_jogo.py. Transparência (nov/2026, "MUITO azul, não dá pra ver o
+  fundo", print do jogo do Matheus): pela conta do PS2 (alfa ~0x80, vértice
+  94/128) a poça fica ~92% opaca, mas no jogo é bem transparente. O lote tem
+  +0x10 = 4 no registro do .pingu (a tela da torre 6, peças opacas 0 ou 2:
+  bit 2 = 2 faces, bit 4 = transparente); o modo de mistura do GS desse
+  lote não foi achado. NOSSO: objetos_rx01.gd POCA_ALFA 0.5 (= alfa lido de
+  0..255), calibrado no print.
+- Cercas e fardos (PORTA, nov/2026; objetos_rx01.gd INTERATIVOS,
+  tests/teste_quebra.gd, docs Objetos interativos): Setup/InstanceDatabase.xml
+  (data/instance_database.xml) diz a classe de cada modelo (registro das
+  classes no 0x547738). As 2 cercas (GEN plástico, SAM madeira) são
+  cObjectFlimsyFence: paradas até o impulso das batidas passar de
+  ShatterImpulse (0x141640 compara a soma com 2² = 4); aí 0x141908 tira a
+  cerca e as peças (Fragment, *_Particle_01/02) nascem paradas na pose dela,
+  de um estoque de 20 por modelo. O fardo é cObjectTrackBlock: corpo solto de
+  0.1 t, atrito 0.2, ActiveResetTimeout 10 s. Contato da cerca = as ESFERAS
+  do .hsc (como o casco dos carros): com a caixa fina, batendo na ponta, o
+  Godot dava a normal da placa e as cercas de lado viravam parede.
+  Batida (nov/2026, "a cerca laranja não freia no jogo", Matheus): o
+  0x153390 (carro E rodas x cerca parada, 0x154088) mede o impulso de cada
+  contato contra corpo parado, j = -(1 + e) vn / (1/m + n.((I^-1 (r x n))
+  x r)) em t·m/s, pega o maior e o 0x141a48 quebra com j > ShatterImpulse
+  (2). Quebrou: o carro só leva n x min(j, 0.25) (0x54d190, giro com o braço
+  x 0.2) e o contato é jogado fora: perde no máximo 0.75 km/h no Renegade.
+  O fardo NÃO tem essa trava (o 0.25 só é usado ali): 0.1 t na mesma unidade
+  do carro (1.2 t) = 100 kg, Hardness 0.2 = restituição (0x142698 -> corpo
+  +0xbc). O que freava no remake era nosso: o raio da suspensão via cerca,
+  peça e fardo como chão fixo (a roda subia na cerca; o fardo virava rampa
+  parada) e as peças soltas batiam no carro logo depois (até 12 km/h em
+  ângulo). Agora a roda quebra a cerca pela mesma conta, a reação da roda vai
+  no corpo solto e as peças nunca batem no carro nem na roda.
+  De lado ("vira parede", Matheus): quem encosta é a esfera da roda
+  (_esferas_das_rodas), que só liga depois da checagem; agora ela também
+  passa pelo roda_na_cerca antes de ligar. Pedaços brancos/amarelos: o
+  load() devolve a mesma malha a cada cerca e o _materiais dobrava a cor de
+  novo (x4, x8); material nosso agora tem meta "rx01" e não é refeito.
+  DEBUG_CERCA=1 imprime o impulso de cada contato.
+  tests/medir_perda.gd (mesmo caminho com e sem o objeto): cerca 0.1 a 0.8
+  km/h a 30 e 60 km/h em 0/30/60°, fardo 1.5 km/h a 20 e ~5 a 55 (física de
+  100 kg contra 1.2 t).
+  Aproximações NOSSAS (marcadas no código): a quebra é decidida ANTES do
+  passo (varrendo o passo com cast_motion: a esfera de 10 cm pulava o
+  contato a 60 km/h), pra o carro atravessar; peça de 10 kg (o construtor
+  0x140758 não dá massa) que não bate no carro; fardo volta 10 s depois de
+  mexido (> 0.5 m), com o carro a > 4 m; AngResistance -> angular_damp.
+  teste_quebra: a 60 km/h a cerca quebra e o carro segue a 63; a 4 km/h
+  (impulso 1.3) segura; fardo sai 13 m e volta.
+  Som da batida (PORTA, 0x36b998, chamado pelo 0x153390 em cada contato):
+  CollisionSample do objeto -> SoundDatabase Collisions/InteractiveObjects
+  (PLASTIC_FENCE = FencePlastic, HAY = Hay, do Collide.bnk), volume Volume x
+  CollisionVolume 0.8 x SFXVolume, tom Pitch, na posição do carro. O jogo
+  repete por quadro (até 4): aqui 1 a cada MinRetriggerTime 0.2 s por objeto
+  (nossa). sfx_carro.batida_objeto. No fardo (corpo solto) o caminho do exe
+  não foi achado: toca no impacto com o carro (nossa).
+  Palha do fardo (palha.gd; dados PORTA): 2 pontos "particle Hay" do
+  PtS/Bantams/GEN_HayBale.pts (formato: "POINT 1.00", n em +16, n x [nome
+  32 + posição + matriz 3x3 x 0.01]), efeito Hay do Setup/Particles.xml
+  (data/particles.xml: 10/s, vel 0.5..1, Spray 6, pra cima) e sistema
+  BailedHay do Effects/WorldFX.xml (data/world_fx.xml: até 30, vida 0.5..1,
+  gravidade, cor de palha, 0.05..0.07 x 0.4..0.7 x 0.6 como a poeira, caixa
+  "snow" = Snow0 do Particles.bed, tools/fx_jogo.py -> assets/fx/palha.png).
+  Disparo NOSSO (não achado no exe): impulso do passo no fardo (massa x
+  variação da velocidade sem a gravidade; o Godot dá 0 no impulso dos
+  contatos) > Impulse 0.2 liga a emissão por Timeout 0.1 s: ~1 palhinha por
+  ponto por batida (teste_quebra: até 6 no ar). Matheus (nov/2026): "sai
+  poucas palhinhas, mas dá pra ver, ficou bom". FECHADO.
+- Multidão (PORTA, nov/2026; multidao.gd, tools/rx01_objetos.py multidao(),
+  docs Multidão): Levels/RX_01/Models/Wahoos/RX01_Crowds.wahoo ("OHAW" 1.3,
+  carregador 0x2821c8/0x2825b8, renderer cWahooRenderer) + o .wfn
+  (#5d1b7d96: 7 texturas de 0x80 e 20 nomes de animação de 0x20). 26
+  objetos de 0x60 (+0x30 material, +0x48 animação, +0x50/+0x54 VIF);
+  material (+0x104 -> tabela de 0x40, +4 = textura do .wfn: a ordem NÃO é a
+  do objeto). VIF: V4-32 posição no mundo do jogo (w 0x8000 = sem
+  triângulo, tira de 4 = 1 pessoa), V3-8 normal, V2-32 UV, V4-8 cor. 233
+  pessoas (fotos da equipe: Rory, Rupert, Graham, Jez, Trev, Joe/Ben/Rob +
+  WahooCrowdTex01), 20 objetos animados pelo Setup/UVRGBAAnim.xml
+  (data/uv_anim.xml: FEX_Crowd_anim 4 quadros de 0.25 com 0.1/0.05/0.05/0.75
+  s, FEX_Crowd_3frame 3 de 0.33, ping-pong; Set_UV soma no UV). As texturas
+  saem com o alfa do PS2 x 2 (recorte). NOSSO: todos com a mesma animação
+  andam juntos (a fase do controle 0x27b930 não foi achada). As pessoas
+  paradas pintadas nas arquibancadas (Crowd_01/02) são do modelo e paradas
+  no jogo também (o Matheus conferiu no jogo, nov/2026). Camisetas
+  coloridas (nov/2026): o lote da US_Bleacher_Wood_02 tem 2 texturas, a
+  Crowd_02 e a Crowd_ColourChange (camisetas no mesmo lugar, 2º UV = 1º)
+  como camada (registro +0x18).
+  Camadas (PORTA, nov/2026, docs Objetos da pista; "o arco do jogo é meio
+  cinza gasto desde o início", prints do Matheus): lote com camada = tipo
+  0x22222222 do renderer de pingu (0x28db40, montado no 0x289228 ->
+  0x289908); a 2ª passada usa a palavra de estado 0x36080044 (0x2897f0) =
+  ALPHA 0x44, a mistura comum (Cs - Cd) x As + Cd, com teste de alfa >= 1.
+  As = alfa da textura x ALFA DO VÉRTICE, e o artista pintou o alfa do
+  vértice pra dizer onde a camada aparece (arco 40..128, celeiros ~0.4 em
+  média). O import de .obj do Godot joga fora o alfa do vértice: por isso a
+  sujeira do arco saía cheia (cinza riscado) e as camadas de madeira,
+  ferrugem e concreto pareciam cobrir os celeiros. tools/rx01_objetos.py põe
+  a malha da camada com o alfa no modelos.json ("tris",
+  pingu2obj.camada_tris) e o objetos_rx01.gd monta por ela: TODAS ligadas
+  (arco, camisetas, celeiros, cabana, persiana do alto-falante). Sem o
+  "tris" (rx01_objetos.py antigo) só as camisetas (CAMADAS_SEM_ALFA), como
+  antes.
+  Piscando / sumindo (nov/2026, prints do Matheus): a camada fica no MESMO
+  plano do modelo; no Forward+ o Godot grava a profundidade do modelo numa
+  passada antes e a camada perdia o empate (sumia inteira: arco limpo) ou
+  brigava (camisetas e celeiro piscando). NOSSO: o shader da camada
+  (_shader_camada) puxa ela 0.05% da distância pra câmera (5 mm a 10 m) e a
+  posição vai com as mesmas 6 casas do .obj. Conferido no lavapipe: sem
+  isso o arco sai limpo, com isso a sujeira aparece. Matheus (nov/2026):
+  "agora sim ficou bom". FECHADO.
+  Cercas das entidades (cFenceNodeEntity/cFenceLinkEntity do RALLYCROSS.bin,
+  32 nós + 26 ligações em 6 correntes): só do EDITOR. A lista de classes que
+  o exe cria (nomes em 0x579480..) não tem nenhuma cFence; o editor gerou as
+  peças por uma curva pelos nós (~3.2 m cada) e gravou como bantams comuns
+  no #def5772a (4 correntes; o remake já desenha). As outras 2 (GEN do lado
+  da torre do locutor, SAM no meio das moitas) não têm peça gravada e não
+  existem no jogo (o Matheus conferiu, nov/2026). FECHADO.
+- Luz e névoa (PORTA, nov/2026, "a cor tá muito clara", prints do Matheus na
+  largada; docs Luz e névoa; main.gd ler_ambiente/_make_environment): o
+  leitor do Environment.xml é o 0x1c15d8. Medido no mesmo enquadramento
+  (tests/print_largada.gd, Forward+): o remake estava 30-50% mais claro. (1)
+  O chão tem a LUZ ASSADA na textura (sombra do arco, arquibancadas, morros):
+  o jogo desenha a cor dela (chão 78, 72, 66 no print x textura 85, 75, 65).
+  terrain.gd: sem luz nem ambiente do Godot, só a sombra dinâmica do carro
+  (SOMBRA 0.66 na tela, NOSSO medido no print; o jogo usa Intensity 0.5 x
+  ((1 - s) + InShadowMultiply 0.8 x s), 0x1b3fe0, mas a textura da sombra
+  não foi achada). Objetos não fazem sombra dinâmica (já está na textura).
+  (2) PS2 sem tonemap: linear (o filmic achatava). (3) Névoa LINEAR de Start
+  87.5 até End = DrawDistance Terrain 400 (0x390a80 põe na câmera), cor
+  (0.48, 0.44, 0.42); antes era exponencial nossa. (4) Ambiente 0.66 x cor e
+  sol 1.0 x cor do XML; o PS2 soma a luz na cor da TELA e o Godot em linear,
+  então a força vai ^2.2 (ambiente 0.40). Resultado (jogo x antes x agora):
+  chão 53-78 x 98-111 x 62-73; para-choque 123 x 95 x 115; tampa branca 135
+  x 162 x 142; arquibancada 109 x ? x 116; azul do céu 115,144,178 x 122,150,
+  180 agora. Não portado: luz própria do carro (Vehicle/VehicleSun) e do
+  piloto, InShadow, Overbright (ActualBrightness 1.756, uso não achado).
+  Falta: o vermelho da lateral do Renegade fica 98 x 72 do jogo (pintura?).
+  AMB_E / SOL_E = força da luz no Godot (diagnóstico).
+  Grão do chão (nov/2026, "o chão do jogo tem mais qualidade", prints do
+  Matheus no mesmo lugar): o renderer do relevo (0x1eb758) põe por cima a
+  textura "detail" da pista (Levels/RX_01/Env/Default/Default/DETAIL.bog,
+  128 x 128, desenho no ALFA; tools/rx01_objetos.py ->
+  assets/terrain/rx01_detalhe.png, no git). env.header +0x2c = 5.0 e o
+  0x29ed98 (x16) = 80 repetições por bloco de 128 m (1.6 m cada; leitura
+  nossa). A mistura fica no VU1 (não achada): NOSSO terrain.gd fator 1 +
+  0.55 x (alfa/média - 1), mesmo brilho médio, repetindo a cada 2.4 m,
+  apagando de 4 a 20 m da câmera. Primeiro calibrado pelo desvio do grão
+  fino (0.9, 1.6 m: 11.3 perto / 5.3 meio x jogo 14.2 / 4.5); depois o
+  Matheus (nov/2026): "tá bem preto e roubando a cor do chão, deixa mais
+  fraca e estica um pouco" -> 0.55 e 2.4 m (6.7 / 4.2).
+  DETALHE=x, DETALHE_M=x, DETALHE_SOME=a,b (diagnóstico).
+  ERRO NOSSO que custou caro ("parece ruído, não parece o chão do jogo",
+  Matheus): textura com MIPMAP no .gob (0x158 = tamanho de todos os níveis,
+  ex: DETAIL.bog 10880 = 128x128 + 64 + 32 + 16 em 4 bits) caía no "pega o
+  fim do arquivo" do gob_tex2png e saía embaralhada (ruído puro, e o terço
+  de baixo diferente = os níveis menores). Agora o nível 0 vem do 0x15c. 477
+  das 15681 texturas do unpacked têm mipmap: quase todas DETAIL das pistas
+  (PlaceHolder), "dirt" vazias dos carros e umas de menu; nada do RX01 nem
+  dos carros que já usávamos.
 - Material do chão: só o atrito (pneu) e o Damping (arrasto do chão,
   0x20e5e8) mexem na física do buggy. Hardness, Sink e Bounciness o jogo
   carrega e não lê (varredura do exe, docs Terreno). Não "portar" eles.
@@ -618,6 +864,24 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   volante avança pro piloto até a coluna acabar atrás dele (car.gd
   _montar_volante, de 0 a 5.6 cm no Kraken; teste_volante imprime). Os X
   ficam a 45° do topo, longe das mãos (65°).
+  Eixo nosso (car.gd VOLANTE_EIXO, nov/2026, "braço muito torto no
+  Fireball"): o aro do Fireball no modelo é o mais deitado dos trucks (46°
+  acima da horizontal; os outros 14 a 36°) e torto ~5° pro lado; o pulso
+  dobrava 28°/42° com o volante reto. O nosso volante fica reto a 30° (como
+  Goliath, Chimera e Lazarus): 20°/27°, braço 90% (era 101%). Banco de lado
+  quase não muda. VOL_EIXO=x,y,z testa.
+  Braços iguais (piloto.gd PAREDE_SIMETRICA, nov/2026, "o esquerdo mais
+  torto que o direito", Matheus): a pegada já era espelhada, mas só o
+  cotovelo esquerdo batia na porta (ia pra -2°) e o direito ficava a +56°
+  pra fora. Agora a folga da porta vale pros 2 (o cotovelo espelhado no
+  plano do volante contra a parede do outro lado): no Fireball, com o
+  volante reto, D pulso 26° cotovelo -1°, E 27° e -2°.
+  Braço mais aberto (car.gd BRACO_ABERTO, piloto.gd cotovelo_min /
+  parede_folga; "abre um pouco, sem varar a porta", Matheus): o -2° não era
+  a porta, era a pose de pulso mais reto do IK. Fireball: cotovelo pelo
+  menos 25° pra fora e folga de 6 cm da porta (manga ~5): abre 25° a 32°,
+  pulso 29°/32°, medir_cabine 5.9 cm no pior caso. COT_MIN=graus e
+  PAREDE=m testam.
 - Volante: no jogo NÃO gira (é parte da carroceria). Girar é melhoria nossa
   (VOLANTE_GIRA no car.gd; tools/volante.py acha o aro). O que gira no jogo
   são os braços do piloto (piloto.gd).
@@ -698,6 +962,56 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   (teste_poeira, 11 s) sai rastro por 0.78 s depois de sair do chão; antes
   parava na hora. O raio da suspensão só alcança 5 cm abaixo da roda: a folga
   no ar é um raio a mais (poeira._folga, até 0.3 m).
+  "Muito grandes e quadriculadas" (Matheus, nov/2026, poeira e espirro): (1)
+  TAMANHO: o do Dust.xml vai x 0.6 pra metros (poeira.gd ESCALA; o desenho
+  é no VU1 e a unidade não sai do exe). Calibrado com 4 prints do jogo do
+  Matheus (terra e poça) x renders do remake em 0.3/0.6/1.0: com 1.0 cobria o
+  carro, com 0.3 ficava "fininho", 0.6 = na altura das rodas, atrás e dos
+  lados. POEIRA_ESCALA=x troca (diagnóstico). Asfalto: a borda é
+  TARMAC/DUSTY (DustType Light) e o asfalto limpo é None (cor some em 1 s):
+  "vai diminuindo até sair", como o Matheus viu no jogo. (2) ALFA: o da
+  textura é do PS2 (0x80 = 1.0, a poeira vai até 250 = satura); lido como
+  255 = 1.0 saía com metade da opacidade. (3) Melhoria nossa: as nuvens do
+  atlas encostam na borda da célula e o quadrado cortava o chão numa reta
+  (os "quadrados"): BORDA_SUAVE apaga o alfa perto da borda da célula e
+  CHAO_SUAVE (0.4 m, pela profundidade da tela) some a nuvem onde encosta no
+  chão. SUAVE=0 desliga os 2 (diagnóstico). No Compatibility do xvfb a poeira
+  não aparece: conferir em Forward+ (lavapipe).
+  FECHADO pelo Matheus (nov/2026, escala 0.6): "não quero mexer mais, senão
+  vira caça-rato". Só reabrir com save state ou vídeo novo que mostre erro.
+- Pedrinhas do pneu (PORTA, nov/2026; pedras.gd, docs Pedrinhas): o
+  WheelSpinDirt/WheelDirtTrail do XML o exe NÃO usa. Quem solta é o gerente
+  0x3bade8 (string "dirt_rocks"): 0x3bb618 por quadro, só rodas de TRÁS, no
+  material IsDirt, com patinada > sorteio(0..0.3) + 0.05 (ou curso acima de
+  1 - DirtKickupChance), 1 por roda por quadro: pedra (Rockiness, 0.14,
+  10 m/s, quica no chão com 0.4, vive 1 s, gravidade 30) ou borrifo de terra
+  (Dirt05, 2.0 crescendo, 5 m/s, vive 0.6 s). Reto = quase pra cima, de
+  lado (|β| 1 rad) = 45° pro lado em que escorrega; cor = DirtColour.
+  Conferido no save state drr2 (80 vivas, 2 por quadro, tamanhos e
+  velocidades). Tamanho x 0.6 como a poeira (vídeo do Matheus: pedra de ~10
+  px do lado da roda). FECHADO (Matheus: "ficou perfeito").
+- Lasquinhas da batida (PORTA, nov/2026; lascas.gd, docs Lasquinhas): mesmo
+  gerente, Particle_Debris.bantam (tools/fx_jogo.py -> lasca.json/png) na
+  COR BASE da pintura (RAM bate com o 150xx; gerar_pintura agora grava
+  pintura.json; sem ele, a cor que mais aparece na pintura.png, NOSSO). Sai
+  em cada contato do CASCO com o mundo fixo (chão e paredes; o par 2 x 0 do
+  exe também lê o material do chão), a >= 1 m do anterior e >= 30 mph:
+  int((2 + 4 t) x de frente) lascas (mínimo 1), 12..35 mph pra fora e pra
+  cima da parede + 70% do deslize; vivem 4 s, quicam com 0.5, giram; no
+  máximo 8 de uma vez. Carro com carro (25..45 mph) fica pra quando tiver IA.
+  Conferido no crash_Storm (5 vivas, tamanhos, giro). teste_lascas.
+  FECHADO (Matheus: "ficou perfeito").
+- Som da batida (PORTA, nov/2026; "no reborn tá sem som a batida", Matheus;
+  sfx_carro.gd batida_passo, docs Som da batida): 0x36e7a8 por quadro com o
+  contato mais forte do casco no mundo fixo (car.gd contato_som): acima de
+  0.5 m/s na normal toca SmallImpact (BigImpact acima de 20) do patch
+  "Default" (o chão e as paredes têm material, e a tabela Materials cai no
+  1º patch), no máximo 1 a cada 0.2 s, só com o carro a >= 2.5 mph; contato
+  na direção do movimento (|cos| > 0.7) toca o raspão (loop "Dirt" do
+  Surface, volume 0.5) por 0.25 s. Volume x CollisionVolume 0.8 x
+  SFXVolume. Cerca e fardo continuam no batida_objeto. teste_lascas confere
+  (10 m/s Small, 20+ Big); no caminho do teste_pedras (rodada fora da
+  pista) só 2 batidas do casco no chão. FECHADO (Matheus: "ficou ótimo").
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o
@@ -766,7 +1080,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   nível sobe min(v, 15)·WheelDirtRate·5e-5 a cada passo de 50 Hz com roda
   no chão (suja até no asfalto), igual em todo o carro, e só zera no
   recomeço (T no remake, car.limpar_sujeira). A água NÃO limpa a carroceria
-  no jogo. Desenho: o lote do .pingu tem uma 2ª textura pelo 2º UV
+  no jogo (só a lama da roda). Desenho: o lote do .pingu tem uma 2ª textura pelo 2º UV
   (pingu2obj -> <modelo>_camada.obj). Na carroceria só a pintura ("white")
   tem: a "dirt", trocada pela GEN_DIRT_DIRT da pista, alfa = nível x alfa
   da textura. Gaiola e peças ficam limpas (como no jogo). Nas rodas é a
@@ -873,7 +1187,9 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   = remake. Pintura dos trucks: o logo é achado sem diferenciar maiúscula
   nem espaço (o vehicles.xml pede "HERBST 1", a TruckLogos tem "Herbst  1";
   antes os dois Herbst saíam sem o logo) e o Chassis_Truck_10.bed diz 25
-  itens com o 25º vazio (o gerar_pintura quebrava no Fireball). Assets
+  itens com o 25º vazio (o gerar_pintura quebrava no Fireball; quem gerou
+  os assets antes disso ficou com o Fireball BRANCO, sem pintura.png: o
+  gerar_buggies agora avisa quando o gerar_pintura falha). Assets
   gerados dos 13 (12 + bônus) também estão no atv4-dados/cars (out/2026).
   Câmera dos trucks = a dos buggies (FollowOrbitFar parada: 6.87 m
   atrás e 3.0 acima no Buccaneer, 7.65/3.39 no Goliath, zoom 0.5;
@@ -1014,9 +1330,10 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- Batida: o RX01 do remake só tem o relevo (sem paredes, cercas e pedras do
-  jogo), então a tremida da batida só aparece quando o casco bate no chão.
-  Trava do 0x380418 (veículo+0xa6c/0xa74/0xa78) não portada.
+- RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
+  câmera de introdução, as 2 luzes direcionais. A tremida da batida
+  (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
+  não portada.
 - Som do motor (melhoria nossa, plano combinado com o Matheus): o jogo só
   tem 3 bancos de motor (02/03/04, XMLs 00002/00004/00005) repetidos nos 12
   buggies (o Mosquito soa igual ao Kraken V8). Plano: o Matheus monta cada
@@ -1043,10 +1360,8 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
 - Câmera do piloto: referência do Matheus = cockpit do Dirt Rally 2.0
   (horizonte perto do meio, volante cortado embaixo, muita estrada).
 - Sinal do giro/direção visual: falta save state andando com volante virado.
-- Sujeira: água (veículo+0xae8 e o registro DAT_007f4bf8+0x20 que lava as
-  rodas: cor 0, alfa 0, taxa 30, lido no save state do Hinter Valley) não
-  portada: o RX01 não tem água. Reflexo menor com o carro sujo
-  (0x22ace8, 1 - nível) não portado. Sujeira do piloto como o jogo.
+- Sujeira: reflexo menor com o carro sujo (0x22ace8, 1 - nível) não
+  portado. Sujeira do piloto como o jogo.
 - Erro antigo com tela (não é da poeira): "Condition !v.is_finite()" em
   instance_set_transform quando o carro pula fora da pista (gravar_poeira na
   terra: 238 vezes em 2 s, com a poeira desligada também); sem tela não

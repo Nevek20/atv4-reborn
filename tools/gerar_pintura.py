@@ -270,6 +270,11 @@ def decalques(img, s, src, veh, numero, log=print):
             log(f"    {chave:12s} {nome:24s} {' '.join(caixas)}")
 
 
+# cores da última pintura montada (main grava em <nome>.json: as lasquinhas
+# da batida usam a BASE, 0x3bbd60; RAM: Renegade 220,231,235, Storm 190,26,16)
+ULTIMAS_CORES = {}
+
+
 def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, chassis_=None):
     """pintura do veículo (Image RGB) ou None; trocar = {"BASE": (r, g, b)...}"""
     prefixo = re.sub(r"^BUGGY", "Buggy", veh, flags=re.I)
@@ -285,6 +290,8 @@ def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, 
         return None
     cores = {k: cor(s, k) for k in ("BASE", "PRIMARY", "SECONDARY")}
     cores.update(trocar or {})
+    ULTIMAS_CORES.clear()
+    ULTIMAS_CORES.update(cores)
     log(f"[+] {xml_nome}: base {cores['BASE']} primária {cores['PRIMARY']} secundária {cores['SECONDARY']}")
 
     camadas = {}
@@ -341,6 +348,11 @@ def main():
     dst = os.path.join(a.out, a.nome)
     img.save(dst)
     print(f"[+] salvo {dst} ({img.width}x{img.height})")
+    import json
+    cj = os.path.splitext(dst)[0] + ".json"
+    with open(cj, "w", encoding="utf-8") as f:
+        json.dump({k.lower(): list(v) if v else None for k, v in ULTIMAS_CORES.items()}, f)
+    print(f"[+] cores em {cj}")
 
 
 if __name__ == "__main__":

@@ -267,6 +267,76 @@ def safe_name(name):
     return re.sub(r"[^A-Za-z0-9_.\-]", "_", name)[:60]
 
 
+def triangulos(verts, normals, adc):
+    """triângulos da tira (índices locais a, b, c; o .obj escreve "a c b").
+    Cada vértice sem o 0x8000 fecha um com os 2 de antes; o giro é conferido
+    com as normais do próprio jogo e desvirado se precisar. Assim dá pra
+    ligar o descarte de face de trás (painéis de duas faces no mesmo lugar,
+    tipo a tampa do motor do Sphinx, não ficam piscando)"""
+    out = []
+    for i in range(2, len(verts)):
+        if adc[i]:
+            continue
+        a, b, c = i - 2, i - 1, i
+        if i % 2:
+            a, b = b, a
+        pa, pb, pc = verts[a], verts[b], verts[c]
+        e1 = [pc[k] - pa[k] for k in range(3)]
+        e2 = [pb[k] - pa[k] for k in range(3)]
+        fn = (e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0])
+        vn = [normals[a][k] + normals[b][k] + normals[c][k] for k in range(3)]
+        if fn[0] * vn[0] + fn[1] * vn[1] + fn[2] * vn[2] < 0:
+            b, c = c, b
+        out.append((a, b, c))
+    return out
+
+
+def alfas(d, st):
+    """alfa do V4-8 de cor de cada vértice da tira (0x80 = 1.0; o parse só
+    guarda o RGB). None se a tira não tem cor"""
+    verts, _, _, _, _, s = st
+    num = len(verts)
+    q = s + 4 + 16 * num + 4 + v3_8_size(num)
+    for _ in range(3):
+        if q + 4 > len(d):
+            break
+        cnum, ccmd = cmd_at(d, q)
+        if cnum != num:
+            break
+        if ccmd == 0x6C:
+            q += 4 + 16 * num
+        elif ccmd == 0x64:
+            q += 4 + 8 * num
+        elif ccmd == 0x6E:
+            return [d[q + 4 + 4 * i + 3] for i in range(num)]
+        else:
+            break
+    return None
+
+
+def camada_tris(d, strips):
+    """camada (2ª textura do lote) como lista plana pro Godot montar a malha
+    (o import de .obj do Godot joga fora o alfa do vértice, e é ele que diz
+    onde a camada aparece: no arco de largada o artista pintou 40..128).
+    Por vértice de cada triângulo, já na ordem do Godot (o importador de
+    .obj inverte a face "a c b" = a, b, c): x y z, nx ny nz, r g b do .obj
+    (cor_obj), alfa (vértice/128, até 1), s t do 2º UV"""
+    out = []
+    for st in strips:
+        verts, normals, uvs, colors, adc, _ = st
+        al = alfas(d, st) or [128] * len(verts)
+        for tri in triangulos(verts, normals, adc):
+            for k in tri:
+                uv = uvs[k]
+                s, t = uv[2:4] if len(uv) == 4 else uv[:2]
+                # posição com as MESMAS 6 casas do .obj do modelo (a camada fica no plano
+                # dele: com 5 casas o teste de profundidade brigava e piscava)
+                out += [float("%.6f" % v) for v in verts[k]] + [round(v, 4) for v in normals[k]]
+                out += [round(cor_obj(c), 4) for c in colors[k]] + [round(min(al[k] / 128.0, 1.0), 4)]
+                out += [round(s, 5), round(t, 5)]
+    return out
+
+
 def to_obj(strips, name, slots=None, mtl_name=None, mat_names=None, uv2=False):
     lines = [f"# {name} - convertido de .pingu (ATV Offroad Fury 4)"]
     if mtl_name:
@@ -285,25 +355,8 @@ def to_obj(strips, name, slots=None, mtl_name=None, mat_names=None, uv2=False):
             lines.append(f"vt {s:.6f} {1.0 - t:.6f}")
         for nx, ny, nz in normals:
             lines.append(f"vn {nx:.4f} {ny:.4f} {nz:.4f}")
-        for i in range(2, len(verts)):
-            if adc[i]:
-                continue
-            a, b, c = base + i - 2, base + i - 1, base + i
-            if i % 2:
-                a, b = b, a
-            # o .obj escreve "a c b": confere esse giro com as normais do
-            # próprio jogo e desvira se precisar. Assim dá pra ligar o
-            # descarte de face de trás (painéis de duas faces no mesmo lugar,
-            # tipo a tampa do motor do Sphinx, não ficam piscando)
-            la, lb, lc = a - base, b - base, c - base
-            pa, pb, pc = verts[la], verts[lb], verts[lc]
-            e1 = [pc[k] - pa[k] for k in range(3)]
-            e2 = [pb[k] - pa[k] for k in range(3)]
-            fn = (e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0])
-            vn = [normals[la][k] + normals[lb][k] + normals[lc][k] for k in range(3)]
-            if fn[0] * vn[0] + fn[1] * vn[1] + fn[2] * vn[2] < 0:
-                b, c = c, b
-            faces.append((mat, a + 1, b + 1, c + 1))
+        for la, lb, lc in triangulos(verts, normals, adc):
+            faces.append((mat, base + la + 1, base + lb + 1, base + lc + 1))
         base += len(verts)
     current = None
     for mat, a, b, c in faces:

@@ -68,6 +68,15 @@ const COTOVELO_FORA := 55.0
 # PAREDE_FOLGA da porta (a manga tem ~5 cm); se precisar ele vai pra dentro,
 # até COTOVELO_DENTRO graus (Fireball: varava 6.4 cm a porta)
 const PAREDE_FOLGA := 0.07
+# cotovelo aberto no mínimo isso pra fora (graus; car.gd COTOVELO_MIN_CARRO);
+# a porta ainda puxa pra dentro. COT_MIN=graus testa (diagnóstico)
+var cotovelo_min := float(OS.get_environment("COT_MIN")) if OS.get_environment("COT_MIN") != "" else 0.0
+# por carro (car.gd PAREDE_FOLGA_CARRO); PAREDE=m testa (diagnóstico)
+var parede_folga := float(OS.get_environment("PAREDE")) if OS.get_environment("PAREDE") != "" else PAREDE_FOLGA
+# a parede vale pros 2 braços (espelhada no plano do volante): no Fireball só
+# o cotovelo esquerdo batia na porta e ia pra dentro (-2°) e o direito ficava
+# a 56° pra fora: braços diferentes ("o esquerdo mais torto", Matheus, nov/2026)
+const PAREDE_SIMETRICA := true
 const COTOVELO_DENTRO := 30.0
 var paredes := {}                 # car.gd _paredes_do_piloto (frame do esqueleto)
 # a solução (giro da mão e cotovelo) é tabelada em TAB_N direções do volante
@@ -459,6 +468,16 @@ func _folga_parede(e: Vector3, fora: Vector3) -> float:
 	if paredes.is_empty():
 		return INF
 	var lado := 1 if fora.x > 0.0 else -1
+	var f := _folga_lado(e, lado)
+	if PAREDE_SIMETRICA and _vol:
+		# o mesmo cotovelo espelhado no plano do volante contra a parede do
+		# outro lado: a porta de um lado segura os dois braços igual
+		var nl := _ve.cross(Vector3.UP).normalized()
+		f = minf(f, _folga_lado(e - 2.0 * nl * nl.dot(e - _vc), -lado))
+	return f
+
+
+func _folga_lado(e: Vector3, lado: int) -> float:
 	var passo: Vector2 = paredes.passo
 	var n: Vector2i = paredes.n
 	var i := floori((e.y - paredes.y0) / passo.x)
@@ -472,11 +491,11 @@ func _folga_parede(e: Vector3, fora: Vector3) -> float:
 ## ângulo do cotovelo final: preso em 0..COTOVELO_FORA e, se o cotovelo fica a
 ## menos de PAREDE_FOLGA da carroceria, vai pra dentro (até COTOVELO_DENTRO)
 func _limita_cotovelo(a: Vector3, w: Vector3, l1: float, l2: float, th: float, fora: Vector3, ref: Vector3) -> float:
-	var t := clampf(th, 0.0, deg_to_rad(COTOVELO_FORA))
+	var t := clampf(th, deg_to_rad(cotovelo_min), deg_to_rad(COTOVELO_FORA))
 	if paredes.is_empty():
 		return t
 	var passo := deg_to_rad(5.0)
-	while t > -deg_to_rad(COTOVELO_DENTRO) and _folga_parede(_cotovelo_ang(a, w, l1, l2, t, fora, ref), fora) < PAREDE_FOLGA:
+	while t > -deg_to_rad(COTOVELO_DENTRO) and _folga_parede(_cotovelo_ang(a, w, l1, l2, t, fora, ref), fora) < parede_folga:
 		t -= passo
 	return t
 

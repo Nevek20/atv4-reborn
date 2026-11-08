@@ -20,6 +20,10 @@ extends Node3D
 @export var material_path := "res://assets/terrain/rx01_material.bin"
 @export var materials_xml := "res://data/materials_rx01.xml"
 @export var texture_path := "res://assets/terrain/rx01_terrain.jpg"
+## melhoria nossa: textura do chão ampliada (Upscayl do Matheus) em
+## assets/terrain/hd/ com o nome da original, .png ou .jpg (fora do git); sem
+## ela (ou false) usa a do jogo (2048 x 2048, ~1 m por pixel)
+const CHAO_HD := true
 @export var size := 1025          # pontos por lado
 @export var mesh_step := 2        # malha visual usa 1 ponto a cada N (colisão usa todos)
 
@@ -94,6 +98,12 @@ static func load_materials(path: String) -> Array:
 		elif nome == "DustColour" and i >= 0:
 			# cor da poeira (registro +0x10): a lama das rodas puxa pra ela (0x2242d0)
 			out[i]["DustColour"] = Color(x.get_named_attribute_value_safe("R").to_float(),
+				x.get_named_attribute_value_safe("G").to_float(),
+				x.get_named_attribute_value_safe("B").to_float(),
+				x.get_named_attribute_value_safe("A").to_float())
+		elif nome == "DirtColour" and i >= 0:
+			# cor da terra (registro +0x20): as pedrinhas do pneu (0x3bb618, pedras.gd)
+			out[i]["DirtColour"] = Color(x.get_named_attribute_value_safe("R").to_float(),
 				x.get_named_attribute_value_safe("G").to_float(),
 				x.get_named_attribute_value_safe("B").to_float(),
 				x.get_named_attribute_value_safe("A").to_float())
@@ -251,16 +261,163 @@ func _build_mesh() -> void:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
-	var mat := StandardMaterial3D.new()
-	if ResourceLoader.exists(texture_path):
-		mat.albedo_texture = load(texture_path)
-	else:
-		mat.albedo_color = Color(0.45, 0.38, 0.3)
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	mat.roughness = 1.0
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var textura: Texture2D = _textura_hd() if CHAO_HD else null
+	if textura == null:
+		textura = _carrega(texture_path)
+	print("chão: ", textura_usada)
+	var mat := ShaderMaterial.new()
+	mat.shader = _shader_chao()
+	if textura:
+		mat.set_shader_parameter("tex", textura)
+	mat.set_shader_parameter("sombra", SOMBRA)
+	var det := _detalhe()
+	if det:
+		mat.set_shader_parameter("detalhe", det)
+		mat.set_shader_parameter("det_forca", DETALHE_FORCA if not OS.has_environment("DETALHE") else float(OS.get_environment("DETALHE")))
+		mat.set_shader_parameter("det_metros", DETALHE_M if not OS.has_environment("DETALHE_M") else float(OS.get_environment("DETALHE_M")))
+		var some := DETALHE_SOME
+		if OS.has_environment("DETALHE_SOME"):
+			var ps := OS.get_environment("DETALHE_SOME").split(",")
+			some = Vector2(float(ps[0]), float(ps[1]))
+		mat.set_shader_parameter("det_some", some)
 
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
 	mi.material_override = mat
 	add_child(mi)
+
+
+var textura_usada := "nenhuma (cor lisa)"
+
+## A textura do chão já vem com a luz assada (sombra do arco, das
+## arquibancadas e dos morros nela): o jogo desenha a cor dela direto. Medido
+## no print do Matheus na largada (nov/2026): chão 78, 72, 66 x textura 85, 75,
+## 65 ali. Antes o Godot iluminava de novo (sol 1.2 + ambiente 0.8 + filmic):
+## o chão saía ~105 cinza frio. Sem luz nem ambiente do Godot; só a sombra
+## dinâmica (o carro) escurece. Os objetos não fazem sombra dinâmica (a deles
+## já está na textura).
+## SOMBRA: NOSSO, medida no mesmo print (chão na sombra do carro / no sol =
+## 0.66 na tela; o DynamicShadow Intensity 0.5 / InShadowMultiply 0.8 do
+## Environment.xml não foram achados no exe)
+const SOMBRA := 0.66
+static var _sh_chao: Shader = null
+
+
+## Detalhe do chão (PORTA parcial, nov/2026, "o chão do jogo tem mais
+## qualidade", prints do Matheus): o renderer do relevo (0x1eb758) carrega a
+## textura "detail" da pasta Env da pista (RX01: DETAIL.bog, 128 x 128, cinza
+## fixo com o desenho no ALFA, 12..190 do PS2) e a repete por cima da textura
+## do chão. env.header +0x2c = 5.0 vai pro renderer +0x1e4 e o 0x29ed98 faz
+## 5 x 16 x (+0x1e8): lido como 80 repetições por bloco de 128 m (1.6 m cada).
+## O jeito de misturar fica no VU1 (não achado). NOSSO: fator = 1 + força x
+## (alfa / média - 1), média do brilho igual (a cor média já batia com o
+## jogo) e só o grão; DETALHE_FORCA calibrada no desvio do grão fino dos
+## prints do jogo (perto do carro ~13 de 255, largada ~11). DETALHE=x e
+## DETALHE_M=x trocam (diagnóstico). Sem assets/terrain/rx01_detalhe.png
+## (tools/rx01_objetos.py) o chão fica liso como antes.
+const DETALHE_ARQ := "res://assets/terrain/rx01_detalhe.png"
+const DETALHE_M := 2.4
+const DETALHE_FORCA := 0.55
+const DETALHE_SOME := Vector2(4.0, 20.0)    # NOSSO: apaga de 4 a 20 m (o grão do jogo some antes que o nosso)
+
+
+func _detalhe() -> Texture2D:
+	if not FileAccess.file_exists(DETALHE_ARQ):
+		return null
+	var img := Image.load_from_file(ProjectSettings.globalize_path(DETALHE_ARQ))
+	if img == null or img.is_empty():
+		return null
+	img.convert(Image.FORMAT_L8)
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+
+
+static func _shader_chao() -> Shader:
+	if _sh_chao == null:
+		_sh_chao = Shader.new()
+		_sh_chao.code = """
+shader_type spatial;
+render_mode cull_disabled, ambient_light_disabled, specular_disabled;
+uniform sampler2D tex : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform float sombra = 0.66;
+uniform sampler2D detalhe : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float det_forca = 0.0;
+uniform float det_metros = 1.6;
+uniform vec2 det_some = vec2(4.0, 20.0);   // de / até (m da câmera)
+const float DET_MEDIA = 0.3594;   // média do alfa do DETAIL.bog do RX01 (91.6 / 255)
+varying vec3 mundo;
+void vertex() {
+	mundo = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+void fragment() {
+	vec3 c = texture(tex, UV).rgb;
+	float d = texture(detalhe, mundo.xz / det_metros).r;
+	// fator na cor da tela (sRGB): mesmo brilho médio, só o grão
+	float longe = clamp((length(VERTEX) - det_some.x) / (det_some.y - det_some.x), 0.0, 1.0);
+	float f = max(1.0 + det_forca * (1.0 - longe) * (d / DET_MEDIA - 1.0), 0.0);
+	ALBEDO = c * pow(f, 2.2);
+	ROUGHNESS = 1.0;
+}
+void light() {
+	// sem luz: a cor da textura no sol, x sombra (na tela, sRGB) na sombra
+	float k = pow(sombra, 2.2);
+	DIFFUSE_LIGHT += vec3(mix(k, 1.0, ATTENUATION));
+}
+"""
+	return _sh_chao
+
+
+## a versão ampliada: qualquer imagem em assets/terrain/hd/ com o nome da
+## original no começo (o Upscayl põe "_upscayl_2x..." no fim). Lida direto do
+## arquivo pelo CONTEÚDO (PNG, JPG ou WEBP, seja qual for a extensão), sem
+## depender do import do Godot; null se não tiver
+func _textura_hd() -> Texture2D:
+	var pasta := texture_path.get_base_dir() + "/hd/"
+	var nome := texture_path.get_file().get_basename().to_lower()
+	var d := DirAccess.open(pasta)
+	if d == null:
+		return null
+	for f in d.get_files():
+		if f.to_lower().begins_with(nome) and not f.ends_with(".import"):
+			var t := _do_arquivo(pasta + f)
+			if t:
+				return t
+	return null
+
+
+## pelo import do Godot; se falhar (arquivo trocado sem reimportar), direto
+func _carrega(caminho: String) -> Texture2D:
+	if ResourceLoader.exists(caminho):
+		var t = load(caminho)
+		if t is Texture2D:
+			textura_usada = caminho
+			return t
+	return _do_arquivo(caminho)
+
+
+func _do_arquivo(caminho: String) -> Texture2D:
+	var b := FileAccess.get_file_as_bytes(caminho)
+	if b.size() < 12:
+		return null
+	var img := Image.new()
+	var err := ERR_FILE_UNRECOGNIZED
+	if b[0] == 0x89 and b[1] == 0x50:
+		err = img.load_png_from_buffer(b)
+	elif b[0] == 0xFF and b[1] == 0xD8:
+		err = img.load_jpg_from_buffer(b)
+	elif b[0] == 0x52 and b[8] == 0x57:
+		err = img.load_webp_from_buffer(b)
+	if err != OK:
+		push_warning("chão: não consegui ler %s" % caminho)
+		return null
+	# na placa comprimida (DXT1/BC1, 8x menor): 4096 x 4096 = ~11 MB com os
+	# mipmaps no lugar de ~85 MB cru; o import do Godot faria o mesmo
+	var t0 := Time.get_ticks_msec()
+	img.convert(Image.FORMAT_RGB8)
+	img.generate_mipmaps()
+	if img.get_width() > 2048:
+		img.compress(Image.COMPRESS_S3TC)
+	textura_usada = "%s (%dx%d, %s, %d ms)" % [caminho, img.get_width(), img.get_height(),
+		"comprimida" if img.is_compressed() else "crua", Time.get_ticks_msec() - t0]
+	return ImageTexture.create_from_image(img)

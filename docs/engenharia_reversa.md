@@ -119,8 +119,9 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
   limita a velocidade de ré.
 - **Arrasto 0x20e5e8** (na força 0x1a0, contra a velocidade 0x90, |v| =
   0xe0): kN = (Air_drag_coefficient·0.00065 + Damping médio 0x788 ·
-  Ground_drag_coefficient·0.01)·v² + água (veículo+0xae8 ligado: média de
-  veículo+0xaec+4i, Water_drag_*; não portado), no máximo massa·v/dt.
+  Ground_drag_coefficient·0.01)·v² + água (veículo+0xae8 ligado: média d de
+  veículo+0xaec+4i, + Water_drag_coefficient x min(d / max_wheel_depth, 1) x
+  0.01 x v² se d > 0; portado nov/2026, seção Água), no máximo massa·v/dt.
   Params+0x3e0..0x3fc = Misc (Air 1.25, Ground 2.0, água 0.5/0.1, atrito
   interno 5/80/3/5; iguais nos 6 save states). Atrito interno só com
   acelerador (0x380) zero e roda no chão.
@@ -829,8 +830,278 @@ nuvens; tools/fx_jogo.py -> assets/fx/poeira.png).
   alfa = alfa0 (1 - t²), t = idade / vida dela. Vida (0x3b5868): tabela de
   2^Power valores pela posição no grupo, MaxParticleAge / PowerRatio^nível
   (Power 1: MaxParticleAge, MaxParticleAge/PowerRatio, alternando).
-- Não portado ainda: Dirt (pedrinhas WheelSpinDirt e WheelDirtTrail do
-  Effects/#3ffdac18, DirtKickupChance), água, o canto escuro, a sombra.
+- Desenho (0x3af590 só grava tamanho em +0x10/+0x14 e o alfa = (1 - t²) x
+  alfa0 x 128 nos 4 vértices; o quadrado sai no VU1): tamanho do XML x 0.6 =
+  metros (calibrado em prints do jogo; a conta do VU1 não foi lida). Alfa da
+  textura do PS2: 0x80 = 1.0.
+- Não portado ainda: o canto escuro, a sombra. A água está na seção Água.
+  As pedrinhas (o "Dirt") estão na seção seguinte.
+
+## Pedrinhas do pneu (dirt_rocks)
+Porta em pedras.gd (nov/2026). O WheelSpinDirt/WheelDirtTrail do
+Effects/#3ffdac18 o exe NÃO usa (nenhuma referência); quem solta as pedras é
+um gerente próprio achado pela string "dirt_rocks" (0x5b98e0).
+- Gerente 0x3bade8 (construtor; global 0x7f58cc, criado no 0x171c28,
+  destruído no 0x3a9f00 e 0x3bb528), por quadro 0x3bb5d0 (do 0x1722ec) =
+  emite (0x3bb618) e anda os 2 estoques (0x3b9d20). Estoque +0x20 = pedras e
+  borrifo, textura Sprites/dirt_rocks (.bog 128x128 + .bed; caixas "Dirt0"
+  + 1..4 = 4 pedras cinza e "Dirt05" = borrifo de terra, 0x5b98c8/0x5b98d0);
+  estoque +0x18 = Particle_Debris.bantam (lasquinhas da batida, 0x3bbd60,
+  chamado nos contatos 0x151740 e 0x152bb4; não portado). RAM: 256 no
+  estoque das pedras; gerente +0x14 = 30 m (distância pros carros da IA).
+- Emissão 0x3bb618, cada veículo, com: veículo+0xa68+0x6c < 2, sem água
+  (veículo+0xae8 = 0), |v| (veículo+0xb18) >= 0.447 m/s, corpo+0x2f0 != 0
+  (1 nos save states); IA só a < 30 m da câmera e desenhada. Interpola 5
+  números pela derrapagem |β| (corpo+0x6c0, presa em ±1 rad; 0x3bad60):
+  reto (0.16, 3.1, 0.5, 10, 10) -> de lado (0.3, 12, 1, 1, 0.3) = c0..c4.
+  Direção = -frente (corpo+0xd0) girada em Y por β x (-90°) (pro lado em que
+  o carro escorrega, drr2), y trocado por c3 ± c4, normalizada; lado =
+  direção x 0x7f76d0 (cima). Rodas: todas menos 0 e 2 (0x1f1ef0: FL e FR),
+  com 0x20ff18 (material da roda, veículo+0xa88; ponto de contato recuado
+  v/60; patinada 0x600 presa 0..1; v = corpo+0x90) e material IsDirt (+0x48).
+  curso = (W+0xe8 - corpo+0x4c0[i]) / (W+0xf0 - corpo+0x4c0[i]) preso 0..1
+  (0x4c0 = curso parado, W+0xf0 = máximo). Curso <= 1 - DirtKickupChance
+  (+0x58): só se patinada > sorteio x 0.3 + 0.05. Sorteio < Rockiness
+  (+0x4c): pedra (tipo 0, caixa Dirt01..04 sorteada, tamanho 0.14, vel 10);
+  senão borrifo (tipo 1, Dirt05, 2.0, vel 5); com veículo+0xa6c+0x8c+0x18 != 0
+  0.12/7.5 e 1.2/4 (0 nos buggies e trucks da RAM). Ponto = contato + lado x
+  l (l = sorteio ±c0), velocidade = direção x (vel ± 1) + lado x l x c1 + v
+  x c2, cor = DirtColour (+0x20) x ((1 - veículo+0xc0) + veículo+0xc0 x
+  env+0x3c0) (sombra, não portada). Uma por roda por quadro.
+- Estoque (0x3b8ed0 cria, 0x3b96f8 solta, 0x3ba650 anda): partícula +0x08
+  tipo, +0x10 posição, +0x20 velocidade, +0x30 idade, +0x34 chão (começa
+  -FLT_MAX), +0x40/+0x44 tamanho. Pedra: vive 1 s, vy -= 30 dt, pos += v dt,
+  alfa = min((1 - idade) 5, 1); abaixo do chão: y = chão, vy = -vy, v x 0.4.
+  Borrifo: vive 0.6 s, vy -= 10 dt, tamanho += dt, alfa = min((0.6 - idade)
+  2, 1), sem chão. Chão: 0x3b9d20 mede o relevo (0x1edb50) + 0.02 (+0xdc) em
+  rodízio, 5 por quadro (+0xd4). Cor do vértice = cor x 128 (0x80 = 1.0).
+- Desenho 0x3b9fd0: quadrado virado pra câmera, ALPHA 0x44 (mistura comum).
+  Tamanho no VU1 (não lido): x 0.6 como a poeira (no vídeo do Matheus a pedra
+  tem ~10 px ao lado da roda de trás).
+- Conferido no drr2 (derrapando a 8.5 m/s, β -1.05): 80 vivas, 2 por quadro
+  (dt 0.0196), pedras 0.14 e borrifos 2.0 + idade, recém-soltas com v - v do
+  carro = (5.4, 4.8, 6.0): ~45° pra cima e pro lado da velocidade.
+
+## Som da batida (Collisions)
+Porta em sfx_carro.gd batida_passo (nov/2026). Leitor 0x372c80 (chamado no
+0x373c74; banco de sons +0xf0): +0x00 SmallThreshold, +0x04 LargeThreshold,
++0x08 RiderThreshold, +0x0c MinRetriggerTime, +0x10 MinScrapeTime, +0x14
+OffsetEnhance, +0x94 Patches (registros de 0xac: Small +0, Large +0x3c,
+Scraping +0x78 com volume +0x8c e tom +0x90), +0x8c InteractiveObjects,
++0x24 Materials (0x377ba8: as 24 entradas = "Default"; entrada +0x18
+CollisionPatch, +0x30 = patch achado no 0x11db48, que devolve o 1º, o
+"Default", quando não acha: o "Small" do XML não existe), +0x18/+0x1c/+0x20 =
+patches Vehicle/RiderM/RiderF.
+- 0x36e7a8 (por quadro, por veículo; som+0x490 = Collisions): contato mais
+  forte do casco = corpo+0x7a0 + corpo+0x860 x 0x40 (registro: +0x00
+  velocidade na normal, +0x10 normal, +0x20 ponto do contato menos o centro
+  do corpo, +0x30 material ou -NaN, +0x34 outro objeto ou 0). Esperas
+  som+0x498 (retrigger) e +0x49c (raspão) descem dt. Raspão > 0 = loop
+  Scraping do patch som+0x494 (volume x CollisionVolume x SFXVolume), 0 =
+  key-off. Patch: material -> tabela Materials (= Default), sem material ->
+  Vehicle. Corpo+0xe0 (|v|) < 2.5 mph (0x55186c): sai. Velocidade na normal >
+  SmallThreshold e espera livre: outro 0 = Small/Large (> LargeThreshold) do
+  patch, outro tipo 2 = Vehicle, tipo 9 = InteractiveObjects do objeto;
+  toca 0x36db68 e espera = MinRetriggerTime. Outro 0 e |r̂ . v̂| > 0.7 (r =
+  +0x20): raspão = MinScrapeTime.
+- crash_Storm: registro 0 com material 0x16 (a parede de pedra tem
+  material), outro 0, normal (-0.378, 0, -0.926).
+
+## Lasquinhas da batida (Particle_Debris)
+Porta em lascas.gd (nov/2026). Estoque +0x18 do mesmo gerente das pedrinhas:
+Levels/Grass/Models/Bantams/Particle_Debris.bantam (36 triângulos, ~25 x 7 x
+22 cm, sombra assada no vértice) + Levels/Grass/Models/Textures/Debris.bog
+(64x64 branca). Configuração (construtor 0x3bade8, conferida na RAM): 8 x 1
+grupo = 8 no máximo, vida +0xa8 4 s, gravidade +0xa4 30, some +0xb0 1/s,
+giro +0xd0 30 (x 1/60 por quadro), chão 2 por quadro (+0xd4), quica +0xd8
+0.5, chão + 0.02 (+0xdc).
+- Quem chama: tabela de pares de colisão montada no 0x14d458
+  (FUN_00254070(tipo A, tipo B, handler)). Par (2, 0) -> handler 0x561a58,
+  +0x14 = 0x1515e0 (veículo x mundo fixo; o mesmo contato lê o material do
+  chão, +0x3c, e suja o carro com o casco na terra sem roda no chão:
+  0x2240c8 com WheelDirtRate). Par (2, 2) -> 0x561918 -> 0x1529d0 (carro x
+  carro, só do mais rápido). Os dois chamam 0x3bbd60 por contato.
+- 0x3bbd60(gerente, {corpo, ?, ponto, normal}, outro): se o ponto fica a
+  >= 1 m de veículo+0xb50 (gravado em seguida), v = corpo+0x20 (com outro:
+  v relativa), |v| = corpo+0x70. Números (mph x 0.44694445): mundo
+  gerente+0x64 = (30, 80, 25, 35, 2, 1.5, 2, 6, 0.7), carro x carro +0x88 =
+  (25, 45, 24, 27, 4, 3, 4, 6, 0.7). |v| >= f0: t = (|v| - f0)/(f1 - f0)
+  preso, saída = f2 + t (f3 - f2), quantas = int((f6 + t (f7 - f6)) x
+  -(v̂.n)) (mínimo 1), base 0x61e010(n, cima): linha 3 = n, linha 1 = cima x
+  n normalizada, linha 2 = n x linha 1. Cada uma: tamanho por eixo 0.7..1.3
+  (x 0.5 com veículo+0xa6c+0x8c+0x18 != 0) e, em 1/3, o x ou o z x
+  1.5..2.5; direção = linha1 x sorteio(±f4) + linha2 x (sorteio(±f4) + f5)
+  + n, normalizada; velocidade = direção x saída x sorteio(0.5..1) + (v -
+  n (v.n)) x f8. Cor = veículo+0x9d0+0xc4+0x78+0xb0 = BASE da pintura (RAM:
+  Renegade 220,231,235, Storm 190,26,16, Bulldog, Phantom, Inferno batem com
+  o 150xx) x sombra ((1 - veículo+0xc0) + veículo+0xc0 x env+0x3c0).
+- 0x3b96f8 (tipo 2, bantam): eixo de giro sorteado, giro = 30/60 rad por
+  quadro. 0x3ba650 tipo 2: idade > 4 some; vy -= 30 dt, pos += v dt, alfa =
+  min((4 - idade) x 1, 1); abaixo do chão: vy = -vy, v x 0.5, y = chão, eixo
+  novo e giro x 0.5; base x giro por quadro.
+- Conferido no crash_Storm (parede de pedra): 5 vivas, 4 com 0.216 s (giro
+  0.5, tamanhos 0.71..1.29 e uma 2.58) e uma de 2.24 s parada no chão (vel
+  só a do quique, giro 0). No remake: tests/teste_lascas.gd.
+
+## Objetos da pista (RX01)
+
+Porta em objetos_rx01.gd + tools/rx01_objetos.py (nov/2026). O RX01 não tem
+modelo no stream: Levels/RX_01/Env/Default/Default/Pingus/pingustream.header
+é o log "Pools Total = 0 bytes. Models Total = 0 bytes" (StreamP e StreamW
+vazios). Tudo vem do evento:
+- Formato de chunks (#def5772a e RALLYCROSS.bin): u32 0x00030000, chunks
+  F00DABCD, u32 tamanho (até o DEADDCBA, incluso), u32 tipo (hash), campos e
+  chunks filhos, DEADDCBA. Campo = chave (hash) + u32, ou chave + u32 n + n
+  bytes de texto preenchido até 4 (o preenchimento às vezes tem lixo: os
+  textos conhecidos são 01ee2ec7 = nome do modelo, 489c80f9 = classe da
+  entidade). Vetor = chunk filho com x/y/z em 484dc9b4, 3f4af922, a643a898.
+- Instâncias (Event/Rallycross/Default/#def5772a, other/12290), raiz
+  4939a99a: 1c85cac0 = pingus (um e9aba222 por modelo: nome + 7db6ffbc =
+  quantas; UM grupo 1b05a8d9 com os 57 registros de 160 bytes na ordem dos
+  modelos: matriz 4x4 com linhas = eixos do modelo no mundo e a 4ª =
+  posição, +0x40 centro, +0x6c flags 0x04100000, +0x70 cor RGBA ~0.6);
+  e0baf2b2 = bantams (um e9aba222 por modelo com 21fdb9c8 grupos 1b05a8d9:
+  7db6ffbc = n, c32f9493 + 40 bytes do jogo em execução + n x 96 bytes:
+  matriz 3x4 com escala, posição + 1.0, +0x40 cor RGBA ~1.0, +0x50 flags
+  0x17000000); 24530fce = quadtree com índice das mesmas instâncias. 651
+  bantams (o cabeçalho 1c85cac0 tem ef8c259e = 651). Posições no mundo do
+  jogo (x 0..1024, z 1024..2048), em cima do relevo do StreamT (moitas a
+  0.00 m de média; cada modelo tem a origem num lugar).
+- Entidades (Event/Rallycross/RALLYCROSS.bin, other/12289): cIntroCamera,
+  8 cStartPosition (posição 1 = (581.3, 201.8, 1564.5), direção (-0.907, 0,
+  -0.421); a largada da RAM é (580.8, 1564.3)), 14 cInstantRespotBox (caixas
+  de reposição), 6 cCrowdEffectBox, 4 cGenTrigger, 2 cLightDirectional, 32
+  cFenceNodeEntity + 26 cFenceLinkEntity (cercas entre nós, com os .clm
+  GEN_Barrier_RallyFence / SAM_Barrier_RallyFence / SAM_Crowd_BarrierTG).
+  Cada uma com pos (3ef310bc), dir (74f784c3), tamanho (44c2fa64).
+- .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
+  o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
+  archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice
+  antes) não serve: o rx01_objetos.py converte os .bog do RX01 direto.
+- .bantam ("TNAB" em 0x44): +0x48 ?, raio, caixa mín/máx (vec4); +0x70 n
+  materiais e onde (0x40 cada), +0x78 n desenhos e onde (16 bytes: slot da
+  textura, ?, ?, início do pacote). Pacote = tag de DMA (qwc nos 16 bits de
+  baixo) + VIF; os vértices vêm num UNPACK V4-32 no endereço 1, 2 qwords por
+  vértice: (x, y, z, flag 0x8000 = ADC) e (u | R, v | G, B, A): UV = float
+  sem o byte de baixo, cor RGBA nos bytes de baixo (0x80 = 1.0). Sem normal
+  (luz assada). Lista de texturas = o #hash logo DEPOIS do bantam no archive
+  (u32 n + n nomes de 128 bytes). Os do GEN_HayBale e GEN_Rock_Group (132
+  bytes) e o .pfn de 13 bytes da WATER_puddle01 não foram extraídos em
+  nenhuma pista: por eliminação são GEN_HayBale, GEN_Rock e water_puddle (as
+  3 texturas do RX01 que sobram sem modelo).
+- Colisão: Models/KDt/#crc32(minúsculo("<modelo>.kdt")) ^ 0xFFFFFFFF. u32 n,
+  12 bytes, n registros de 0x70 = triângulo: plano da face + 3 planos das
+  arestas (n, d com n.p + d = 0), caixa mín/máx com 3 cm de folga, flag
+  (0x10); depois a árvore. Vértices = face com cada par de arestas. 16 têm
+  nome pelo hash; 11 sem nome no dicionário do archive foram casados pela
+  caixa (tools/rx01_objetos.py KDT_POR_CAIXA): chalés 01/02/03, US_Barn_1,
+  cerca de chevron, placas 02/03, arquibancadas GEN_AM e US 02/03, barreira
+  da torcida, alto-falante. Models/HsC/*.hsc ("CSH", o casco dos carros):
+  só a cerca de plástico, a de madeira e o fardo (15 esferas); no jogo eles
+  quebram (bantams *_Particle_*, pontos "particle Hay" no GEN_HayBale.pts):
+  ver Objetos interativos. Moitas sem colisão nenhuma.
+- Mundo do remake: base = colunas das linhas da matriz com x <-> z
+  (Terrain.dir_do_jogo), posição Terrain.do_jogo: determinante -1, o Godot
+  desenha espelhado certo (o "START" do arco sai legível).
+- Bantam é pré-iluminado (sem normal): desenhado SEM luz, textura x cor
+  do vértice x a cor de luz da instância (a luz "Bantam" do Environment.xml
+  é 1.0 no sol). Com o sol do Godot as placas de folha de costas pro sol
+  ficavam pretas e as de frente amareladas (prints do Matheus, nov/2026).
+  Folhagem (Alder, pinheiro, moita): material do bantam +0x38 = 5 (0 em
+  todo o resto); cada folha é uma placa TRIANGULAR com UV de ~-0.3 a 1.4 em
+  volta do quadrado da textura, de borda transparente: textura presa na
+  borda (repetindo, os cantos do triângulo mostravam pedaços cortados da
+  textura, "placas soltas" no céu). O bit exato não foi conferido no exe.
+- Cercas das entidades (cFenceNodeEntity/cFenceLinkEntity): só do editor. O
+  exe não tem essas classes (lista de nomes de entidade em 0x579480..); as
+  peças foram geradas por uma curva pelos nós (~3.2 m) e gravadas como
+  bantams no #def5772a. 2 das 6 correntes não têm peça gravada e não
+  aparecem no jogo (conferido pelo Matheus).
+- Não portado: LOD (TREE_*_LOD1), cor de luz por instância, cIntroCamera,
+  cInstantRespotBox (reposição), cGenTrigger, cCrowdEffectBox, as 2 luzes.
+
+- Camada do lote de pingu (2ª textura pelo 2º UV), como o GS desenha:
+  - O registro do lote (0x50 bytes em 0xD0 + i·0x50) passa pelo 0x289228:
+    +0x08 = quantas texturas, +0x10 modo, +0x14 slot, +0x18 slot da camada
+    (vira ponteiro na carga), +0x20 = marca do tipo (0x11111111 uma
+    textura, 0x22222222 com camada). 0x289148 ajusta o modo pelas flags do
+    modelo e põe +0x08 = 2 se +0x18 != 0.
+  - Tipos do renderer (cPinguRenderer, construtor 0x28d340): 0x28dad8 =
+    0x11111111 (DAT_007f4814), 0x28db40 = 0x22222222 (DAT_007f4818), 0x28dba8
+    = 0x2e2e2e2e (DAT_007fdcac: modo & 0x40 com 2 texturas, +0x04 = 1), 0x28da78
+    = sem textura. Cada um guarda 2 endereços de programa do VU1 (0x283/0x303
+    no de camada).
+  - Estado do GS: palavra de 64 bits por contexto (0x658b40 -> registradores
+    no 0x658f50): bits 0..15 = ALPHA (0x42/0x43), 16..21 = PRMODE (IIP,
+    TME, FGE invertidos; ABE, AA1, FST), 24 = FBA, 25.. = TEST (ATE, ATST,
+    AREF, ...). Contexto 2 (+0x150) = a 2ª passada.
+  - 0x2897f0 (lote com camada, chamado no 0x289908): 2ª passada = 0x36080044
+    (0x360c0044 sem névoa): ALPHA 0x44 = (Cs - Cd) x As + Cd, ABE ligado,
+    teste de alfa GEQUAL 1: a mistura comum.
+  - As = alfa da textura (0x80 = 1.0) x alfa do vértice (V4-8 de cor, 0x80 =
+    1.0). Nos carros o pintor de sujeira mexe nesse alfa (Sujeira); nos
+    objetos da pista o artista pintou: GEN_PRO_StartArch02 (Start_DirtOverlay,
+    textura preta com alfa 0..0x78) 40..128 por vértice, US_Barn_1 madeira e
+    ferrugem ~0.4 em média, celeiro/cabana idem, Crowd_ColourChange ~0.8.
+    O import de .obj do Godot não lê o alfa do vértice (v x y z r g b a):
+    o rx01_objetos.py manda a malha da camada no modelos.json ("tris").
+
+## Luz e névoa (Environment.xml)
+
+- Leitor 0x1c15d8 (chamado na carga da pista pelo 0x174398; objeto global
+  [0x7f48e0], 0x570 bytes). Lighting/Overbright: só ActualBrightness (+0x290)
+  e GrassBrightness (+0x294) são lidos (TargetBrightness, Threshold, Power e
+  Colour não). InSun (i = 0) e InShadow (i = 1), base +0x110·i: pares
+  (Ambient, Sun), (Bantam, __dummy__), (Rider, RiderSun), (Vehicle,
+  VehicleSun), um par por 0x40: 1º Strength +0x90 / Colour +0x80, 2º
+  Strength +0xb0 / Colour +0xa0; Dir só no Sun do InSun (+0x70).
+  DynamicShadow: Intensity +0x3c4, InShadowMultiply +0x3c8. Fog: Start
+  +0x2c0, End +0x2c4 (sem End = DrawDistance Terrain +0x29c; +0x34 = 1),
+  Density +0x2c8, Colour +0x2d0. DrawDistance: Terrain +0x29c, Instances
+  +0x2a0.
+- Névoa: 0x390a80 / 0x38f238 põem na câmera o far = DrawDistance Terrain
+  (400 no RX01), Start/End em câmera+0x170/0x174 e a cor em +0x190. RX01:
+  linear de 87.5 a 400 m, cor (0.48, 0.44, 0.42), cúpulas do céu sem névoa
+  (Fog="0").
+- Sombra dinâmica (0x1b3fe0): força = k x Intensity x ((1 - s) + s x
+  InShadowMultiply) x ... (s = quanto o objeto está na sombra assada);
+  RX01: 0.5 no sol. Na tela (print do Matheus na largada) o chão na sombra
+  do carro fica 0.66 do chão no sol.
+- Chão: a textura do relevo (assets/terrain/rx01_terrain.jpg) tem a luz
+  assada (sombra do arco, arquibancadas, morros). No print do jogo o chão da
+  largada é 78, 72, 66 e a textura ali 85, 75, 65: desenhada sem luz.
+- Detalhe do chão: o renderer do relevo (0x1eb758, objeto com o
+  env.header de 0x48 bytes em +0x10: tile 128 m em +0x24, +0x3c = 5.0)
+  carrega "<pasta Env>/detail" (RX01: DETAIL.bog, 128 x 128 4 bits, RGB 131
+  fixo e alfa 12..190) em +0xd0 e "/Init/White" em +0xd4. +0x3c vai pro
+  renderer 0x7f6718 +0x1e4 (padrão 5.0 no 0x29ce38; 2x no LOD de longe em
+  0x1ec898) e o 0x29ed98 faz +0x138/+0x148 = +0x1e4 x 16 x +0x1e8/+0x1ec.
+  O renderer também guarda o ActualBrightness (+0xe4). A mistura e o +0x1e8
+  ficam no VU1 (não achados). O .gob tem os 4 níveis de mipmap (0x158 =
+  10880 bytes a partir do 0x15c): o nível 0 é o primeiro.
+- PS2 sem tonemap. Godot faz a luz em espaço linear e o PS2 na cor da tela:
+  o mesmo ambiente 0.66 clareava muito mais no remake.
+
+## Céu (SkyDome)
+
+Porta em ceu.gd (nov/2026). Environment.xml da pista (Levels/RX_01/Env/
+Default/Environment.xml = xml/12282, data/environment_rx01.xml): SkyDome com
+Outer (SKY_Bright_LowCloud, yOffset 12.5, rotation 234.8) e Inner
+(BACKDROP_Asia_1, 23.4, 154.5), alpha 1, fog 0. O XML diz .clm; o loader
+(0x1d62b8, FUN_00287f50) abre o .pingu de Levels/SkyDomes (textura pela
+.pfn: SKY_Bright_LowCloud, BACKDROP_ASIA_1e). Leitura 0x1d5c40, registro de
+0x40: +0 modelo, +4 yOffset, +8 rotation, +0xc rotationSpeed, +0x10 alpha
+(1.0), +0x14 fog, +0x18 lightning, +0x20 tint (vec4, 0..2). Desenho
+0x1d6500: pula alpha < 0.01; cor do modelo = tint com o alpha (fog = 0), ou
+0.5 x cor do ambiente x tint; matriz = giro em Y (0x61e2a0 com
+0x6891f8 = cos e 0x6893f0 = sin do fdlibm: linhas (c, 0, -s), (0, 1, 0),
+(s, 0, c)) na posição da câmera + (0, yOffset, 0), escala 1; ZBUF com ZMSK
+(registradores 0x4e/0x4f), Outer e depois Inner. As cúpulas têm raio ~43 m
+(céu, y -27.5..18.7) e ~39 m (montanhas, y -26.5..-1.3, alfa em 4 níveis);
+cor do vértice 1.0 no céu e 0.71 nas montanhas. No remake: ESCALA 70 em
+volta da câmera (mesmos ângulos; relevo e objetos ficam na frente pelo teste
+de profundidade), sem luz e sem névoa. Não portado: SunHalo, rotationSpeed
+(0 no RX01), lightning.
 
 ## Mão (espelho)
 
@@ -921,3 +1192,78 @@ outras ficam como a introdução da corrida deixou (zoom 0.6027, 17.85/s) e
 parado podem estar mais perto do carro que a ativa. Câmbio em corpo+0x2d0 (+0x08
 marchas, +0x20 final, +0x9c embreagem máx, +0x60 rpm de subir). Motor em
 corpo+0x2ac (parâmetros; estado logo antes, com rpm e limitador).
+
+
+## Água
+
+Porta em objetos_rx01.gd (agua_em), car.gd (_agua_passo, _arrasto, lama),
+poeira.gd (ramo da água) e sfx_carro.gd (nov/2026). Save states do Matheus
+na poça do RX01: Renegade_dentro_da_agua.p2s (parado) e
+Renegade_andando_na_agua.p2s (61 km/h). tests/teste_agua.gd.
+- Objeto da água (vtable 0xe842e0; o do RX01 em 0x10cad20): +0x10 centro,
+  +0x20/+0x30/+0x40 linhas do giro (15° em Y), +0x50 meia-largura x, +0x58
+  meia-largura z, +0x60 superfície (206.017), +0x70 cor (0.588, 0.607, 0.614,
+  1.0). É a WATER_puddle01.pingu da instância: centro/meia-largura = caixa do
+  modelo (x de -20.66 a 21.35, z de -19.71 a 20.05) e a superfície = y dela.
+- 0x1bb098 (busca): testa antes a água da roda anterior, depois a lista
+  (DAT_007f5334+0x2c). Profundidade = superfície - y do ponto; dentro =
+  profundidade >= 0 e |d . linha0| < meia x e |d . linha2| < meia z. Grava a
+  profundidade da última testada mesmo fora.
+- 0x201c20 (por quadro): ponto = roda no mundo (corpo+0x500 + i x 0x10) com y
+  - raio (W+0x30); veículo+0xaec+4i = profundidade, veículo+0xae8 = água da
+  última roda. Também testa o meio do casco (0x9f0 +0x130/+0x140) contra a
+  superfície e passa de DAT_0055052c/0x550528 chama 0x159d18 (carro afundado;
+  não portado, a poça é rasa).
+- Arrasto 0x20e5e8: ver Forças. Lama 0x2242d0: na água o alvo é o registro
+  DAT_007f4bf8+0x20 (DustColour 0, DustType 3 = Water, WheelDirtAlpha 0,
+  WheelDirtRate 30; material da FL na RAM = -2). Na RAM parado: t 0.10, taxa
+  30, alvo (0.6, 0.51, 0.4, alfa 0) (com alfa 0 só o alfa cai).
+- Espirro 0x225108 (ramo com veículo+0xae8 e profundidade > 0): material = o
+  registro da água, cor = objeto +0x70 com alfa x 0.6 (de = para = cor, sem a
+  troca de 1 s), força = (|v| - 0.5)/35 sem a folga, ponto = roda no mundo com
+  y = ((y - raio) + superfície) / 2, sem o recuo de velocidade/60. Tipo Water
+  do Dust.xml (MaxParticleAge 0.3, Power 0), textura Sprites/WorldFXwater_dust
+  (atlas igual ao da poeira; só as 4 células de cima têm desenho).
+- Marca de pneu 0x224c38: na água (profundidade > 0) não deixa marca.
+- Som 0x370548: veículo+0xae8 e veículo+0xaec[roda] > -0.05 = material de som
+  "Water" (string 0x5b1008) do SoundDatabase (Surface/Water em loop).
+- Desenho: o lote da poça é transparente (+0x00 = 1) e a water_puddle
+  (128 x 128, cinza 105) tem alfa 96..254 (PS2: 0x80 = 1.0). Vértices 0.73.
+
+
+## Objetos interativos (cercas e fardos)
+
+Porta em objetos_rx01.gd (INTERATIVOS) + tools/rx01_objetos.py (quebraveis,
+JSON "interativos"). tests/teste_quebra.gd.
+- Setup/InstanceDatabase.xml (xml 14849; data/instance_database.xml): por
+  ModelName, <Interactive CollSkin Mass Friction Hardness ActiveResetTimeout
+  AIObserve ClassName> + AngResistance, Destructible ShatterImpulse com os
+  Fragment (Model + CollSkin), ParticleTrigger, CollisionSample (som). No
+  RX01: Gen_Barrier_Rallyfence e SAM_Barrier_RallyFence = cObjectFlimsyFence
+  (Mass 0, ShatterImpulse 2, 2 peças; a 2ª da SAM usa o casco da 1ª) e
+  GEN_HayBale = cObjectTrackBlock (Mass 0.1, ActiveResetTimeout 10,
+  ParticleTrigger Impact 0.2 / 0.1 s).
+- 0x547738 registra as classes: cObjectFlimsyFence (base
+  cObjectDestructibleFixed, fábrica 0x547b70, vtable 0x600a78),
+  cObjectTrackBlock e cObjectTrackDebris (base cObjectInteractive, 0x547c30 /
+  0x547c78, vtables 0x600500 / 0x600958), cInstantRespotBox, cNoRespotBox...
+- 0x141640 (por passo, cerca): com o corpo ativo soma +0x60 dos contatos do
+  corpo (lista em +0x180) e se ShatterImpulse² (+0x104) < soma chama 0x141908.
+- 0x141908: uma vez só (+0x110), tira o corpo da cerca do mundo (0x23f970) e
+  pra cada peça pega uma livre no estoque (0x1406f0; 0x140318 cria até 20
+  por modelo) e 0x140cf0 põe ela na posição e no giro da cerca, parada.
+  0x140758 (construtor da peça) não dá massa.
+- 0x153390 (contato de um corpo com objeto parado; chamado pelo 0x153658 /
+  0x154520 pra corpos e 0x154088 pras rodas do carro, corpo = veículo+0x70):
+  pra cada ponto, j = -(1 + e) vn / (1/m + n.((I^-1 (r x n)) x r)) com o
+  corpo de +0xc0 (1/m), +0x100 (I^-1 no mundo), +0xbc (restituição) e
+  vn = (v + w x r).n; fica o maior. 0x141a48(j, cerca): ShatterImpulse > 0 e
+  j > ShatterImpulse -> 0x141908. Se a cerca está quebrada (+0x110) soma
+  n x min(j, 0.25) (0x54d190) em +0x150 (impulso: o integrador 0x23efa8 faz
+  v += +0x150 x 1/m) e (0.2 r) x isso em +0x160, e devolve 1: o chamador NÃO
+  cria contato. Já quebrada, devolve 1 direto. O 0.25 só é lido ali.
+- 0x142698 (corpo do objeto): dinâmico se Mass > 1e-6, massa = Mass (t, a
+  mesma unidade do carro), +0xb8 = Friction, +0xbc = Hardness (restituição);
+  0x23eb88 guarda a massa em +0x78 e 1/m em +0xc0. A cerca (Mass 0) é
+  parada; o 0x141640 (soma dos contatos) só age em corpo com massa, então
+  quem quebra a cerca é o 0x153390.
