@@ -170,6 +170,10 @@ var fumaca: Node3D = null
 # da cor do chão (DustColour) atrás das rodas de trás, pelo DustType do material
 const POEIRA := true
 var poeira: Node3D = null
+# pedrinhas do pneu (porta do jogo: 0x3bb618, textura Sprites/dirt_rocks;
+# pedras.gd): pedras e borrifos de terra das rodas de trás patinando na terra
+const PEDRAS := true
+var pedras: Node3D = null
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas
@@ -508,6 +512,7 @@ func _ready() -> void:
 	_load_sfx()
 	_load_fumaca()
 	_load_poeira()
+	_load_pedras()
 	_casco()
 	_marca("som+fumaça+casco")
 	contact_monitor = true            # batida: contatos do casco (_batida_passo)
@@ -966,6 +971,7 @@ func _load_physics() -> void:
 		var share: float = (WHEEL_Z + com_z) / wb if w.front else (WHEEL_Z - com_z) / wb
 		var x_static := _solve_static(w, mass * G * share * 0.5)
 		w.y0 = WHEEL_Y - x_static
+		w.xs = x_static                     # curso parado (corpo+0x4c0; pedras.gd)
 		if from_points:
 			w.y0 = wpos[info[0]].y          # cubo com a mola solta = ponto do jogo
 		w.x = 0.0                           # curso (0x0e8): + = comprimida, - = esticada
@@ -1582,6 +1588,17 @@ func _load_poeira() -> void:
 	if not poeira.montar(self):
 		poeira.queue_free()
 		poeira = null
+
+
+func _load_pedras() -> void:
+	if not (PEDRAS and _tem("pedras")):
+		return
+	pedras = preload("res://pedras.gd").new()
+	pedras.name = "Pedras"
+	add_child(pedras)
+	if not pedras.montar(self):
+		pedras.queue_free()
+		pedras = null
 
 
 func _load_painel() -> void:
@@ -2220,6 +2237,8 @@ func _physics_process(dt: float) -> void:
 		_roda_suja_passo(1.0 / JIT_HZ)
 		if poeira:
 			poeira.passo(1.0 / JIT_HZ, v)
+		if pedras:
+			pedras.passo(1.0 / JIT_HZ, v)
 		if sfx:
 			sfx.passo(1.0 / JIT_HZ, v.dot(left), v_f)
 	_update_visuals(dt, v_f)

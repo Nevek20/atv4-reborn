@@ -15,6 +15,7 @@ mDirtTextureName, igual em todas). Carro: Vehicles/Generic/Textures (128x128),
 piloto: Characters/Textures/Dirt (256x256). Marrom com alfa de mancha.
 Lama dos pneus: UNI_TyreOverlay (128x128, 4 bits; igual nos pneus do jogo),
 só o alfa conta (o jogo troca a cor da paleta pela lama do chão).
+Pedrinhas do pneu (pedras.gd): Sprites/dirt_rocks (atlas + caixas em pedras.json).
 Poeira dos pneus (poeira.gd): Sprites/WorldFXdust (e o espirro na água,
 Sprites/WorldFXwater_dust -> agua.png) (Setup/Dust.xml, tipos
 Light/Medium/Heavy), 128x128, atlas de 6 nuvens (2 x 3), cinza com o alfa.
@@ -23,6 +24,7 @@ Uso:
     python tools/fx_jogo.py <unpacked> [saida=assets/fx]
 """
 
+import json
 import os
 import struct
 import sys
@@ -86,6 +88,23 @@ def main():
     box = (round(u0 * w), round(v0 * h), round(u1 * w), round(v1 * h))
     im.crop(box).save(os.path.join(saida, "palha.png"))
     print("Snow0", box, "->", os.path.join(saida, "palha.png"))
+
+    # pedrinhas do pneu (pedras.gd, 0x3bade8): Sprites/dirt_rocks (128x128),
+    # Dirt01..04 = 4 pedras cinza, Dirt05 = borrifo de terra; o atlas inteiro
+    # + as caixas do .bed em pedras.json
+    gob, _, _ = caminho(unpacked, arqs, "Sprites/dirt_rocks.bog")
+    bed_arq, off, tam = caminho(unpacked, arqs, "Sprites/dirt_rocks.bed")
+    with open(bed_arq, "rb") as f:
+        f.seek(off)
+        bed_p = f.read(tam)
+    im, info = convert(gob)
+    if im is None:
+        raise SystemExit("dirt_rocks.bog: " + str(info))
+    im.convert("RGBA").save(os.path.join(saida, "pedras.png"))
+    caixas = {n: list(caixa(bed_p, n)) for n in ("Dirt01", "Dirt02", "Dirt03", "Dirt04", "Dirt05")}
+    with open(os.path.join(saida, "pedras.json"), "w", encoding="utf-8") as f:
+        json.dump(caixas, f, indent=1)
+    print("dirt_rocks", im.size, caixas, "->", os.path.join(saida, "pedras.png"))
 
     for nome, png in (("Vehicles/Generic/Textures/GEN_DIRT_DIRT.bog", "sujeira.png"),
                       ("Characters/Textures/Dirt/GEN_DIRT_DIRT.bog", "sujeira_piloto.png"),

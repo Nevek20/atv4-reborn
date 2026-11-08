@@ -101,6 +101,12 @@ static func load_materials(path: String) -> Array:
 				x.get_named_attribute_value_safe("G").to_float(),
 				x.get_named_attribute_value_safe("B").to_float(),
 				x.get_named_attribute_value_safe("A").to_float())
+		elif nome == "DirtColour" and i >= 0:
+			# cor da terra (registro +0x20): as pedrinhas do pneu (0x3bb618, pedras.gd)
+			out[i]["DirtColour"] = Color(x.get_named_attribute_value_safe("R").to_float(),
+				x.get_named_attribute_value_safe("G").to_float(),
+				x.get_named_attribute_value_safe("B").to_float(),
+				x.get_named_attribute_value_safe("A").to_float())
 		elif nome == "Overrides" and i >= 0:
 			for k in x.get_attribute_count():
 				var p := x.get_attribute_value(k).split(" ", false)

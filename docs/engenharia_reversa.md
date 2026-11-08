@@ -834,9 +834,53 @@ nuvens; tools/fx_jogo.py -> assets/fx/poeira.png).
   alfa0 x 128 nos 4 vértices; o quadrado sai no VU1): tamanho do XML x 0.6 =
   metros (calibrado em prints do jogo; a conta do VU1 não foi lida). Alfa da
   textura do PS2: 0x80 = 1.0.
-- Não portado ainda: Dirt (pedrinhas WheelSpinDirt e WheelDirtTrail do
-  Effects/#3ffdac18, DirtKickupChance), o canto escuro, a sombra. A água
-  está na seção Água.
+- Não portado ainda: o canto escuro, a sombra. A água está na seção Água.
+  As pedrinhas (o "Dirt") estão na seção seguinte.
+
+## Pedrinhas do pneu (dirt_rocks)
+Porta em pedras.gd (nov/2026). O WheelSpinDirt/WheelDirtTrail do
+Effects/#3ffdac18 o exe NÃO usa (nenhuma referência); quem solta as pedras é
+um gerente próprio achado pela string "dirt_rocks" (0x5b98e0).
+- Gerente 0x3bade8 (construtor; global 0x7f58cc, criado no 0x171c28,
+  destruído no 0x3a9f00 e 0x3bb528), por quadro 0x3bb5d0 (do 0x1722ec) =
+  emite (0x3bb618) e anda os 2 estoques (0x3b9d20). Estoque +0x20 = pedras e
+  borrifo, textura Sprites/dirt_rocks (.bog 128x128 + .bed; caixas "Dirt0"
+  + 1..4 = 4 pedras cinza e "Dirt05" = borrifo de terra, 0x5b98c8/0x5b98d0);
+  estoque +0x18 = Particle_Debris.bantam (lasquinhas da batida, 0x3bbd60,
+  chamado nos contatos 0x151740 e 0x152bb4; não portado). RAM: 256 no
+  estoque das pedras; gerente +0x14 = 30 m (distância pros carros da IA).
+- Emissão 0x3bb618, cada veículo, com: veículo+0xa68+0x6c < 2, sem água
+  (veículo+0xae8 = 0), |v| (veículo+0xb18) >= 0.447 m/s, corpo+0x2f0 != 0
+  (1 nos save states); IA só a < 30 m da câmera e desenhada. Interpola 5
+  números pela derrapagem |β| (corpo+0x6c0, presa em ±1 rad; 0x3bad60):
+  reto (0.16, 3.1, 0.5, 10, 10) -> de lado (0.3, 12, 1, 1, 0.3) = c0..c4.
+  Direção = -frente (corpo+0xd0) girada em Y por β x (-90°) (pro lado em que
+  o carro escorrega, drr2), y trocado por c3 ± c4, normalizada; lado =
+  direção x 0x7f76d0 (cima). Rodas: todas menos 0 e 2 (0x1f1ef0: FL e FR),
+  com 0x20ff18 (material da roda, veículo+0xa88; ponto de contato recuado
+  v/60; patinada 0x600 presa 0..1; v = corpo+0x90) e material IsDirt (+0x48).
+  curso = (W+0xe8 - corpo+0x4c0[i]) / (W+0xf0 - corpo+0x4c0[i]) preso 0..1
+  (0x4c0 = curso parado, W+0xf0 = máximo). Curso <= 1 - DirtKickupChance
+  (+0x58): só se patinada > sorteio x 0.3 + 0.05. Sorteio < Rockiness
+  (+0x4c): pedra (tipo 0, caixa Dirt01..04 sorteada, tamanho 0.14, vel 10);
+  senão borrifo (tipo 1, Dirt05, 2.0, vel 5); com veículo+0xa6c+0x8c+0x18 != 0
+  0.12/7.5 e 1.2/4 (0 nos buggies e trucks da RAM). Ponto = contato + lado x
+  l (l = sorteio ±c0), velocidade = direção x (vel ± 1) + lado x l x c1 + v
+  x c2, cor = DirtColour (+0x20) x ((1 - veículo+0xc0) + veículo+0xc0 x
+  env+0x3c0) (sombra, não portada). Uma por roda por quadro.
+- Estoque (0x3b8ed0 cria, 0x3b96f8 solta, 0x3ba650 anda): partícula +0x08
+  tipo, +0x10 posição, +0x20 velocidade, +0x30 idade, +0x34 chão (começa
+  -FLT_MAX), +0x40/+0x44 tamanho. Pedra: vive 1 s, vy -= 30 dt, pos += v dt,
+  alfa = min((1 - idade) 5, 1); abaixo do chão: y = chão, vy = -vy, v x 0.4.
+  Borrifo: vive 0.6 s, vy -= 10 dt, tamanho += dt, alfa = min((0.6 - idade)
+  2, 1), sem chão. Chão: 0x3b9d20 mede o relevo (0x1edb50) + 0.02 (+0xdc) em
+  rodízio, 5 por quadro (+0xd4). Cor do vértice = cor x 128 (0x80 = 1.0).
+- Desenho 0x3b9fd0: quadrado virado pra câmera, ALPHA 0x44 (mistura comum).
+  Tamanho no VU1 (não lido): x 0.6 como a poeira (no vídeo do Matheus a pedra
+  tem ~10 px ao lado da roda de trás).
+- Conferido no drr2 (derrapando a 8.5 m/s, β -1.05): 80 vivas, 2 por quadro
+  (dt 0.0196), pedras 0.14 e borrifos 2.0 + idade, recém-soltas com v - v do
+  carro = (5.4, 4.8, 6.0): ~45° pra cima e pro lado da velocidade.
 
 ## Objetos da pista (RX01)
 

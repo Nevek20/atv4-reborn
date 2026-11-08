@@ -39,6 +39,7 @@ motor_som.gd         som do motor: loops do Engine Simulator por rpm e carga (me
 sfx_carro.gd         som de pneu, suspensão e pouso do jogo (portado do exe); som_jogo.gd toca os sons 989snd
 fumaca.gd            fumaça do escapamento (melhoria nossa com o efeito ExhaustSmokeTrail que o jogo não usa)
 poeira.gd            poeira dos pneus (porta do jogo: Setup/Dust.xml, DustType/DustColour do chão, 0x225108)
+pedras.gd            pedrinhas e borrifo de terra das rodas de trás patinando (porta do jogo: 0x3bb618, Sprites/dirt_rocks)
 sujeira.gd           sujeira do jogo na pintura e lama nas rodas, pelo 2º UV (_camada.obj); nível e cor vêm do car.gd
 painel.gd            painel funcional (melhoria nossa): ponteiros, marcha e luz de troca, amador x PRO
 motor_treme.gd       motor e escape tremendo (melhoria nossa): separa as peças do cofre da carroceria
@@ -124,6 +125,8 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
 set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quanto o carro perde na cerca e no fardo (0/30/60°), com x sem o objeto
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
+%GODOT% --headless --path . -s res://tests/teste_pedras.gd        :: pedrinhas: larga na terra, vira (VIRA=7): parado não, ~80 vivas, pro lado derrapando
+%GODOT% --path . --fixed-fps 60 -s res://tests/gravar_pedras.gd -- 0 pedras   :: prints da largada na terra (QUANDO=0.6,1.0,1.4; SEM_PEDRAS=1, PEDRAS_COR=1, VIRA=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
 set VEL=110 & %GODOT% --headless --path . res://tests/teste_entrada.tscn   :: reto até VEL e vira tudo: quando passa de 20° (jogo: 110 não derrapa)
@@ -955,6 +958,18 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   não aparece: conferir em Forward+ (lavapipe).
   FECHADO pelo Matheus (nov/2026, escala 0.6): "não quero mexer mais, senão
   vira caça-rato". Só reabrir com save state ou vídeo novo que mostre erro.
+- Pedrinhas do pneu (PORTA, nov/2026; pedras.gd, docs Pedrinhas): o
+  WheelSpinDirt/WheelDirtTrail do XML o exe NÃO usa. Quem solta é o gerente
+  0x3bade8 (string "dirt_rocks"): 0x3bb618 por quadro, só rodas de TRÁS, no
+  material IsDirt, com patinada > sorteio(0..0.3) + 0.05 (ou curso acima de
+  1 - DirtKickupChance), 1 por roda por quadro: pedra (Rockiness, 0.14,
+  10 m/s, quica no chão com 0.4, vive 1 s, gravidade 30) ou borrifo de terra
+  (Dirt05, 2.0 crescendo, 5 m/s, vive 0.6 s). Reto = quase pra cima, de
+  lado (|β| 1 rad) = 45° pro lado em que escorrega; cor = DirtColour.
+  Conferido no save state drr2 (80 vivas, 2 por quadro, tamanhos e
+  velocidades). Tamanho x 0.6 como a poeira (vídeo do Matheus: pedra de ~10
+  px do lado da roda). O mesmo gerente tem o estoque das lasquinhas da
+  batida (Particle_Debris.bantam, 0x3bbd60): ainda não portado.
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o
