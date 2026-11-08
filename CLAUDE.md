@@ -1000,6 +1000,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   cima da parede + 70% do deslize; vivem 4 s, quicam com 0.5, giram; no
   máximo 8 de uma vez. Carro com carro (25..45 mph) fica pra quando tiver IA.
   Conferido no crash_Storm (5 vivas, tamanhos, giro). teste_lascas.
+  FECHADO (Matheus: "ficou perfeito").
 - Som da batida (PORTA, nov/2026; "no reborn tá sem som a batida", Matheus;
   sfx_carro.gd batida_passo, docs Som da batida): 0x36e7a8 por quadro com o
   contato mais forte do casco no mundo fixo (car.gd contato_som): acima de
@@ -1010,7 +1011,7 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   Surface, volume 0.5) por 0.25 s. Volume x CollisionVolume 0.8 x
   SFXVolume. Cerca e fardo continuam no batida_objeto. teste_lascas confere
   (10 m/s Small, 20+ Big); no caminho do teste_pedras (rodada fora da
-  pista) só 2 batidas do casco no chão.
+  pista) só 2 batidas do casco no chão. FECHADO (Matheus: "ficou ótimo").
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o
