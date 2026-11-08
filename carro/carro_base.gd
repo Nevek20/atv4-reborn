@@ -237,6 +237,11 @@ var motor_anima: Node = null
 # Truggy, TT, Hammerhead e Lazarus (3 em cima dos estepes, textura
 # preRunnerTruck_fan). Nos trucks elas têm raio de 27 a 31 cm
 # (motor_anima.RAIO_MAX_TRUCK); conferido com print_tela VENTOINHA_COR=1
+# amortecedor da frente telescópico (melhoria nossa, nov/2026, pedido do
+# Matheus; suspension_visual.gd _telescopio): nos trucks com a mola e o
+# amortecedor dentro da malha da balança (LeftFrame/RightFrame) o jogo gira
+# tudo junto e no curso máximo a ponta sai pelo capô (igual no jogo)
+const TELESCOPIO := ["TRUCK_09"]
 const ANIMA_TRUCKS := ["TRUCK_05", "TRUCK_06", "TRUCK_07", "TRUCK_08", "TRUCK_09", "LAZARUS"]
 # lanterna de freio e luz de ré acesas (melhoria nossa, luzes.gd: a lente da
 # cor da luz acende e ganha um halo nosso; o jogo põe só um halo laranja com

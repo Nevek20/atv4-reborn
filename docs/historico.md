@@ -722,7 +722,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   só a metade de cima acendia. MASCARA_CARRO ganhou "satur" (padrão
   0.40-0.55); Chimera claro 0.08-0.14 e satur 0.60-0.70 (a pintura azul em
   volta passa de 0.8). Hammerhead: o amortecedor da frente sai pelo capô
-  no curso máximo, igual no jogo (o Matheus testou): fica.
+  no curso máximo, igual no jogo (o Matheus testou). Depois ele pediu pra
+  arrumar como melhoria nossa: amortecedor telescópico (car.gd TELESCOPIO,
+  suspension_visual.gd _telescopio, DESLIGAR=telescopio). No Hammerhead a
+  mola e o corpo do amortecedor vêm dentro da malha da balança
+  (LeftFrame/RightFrame, TruckCompMap_B1 não tem peça Shocks) e o jogo gira
+  tudo junto com a balança; agora saem da balança: o corpo de cima fica
+  preso no chassi no lugar do curso 0, a haste (o mesmo corpo, 75% da
+  largura) vai com a balança, cada metade com 60% do comprimento, e a mola
+  estica entre as 2 pontas. Conferido em print nos cursos -0.2, 0, nat e
+  máximo (0.48): capô limpo e sem buraco entre as metades.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels

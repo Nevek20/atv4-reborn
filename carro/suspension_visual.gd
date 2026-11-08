@@ -125,6 +125,10 @@ func _build_truck(pts: Dictionary, dir: String, pecas: Dictionary) -> void:
 		var fr := _part(dir, pecas.get(nome + "Frame", ""))
 		if fr and w0 != null and pts.has(piv) and rodas.has("F" + l):
 			truck[nome + "Frame"] = {"mi": fr, "pivot": pts[piv], "div": w0.x, "roda": rodas["F" + l]}
+			if car.chave() in car.TELESCOPIO and car._tem("telescopio"):
+				var tele := _telescopio(fr)
+				if not tele.is_empty():
+					truck[nome + "Frame"].tele = tele
 		var br := _part(dir, pecas.get("Front" + nome + "Brake", ""))
 		if br and w0 != null and rodas.has("F" + l):
 			truck["Front" + nome + "Brake"] = {"mi": br, "w": w0, "roda": rodas["F" + l]}
@@ -209,6 +213,110 @@ static func _inclinacao(t: Dictionary, x: Dictionary) -> float:
 	if absf(hl.x - hr.x) < 0.01:
 		return 0.0
 	return (hl.y - hr.y) / (hl.x - hr.x)
+
+
+## Amortecedor da frente telescópico (melhoria nossa, car.gd TELESCOPIO): tira
+## da malha da balança a mola (material *spring*) e o corpo do amortecedor
+## (pedaço alto e fino: > 0.5 m de altura, < 15 cm de largura) e monta 3
+## peças: o corpo de cima preso no chassi (no lugar dele com o curso 0, a
+## ponta não sobe), a haste de baixo (o mesmo corpo, mais fino) presa na
+## balança e a mola esticada entre as 2 pontas. Cada metade tem 60% do
+## comprimento: comprimindo elas entram uma na outra. {} = não achou.
+func _telescopio(fr: MeshInstance3D) -> Dictionary:
+	var mesh := fr.mesh as ArrayMesh
+	if mesh == null:
+		return {}
+	var resto := ArrayMesh.new()
+	var corpo := ArrayMesh.new()
+	var mola := ArrayMesh.new()
+	var lo := Vector3.INF
+	var hi := -Vector3.INF
+	for s in mesh.get_surface_count():
+		var a := mesh.surface_get_arrays(s)
+		var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var ix := PackedInt32Array(range(vs.size()))
+		if a[Mesh.ARRAY_INDEX] != null:
+			ix = a[Mesh.ARRAY_INDEX]
+		var mat := mesh.surface_get_material(s)
+		var e_mola: bool = mat != null and mat.resource_name.to_lower().contains("spring")
+		# pedaços ligados (vértices na mesma posição contam como ligados)
+		var pai := PackedInt32Array(range(vs.size()))
+		var achar := func(i: int) -> int:
+			while pai[i] != i:
+				i = pai[i]
+			return i
+		var por_pos := {}
+		for i in vs.size():
+			var k := Vector3i((vs[i] * 1e4).round())
+			if por_pos.has(k):
+				pai[achar.call(i)] = achar.call(por_pos[k])
+			else:
+				por_pos[k] = i
+		for t in range(0, ix.size(), 3):
+			for j in [1, 2]:
+				pai[achar.call(ix[t + j])] = achar.call(ix[t])
+		var caixa := {}
+		for i in vs.size():
+			var r: int = achar.call(i)
+			if not caixa.has(r):
+				caixa[r] = AABB(vs[i], Vector3.ZERO)
+			else:
+				caixa[r] = caixa[r].expand(vs[i])
+		var listas := {"resto": PackedInt32Array(), "corpo": PackedInt32Array(), "mola": PackedInt32Array()}
+		for t in range(0, ix.size(), 3):
+			var cx: AABB = caixa[achar.call(ix[t])]
+			var qual := "resto"
+			if e_mola:
+				qual = "mola"
+			elif cx.size.y > 0.5 and cx.size.x < 0.15 and cx.size.z < 0.15:
+				qual = "corpo"
+				lo = lo.min(cx.position)
+				hi = hi.max(cx.end)
+			listas[qual].append_array([ix[t], ix[t + 1], ix[t + 2]])
+		for qual in listas:
+			if listas[qual].is_empty():
+				continue
+			var b: Array = a.duplicate()
+			b[Mesh.ARRAY_INDEX] = listas[qual]
+			var alvo: ArrayMesh = {"resto": resto, "corpo": corpo, "mola": mola}[qual]
+			alvo.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, b)
+			alvo.surface_set_material(alvo.get_surface_count() - 1, mat)
+	if corpo.get_surface_count() == 0:
+		return {}
+	fr.mesh = resto
+	for i in resto.get_surface_count():
+		var m := resto.surface_get_material(i)
+		var m2: StandardMaterial3D = m.duplicate() if m is StandardMaterial3D else StandardMaterial3D.new()
+		car.material_do_jogo(m2)
+		fr.set_surface_override_material(i, m2)
+	var c := (lo + hi) * 0.5
+	var pecas := {"cima": _mesh_instance(corpo), "baixo": _mesh_instance(corpo)}
+	if mola.get_surface_count() > 0:
+		pecas.mola = _mesh_instance(mola)
+	return {"pecas": pecas, "b0": Vector3(c.x, lo.y, c.z), "t0": Vector3(c.x, hi.y, c.z)}
+
+
+## matrizes das 3 peças do telescópico pra matriz f da balança (frame do jogo)
+static func pose_telescopio(tele: Dictionary, f: Transform3D) -> Dictionary:
+	const METADE := 0.6       # cada metade do corpo, do comprimento parado
+	const HASTE := 0.75       # largura da haste (a de baixo) x a do corpo
+	var b0: Vector3 = tele.b0
+	var t0: Vector3 = tele.t0
+	var b: Vector3 = f * b0
+	var t := t0
+	var d0 := (t0 - b0).normalized()
+	var l0 := t0.distance_to(b0)
+	var giro := Basis(Quaternion(d0, (t - b).normalized()))
+	# escala ao longo do eixo (k) e na largura (w) do amortecedor parado
+	var escala := func(k: float, w: float) -> Basis:
+		# v -> w v + (k - w)(d0 . v) d0, coluna a coluna
+		return Basis(Vector3(w, 0, 0) + d0 * d0.x * (k - w), Vector3(0, w, 0) + d0 * d0.y * (k - w),
+			Vector3(0, 0, w) + d0 * d0.z * (k - w))
+	var cima: Basis = giro * escala.call(METADE, 1.0)
+	var baixo: Basis = giro * escala.call(METADE, HASTE)
+	var mola: Basis = giro * escala.call(t.distance_to(b) / l0, 1.0)
+	return {"cima": Transform3D(cima, t - cima * t0), "baixo": Transform3D(baixo, b - baixo * b0),
+		"mola": Transform3D(mola, b - mola * b0)}
 
 
 func _part(dir: String, file: String) -> MeshInstance3D:
@@ -307,6 +415,9 @@ func update(steer_angle: float) -> void:
 		var t: Dictionary = truck[nome]
 		for mi in t.get("mis", [t.get("mi")]):
 			_place(mi, p[nome])
+		if t.has("tele"):
+			for k in t.tele.pecas:
+				_place(t.tele.pecas[k], pose_telescopio(t.tele, p[nome])[k])
 	# as rodas de trás inclinam junto com o eixo (só giram no lugar: o centro
 	# continua o da física)
 	for nome in ["RearAxle", "RearFreeAxle"]:
