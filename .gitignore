@@ -27,3 +27,5 @@ assets/terrain/hd/
 
 # logs do tests/rodar_tudo.py
 tests/.saida/
+# o Godot de cada máquina gera o seu (commitado em nov/2026, travou o pull do Matheus)
+assets/terrain/rx01_detalhe.png.import
