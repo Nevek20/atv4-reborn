@@ -861,6 +861,12 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   volante avança pro piloto até a coluna acabar atrás dele (car.gd
   _montar_volante, de 0 a 5.6 cm no Kraken; teste_volante imprime). Os X
   ficam a 45° do topo, longe das mãos (65°).
+  Eixo nosso (car.gd VOLANTE_EIXO, nov/2026, "braço muito torto no
+  Fireball"): o aro do Fireball no modelo é o mais deitado dos trucks (46°
+  acima da horizontal; os outros 14 a 36°) e torto ~5° pro lado; o pulso
+  dobrava 28°/42° com o volante reto. O nosso volante fica reto a 30° (como
+  Goliath, Chimera e Lazarus): 20°/27°, braço 90% (era 101%). Banco de lado
+  quase não muda. VOL_EIXO=x,y,z testa.
 - Volante: no jogo NÃO gira (é parte da carroceria). Girar é melhoria nossa
   (VOLANTE_GIRA no car.gd; tools/volante.py acha o aro). O que gira no jogo
   são os braços do piloto (piloto.gd).
@@ -1145,7 +1151,9 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   = remake. Pintura dos trucks: o logo é achado sem diferenciar maiúscula
   nem espaço (o vehicles.xml pede "HERBST 1", a TruckLogos tem "Herbst  1";
   antes os dois Herbst saíam sem o logo) e o Chassis_Truck_10.bed diz 25
-  itens com o 25º vazio (o gerar_pintura quebrava no Fireball). Assets
+  itens com o 25º vazio (o gerar_pintura quebrava no Fireball; quem gerou
+  os assets antes disso ficou com o Fireball BRANCO, sem pintura.png: o
+  gerar_buggies agora avisa quando o gerar_pintura falha). Assets
   gerados dos 13 (12 + bônus) também estão no atv4-dados/cars (out/2026).
   Câmera dos trucks = a dos buggies (FollowOrbitFar parada: 6.87 m
   atrás e 3.0 acima no Buccaneer, 7.65/3.39 no Goliath, zoom 0.5;

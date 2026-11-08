@@ -142,6 +142,14 @@ const VOLANTE_SEM_MODELO := {
 	"TRUCK_02": {"centro": [-0.475, 1.883, 0.523], "eixo": [0.0, 0.41, -0.912], "raio": 0.185},
 	"TRUCK_05": {"centro": [-0.565, 1.706, 0.695], "eixo": [0.0, 0.41, -0.912], "raio": 0.185},
 }
+# melhoria nossa: eixo do volante NOSSO (o do jogo sai). Fireball: o aro do
+# modelo é o mais deitado dos trucks (46° acima da horizontal; os outros 14 a
+# 36°) e torto ~5° pro lado (x 0.059): com a mão a 65° do topo o pulso dobrava
+# 28° / 42° (direita / esquerda) com o volante reto ("braço muito torto",
+# Matheus, nov/2026). Reto e a 30° (como Goliath, Chimera e Lazarus): 20° /
+# 27° e braço 90% esticado (era 101%); 36° dava 24° / 31°. O banco de lado
+# quase não muda (cotovelo esquerdo na porta). VOL_EIXO=x,y,z testa
+const VOLANTE_EIXO := {"TRUCK_10": Vector3(0.0, 0.5, -0.866)}
 const COLUNA_RAIO := 0.025     # m (coluna nossa)
 const COLUNA_MAX := 0.6        # m: até o painel, no máximo
 var sw_coluna: MeshInstance3D
@@ -1695,6 +1703,12 @@ func _load_steering_wheel() -> void:
 	if vol.has("centro"):
 		SW_CENTER = Vector3(vol.centro[0], vol.centro[1], vol.centro[2])
 		SW_AXIS = Vector3(vol.eixo[0], vol.eixo[1], vol.eixo[2])
+	if nosso:
+		var ve := OS.get_environment("VOL_EIXO").split(",")
+		if ve.size() == 3:
+			SW_AXIS = Vector3(float(ve[0]), float(ve[1]), float(ve[2])).normalized()
+		elif VOLANTE_EIXO.has(chave()):
+			SW_AXIS = (VOLANTE_EIXO[chave()] as Vector3).normalized()
 	sw_pivot = Node3D.new()
 	sw_pivot.position = model_offset + SW_CENTER
 	model_root.add_child(sw_pivot)
