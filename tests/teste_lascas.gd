@@ -23,6 +23,8 @@ var bateu := -1.0
 var falhas := 0
 var saidas: Array = []
 var abaixo := 0
+var raspou := false
+var encostou := false
 
 
 func _initialize() -> void:
@@ -73,10 +75,15 @@ func _physics_process(dt: float) -> bool:
 	var lq = car.lascas
 	# segura a velocidade até encostar (na terra o carro solto perde ~14 m/s
 	# nos 12 m até a parede)
-	if car.batida <= 0.0 and bateu < 0.0 and t < 3.0:
+	if car.batida > 0.0:
+		encostou = true
+	if not encostou and t < 3.0:
 		var vy: float = car.linear_velocity.y
 		car.linear_velocity = fwd * vel + Vector3(0, vy, 0)
 	max_vivas = maxi(max_vivas, lq.vivas())
+	car.batida_max = maxf(car.batida_max, car.batida)
+	if car.sfx and car.sfx.raspa.tocando:
+		raspou = true
 	if bateu < 0.0 and lq.soltas > 0:
 		bateu = t
 		for u in lq.ultimas:
@@ -112,6 +119,21 @@ func _physics_process(dt: float) -> bool:
 		if -vp.dot(fwd) < -1.0 or vp.y < -0.5 * vp.length():
 			falhas += 1
 			print("FALHA: lasca não saiu pra fora/cima: ", vp)
+	# som da batida (0x36e7a8): SmallImpact acima de 0.5 m/s na normal,
+	# BigImpact acima de 20, um a cada 0.2 s no máximo
+	if car.sfx:
+		var tocadas: Array = car.sfx.batida_tocadas
+		print("  som: ", tocadas, "  raspão tocou: ", raspou)
+		if tocadas.is_empty():
+			falhas += 1
+			print("FALHA: bateu e não tocou som")
+		else:
+			var esperado_som := "BigImpact" if car.batida_max > 20.0 else "SmallImpact"
+			if String(tocadas[0][1]) != esperado_som:
+				falhas += 1
+				print("FALHA: batida a %.1f m/s na normal tocou %s (esperado %s)" % [car.batida_max, tocadas[0][1], esperado_som])
+	else:
+		print("  (sem sfx: rode tools/sfx_jogo.py)")
 	print("  lasca mais de 5 cm abaixo do relevo (chão guardado velho): %d amostras" % abaixo)
 	print("teste_lascas: %s (soltas %d, máximo vivas %d, agora %d)" % ["ok" if falhas == 0 else "FALHA", lq.soltas, max_vivas, lq.vivas()])
 	return true

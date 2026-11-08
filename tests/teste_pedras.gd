@@ -141,6 +141,8 @@ func _physics_process(dt: float) -> bool:
 	if lado_n < 10 or lado_m < 0.8:
 		falhas += 1
 		print("FALHA: derrapando as pedras não vão pro lado do escorregão")
+	if car.sfx:
+		print("  sons de batida no caminho (sem parede): %d %s" % [car.sfx.batida_tocadas.size(), car.sfx.batida_tocadas.slice(0, 4)])
 	print("teste_pedras: %s (máximo vivas %d de %d; soltas %d pedras, %d borrifos)" % [
 		"ok" if falhas == 0 else "FALHA", max_vivas, pq.MAX, pq.soltas_tipo[0], pq.soltas_tipo[1]])
 	return true

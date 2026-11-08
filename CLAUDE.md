@@ -128,7 +128,7 @@ set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quan
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 %GODOT% --headless --path . -s res://tests/teste_pedras.gd        :: pedrinhas: larga na terra, vira (VIRA=7): parado não, ~80 vivas, pro lado derrapando
 %GODOT% --path . --fixed-fps 60 -s res://tests/gravar_pedras.gd -- 0 pedras   :: prints da largada na terra (QUANDO=0.6,1.0,1.4; SEM_PEDRAS=1, PEDRAS_COR=1, VIRA=1)
-set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_lascas.gd   :: lasquinhas: Storm numa parede (20 m/s = 3, 10 m/s = 0, até 8 vivas, 4 s)
+set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_lascas.gd   :: lasquinhas e som da batida: Storm numa parede (20 m/s = 3 lascas + BigImpact, 10 m/s = 0 + SmallImpact, até 8 vivas, 4 s)
 %GODOT% --path . --fixed-fps 60 -s res://tests/gravar_lascas.gd -- 0 lascas    :: prints depois da batida (QUANDO=0.1,0.3,1.0; VEL=25, LASCAS_COR=1)
 :: + print_tela com MOTOR_COR=1 pinta de vermelho as peças que tremem, VENTOINHA_COR=1 as ventoinhas que giram
 %GODOT% --path . --write-movie previa.avi --fixed-fps 60 -s res://tests/gravar_som.gd -- 8   :: prévia com áudio (acelera e solta; VIRA=5 derrapa, SEM_MOTOR=1)
@@ -1000,6 +1000,17 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   cima da parede + 70% do deslize; vivem 4 s, quicam com 0.5, giram; no
   máximo 8 de uma vez. Carro com carro (25..45 mph) fica pra quando tiver IA.
   Conferido no crash_Storm (5 vivas, tamanhos, giro). teste_lascas.
+- Som da batida (PORTA, nov/2026; "no reborn tá sem som a batida", Matheus;
+  sfx_carro.gd batida_passo, docs Som da batida): 0x36e7a8 por quadro com o
+  contato mais forte do casco no mundo fixo (car.gd contato_som): acima de
+  0.5 m/s na normal toca SmallImpact (BigImpact acima de 20) do patch
+  "Default" (o chão e as paredes têm material, e a tabela Materials cai no
+  1º patch), no máximo 1 a cada 0.2 s, só com o carro a >= 2.5 mph; contato
+  na direção do movimento (|cos| > 0.7) toca o raspão (loop "Dirt" do
+  Surface, volume 0.5) por 0.25 s. Volume x CollisionVolume 0.8 x
+  SFXVolume. Cerca e fardo continuam no batida_objeto. teste_lascas confere
+  (10 m/s Small, 20+ Big); no caminho do teste_pedras (rodada fora da
+  pista) só 2 batidas do casco no chão.
 - Motor e escape tremendo (melhoria nossa, car.gd MOTOR_TREME,
   motor_treme.gd): no jogo são parte da Body e não tremem. Separação pelas
   peças soltas da malha que cabem inteiras no cofre (atrás do banco até o

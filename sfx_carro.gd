@@ -60,6 +60,14 @@ var _uma_vez: Array = []          # sons curtos tocando (suspensão, pouso)
 var objetos_som := {}             # Collisions/InteractiveObjects (PLASTIC_FENCE, HAY...)
 var batidas: Array = []           # [CollisionSample, sample, volume] tocados
 var colisoes := {}                # atributos do <Collisions> (MinRetriggerTime 0.2)
+# batida do carro com o mundo (0x36e7a8): Collisions/Patches (Default, Metal,
+# Wood, Vehicle, RiderM/F) -> {Small, Large, Scraping}
+var batida_patches := {}
+var batida_tocadas: Array = []    # [patch, sample, volume] (testes)
+var _bat_ret := 0.0               # som+0x498: espera do MinRetriggerTime
+var _raspa_t := 0.0               # som+0x49c: raspão tocando (MinScrapeTime)
+var _raspa_patch := "Default"     # som+0x494
+var raspa: SomJogo                # loop do raspão (Scraping)
 var spd := 0.0
 var side := 0.0
 var ws := 0.0
@@ -75,6 +83,7 @@ func carregar(c) -> bool:
 		return false
 	var pilha: Array = []
 	var patch := ""
+	var bpatch := ""
 	while x.read() == OK:
 		var t := x.get_node_type()
 		if t == XMLParser.NODE_ELEMENT_END:
@@ -107,6 +116,11 @@ func carregar(c) -> bool:
 			objetos_som[n] = a
 		elif caminho == "Root" and n == "Collisions":
 			colisoes = a
+		elif caminho == "Root/Collisions/Patches":
+			bpatch = n
+			batida_patches[bpatch] = {}
+		elif caminho == "Root/Collisions/Patches/" + bpatch:
+			batida_patches[bpatch][n] = a
 		elif caminho == "Root/Vehicles/Model" and n == car.vehicle_id:
 			modelo = a
 		if not x.is_empty():
@@ -118,6 +132,10 @@ func carregar(c) -> bool:
 		add_child(o)
 		rodas.append({"som": o, "idx": 0 if k != 1 else 1, "sec": k == 2, "trava": 0.0,
 			"mat": -2, "s": 0.0, "vol": 0.0})
+	raspa = SomJogo.new()
+	raspa.name = "Raspao"
+	raspa.ganho = GANHO
+	add_child(raspa)
 	return not patches.is_empty()
 
 
@@ -272,6 +290,65 @@ func batida_objeto(amostra: String) -> void:
 	var vol := _f(e, "Volume", 1.0) * _f(master, "CollisionVolume", 0.8) * _f(master, "SFXVolume", 1.0)
 	batidas.append([amostra, e.get("FirstSample", ""), vol])     # conferência (teste_quebra)
 	_tocar_uma(e.get("Bank", "Coll_Big"), e.get("FirstSample", ""), vol, _f(e, "Pitch", 1.0))
+
+
+## 0x36e7a8 (a cada quadro, por veículo): som da batida com o mundo.
+## c = contato do casco mais forte do passo (corpo+0x7a0 + 0x860 x 0x40), {}
+## sem contato: vn = velocidade na normal (+0x00), r = ponto do contato menos
+## o centro do corpo (+0x20), mat = tem material (+0x30; chão e paredes do
+## RX01 têm). v = velocidade do corpo.
+##  - espera do retrigger (som+0x498) e do raspão (som+0x49c) descem dt; com
+##    o raspão > 0 o loop Scraping do patch toca (volume do patch x
+##    CollisionVolume x SFXVolume), com 0 ele solta (key-off);
+##  - patch: com material = a entrada do material na tabela Materials; as 24
+##    entradas são "Default" (0x377ba8), que pede o patch "Small", que não
+##    existe: a busca (0x11db48) devolve o 1º, "Default". Sem material =
+##    "Vehicle" (Collisions+0x18);
+##  - |v| < 2.5 mph (0x55186c): nada;
+##  - vn > SmallThreshold (0.5) e a espera acabada: Small, ou Large com vn >
+##    LargeThreshold (20); espera = MinRetriggerTime (0.2);
+##  - |r̂ . v̂| > 0.7 (o contato na direção do movimento): raspão por
+##    MinScrapeTime (0.25 s).
+## Objetos interativos (outro tipo 9) são o batida_objeto; carro x carro (tipo
+## 2, patch Vehicle) não existe no remake.
+func batida_passo(dt: float, c: Dictionary, v: Vector3) -> void:
+	var livre := true
+	if _bat_ret > 0.0:
+		_bat_ret -= dt
+		livre = _bat_ret < 0.0
+		if livre:
+			_bat_ret = 0.0
+	var vol_bat := clampf(_f(master, "CollisionVolume", 0.8) * _f(master, "SFXVolume", 1.0), 0.0, 1.0)
+	if _raspa_t == 0.0:
+		if raspa.tocando:
+			raspa.parar()
+	else:
+		_raspa_t = maxf(_raspa_t - dt, 0.0)
+		var sc: Dictionary = batida_patches.get(_raspa_patch, {}).get("Scraping", {})
+		var b := String(sc.get("Bank", ""))
+		var n := String(sc.get("Sample", ""))
+		if raspa.nome != n or not raspa.tocando:
+			raspa.tocar(b, n)
+		raspa.volume = _f(sc, "Volume", 1.0) * vol_bat
+		raspa.tom = _f(sc, "Pitch", 1.0)
+	if c.is_empty():
+		return
+	_raspa_patch = "Default" if c.get("mat", true) else "Vehicle"
+	var vel := v.length()
+	if vel < 2.5 * 0.44694445:
+		return
+	var vn: float = c.vn
+	if vn > _f(colisoes, "SmallThreshold", 0.5) and livre:
+		var grande := vn > _f(colisoes, "LargeThreshold", 20.0)
+		var e: Dictionary = batida_patches.get(_raspa_patch, {}).get("Large" if grande else "Small", {})
+		if not e.is_empty():
+			var vol := _f(e, "Volume", 1.0) * vol_bat
+			batida_tocadas.append([_raspa_patch, e.get("FirstSample", ""), vol])
+			_tocar_uma(e.get("Bank", "Coll_Big"), e.get("FirstSample", ""), vol, _f(e, "Pitch", 1.0))
+		_bat_ret = _f(colisoes, "MinRetriggerTime", 0.2)
+	var r: Vector3 = c.r
+	if vel > 1e-6 and r.length_squared() > 1e-12 and absf(r.normalized().dot(v / vel)) > 0.7:
+		_raspa_t = _f(colisoes, "MinScrapeTime", 0.25)
 
 
 func _tocar_uma(b: String, n: String, vol: float, tom: float) -> void:

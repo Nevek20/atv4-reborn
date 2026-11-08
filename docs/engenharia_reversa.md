@@ -882,6 +882,31 @@ um gerente próprio achado pela string "dirt_rocks" (0x5b98e0).
   (dt 0.0196), pedras 0.14 e borrifos 2.0 + idade, recém-soltas com v - v do
   carro = (5.4, 4.8, 6.0): ~45° pra cima e pro lado da velocidade.
 
+## Som da batida (Collisions)
+Porta em sfx_carro.gd batida_passo (nov/2026). Leitor 0x372c80 (chamado no
+0x373c74; banco de sons +0xf0): +0x00 SmallThreshold, +0x04 LargeThreshold,
++0x08 RiderThreshold, +0x0c MinRetriggerTime, +0x10 MinScrapeTime, +0x14
+OffsetEnhance, +0x94 Patches (registros de 0xac: Small +0, Large +0x3c,
+Scraping +0x78 com volume +0x8c e tom +0x90), +0x8c InteractiveObjects,
++0x24 Materials (0x377ba8: as 24 entradas = "Default"; entrada +0x18
+CollisionPatch, +0x30 = patch achado no 0x11db48, que devolve o 1º, o
+"Default", quando não acha: o "Small" do XML não existe), +0x18/+0x1c/+0x20 =
+patches Vehicle/RiderM/RiderF.
+- 0x36e7a8 (por quadro, por veículo; som+0x490 = Collisions): contato mais
+  forte do casco = corpo+0x7a0 + corpo+0x860 x 0x40 (registro: +0x00
+  velocidade na normal, +0x10 normal, +0x20 ponto do contato menos o centro
+  do corpo, +0x30 material ou -NaN, +0x34 outro objeto ou 0). Esperas
+  som+0x498 (retrigger) e +0x49c (raspão) descem dt. Raspão > 0 = loop
+  Scraping do patch som+0x494 (volume x CollisionVolume x SFXVolume), 0 =
+  key-off. Patch: material -> tabela Materials (= Default), sem material ->
+  Vehicle. Corpo+0xe0 (|v|) < 2.5 mph (0x55186c): sai. Velocidade na normal >
+  SmallThreshold e espera livre: outro 0 = Small/Large (> LargeThreshold) do
+  patch, outro tipo 2 = Vehicle, tipo 9 = InteractiveObjects do objeto;
+  toca 0x36db68 e espera = MinRetriggerTime. Outro 0 e |r̂ . v̂| > 0.7 (r =
+  +0x20): raspão = MinScrapeTime.
+- crash_Storm: registro 0 com material 0x16 (a parede de pedra tem
+  material), outro 0, normal (-0.378, 0, -0.926).
+
 ## Lasquinhas da batida (Particle_Debris)
 Porta em lascas.gd (nov/2026). Estoque +0x18 do mesmo gerente das pedrinhas:
 Levels/Grass/Models/Bantams/Particle_Debris.bantam (36 triângulos, ~25 x 7 x

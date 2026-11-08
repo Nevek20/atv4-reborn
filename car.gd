@@ -418,6 +418,10 @@ var jitter_chao := 0.0        # veículo+0xac0: média do WheelJitter embaixo de
 # contato. No save state da batida (crash_Storm): parede de pedra, outro corpo
 # nenhum, 4.86 m/s num registro velho e 0.08 m/s encostado.
 var batida := 0.0             # corpo+0x7a0: maior velocidade de contato do último passo (m/s)
+# o contato com o mundo fixo mais forte do passo, pro som da batida (0x36e7a8):
+# {vn, r (ponto - centro), mat}; vazio sem contato
+var contato_som := {}
+var batida_max := 0.0         # testes
 var _v_antes := Vector3.ZERO
 var _w_antes := Vector3.ZERO
 
@@ -2281,6 +2285,7 @@ func _physics_process(dt: float) -> void:
 			lascas.passo(1.0 / JIT_HZ)
 		if sfx:
 			sfx.passo(1.0 / JIT_HZ, v.dot(left), v_f)
+			sfx.batida_passo(1.0 / JIT_HZ, contato_som, _v_antes)
 	_update_visuals(dt, v_f)
 
 
@@ -2295,12 +2300,17 @@ func _physics_process(dt: float) -> void:
 ## com a velocidade do ponto de antes desse passo (_v_antes, _w_antes)
 func _batida_passo() -> void:
 	batida = 0.0
+	contato_som = {}
 	var st := PhysicsServer3D.body_get_direct_state(get_rid())
 	if st:
 		var com := global_transform * center_of_mass
 		for i in st.get_contact_count():
 			var vp := _v_antes + _w_antes.cross(st.get_contact_local_position(i) - com)
 			batida = maxf(batida, absf(vp.dot(st.get_contact_local_normal(i))))
+			if _contato_mundo(st, i, true):
+				var vn := absf(vp.dot(st.get_contact_local_normal(i)))
+				if contato_som.is_empty() or vn > contato_som.vn:
+					contato_som = {"vn": vn, "r": st.get_contact_local_position(i) - com, "mat": true}
 			if lascas and _contato_mundo(st, i):
 				# 0x1515e0 -> 0x3bbd60: contato do casco com o mundo fixo (par 2 x 0),
 				# normal saindo do que foi batido, velocidade do corpo de antes do passo
@@ -2315,10 +2325,14 @@ func _batida_passo() -> void:
 
 ## contato do CASCO (não a esfera da roda) com o mundo fixo: relevo e colisão
 ## dos objetos (StaticBody), sem cerca que quebra nem corpo solto (fardo)
-func _contato_mundo(st: PhysicsDirectBodyState3D, i: int) -> bool:
+## (com_rodas: a esfera da roda de lado também conta, pro som)
+func _contato_mundo(st: PhysicsDirectBodyState3D, i: int, com_rodas := false) -> bool:
 	var dono := shape_find_owner(st.get_contact_local_shape(i))
 	var no = shape_owner_get_owner(dono) if dono >= 0 else null
-	if no == null or not String(no.name).begins_with("Casco"):
+	if no == null:
+		return false
+	var nome := String(no.name)
+	if not (nome.begins_with("Casco") or (com_rodas and nome.begins_with("Roda"))):
 		return false
 	var outro = st.get_contact_collider_object(i)
 	return outro is StaticBody3D and String(outro.name) != "Cerca"
