@@ -873,6 +873,12 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
   pra fora. Agora a folga da porta vale pros 2 (o cotovelo espelhado no
   plano do volante contra a parede do outro lado): no Fireball, com o
   volante reto, D pulso 26° cotovelo -1°, E 27° e -2°.
+  Braço mais aberto (car.gd BRACO_ABERTO, piloto.gd cotovelo_min /
+  parede_folga; "abre um pouco, sem varar a porta", Matheus): o -2° não era
+  a porta, era a pose de pulso mais reto do IK. Fireball: cotovelo pelo
+  menos 25° pra fora e folga de 6 cm da porta (manga ~5): abre 25° a 32°,
+  pulso 29°/32°, medir_cabine 5.9 cm no pior caso. COT_MIN=graus e
+  PAREDE=m testam.
 - Volante: no jogo NÃO gira (é parte da carroceria). Girar é melhoria nossa
   (VOLANTE_GIRA no car.gd; tools/volante.py acha o aro). O que gira no jogo
   são os braços do piloto (piloto.gd).

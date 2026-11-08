@@ -150,6 +150,11 @@ const VOLANTE_SEM_MODELO := {
 # 27° e braço 90% esticado (era 101%); 36° dava 24° / 31°. O banco de lado
 # quase não muda (cotovelo esquerdo na porta). VOL_EIXO=x,y,z testa
 const VOLANTE_EIXO := {"TRUCK_10": Vector3(0.0, 0.5, -0.866)}
+# melhoria nossa: braço mais aberto (cotovelo pelo menos x graus pra fora,
+# folga y m da porta). Fireball (nov/2026, "abre um pouco mais o braço, sem
+# varar a porta", Matheus): o IK deixava os cotovelos pra baixo (-2°); com 25°
+# e 6 cm (manga ~5 cm) eles abrem 25° a 32° com o volante reto, pulso 29°/32°
+const BRACO_ABERTO := {"TRUCK_10": Vector2(25.0, 0.06)}
 const COLUNA_RAIO := 0.025     # m (coluna nossa)
 const COLUNA_MAX := 0.6        # m: até o painel, no máximo
 var sw_coluna: MeshInstance3D
@@ -1474,6 +1479,9 @@ func _load_piloto() -> void:
 	piloto.position = model_offset + banco() - piloto.root_pos
 	model_root.add_child(piloto)
 	piloto.paredes = _paredes_do_piloto()
+	if BRACO_ABERTO.has(chave()) and OS.get_environment("COT_MIN") == "" and OS.get_environment("PAREDE") == "":
+		piloto.cotovelo_min = BRACO_ABERTO[chave()].x
+		piloto.parede_folga = BRACO_ABERTO[chave()].y
 	if MAOS_NO_VOLANTE and VOLANTE_GIRA and _tem("maos") and _tem("volante_gira") and sw_pivot:
 		var vol: Dictionary = pecas.get("volante", {})
 		# aro no frame do esqueleto (o piloto não gira em relação ao modelo)
