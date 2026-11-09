@@ -247,10 +247,12 @@ const TELESCOPIO := ["TRUCK_09"]
 # que o espelho da esquerda (pivô x 0.288 x -0.179, malha 0.177..1.072 x
 # -0.939..-0.065; as rodas são simétricas, ±1.00) e a ponta da balança sai
 # pela face da roda, igual no jogo. Mesmo espelhada, a ponta das duas ainda
-# aparecia uns cm na face da roda: as 2 vão mais 4 cm pra dentro. Frame do
-# jogo, m (esquerda = x < 0)
-const BALANCA_DESLOCA := {"TRUCK_10": {"LeftFrame": Vector3(0.04, 0.0, 0.0),
-	"RightFrame": Vector3(-0.149, 0.0, 0.0)}}
+# aparecia: o eixo da direção fica em x 0.73 e a ponta vai até 0.94, então
+# com o volante virado ela sai do lado do cubo. As 2 vão mais 10 cm pra
+# dentro (limpo no volante todo virado pros 2 lados e ainda encosta no
+# cubo). Frame do jogo, m (esquerda = x < 0)
+const BALANCA_DESLOCA := {"TRUCK_10": {"LeftFrame": Vector3(0.10, 0.0, 0.0),
+	"RightFrame": Vector3(-0.209, 0.0, 0.0)}}
 const ANIMA_TRUCKS := ["TRUCK_05", "TRUCK_06", "TRUCK_07", "TRUCK_08", "TRUCK_09", "LAZARUS"]
 # lanterna de freio e luz de ré acesas (melhoria nossa, luzes.gd: a lente da
 # cor da luz acende e ganha um halo nosso; o jogo põe só um halo laranja com

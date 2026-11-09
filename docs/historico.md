@@ -738,8 +738,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   x 0.288 x -0.179; malha 0.177..1.072 x -0.939..-0.065), com as rodas
   simétricas (±1.00): a direita varava muito, a esquerda um pouco. car.gd
   BALANCA_DESLOCA (DESLIGAR=balanca_desloca): só o desenho, a direita 10.9
-  cm pra dentro (vira o espelho da esquerda) e as 2 mais 4 cm pra dentro.
-  Rodas limpas dos 2 lados, curso parado e máximo.
+  cm pra dentro (vira o espelho da esquerda) e as 2 mais 10 cm pra dentro:
+  o eixo da direção fica em x 0.73 e a ponta da balança vai até 0.94, então
+  com 4 cm ainda aparecia virando o volante (o Matheus testou). Conferido
+  com o volante todo virado pros 2 lados, curso parado e máximo; a balança
+  ainda encosta no cubo.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels
