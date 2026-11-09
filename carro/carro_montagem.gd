@@ -115,7 +115,7 @@ func _load_model() -> void:
 		mi.position = Vector3(0, 1.0, 0)
 		model_root.add_child(mi)
 		return
-	if not glb and mesh is ArrayMesh:
+	if not glb and mesh is ArrayMesh and _tem("acertar_giro"):
 		mesh = _acertar_giro(mesh)
 	mi.mesh = mesh
 	# pintura: a carroceria usa a textura "white", que o jogo gera em tempo
