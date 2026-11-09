@@ -769,6 +769,17 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   comprimento atual / o parado, ponta de baixo na balança. O pose() segue o
   do jogo (teste_pecas com a RAM). O corpo do amortecedor continua girando
   preso em cima: no Inferno ele ainda cruza a chapa lateral inclinada.
+  Barras soltas da traseira (mesmo pedido, prints do Mosquito e do Bulldog):
+  as balanças de trás (e no Mosquito o freio) trazem barras finas da roda
+  até o chassi, e o jogo gira a peça inteira em volta do eixo da balança
+  (A_FRAME, u): a ponta de dentro da barra que não está nesse eixo passeia
+  e vara a carroceria. No Mosquito as 2 barras estão dentro do
+  RearLeftFrameBrake (a da direita subia com a roda esquerda).
+  suspension_visual.gd _barras (DESLIGAR=barras_presas): barra = pedaço com
+  <= 16 faces, >= 30 cm, <= 5 cm de grossura; da balança só as com a ponta
+  de dentro a > 6 cm do eixo. A ponta de dentro fica presa no chassi, a de
+  fora vai com a peça do canto mais perto, esticando. Achou em Mosquito 2,
+  Inferno 2, Bulldog 4, Phantom 4, Kraken 2, McKenzies 2, Hurricane 2.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels

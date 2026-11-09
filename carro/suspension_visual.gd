@@ -54,6 +54,7 @@ var corners := []            # um por roda
 var rally := false
 var spares := []             # transform de cada estepe (frame do modelo)
 var truck := {}              # peças dos trucks: frames, freios e eixo (ver o topo)
+var barras := []             # barras soltas das balanças/freios de trás (melhoria nossa, _barras)
 
 
 func build(c, pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary,
@@ -101,6 +102,8 @@ func build(c, pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary,
 					k.top = pts[ch]
 					k.bottom = pts[pi]
 			corners.append(k)
+	if not rally and car._tem("barras_presas"):
+		_barras()
 	_build_truck(pts, dir, pecas)
 	# estepe (BuggyCompMap_A1/B1/C1: RearWheel em SpareWheel01)
 	for s in spare:
@@ -326,7 +329,11 @@ func _part(dir: String, file: String) -> MeshInstance3D:
 	if not ResourceLoader.exists(path):
 		return null
 	var mesh := load(path) as Mesh
-	return _mesh_instance(mesh) if mesh else null
+	if mesh == null:
+		return null
+	var mi := _mesh_instance(mesh)
+	mi.name = file.get_basename()       # o PICK do print_tela mostra o bloco da peça
+	return mi
 
 
 func _mesh_instance(mesh: Mesh) -> MeshInstance3D:
@@ -389,6 +396,155 @@ func pose(k: Dictionary, x: float, steer: float) -> Dictionary:
 	return out
 
 
+## Barras presas (melhoria nossa, nov/2026, pedido do Matheus): as balanças
+## de trás dos buggies trazem barras finas (links) da roda até o chassi, e o
+## jogo gira tudo junto com a balança em volta do eixo dela (A_FRAME, u):
+## a barra cuja ponta de dentro não está nesse eixo fica com essa ponta
+## passeando (solta, varando a carroceria). No Mosquito as 2 barras do freio
+## de trás estão dentro do RearLeftFrameBrake (a da direita subia com a roda
+## esquerda). Aqui elas saem da peça: a ponta de dentro fica presa no chassi
+## e a de fora vai com a peça do canto mais perto dela (balança ou freio),
+## esticando entre as 2. Barra = pedaço com <= 16 faces, >= 30 cm e <= 5 cm
+## de grossura; da balança só as que têm a ponta de dentro a > 6 cm do eixo.
+func _barras() -> void:
+	var traseiros := corners.filter(func(k): return not k.front)
+	for k in traseiros:
+		for peca in ["frame", "brake"]:
+			var mi: MeshInstance3D = k.get(peca)
+			if mi == null or not (mi.mesh is ArrayMesh):
+				continue
+			var achadas := _separar_barras(mi)
+			for b in achadas:
+				# ponta de fora = a mais perto do centro de uma roda de trás
+				var melhor = null
+				var dist := INF
+				for kk in traseiros:
+					for ponta in [b.a, b.b]:
+						var d: float = ponta.distance_to(kk.w0)
+						if d < dist:
+							dist = d
+							melhor = [kk, ponta]
+				var fora: Vector3 = melhor[1]
+				var dentro: Vector3 = b.b if fora == b.a else b.a
+				if peca == "frame":
+					var u: Vector3 = k.u.normalized()
+					var r: Vector3 = dentro - k.pivot
+					if (r - u * r.dot(u)).length() < 0.06:
+						b.volta.call()            # nasce no eixo: gira com a balança
+						continue
+				var no := _mesh_instance(b.malha)
+				no.name = mi.name + "_barra"
+				barras.append({"mi": no, "dentro": dentro, "fora": fora, "canto": melhor[0], "peca": peca})
+			if not achadas.is_empty():
+				achadas[0].sobra.call()
+
+
+## tira da malha os pedaços que são barras finas; devolve [{malha, a, b, volta}]
+## (volta() devolve o pedaço pra peça, quando a barra fica com ela)
+func _separar_barras(mi: MeshInstance3D) -> Array:
+	var mesh := mi.mesh as ArrayMesh
+	var out := []
+	var resto := {}               # superfície -> índices que ficam
+	var arrs := []
+	for s in mesh.get_surface_count():
+		var a := mesh.surface_get_arrays(s)
+		arrs.append(a)
+		var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var ix := PackedInt32Array(range(vs.size()))
+		if a[Mesh.ARRAY_INDEX] != null:
+			ix = a[Mesh.ARRAY_INDEX]
+		var pai := PackedInt32Array(range(vs.size()))
+		var achar := func(i: int) -> int:
+			while pai[i] != i:
+				i = pai[i]
+			return i
+		var por_pos := {}
+		for i in vs.size():
+			var kp := Vector3i((vs[i] * 1e4).round())
+			if por_pos.has(kp):
+				pai[achar.call(i)] = achar.call(por_pos[kp])
+			else:
+				por_pos[kp] = i
+		for t in range(0, ix.size(), 3):
+			for j in [1, 2]:
+				pai[achar.call(ix[t + j])] = achar.call(ix[t])
+		var grupos := {}
+		for t in range(0, ix.size(), 3):
+			var r: int = achar.call(ix[t])
+			if not grupos.has(r):
+				grupos[r] = PackedInt32Array()
+			grupos[r].append_array([ix[t], ix[t + 1], ix[t + 2]])
+		resto[s] = []
+		for r in grupos:
+			var tri: PackedInt32Array = grupos[r]
+			var e_barra := tri.size() / 3 <= 16
+			var pa := Vector3.ZERO
+			var pb := Vector3.ZERO
+			if e_barra:
+				var maior := -1.0
+				for i in tri:
+					for j in tri:
+						var d := vs[i].distance_squared_to(vs[j])
+						if d > maior:
+							maior = d
+							pa = vs[i]
+							pb = vs[j]
+				var eixo := (pb - pa).normalized()
+				var grossura := 0.0
+				for i in tri:
+					var w := vs[i] - pa
+					grossura = maxf(grossura, (w - eixo * w.dot(eixo)).length())
+				e_barra = pa.distance_to(pb) >= 0.3 and grossura <= 0.05
+			if not e_barra:
+				resto[s].append_array(Array(tri))
+				continue
+			var m := ArrayMesh.new()
+			var b: Array = a.duplicate()
+			b[Mesh.ARRAY_INDEX] = tri
+			m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, b)
+			m.surface_set_material(0, mesh.surface_get_material(s))
+			var item := {"malha": m, "a": pa, "b": pb}
+			var lista: Array = resto[s]
+			item.volta = func(): lista.append_array(Array(tri))
+			out.append(item)
+	if out.is_empty():
+		return out
+	# a malha da peça é refeita no fim (as barras que voltaram entram de novo)
+	var sobra := func():
+		var nova := ArrayMesh.new()
+		for s in resto:
+			if resto[s].is_empty():
+				continue
+			var c: Array = arrs[s].duplicate()
+			c[Mesh.ARRAY_INDEX] = PackedInt32Array(resto[s])
+			nova.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, c)
+			nova.surface_set_material(nova.get_surface_count() - 1, mesh.surface_get_material(s))
+		mi.mesh = nova
+		for i in nova.get_surface_count():
+			var m0 := nova.surface_get_material(i)
+			var m2: StandardMaterial3D = m0.duplicate() if m0 is StandardMaterial3D else StandardMaterial3D.new()
+			car.material_do_jogo(m2)
+			mi.set_surface_override_material(i, m2)
+	for item in out:
+		item.sobra = sobra
+	return out
+
+
+## matriz da barra: ponta de dentro parada, a de fora levada pela peça t
+static func pose_barra(b: Dictionary, t: Transform3D) -> Transform3D:
+	var i: Vector3 = b.dentro
+	var o0: Vector3 = b.fora
+	var o: Vector3 = t * o0
+	var l0 := i.distance_to(o0)
+	var d0 := (o0 - i) / l0
+	var giro := Basis(Quaternion(d0, (o - i).normalized()))
+	var s := i.distance_to(o) / l0
+	var e := Basis(Vector3(1, 0, 0) + d0 * d0.x * (s - 1.0), Vector3(0, 1, 0) + d0 * d0.y * (s - 1.0),
+		Vector3(0, 0, 1) + d0 * d0.z * (s - 1.0))
+	var m := giro * e
+	return Transform3D(m, i - m * i)
+
+
 ## Haste do amortecedor de trás esticando (melhoria nossa, nov/2026, pedido do
 ## Matheus): no jogo (0x21fb68) a câmara gira presa no SHOCK_CHAMBER e a haste
 ## vai rígida com a balança na mesma linha; com o comprimento fixo das 2 peças
@@ -428,6 +584,9 @@ func update(steer_angle: float) -> void:
 			if car._tem("haste_estica"):
 				hs = haste_estica(k, hs)
 			_place(k.get("piston"), hs)
+		k.ultima = p
+	for b in barras:
+		_place(b.mi, pose_barra(b, b.canto.ultima[b.peca]))
 	if truck.is_empty():
 		return
 	var x := {}
