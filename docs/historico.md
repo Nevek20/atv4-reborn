@@ -782,7 +782,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   dentro fica presa no chassi, a de fora vai com a peça do canto mais perto,
   esticando. Achou em Mosquito 2, Inferno 6, Trident 2, Bulldog 4, Phantom
   4, Kraken 2, McKenzies 2, Viper 2, Hurricane 2 (Sphinx, Renegade e Storm
-  nenhuma: as barras deles nascem no eixo).
+  nenhuma: as barras deles nascem no eixo). FECHADO pelo Matheus (nov/2026,
+  "tá perfeito tudo agora"), junto com a haste esticando, o telescópico do
+  Hammerhead e a balança do Fireball.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels
