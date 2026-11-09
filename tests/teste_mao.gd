@@ -100,7 +100,11 @@ func _conferir(nome: String, c) -> void:
 			var mi = k.get(nm)
 			if mi == null or not ps.has(nm):
 				continue
-			var e: Transform3D = base * ps[nm]
+			var esperado: Transform3D = ps[nm]
+			# haste de trás esticando (melhoria nossa, suspension_visual haste_estica)
+			if nm == "piston" and c._tem("haste_estica"):
+				esperado = c.susp_vis.haste_estica(k, esperado)
+			var e: Transform3D = base * esperado
 			var g: Transform3D = mi.global_transform
 			var err := g.origin.distance_to(e.origin)
 			for i in 3:
