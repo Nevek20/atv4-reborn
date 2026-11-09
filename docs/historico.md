@@ -245,6 +245,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   desenha o veículo nela; On_Hood é 1). O main.gd escondia só a carroceria e
   a suspensão e deixava as rodas ("as rodas continuam", sem fonte); agora as
   rodas somem também. print_tela CAM_MODO=3 com a vista "jogo" confere.
+- Câmera do capô do Fireball tampada (nov/2026, Matheus): a MountOnHood do
+  TruckCamSet_10 (PosOffset y 2.38, z 0.55) fica DENTRO do teto da cabine
+  (chapa a 3 cm). Corte de perto da câmera: 0.1 m era nosso, sem fonte; na
+  do capô agora 0.2 (NOSSO; o valor do jogo não foi achado): o teto some e
+  o resto fica igual (Renegade conferido). Perseguição 0.1, piloto
+  FP_NEAR.
 
 ## Pista RX01
 

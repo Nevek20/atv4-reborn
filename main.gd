@@ -614,6 +614,7 @@ func _update_camera(delta: float) -> void:
 	# congelado na tela ao trocar de câmera em alta, Matheus nov/2026)
 	cam_piloto.atualizar_tela(cam_mode == 4)
 	if cam_mode <= 1:
+		cam.near = 0.1
 		gcams[cam_mode].apply(cam, s.tp)
 		if ORBITA:
 			orbita.passo(delta)
@@ -641,7 +642,11 @@ func _update_camera(delta: float) -> void:
 		cam.near = car.FP_NEAR
 		return
 
-	cam.near = 0.1
+	# corte de perto: 0.1 sem fonte; na do capô 0.2 (NOSSO, nov/2026): a
+	# MountOnHood do Fireball (TruckCamSet_10, y 2.38 z 0.55) fica dentro do
+	# teto da cabine (chapa a 3 cm) e tampava a tela; o que está a menos de
+	# 20 cm da câmera é sempre chapa dentro dela
+	cam.near = 0.2 if cam_mode == 2 else 0.1
 	# MountOnHood / MountOnFront: presa no carro, PosOffset no frame do modelo,
 	# Orientation.X = inclinação em graus, FOV = zoom fixo
 	var g = gcams[cam_mode]
