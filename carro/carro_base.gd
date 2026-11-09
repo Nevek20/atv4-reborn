@@ -242,6 +242,15 @@ var motor_anima: Node = null
 # amortecedor dentro da malha da balança (LeftFrame/RightFrame) o jogo gira
 # tudo junto e no curso máximo a ponta sai pelo capô (igual no jogo)
 const TELESCOPIO := ["TRUCK_09"]
+# balança da frente deslocada só no desenho (melhoria nossa, nov/2026): no
+# Fireball a RightFrame e o A_FRAME_RIGHT do jogo estão ~11 cm mais pra fora
+# que o espelho da esquerda (pivô x 0.288 x -0.179, malha 0.177..1.072 x
+# -0.939..-0.065; as rodas são simétricas, ±1.00) e a ponta da balança sai
+# pela face da roda, igual no jogo. Mesmo espelhada, a ponta das duas ainda
+# aparecia uns cm na face da roda: as 2 vão mais 4 cm pra dentro. Frame do
+# jogo, m (esquerda = x < 0)
+const BALANCA_DESLOCA := {"TRUCK_10": {"LeftFrame": Vector3(0.04, 0.0, 0.0),
+	"RightFrame": Vector3(-0.149, 0.0, 0.0)}}
 const ANIMA_TRUCKS := ["TRUCK_05", "TRUCK_06", "TRUCK_07", "TRUCK_08", "TRUCK_09", "LAZARUS"]
 # lanterna de freio e luz de ré acesas (melhoria nossa, luzes.gd: a lente da
 # cor da luz acende e ganha um halo nosso; o jogo põe só um halo laranja com

@@ -732,6 +732,14 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   largura) vai com a balança, cada metade com 60% do comprimento, e a mola
   estica entre as 2 pontas. Conferido em print nos cursos -0.2, 0, nat e
   máximo (0.48): capô limpo e sem buraco entre as metades.
+  Fireball (melhoria nossa, mesmo pedido; "vara o tempo todo"): a ponta da
+  balança da frente sai pela face da roda. No jogo a RightFrame e o
+  A_FRAME_RIGHT estão ~11 cm mais pra fora que o espelho da esquerda (pivô
+  x 0.288 x -0.179; malha 0.177..1.072 x -0.939..-0.065), com as rodas
+  simétricas (±1.00): a direita varava muito, a esquerda um pouco. car.gd
+  BALANCA_DESLOCA (DESLIGAR=balanca_desloca): só o desenho, a direita 10.9
+  cm pra dentro (vira o espelho da esquerda) e as 2 mais 4 cm pra dentro.
+  Rodas limpas dos 2 lados, curso parado e máximo.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels

@@ -411,8 +411,11 @@ func update(steer_angle: float) -> void:
 		x[("F" if w.front else "R") + ("L" if w.left else "R")] = clampf(w.x, w.min, w.max) + w.get("jit", 0.0)
 	var inclina: bool = car._tem("eixo_rigido")
 	var p := pose_truck(x, steer_angle, inclina)
+	var desloca: Dictionary = car.BALANCA_DESLOCA.get(car.chave(), {}) if car._tem("balanca_desloca") else {}
 	for nome in p:
 		var t: Dictionary = truck[nome]
+		if desloca.has(nome):
+			p[nome] = Transform3D(Basis(), desloca[nome]) * p[nome]
 		for mi in t.get("mis", [t.get("mi")]):
 			_place(mi, p[nome])
 		if t.has("tele"):
