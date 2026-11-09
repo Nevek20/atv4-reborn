@@ -759,6 +759,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   com 4 cm ainda aparecia virando o volante (o Matheus testou). Conferido
   com o volante todo virado pros 2 lados, curso parado e máximo; a balança
   ainda encosta no cubo.
+  Amortecedor de trás dos buggies (melhoria nossa, nov/2026, "hastes soltas
+  varando o carro", Matheus): no 0x21fb68 a câmara gira presa no
+  SHOCK_CHAMBER e a haste vai rígida com a balança na mesma linha, as 2 com
+  comprimento fixo: com a roda pendurada a haste solta da câmara (Mosquito)
+  e comprimindo passa por cima dela e da carroceria (Inferno, Bulldog...).
+  Renegade, Hurricane e Storm escondem na carroceria. suspension_visual.gd
+  haste_estica (DESLIGAR=haste_estica): a haste escala no eixo pelo
+  comprimento atual / o parado, ponta de baixo na balança. O pose() segue o
+  do jogo (teste_pecas com a RAM). O corpo do amortecedor continua girando
+  preso em cima: no Inferno ele ainda cruza a chapa lateral inclinada.
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels

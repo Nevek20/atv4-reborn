@@ -54,6 +54,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --headless --path . -s res://tests/teste_motor_anima.gd   :: ventoinhas, polias e correia nos 25 (nada some, correia encosta)
 %GODOT% --headless --path . -s res://tests/teste_luzes.gd         :: cor do vértice nos materiais e lanterna de freio e ré nos 25 (acende e apaga)
 CAM_MODO=3 %GODOT% --path . -s res://tests/print_tela.gd -- p.png jogo 23   :: print com a câmera do main (2 capô, 3 para-choque)
+:: DESLIGAR=haste_estica no print_tela: haste do amortecedor de trás dos buggies rígida como o jogo (solta e vara comprimindo)
 :: DESLIGAR=balanca_desloca no print_tela: balança da frente do Fireball onde o jogo põe (a ponta sai pela roda)
 :: DESLIGAR=telescopio no print_tela: amortecedor da frente do Hammerhead como o jogo (gira com a balança e sai pelo capô)
 set GIRO_DEBUG=1 & %GODOT% --headless --path . -s res://tests/teste_luzes.gd   :: + quantos triângulos com o giro trocado do jogo cada carro consertou (carro_montagem _acertar_giro)

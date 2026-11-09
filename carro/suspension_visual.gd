@@ -389,6 +389,27 @@ func pose(k: Dictionary, x: float, steer: float) -> Dictionary:
 	return out
 
 
+## Haste do amortecedor de trás esticando (melhoria nossa, nov/2026, pedido do
+## Matheus): no jogo (0x21fb68) a câmara gira presa no SHOCK_CHAMBER e a haste
+## vai rígida com a balança na mesma linha; com o comprimento fixo das 2 peças
+## a haste solta da câmara com a roda pendurada (Mosquito) e passa por cima
+## dela comprimindo (varava a carroceria no Inferno, Bulldog...). Aqui a
+## haste escala ao longo do eixo (ponta de baixo presa na balança) pelo
+## comprimento atual / o parado: fica sempre na mesma fração dentro da
+## câmara. Só o desenho (o pose() continua o do jogo, teste_pecas).
+static func haste_estica(k: Dictionary, hs: Transform3D) -> Transform3D:
+	var top: Vector3 = k.top
+	var bot: Vector3 = k.bottom
+	var l0 := top.distance_to(bot)
+	if l0 < 1e-4:
+		return hs
+	var s := top.distance_to(hs * bot) / l0
+	var d := (top - bot) / l0
+	var e := Basis(Vector3(1, 0, 0) + d * d.x * (s - 1.0), Vector3(0, 1, 0) + d * d.y * (s - 1.0),
+		Vector3(0, 0, 1) + d * d.z * (s - 1.0))
+	return hs * Transform3D(e, bot - e * bot)
+
+
 ## steer_angle: ângulo das rodas no frame do jogo (car.gd a_jogo)
 func update(steer_angle: float) -> void:
 	for k in corners:
@@ -403,7 +424,10 @@ func update(steer_angle: float) -> void:
 			_place(k.shock, p.shock)
 		if p.has("chamber"):
 			_place(k.get("chamber"), p.chamber)
-			_place(k.get("piston"), p.piston)
+			var hs: Transform3D = p.piston
+			if car._tem("haste_estica"):
+				hs = haste_estica(k, hs)
+			_place(k.get("piston"), hs)
 	if truck.is_empty():
 		return
 	var x := {}
