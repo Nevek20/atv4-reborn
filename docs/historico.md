@@ -251,6 +251,10 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   do capô agora 0.2 (NOSSO; o valor do jogo não foi achado): o teto some e
   o resto fica igual (Renegade conferido). Perseguição 0.1, piloto
   FP_NEAR.
+  Print do jogo (Matheus, nov/2026): no PS2 o teto também não aparece e o
+  enquadramento bate. Diferença que sobrou: o capô ocupa ~23% da altura da
+  tela no jogo e ~16% aqui (câmera um pouco mais alta ou FOV diferente; não
+  calibrado).
 
 ## Pista RX01
 
