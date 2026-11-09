@@ -161,6 +161,8 @@ Câmeras
   meia-altura = 0.375/zoom (4:3). Passos de 1/60 interpolando no frame do
   carro, cada passo com o carro no tempo dele.
 - Do save state, só a câmera ativa atualiza (a de suavização ~40/s).
+- Para-choque (On_Front, mRenderVehicle 0): nada do carro aparece, nem as
+  rodas. Capô (On_Hood): o carro aparece, o piloto não.
 
 Pista RX01
 - Terreno e material do stream do jogo (conferidos com a RAM). Objetos vêm

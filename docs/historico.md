@@ -240,6 +240,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   deixou (zoom 0.6027, suavização 17.85/s em a.p2s, b.p2s, Goliath e
   Buccaneer). A ativa é a de suavização ~40/s (corrigido out/2026).
 
+- Câmera do para-choque sem as rodas (nov/2026, "sempre mostra a roda" em 15
+  carros, Matheus): o xml 14837 tem On_Front mRenderVehicle="0" (o jogo não
+  desenha o veículo nela; On_Hood é 1). O main.gd escondia só a carroceria e
+  a suspensão e deixava as rodas ("as rodas continuam", sem fonte); agora as
+  rodas somem também. print_tela CAM_MODO=3 com a vista "jogo" confere.
+
 ## Pista RX01
 
 - Terreno RX01: .bin no layout do jogo, transposto na carga (terrain.gd).

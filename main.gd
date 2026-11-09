@@ -594,11 +594,16 @@ func _update_camera(delta: float) -> void:
 	for i in 2:
 		gcams[i].update(delta, s, terrain)
 
-	# MountOnFront fica dentro da carroceria (no ATV também: Z -0.2), então o
-	# jogo não desenha o veículo nela. As rodas continuam.
+	# MountOnFront fica dentro da carroceria (no ATV também: Z -0.2): o jogo não
+	# desenha o veículo nela (xml 14837, On_Front mRenderVehicle="0"), rodas
+	# junto (são peças do component map). Até nov/2026 as rodas ficavam e
+	# apareciam na tela em 15 carros (Matheus)
 	car.model_root.visible = cam_mode != 3
 	if car.susp_vis:
 		car.susp_vis.visible = cam_mode != 3
+	for w in car.wheels:
+		if w.has("pivot"):
+			w.pivot.visible = cam_mode != 3
 	# mRenderRider (xml 14837): 0 em On_Hood e On_Front. Na nossa câmera do
 	# piloto ele aparece sem o capacete (braços e mãos no volante)
 	if car.piloto:

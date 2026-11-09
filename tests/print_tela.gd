@@ -18,6 +18,7 @@ extends SceneTree
 ##   MEDIR=1                    imprime as medidas de cada canto em cada curso e
 ##                              salva <saida>_medidas.json (ver _medir/_estatico)
 ##   CORPO=0                    esconde a carroceria em todas as vistas
+##   CAM_MODO=3                 vista "jogo" com outra câmera do main (2 capô, 3 para-choque)
 ##   VIRA=1                     direção forçada (-1..1, + = esquerda) antes dos
 ##                              prints (só no print simples, sem VISTAS)
 ##   VOLANTE_COR=1              pinta o volante solto de vermelho (vista "volante")
@@ -150,6 +151,8 @@ func _process(_dt: float) -> bool:
 			main.spawn_vehicle(veh, main.spawn_point(), deg_to_rad(main.SPAWN_YAW))
 	if multi:
 		return _process_multi()
+	if frames == 3 and OS.has_environment("CAM_MODO"):     # vista "jogo": 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
+		main.cam_mode = int(OS.get_environment("CAM_MODO"))
 	if frames == 3 and OS.has_environment("VIRA"):
 		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": float(OS.get_environment("VIRA"))}
 	if frames == 90 and view != "jogo":
