@@ -776,10 +776,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   e vara a carroceria. No Mosquito as 2 barras estão dentro do
   RearLeftFrameBrake (a da direita subia com a roda esquerda).
   suspension_visual.gd _barras (DESLIGAR=barras_presas): barra = pedaço com
-  <= 16 faces, >= 30 cm, <= 5 cm de grossura; da balança só as com a ponta
-  de dentro a > 6 cm do eixo. A ponta de dentro fica presa no chassi, a de
-  fora vai com a peça do canto mais perto, esticando. Achou em Mosquito 2,
-  Inferno 2, Bulldog 4, Phantom 4, Kraken 2, McKenzies 2, Hurricane 2.
+  <= 16 faces, >= 30 cm, <= 7 cm de grossura (com 5 cm escapavam a do
+  Trident, 5.5, e a de cima do Viper, 5.2, que ficavam soltas; o Matheus
+  viu); da balança só as com a ponta de dentro a > 6 cm do eixo. A ponta de
+  dentro fica presa no chassi, a de fora vai com a peça do canto mais perto,
+  esticando. Achou em Mosquito 2, Inferno 6, Trident 2, Bulldog 4, Phantom
+  4, Kraken 2, McKenzies 2, Viper 2, Hurricane 2 (Sphinx, Renegade e Storm
+  nenhuma: as barras deles nascem no eixo).
 
 - Farol (melhoria nossa, car.gd FAROL, farol.gd; H no jogo liga e desliga,
   vale pra todos): mesma cara da lanterna de freio (lente acesa nos pixels

@@ -404,7 +404,7 @@ func pose(k: Dictionary, x: float, steer: float) -> Dictionary:
 ## de trás estão dentro do RearLeftFrameBrake (a da direita subia com a roda
 ## esquerda). Aqui elas saem da peça: a ponta de dentro fica presa no chassi
 ## e a de fora vai com a peça do canto mais perto dela (balança ou freio),
-## esticando entre as 2. Barra = pedaço com <= 16 faces, >= 30 cm e <= 5 cm
+## esticando entre as 2. Barra = pedaço com <= 16 faces, >= 30 cm e <= 7 cm
 ## de grossura; da balança só as que têm a ponta de dentro a > 6 cm do eixo.
 func _barras() -> void:
 	var traseiros := corners.filter(func(k): return not k.front)
@@ -494,7 +494,7 @@ func _separar_barras(mi: MeshInstance3D) -> Array:
 				for i in tri:
 					var w := vs[i] - pa
 					grossura = maxf(grossura, (w - eixo * w.dot(eixo)).length())
-				e_barra = pa.distance_to(pb) >= 0.3 and grossura <= 0.05
+				e_barra = pa.distance_to(pb) >= 0.3 and grossura <= 0.07
 			if not e_barra:
 				resto[s].append_array(Array(tri))
 				continue
