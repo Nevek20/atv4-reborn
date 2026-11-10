@@ -623,7 +623,7 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
   script): 64 tiles de 128 m, patches 9x9 (FUN_0029bcb0, tabela 0x550c00),
   altura = FUN_00299a60 com a diagonal (i+1, j)-(i, j+1). A mesma diagonal
   do HeightMapShape3D do Godot (Godot Physics e Jolt, testado). Grade de
-  1 m em assets/terrain/rx01_height.bin; o .bin antigo errava 1,5 m em
+  1 m em assets/pista/terreno/rx01_height.bin; o .bin antigo errava 1,5 m em
   média (até 32 m).
 - Material: entrada E do tile, uma a cada 2 m, byte0 & 0xF = índice i ->
   Material_(i+1) do Levels/RX_01/Env/Materials.xml (unpacked/xml/12280,
@@ -664,7 +664,7 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
 
 ## Som de pneu, suspensão e pouso
 
-Porta em sfx_carro.gd; samples do jogo via tools/sfx_jogo.py (assets/sfx,
+Porta em sfx_carro.gd; samples do jogo via tools/sfx_jogo.py (assets/sons,
 fora do git); parâmetros em data/sound_database.xml (Audio/SoundDatabase.xml).
 - Bancos numa corrida no RX01 (RAM do SPU de 17 save states): Audio/SURFACE.bnk
   e Audio/Collide.bnk ("Coll_Big"). Suspen.bnk e VEHICLE.bnk (#01b65ec7) nunca
@@ -785,7 +785,7 @@ fora do git); parâmetros em data/sound_database.xml (Audio/SoundDatabase.xml).
 Porta em poeira.gd (nov/2026). Dados: Setup/Dust.xml (data/dust.xml) e
 Levels/<pista>/Env/Dust.xml (data/dust_rx01.xml: Dust 32 grupos x 32
 partículas, Dirt 16 x 32). Textura Sprites/WorldFXdust (atlas 2 x 3 de
-nuvens; tools/fx_jogo.py -> assets/fx/poeira.png).
+nuvens; tools/fx_jogo.py -> assets/efeitos/poeira.png).
 - Material (0x3a9608, registro de 0x60): +0x10 DustColour, +0x20 DirtColour
   (sem ela = DustColour x 0.7, alfa 1), +0x30 DustType (None = -1, Light 0,
   Medium 1, Heavy 2; Water 3 = água), +0x34 SkidmarkIndex, +0x38
@@ -974,6 +974,19 @@ vazios). Tudo vem do evento:
   cFenceNodeEntity + 26 cFenceLinkEntity (cercas entre nós, com os .clm
   GEN_Barrier_RallyFence / SAM_Barrier_RallyFence / SAM_Crowd_BarrierTG).
   Cada uma com pos (3ef310bc), dir (74f784c3), tamanho (44c2fa64).
+- Corrida do RX01 (nov/2026, tools/rx01_corrida.py -> data/rx01_corrida.json):
+  #b953876a (other/12288) = "AIT 1.1 ExportedTrack", o traçado da IA: 75
+  links de 0x70 bytes a partir de 0x3c (+0x00 ponto, +0x0c direção, +0x18
+  normal, +0x28 próximo link, +0x2c/+0x3c anteriores/seguintes, +0x5c
+  centro, +0x68/+0x6c largura esquerda/direita); fecha uma volta e cai em
+  cima da pista na textura do chão. #7c14cf48 = XML dos checkpoints (1 CP
+  Type 2 na linha de chegada, AILink 50, caixa 15.8 x 5.9 x 1.4 m).
+  #c0675b52 = mFirstLink 51, mCircuitLength 1810.4 m, mStartingOffset
+  1759.7, mFirstLapLength 54.8 (a largada fica 54.8 m antes da linha).
+  TrackSetup/RALLYCROSS.xml: Logic (mWarningStray 4, mCheatingStray 8,
+  mCheatingProgress 30, mLinkReadAhead 10, mRespotSpeed 40,
+  mBackwardLimit 100), RollingStart. Eventos (xml 14840): Rallycross
+  Amateur buggy/truck = Laps 5, NumRankings 8.
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice
@@ -1067,7 +1080,7 @@ vazios). Tudo vem do evento:
   InShadowMultiply) x ... (s = quanto o objeto está na sombra assada);
   RX01: 0.5 no sol. Na tela (print do Matheus na largada) o chão na sombra
   do carro fica 0.66 do chão no sol.
-- Chão: a textura do relevo (assets/terrain/rx01_terrain.jpg) tem a luz
+- Chão: a textura do relevo (assets/pista/terreno/rx01_terrain.jpg) tem a luz
   assada (sombra do arco, arquibancadas, morros). No print do jogo o chão da
   largada é 78, 72, 66 e a textura ali 85, 75, 65: desenhada sem luz.
 - Detalhe do chão: o renderer do relevo (0x1eb758, objeto com o

@@ -6,7 +6,7 @@ extends SceneTree
 ##   VISTAS=lado,janela,frente,cima,olho,maos,maos_cima,maos_lado; VIRA=0.5 volante virado, + = esquerda;
 ##   CORPO=1 deixa a carroceria)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 # câmera a partir do banco do piloto (car.banco(), frame do jogo: x < 0 =

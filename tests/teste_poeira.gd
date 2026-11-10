@@ -9,9 +9,9 @@ extends SceneTree
 ## sobra um rastro curto (o jogo, 0x225108). Imprime quanto tempo soltou no ar.
 ## Uso: godot --headless --path . -s res://tests/teste_poeira.gd [-- veh]
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 
 var terrain
 var car
@@ -49,7 +49,7 @@ func _physics_process(dt: float) -> bool:
 		var p: Vector2 = Main.SPAWN_XZ
 		car.reset_to(Vector3(p.x, terrain.height_at(p.x, p.y) + 0.8, p.y), deg_to_rad(Main.SPAWN_YAW))
 		if car.poeira == null:
-			print("teste_poeira: FALHA (sem poeira: falta assets/fx/poeira.png? rode tools/fx_jogo.py)")
+			print("teste_poeira: FALHA (sem poeira: falta assets/efeitos/poeira.png? rode tools/fx_jogo.py)")
 			return true
 	t += dt
 	car.test_input.thr = 1.0 if t > 1.5 else 0.0

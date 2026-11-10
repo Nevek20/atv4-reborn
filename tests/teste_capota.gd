@@ -8,7 +8,7 @@ extends SceneTree
 ## índices da frota (padrão Renegade, Buccaneer, Truggy, Fireball, Goliath).
 ## Uso: VEL=80 godot --headless --path . -s res://tests/teste_capota.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var carros := []        # [car, nome, modo, estado]

@@ -16,7 +16,7 @@ extends Node3D
 ##   HZ    passos de física por segundo (padrão do projeto: 50 = PAL, como o
 ##         nosso exe; 60 = NTSC, pra comparar com vídeo da versão americana)
 ##   LEG=1 pneus antigos   LAT=0 lateral remendo
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 var car
 var t := 0.0

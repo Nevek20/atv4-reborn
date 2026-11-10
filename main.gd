@@ -12,9 +12,9 @@ extends Node3D
 # metade (tools/volante.py antigo, centro 1.4 cm mais baixo e 1.2 cm mais pra
 # frente) e foi refeito pro mesmo olho com o centro novo (0.32, 0.47 -> 0.31, 0.46).
 const VEHICLES := [
-	{"name": "Renegade", "id": "BUGGY_10", "cams": "BuggyCamSet_10", "dir": "res://assets/renegade",
+	{"name": "Renegade", "id": "BUGGY_10", "cams": "BuggyCamSet_10", "dir": "res://assets/carros/buggy_10",
 		"data": "res://data/vehicles/buggy_10.xml", "points": "res://data/vehicles/buggy_10_points.bin", "fp": [0.39, 0.52, 0.00]},
-	{"name": "Sphinx", "id": "BUGGY_04", "cams": "BuggyCamSet_04", "dir": "res://assets/sphinx",
+	{"name": "Sphinx", "id": "BUGGY_04", "cams": "BuggyCamSet_04", "dir": "res://assets/carros/buggy_04",
 		"data": "res://data/vehicles/buggy_04.xml", "points": "res://data/vehicles/buggy_04_points.bin", "fp": [0.35, 0.48, 0.00]},
 	# Sphinx do speedrun, pela ficha da tela de opções do vídeo (0:00): pneu
 	# DIRT PREMIUM; 269,9 HP = Drive_torque 1,08 x 250 (0x1f5e90), ou seja,
@@ -22,29 +22,29 @@ const VEHICLES := [
 	# (BodyMass L2). Embreagem L2: na troca 2->3 do vídeo a velocidade para
 	# 0,28 s (L2 dá 0,30, L1 0,40). O câmbio Prototype libera a relação final
 	# custom (0.61; o Level0 de fábrica dá 0.45, vehicle_data.factory_tuning)
-	{"name": "Sphinx speedrun", "id": "BUGGY_04", "cams": "BuggyCamSet_04", "dir": "res://assets/sphinx",
+	{"name": "Sphinx speedrun", "id": "BUGGY_04", "cams": "BuggyCamSet_04", "dir": "res://assets/carros/buggy_04",
 		"data": "res://data/vehicles/buggy_04.xml", "points": "res://data/vehicles/buggy_04_points.bin", "fp": [0.35, 0.48, 0.00],
 		"livery": "pintura_speedrun.png", "tune": {"engine": 1.0, "mass": 1.0, "shift": 1.0, "final": 0.61, "tire": "DIRT_PREMIUM"}},
 	# os outros buggies, na ordem da lista do jogo (tools/gerar_buggies.py)
-	{"name": "Mosquito", "id": "BUGGY_01", "cams": "BuggyCamSet_01", "dir": "res://assets/buggy_01",
+	{"name": "Mosquito", "id": "BUGGY_01", "cams": "BuggyCamSet_01", "dir": "res://assets/carros/buggy_01",
 		"data": "res://data/vehicles/buggy_01.xml", "points": "res://data/vehicles/buggy_01_points.bin", "fp": [0.35, 0.46, 0.00]},
-	{"name": "Inferno", "id": "BUGGY_02", "cams": "BuggyCamSet_02", "dir": "res://assets/buggy_02",
+	{"name": "Inferno", "id": "BUGGY_02", "cams": "BuggyCamSet_02", "dir": "res://assets/carros/buggy_02",
 		"data": "res://data/vehicles/buggy_02.xml", "points": "res://data/vehicles/buggy_02_points.bin", "fp": [0.37, 0.50, 0.00]},
-	{"name": "Trident", "id": "BUGGY_03", "cams": "BuggyCamSet_03", "dir": "res://assets/buggy_03",
+	{"name": "Trident", "id": "BUGGY_03", "cams": "BuggyCamSet_03", "dir": "res://assets/carros/buggy_03",
 		"data": "res://data/vehicles/buggy_03.xml", "points": "res://data/vehicles/buggy_03_points.bin", "fp": [0.37, 0.56, -0.06]},
-	{"name": "Bulldog", "id": "BUGGY_05", "cams": "BuggyCamSet_05", "dir": "res://assets/buggy_05",
+	{"name": "Bulldog", "id": "BUGGY_05", "cams": "BuggyCamSet_05", "dir": "res://assets/carros/buggy_05",
 		"data": "res://data/vehicles/buggy_05.xml", "points": "res://data/vehicles/buggy_05_points.bin", "fp": [0.27, 0.40, -0.08]},
-	{"name": "Phantom", "id": "BUGGY_06", "cams": "BuggyCamSet_06", "dir": "res://assets/buggy_06",
+	{"name": "Phantom", "id": "BUGGY_06", "cams": "BuggyCamSet_06", "dir": "res://assets/carros/buggy_06",
 		"data": "res://data/vehicles/buggy_06.xml", "points": "res://data/vehicles/buggy_06_points.bin", "fp": [0.37, 0.44, -0.04]},
-	{"name": "Kraken V8", "id": "BUGGY_07", "cams": "BuggyCamSet_07", "dir": "res://assets/buggy_07",
+	{"name": "Kraken V8", "id": "BUGGY_07", "cams": "BuggyCamSet_07", "dir": "res://assets/carros/buggy_07",
 		"data": "res://data/vehicles/buggy_07.xml", "points": "res://data/vehicles/buggy_07_points.bin", "fp": [0.35, 0.44, 0.00]},
-	{"name": "McKenzies", "id": "BUGGY_08", "cams": "BuggyCamSet_08", "dir": "res://assets/buggy_08",
+	{"name": "McKenzies", "id": "BUGGY_08", "cams": "BuggyCamSet_08", "dir": "res://assets/carros/buggy_08",
 		"data": "res://data/vehicles/buggy_08.xml", "points": "res://data/vehicles/buggy_08_points.bin", "fp": [0.37, 0.40, 0.02]},
-	{"name": "Viper", "id": "BUGGY_09", "cams": "BuggyCamSet_09", "dir": "res://assets/buggy_09",
+	{"name": "Viper", "id": "BUGGY_09", "cams": "BuggyCamSet_09", "dir": "res://assets/carros/buggy_09",
 		"data": "res://data/vehicles/buggy_09.xml", "points": "res://data/vehicles/buggy_09_points.bin", "fp": [0.25, 0.46, -0.10]},
-	{"name": "Hurricane", "id": "BUGGY_11", "cams": "BuggyCamSet_11", "dir": "res://assets/buggy_11",
+	{"name": "Hurricane", "id": "BUGGY_11", "cams": "BuggyCamSet_11", "dir": "res://assets/carros/buggy_11",
 		"data": "res://data/vehicles/buggy_11.xml", "points": "res://data/vehicles/buggy_11_points.bin", "fp": [0.37, 0.48, 0.00]},
-	{"name": "Storm", "id": "BUGGY_12", "cams": "LanciaCam", "dir": "res://assets/buggy_12",
+	{"name": "Storm", "id": "BUGGY_12", "cams": "LanciaCam", "dir": "res://assets/carros/buggy_12",
 		"data": "res://data/vehicles/buggy_12.xml", "points": "res://data/vehicles/buggy_12_points.bin", "fp": [0.33, 0.46, 0.00]},
 ]
 # física: base da classe + o arquivo do veículo
@@ -54,29 +54,29 @@ const BASE_TRUCK := "res://data/vehicles/truck_base.xml"     # Setup/VehiclePara
 # nomes do menu do jogo (text/15205_en.txt). Ficam fora do VEHICLES pra os
 # testes dos buggies não mudarem; o menu, o V e o print_tela usam frota()
 const TRUCKS := [
-	{"name": "Buccaneer", "id": "TRUCK_01", "cams": "TruckCamSet_01", "dir": "res://assets/truck_01",
+	{"name": "Buccaneer", "id": "TRUCK_01", "cams": "TruckCamSet_01", "dir": "res://assets/carros/truck_01",
 		"data": "res://data/vehicles/truck_01.xml", "points": "res://data/vehicles/truck_01_points.bin", "base": BASE_TRUCK, "fp": [0.36, 0.47, 0.00]},
-	{"name": "Shockwave", "id": "TRUCK_02", "cams": "TruckCamSet_02", "dir": "res://assets/truck_02",
+	{"name": "Shockwave", "id": "TRUCK_02", "cams": "TruckCamSet_02", "dir": "res://assets/carros/truck_02",
 		"data": "res://data/vehicles/truck_02.xml", "points": "res://data/vehicles/truck_02_points.bin", "base": BASE_TRUCK, "fp": [0.42, 0.49, 0.00]},
-	{"name": "Shinto", "id": "TRUCK_03", "cams": "TruckCamSet_03", "dir": "res://assets/truck_03",
+	{"name": "Shinto", "id": "TRUCK_03", "cams": "TruckCamSet_03", "dir": "res://assets/carros/truck_03",
 		"data": "res://data/vehicles/truck_03.xml", "points": "res://data/vehicles/truck_03_points.bin", "base": BASE_TRUCK, "fp": [0.36, 0.47, 0.00]},
-	{"name": "Jericho", "id": "TRUCK_04", "cams": "TruckCamSet_11", "dir": "res://assets/truck_04",
+	{"name": "Jericho", "id": "TRUCK_04", "cams": "TruckCamSet_11", "dir": "res://assets/carros/truck_04",
 		"data": "res://data/vehicles/truck_04.xml", "points": "res://data/vehicles/truck_04_points.bin", "base": BASE_TRUCK, "fp": [0.30, 0.47, -0.04]},
-	{"name": "Punisher", "id": "TRUCK_05", "cams": "TruckCamSet_05", "dir": "res://assets/truck_05",
+	{"name": "Punisher", "id": "TRUCK_05", "cams": "TruckCamSet_05", "dir": "res://assets/carros/truck_05",
 		"data": "res://data/vehicles/truck_05.xml", "points": "res://data/vehicles/truck_05_points.bin", "base": BASE_TRUCK, "fp": [0.36, 0.47, 0.00]},
-	{"name": "Panther", "id": "TRUCK_06", "cams": "TruckCamSet_06", "dir": "res://assets/truck_06",
+	{"name": "Panther", "id": "TRUCK_06", "cams": "TruckCamSet_06", "dir": "res://assets/carros/truck_06",
 		"data": "res://data/vehicles/truck_06.xml", "points": "res://data/vehicles/truck_06_points.bin", "base": BASE_TRUCK, "fp": [0.36, 0.47, 0.00]},
-	{"name": "Herbst Truggy", "id": "TRUCK_07", "cams": "TruckCamSet_07", "dir": "res://assets/truck_07",
+	{"name": "Herbst Truggy", "id": "TRUCK_07", "cams": "TruckCamSet_07", "dir": "res://assets/carros/truck_07",
 		"data": "res://data/vehicles/truck_07.xml", "points": "res://data/vehicles/truck_07_points.bin", "base": BASE_TRUCK, "fp": [0.40, 0.47, 0.00]},
-	{"name": "Herbst TT", "id": "TRUCK_08", "cams": "TruckCamSet_08", "dir": "res://assets/truck_08",
+	{"name": "Herbst TT", "id": "TRUCK_08", "cams": "TruckCamSet_08", "dir": "res://assets/carros/truck_08",
 		"data": "res://data/vehicles/truck_08.xml", "points": "res://data/vehicles/truck_08_points.bin", "base": BASE_TRUCK, "fp": [0.48, 0.57, -0.04]},
-	{"name": "Hammerhead", "id": "TRUCK_09", "cams": "TruckCamSet_09", "dir": "res://assets/truck_09",
+	{"name": "Hammerhead", "id": "TRUCK_09", "cams": "TruckCamSet_09", "dir": "res://assets/carros/truck_09",
 		"data": "res://data/vehicles/truck_09.xml", "points": "res://data/vehicles/truck_09_points.bin", "base": BASE_TRUCK, "fp": [0.44, 0.55, 0.00]},
-	{"name": "Fireball", "id": "TRUCK_10", "cams": "TruckCamSet_10", "dir": "res://assets/truck_10",
+	{"name": "Fireball", "id": "TRUCK_10", "cams": "TruckCamSet_10", "dir": "res://assets/carros/truck_10",
 		"data": "res://data/vehicles/truck_10.xml", "points": "res://data/vehicles/truck_10_points.bin", "base": BASE_TRUCK, "fp": [0.32, 0.47, 0.00]},
-	{"name": "Goliath", "id": "TRUCK_11", "cams": "TruckCamSet_11", "dir": "res://assets/truck_11",
+	{"name": "Goliath", "id": "TRUCK_11", "cams": "TruckCamSet_11", "dir": "res://assets/carros/truck_11",
 		"data": "res://data/vehicles/truck_11.xml", "points": "res://data/vehicles/truck_11_points.bin", "base": BASE_TRUCK, "fp": [0.30, 0.47, -0.04]},
-	{"name": "Chimera", "id": "TRUCK_12", "cams": "TruckCamSet_12", "dir": "res://assets/truck_12",
+	{"name": "Chimera", "id": "TRUCK_12", "cams": "TruckCamSet_12", "dir": "res://assets/carros/truck_12",
 		"data": "res://data/vehicles/truck_12.xml", "points": "res://data/vehicles/truck_12_points.bin", "base": BASE_TRUCK, "fp": [0.31, 0.46, -0.02]},
 	# bônus resgatado: a CHASSIS_Truck_04 está completa no jogo e nenhum carro
 	# usa. É a Chevrolet Silverado pre-runner, carroceria original do Jericho;
@@ -86,7 +86,7 @@ const TRUCKS := [
 	# (data/vehicles/lazarus.xml, nov/2026): cabine dupla mais pesada, V8 com
 	# mais torque, câmbio mais longo, curso maior e traseira mais presa que o
 	# Jericho (o truck_bonus.xml que o gerar_buggies escreve é a do Jericho)
-	{"name": "Lazarus", "id": "TRUCK_04", "cams": "TruckCamSet_04", "dir": "res://assets/truck_bonus",
+	{"name": "Lazarus", "id": "TRUCK_04", "cams": "TruckCamSet_04", "dir": "res://assets/carros/truck_bonus",
 		"data": "res://data/vehicles/lazarus.xml", "points": "res://data/vehicles/truck_bonus_points.bin",
 		"base": BASE_TRUCK, "fp": [0.36, 0.47, 0.00], "bonus": true, "som": "res://som/loops/t13_silverado_chevy_53_vortec"},
 ]
@@ -96,12 +96,12 @@ const TRUCKS := [
 # melhorias que não servem (o modelo já tem volante e relógios próprios, não
 # tem a 2ª textura da sujeira); "motor_escondido" = só a ponta do escape treme.
 # Escort RS1600 Mk1 1974: modelo de vecarz no Sketchfab (CC-BY-NC-SA 4.0,
-# assets/escort/pecas.json "fonte"); física de partida = a do Storm (o rally
+# assets/carros/escort/pecas.json "fonte"); física de partida = a do Storm (o rally
 # do jogo) com rodas, curso, massa, CoM e caixa do Escort. Mão inglesa (o
 # volante fica na direita, como no modelo). Som: o I4 do Storm por enquanto
 const EXTRAS := [
 	{"name": "Escort RS1600", "id": "ESCORT", "tune_id": "BUGGY_12", "cams": "LanciaCam",
-		"dir": "res://assets/escort", "data": "res://data/vehicles/escort.xml",
+		"dir": "res://assets/carros/escort", "data": "res://data/vehicles/escort.xml",
 		"points": "res://data/vehicles/escort_points.json", "fp": [0.36, 0.50, 0.00], "extra": true,
 		"motor_escondido": true, "desligar": ["volante_nosso", "painel", "sujeira", "farol"],
 		"som": "res://som/loops/12_storm_lancia_delta_s4"},
@@ -114,14 +114,14 @@ var veh_idx := 0
 const SPAWN_XZ := Vector2(540.3, 580.8)
 const SPAWN_YAW := -154.9                 # graus, frente = +Z do carro
 
-const Car := preload("res://car.gd")
-const Terrain := preload("res://terrain.gd")
-const SomJogo := preload("res://som_jogo.gd")
-const CameraPiloto := preload("res://camera_piloto.gd")
-const CameraOrbita := preload("res://camera_orbita.gd")
-const Farol := preload("res://farol.gd")
-const ObjetosRX01 := preload("res://objetos_rx01.gd")
-const Ceu := preload("res://ceu.gd")
+const Car := preload("res://carro/car.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const SomJogo := preload("res://som/som_jogo.gd")
+const CameraPiloto := preload("res://camera/camera_piloto.gd")
+const CameraOrbita := preload("res://camera/camera_orbita.gd")
+const Farol := preload("res://carro/farol.gd")
+const ObjetosRX01 := preload("res://pista/objetos_rx01.gd")
+const Ceu := preload("res://pista/ceu.gd")
 
 var car  # instância de car.gd (sem tipo estático de propósito: métodos próprios do script)
 var cam: Camera3D
@@ -129,8 +129,9 @@ var hud: Label
 var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
 var terrain
-var objetos                              # objetos_rx01.gd (aviso() no HUD se faltar o assets/rx01)
-var ceu                                  # ceu.gd (null sem assets/rx01/ceu)
+var corrida                              # pista/corrida.gd (Enter começa, Backspace volta pro treino)
+var objetos                              # objetos_rx01.gd (aviso() no HUD se faltar o assets/pista/rx01)
+var ceu                                  # ceu.gd (null sem assets/pista/rx01/ceu)
 var cam_piloto                           # camera_piloto.gd: efeitos de velocidade e olhar livre
 # órbita da câmera de corrida pelo analógico direito / mouse (melhoria nossa,
 # o Forza; camera_orbita.gd). false = só a câmera do jogo
@@ -157,6 +158,12 @@ func _ready() -> void:
 		ceu = null
 
 	spawn_vehicle(0, spawn_point(), deg_to_rad(SPAWN_YAW))
+	corrida = preload("res://pista/corrida.gd").new()
+	corrida.name = "Corrida"
+	add_child(corrida)
+	if not corrida.montar(self):
+		corrida.queue_free()
+		corrida = null
 
 	cam = Camera3D.new()
 	cam.far = 4000.0
@@ -373,6 +380,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				car.reset_to(spawn_point(), deg_to_rad(SPAWN_YAW))
 				car.limpar_sujeira()        # recomeço da corrida: o jogo zera (0x223db0)
 				reset_camera()
+			KEY_ENTER, KEY_KP_ENTER:
+				if corrida:
+					corrida.comecar()
+			KEY_BACKSPACE:
+				if corrida:
+					corrida.parar()
 			KEY_V:
 				_swap_vehicle((veh_idx + 1) % frota().size())
 			KEY_F:
@@ -467,6 +480,8 @@ func _toggle_menu() -> void:
 
 
 func _swap_vehicle(i: int) -> void:
+	if corrida:
+		corrida.parar()          # trocar de carro no meio volta pro treino
 	var p: Vector3 = car.global_position
 	spawn_vehicle(i, Vector3(p.x, terrain.height_at(p.x, p.z) + 1.5, p.z), car.global_rotation.y)
 
@@ -504,8 +519,8 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
-		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/fx: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
+		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
 	hud.text += fp
@@ -531,7 +546,7 @@ func _chao() -> String:
 	return "   ".join(out)
 
 
-const GameCamera := preload("res://game_camera.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
 const CAM_XML := "res://data/cameras.xml"
 const CAM_NAMES := ["perto", "longe", "capô", "para-choque", "piloto"]
 var gcams := []                           # câmeras do jogo, uma por modo (0..3)
@@ -572,6 +587,22 @@ func ground_normal(x: float, z: float) -> Vector3:
 		terrain.height_at(x, z - e) - terrain.height_at(x, z + e)).normalized()
 
 
+## recomeço da corrida (Enter): carro no lugar, sujeira e câmeras zeradas,
+## cercas e fardos de volta (o objetos_rx01 é montado de novo)
+func recomecar(pos: Vector3, yaw: float) -> void:
+	if objetos:
+		objetos.queue_free()
+		objetos = ObjetosRX01.new()
+		objetos.name = "ObjetosNovo"
+		add_child(objetos)
+		objetos.montar()
+		car.objetos = objetos
+		objetos.carro = car
+	car.reset_to(pos, yaw)
+	car.limpar_sujeira()
+	reset_camera()
+
+
 func reset_camera() -> void:
 	if cam_piloto:
 		cam_piloto.car = car
@@ -594,11 +625,16 @@ func _update_camera(delta: float) -> void:
 	for i in 2:
 		gcams[i].update(delta, s, terrain)
 
-	# MountOnFront fica dentro da carroceria (no ATV também: Z -0.2), então o
-	# jogo não desenha o veículo nela. As rodas continuam.
+	# MountOnFront fica dentro da carroceria (no ATV também: Z -0.2): o jogo não
+	# desenha o veículo nela (xml 14837, On_Front mRenderVehicle="0"), rodas
+	# junto (são peças do component map). Até nov/2026 as rodas ficavam e
+	# apareciam na tela em 15 carros (Matheus)
 	car.model_root.visible = cam_mode != 3
 	if car.susp_vis:
 		car.susp_vis.visible = cam_mode != 3
+	for w in car.wheels:
+		if w.has("pivot"):
+			w.pivot.visible = cam_mode != 3
 	# mRenderRider (xml 14837): 0 em On_Hood e On_Front. Na nossa câmera do
 	# piloto ele aparece sem o capacete (braços e mãos no volante)
 	if car.piloto:
@@ -609,6 +645,7 @@ func _update_camera(delta: float) -> void:
 	# congelado na tela ao trocar de câmera em alta, Matheus nov/2026)
 	cam_piloto.atualizar_tela(cam_mode == 4)
 	if cam_mode <= 1:
+		cam.near = 0.1
 		gcams[cam_mode].apply(cam, s.tp)
 		if ORBITA:
 			orbita.passo(delta)
@@ -636,7 +673,11 @@ func _update_camera(delta: float) -> void:
 		cam.near = car.FP_NEAR
 		return
 
-	cam.near = 0.1
+	# corte de perto: 0.1 sem fonte; na do capô 0.2 (NOSSO, nov/2026): a
+	# MountOnHood do Fireball (TruckCamSet_10, y 2.38 z 0.55) fica dentro do
+	# teto da cabine (chapa a 3 cm) e tampava a tela; o que está a menos de
+	# 20 cm da câmera é sempre chapa dentro dela
+	cam.near = 0.2 if cam_mode == 2 else 0.1
 	# MountOnHood / MountOnFront: presa no carro, PosOffset no frame do modelo,
 	# Orientation.X = inclinação em graus, FOV = zoom fixo
 	var g = gcams[cam_mode]

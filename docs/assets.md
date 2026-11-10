@@ -4,6 +4,26 @@ Tudo sai da pasta `unpacked` (other/raw/gob/xml + manifest.json) gerada a
 partir do archive.imp. Os scripts estão em `tools/` (rodar na pasta que tem
 o `unpacked`). As texturas PNG vêm do `gob_tex2png.py` (pasta `texturas`).
 
+## Pastas (assets/, fora do git)
+
+```
+assets/carros/buggy_01..12   o número do jogo (BUGGY_NN): buggy_10 = Renegade, buggy_04 = Sphinx
+assets/carros/truck_01..12   trucks (TRUCK_NN), truck_bonus = Lazarus
+assets/carros/escort         carro extra nosso (tools/carro_glb.py)
+assets/carros/rodas          rodas de todos (o pecas.json aponta "../rodas/...")
+assets/piloto                piloto (tools/piloto.py)
+assets/pista/rx01            objetos e céu do RX01 (tools/rx01_objetos.py)
+assets/pista/terreno         relevo, material e textura do chão (no git; hd/ fora)
+assets/efeitos               texturas de efeito (tools/fx_jogo.py)
+assets/sons                  sons do jogo (tools/sfx_jogo.py)
+```
+Dentro de cada carro os arquivos guardam o número do bloco do archive
+(`20800_bloco.obj`, `15199_white.png`): dá pra voltar no `data/arquivos.tsv`
+e no unpacked. Quem diz o que é cada um é o `pecas.json` da pasta (Body,
+FrontLeftFrame..., rodas, volante). Até nov/2026 era tudo solto em assets/
+(renegade, sphinx, buggy_NN, fx, sfx, rx01, terrain): `tools/migrar_assets.py`
+move pro lugar novo sem gerar nada.
+
 ## Índice do archive: caminho -> bloco (data/arquivos.tsv)
 
 O jogo abre tudo pelo caminho e o índice do archive (archive.bin, inteiro na
@@ -163,7 +183,7 @@ carro quase o tempo todo; de lado só nas curvas e nos saltos.
 python tools\gerar_buggies.py <unpacked> <texturas>            :: os 12 + rodas + física/pontos
 python tools\gerar_buggies.py <unpacked> <texturas> --tabela   :: só a tabela de blocos
 python re\indice_archive.py <save.p2s> <unpacked> <SCES_546.88>  :: refaz data\arquivos.tsv
-python tools\gerar_pintura.py <unpacked> BUGGY_04 assets\sphinx --nome pintura_speedrun.png --base 225,225,230 --primary 215,85,20 --secondary 45,35,175
+python tools\gerar_pintura.py <unpacked> BUGGY_04 assets\carros\buggy_04 --nome pintura_speedrun.png --base 225,225,230 --primary 215,85,20 --secondary 45,35,175
 ```
 O Renegade sai com o volante separado (4K: `--split
 volante:43,46,47,144[16-28],145-150`, cubo + aro); os outros ainda não.

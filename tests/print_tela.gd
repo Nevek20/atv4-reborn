@@ -18,6 +18,7 @@ extends SceneTree
 ##   MEDIR=1                    imprime as medidas de cada canto em cada curso e
 ##                              salva <saida>_medidas.json (ver _medir/_estatico)
 ##   CORPO=0                    esconde a carroceria em todas as vistas
+##   CAM_MODO=3                 vista "jogo" com outra câmera do main (2 capô, 3 para-choque)
 ##   VIRA=1                     direção forçada (-1..1, + = esquerda) antes dos
 ##                              prints (só no print simples, sem VISTAS)
 ##   VOLANTE_COR=1              pinta o volante solto de vermelho (vista "volante")
@@ -35,7 +36,7 @@ extends SceneTree
 ##                              o jogo segura o freio, então sem isso sai acesa)
 ##   RE=1 / RE=0                luz de ré acesa / apagada (luzes.gd)
 ##   FAROL=1 / FAROL=0          farol aceso / apagado (farol.gd)
-##   PASTA=res://assets/buggy_02 (pasta com o pecas.json)  PONTOS=res://...
+##   PASTA=res://assets/carros/buggy_02 (pasta com o pecas.json)  PONTOS=res://...
 ##   RODA_F=res://...  RODA_T=res://...
 ##                              troca pasta/pontos/rodas sem mexer no main.gd
 ##                              (teste de hipótese)
@@ -46,7 +47,7 @@ extends SceneTree
 ##   VISTAS=lado0,frente0,tras0,lado0_sc CURSOS=nat,0,max,min MEDIR=1 xvfb-run -a $GODOT --path . \
 ##     --rendering-driver opengl3 -s res://tests/print_tela.gd -- /tmp/inf.png lado 4
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 
 var frames := 0
 var main
@@ -150,6 +151,8 @@ func _process(_dt: float) -> bool:
 			main.spawn_vehicle(veh, main.spawn_point(), deg_to_rad(main.SPAWN_YAW))
 	if multi:
 		return _process_multi()
+	if frames == 3 and OS.has_environment("CAM_MODO"):     # vista "jogo": 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
+		main.cam_mode = int(OS.get_environment("CAM_MODO"))
 	if frames == 3 and OS.has_environment("VIRA"):
 		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": float(OS.get_environment("VIRA"))}
 	if frames == 90 and view != "jogo":

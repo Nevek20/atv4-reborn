@@ -8,7 +8,7 @@ extends SceneTree
 ## largada do RX01, quase plana: a folga cobre a inclinação.
 ## Uso: godot --headless --path . -s res://tests/teste_curso.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 const TOL := 0.006                      # m
 # peças compradas nos save states (o resto é de fábrica): o Sphinx do b.p2s

@@ -7,6 +7,7 @@ extends SceneTree
 ## índice em main.VEHICLES. Tempos (s): PARADO, ACELERA, SOLTA.
 ## VIRA=4 vira tudo a partir de 4 s de aceleração (derrapa: pneu e suspensão),
 ## SEM_MOTOR=1 tira o som do motor (só pneu, suspensão e pouso).
+## SOM_PASTA=/caminho/dos/loops troca os loops do motor (comparar variantes).
 
 const PARADO := 1.5
 const ACELERA := 9.0
@@ -35,6 +36,17 @@ func _process(dt: float) -> bool:
 			main.spawn_vehicle(veh, main.spawn_point(), deg_to_rad(main.SPAWN_YAW))
 			return false
 		pronto = true
+		if OS.get_environment("SOM_PASTA") != "" and main.car.som:
+			var c = main.car
+			c.som.queue_free()
+			c.som = preload("res://som/motor_som.gd").new()
+			c.som.name = "SomMotorTeste"
+			if c.som.carregar(OS.get_environment("SOM_PASTA")):
+				c.add_child(c.som)
+				print("loops do motor: ", OS.get_environment("SOM_PASTA"))
+			else:
+				c.som = null
+				print("SOM_PASTA sem info.csv: ", OS.get_environment("SOM_PASTA"))
 	var car = main.car
 	t += dt
 	var thr := 1.0 if t > PARADO and t < PARADO + ACELERA else 0.0

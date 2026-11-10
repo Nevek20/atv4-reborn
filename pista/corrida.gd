@@ -1,0 +1,229 @@
+extends Node
+## Modo corrida do RX01 (Enter no jogo; o treino livre continua sendo o
+## padrão). Dados do jogo em data/rx01_corrida.json (tools/rx01_corrida.py):
+## grid (8 cStartPosition), linha de chegada (o checkpoint do evento, caixa
+## 15.8 x 5.9 x 1.4 m), traçado da IA (75 links) e 5 voltas (eventos
+## Rallycross Amateur, xml 14840).
+##
+## Largada: o carro vai pra posição 1 do grid (a mesma da RAM), contagem de 3 s
+## com o freio preso, cronômetro a partir do "VAI". A largada fica 54.8 m
+## antes da linha (mFirstLapLength): a 1ª passagem pela linha começa a volta
+## 1, cada passagem seguinte fecha uma volta; acaba na 5ª. Tempo total desde
+## o VAI. NOSSO (o jogo não foi lido): como ele conta essa 1ª passagem e a
+## contagem de 3 s.
+##
+## Os links do arquivo vêm na ordem contrária à da corrida (a direção de cada
+## um aponta pro de índice menor): a lista é invertida ao carregar.
+##
+## Atalho: a volta só conta se o carro passou pelos links do traçado (anda pelo
+## link mais perto, só pros vizinhos) e avançou pelo menos AVANCO_MIN links
+## desde a última passagem.
+
+const ARQ := "res://data/rx01_corrida.json"
+const CONTAGEM := 3.0
+const AVANCO_MIN := 60          # dos 75 links
+
+enum { LIVRE, CONTANDO, CORRENDO, CHEGOU }
+
+var main
+var estado := LIVRE
+var dados := {}
+var voltas := 5
+var links: Array = []           # centros no mundo (Godot), na ordem da corrida
+var sentido := 1                # o arquivo do RX01 tem os links ao contrário da corrida
+var t := 0.0                    # cronômetro da corrida (desde o VAI)
+var t_conta := 0.0
+var volta := 0                  # 0 = ainda não cruzou a linha
+var t_volta := 0.0              # início da volta atual
+var melhor := INF
+var ultima := INF
+var tempos: Array = []
+var link := 0
+var avanco := 0
+var _lado_ant := 0.0
+var _cp_pos := Vector3.ZERO
+var _cp_frente := Vector3.ZERO
+var _cp_lado := Vector3.ZERO
+var _cp_meia := Vector3.ZERO
+var hud: Label
+
+
+## jogo (x, y, z) -> mundo do Godot (z - 1024, y, x)
+static func mundo(p: Array) -> Vector3:
+	return Vector3(p[2] - 1024.0, p[1], p[0])
+
+
+static func dir_mundo(d: Array) -> Vector3:
+	return Vector3(d[2], d[1], d[0])
+
+
+func montar(m) -> bool:
+	main = m
+	if not FileAccess.file_exists(ARQ):
+		return false
+	dados = JSON.parse_string(FileAccess.get_file_as_string(ARQ))
+	voltas = int(dados.voltas)
+	for l in dados.links:
+		links.append(mundo(l.centro))
+	# a direção de cada link aponta no sentido da corrida; no RX01 ela vai
+	# pro link anterior (o índice cresce ao contrário): inverte a lista
+	var l0: Dictionary = dados.links[0]
+	if dir_mundo(l0.dir).dot(links[1] - links[0]) < 0.0:
+		sentido = -1
+		links.reverse()
+	var cp: Dictionary = dados.checkpoint
+	_cp_pos = mundo(cp.pos)
+	_cp_lado = dir_mundo(cp.row0).normalized()
+	_cp_frente = _cp_lado.cross(Vector3.UP).normalized()
+	# a frente da linha = o sentido da corrida (o grid olha pra ela)
+	if _cp_frente.dot(dir_mundo(dados.grid[0].dir)) < 0.0:
+		_cp_frente = -_cp_frente
+	_cp_meia = Vector3(cp.tamanho[0], cp.tamanho[1], cp.tamanho[2]) * 0.5
+	hud = Label.new()
+	hud.name = "HudCorrida"
+	hud.add_theme_font_size_override("font_size", 28)
+	hud.add_theme_color_override("font_outline_color", Color.BLACK)
+	hud.add_theme_constant_override("outline_size", 8)
+	hud.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hud.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	hud.position.y = 14
+	var cl := CanvasLayer.new()
+	cl.name = "CamadaCorrida"
+	cl.add_child(hud)
+	add_child(cl)
+	hud.visible = false
+	return true
+
+
+## posição e giro (yaw) da largada n (0 = pole)
+func largada(n: int) -> Array:
+	var g: Dictionary = dados.grid[n]
+	var p := mundo(g.pos)
+	var d := dir_mundo(g.dir)
+	return [p, atan2(d.x, d.z)]
+
+
+## Enter: reinicia tudo e começa a contagem
+func comecar() -> void:
+	var l := largada(0)
+	var p: Vector3 = l[0]
+	main.recomecar(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.5, p.z), l[1])
+	estado = CONTANDO
+	t_conta = CONTAGEM
+	t = 0.0
+	volta = 0
+	melhor = INF
+	ultima = INF
+	tempos.clear()
+	avanco = 0
+	link = _mais_perto(main.car.global_position)
+	_lado_ant = _lado(main.car.global_position)
+	main.car.test_input = {"thr": 0.0, "brk": 1.0, "steer": 0.0}
+	hud.visible = true
+
+
+func parar() -> void:
+	estado = LIVRE
+	hud.visible = false
+	if main.car:
+		main.car.test_input = null
+
+
+func _mais_perto(p: Vector3) -> int:
+	var melhor_i := 0
+	var d := INF
+	for i in links.size():
+		var e: float = Vector2(links[i].x - p.x, links[i].z - p.z).length()
+		if e < d:
+			d = e
+			melhor_i = i
+	return melhor_i
+
+
+## distância com sinal até a linha de chegada (+ = já passou)
+func _lado(p: Vector3) -> float:
+	return (p - _cp_pos).dot(_cp_frente)
+
+
+func _na_linha(p: Vector3) -> bool:
+	var r := p - _cp_pos
+	return absf(r.dot(_cp_lado)) <= _cp_meia.x and absf(r.y) <= _cp_meia.y + 2.0
+
+
+func _physics_process(dt: float) -> void:
+	if estado == LIVRE or main.car == null:
+		return
+	var car = main.car
+	if estado == CONTANDO:
+		t_conta -= dt
+		if t_conta <= 0.0:
+			estado = CORRENDO
+			car.test_input = null
+		return
+	if estado == CHEGOU:
+		t_conta += dt
+		return
+	t += dt
+	var p: Vector3 = car.global_position
+	# avança pelo traçado: só pros vizinhos (não pula pra outro trecho da pista)
+	var n := links.size()
+	for _i in 3:
+		var a: Vector3 = links[link]
+		var prox: Vector3 = links[(link + 1) % n]
+		var ant: Vector3 = links[(link - 1 + n) % n]
+		var d0 := Vector2(a.x - p.x, a.z - p.z).length()
+		if Vector2(prox.x - p.x, prox.z - p.z).length() < d0:
+			link = (link + 1) % n
+			avanco += 1
+		elif Vector2(ant.x - p.x, ant.z - p.z).length() < d0:
+			link = (link - 1 + n) % n
+			avanco -= 1
+	var lado := _lado(p)
+	if _lado_ant < 0.0 and lado >= 0.0 and _na_linha(p):
+		_cruzou()
+	_lado_ant = lado
+
+
+func _cruzou() -> void:
+	if volta == 0:
+		volta = 1
+		t_volta = t
+		avanco = 0
+		return
+	if avanco < AVANCO_MIN:
+		return                  # atalho ou deu ré pela linha
+	ultima = t - t_volta
+	tempos.append(ultima)
+	melhor = minf(melhor, ultima)
+	avanco = 0
+	t_volta = t
+	if volta >= voltas:
+		estado = CHEGOU
+		t_conta = 0.0
+		main.car.test_input = {"thr": 0.0, "brk": 1.0, "steer": 0.0}
+		return
+	volta += 1
+
+
+static func relogio(s: float) -> String:
+	if s == INF:
+		return "--:--.--"
+	return "%d:%05.2f" % [int(s) / 60, fmod(s, 60.0)]
+
+
+func _process(_dt: float) -> void:
+	if estado == LIVRE:
+		return
+	match estado:
+		CONTANDO:
+			hud.text = "%d" % ceili(t_conta) if t_conta > 0.0 else "VAI!"
+		CORRENDO:
+			if t < 1.0:
+				hud.text = "VAI!"
+				return
+			var txt := "Volta %d/%d   %s" % [maxi(volta, 1), voltas, relogio(t)]
+			if volta > 0:
+				txt += "\nvolta %s   última %s   melhor %s" % [relogio(t - t_volta), relogio(ultima), relogio(melhor)]
+			hud.text = txt
+		CHEGOU:
+			hud.text = "CHEGADA!   %s\nmelhor volta %s\nEnter: correr de novo   Backspace: treino livre" % [relogio(t), relogio(melhor)]

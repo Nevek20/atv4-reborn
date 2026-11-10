@@ -5,7 +5,7 @@ extends SceneTree
 ## Uso: godot --headless --path . -s res://tests/medir_cabine.gd   (VEHS=16,25 só esses;
 ## BANCO=x,y,z testa um banco no lugar do BANCO_NOSSO)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var carros := []

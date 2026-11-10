@@ -4,7 +4,7 @@ extends SceneTree
 ## peças e faces que saem da carroceria pro motor, o centro do motor e confere
 ## que a carroceria + motor têm as mesmas faces de antes (nada some).
 ## Uso: godot --headless --path . -s res://tests/teste_motor_treme.gd
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var i := -1

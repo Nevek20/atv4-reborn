@@ -18,9 +18,9 @@ extends SceneTree
 ##     atrito do pneu e Damping) = terrain.atrito / terrain.amortecimento.
 ## Uso: godot --headless --path . -s res://tests/teste_chao.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const TERRA := Vector2(576.0, 572.0)     # remake (jogo x 572, z 1600)
 const TOL_FISICA := 0.05                 # m, no plano xz
 const TOL_VISUAL := 0.30

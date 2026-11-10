@@ -7,9 +7,9 @@ extends SceneTree
 ## parênteses o |v|), marcha, guinada e inclinação.
 ## Uso: godot --headless --path . -s res://tests/teste_truck_video.gd -- 13 [VIRA=-1]
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 
 var terrain
 var car

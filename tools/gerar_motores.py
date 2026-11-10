@@ -539,24 +539,10 @@ MOTORES.append(dict(
     partida=(200, 200), embreagem=650, veiculo=caminhao(1800),
 ))
 
-# t06 Panther (truggy): Toyota 2JZ-GTE 3.0 6 em linha, turbo de mentira
-MOTORES.append(dict(
-    arq="t06_panther_toyota_2jz", no="toyota_2jz_gte", nome="Toyota 2JZ-GTE [I6, turbo]",
-    buggy="Panther (truggy)", cv=510, lenta=850, corte=7200,
-    **i6([12, 12, 12, 12, 12, 12]),
-    diam=86.0, curso=86.0, biela=142.0, alt_comp=1.2, cr=8.5,
-    massa_biela=560, massa_pistao=420, massa_vira=21.0, massa_volante=7.0, raio_volante=5.5,
-    atrito_vira=4.0,
-    fluxo=(250, 190), dutos=(1.45, 1.3), lift_scale=1.0,
-    adm=dict(dur=240, gamma=1.0, lift=400), esc=dict(dur=236, gamma=1.0, lift=390),
-    centros=(110, 112), raio_base=0.6,
-    admissoes=[dict(fluxo=900, runner=260, runner_len=9.0, lenta=0.998, plenum=1.8, decay=0.5)],
-    # 6 em 1 num cano só, filtro "sharp" (som mais áspero, de turbo de corrida)
-    escapes=[dict(saida=1400, prim_len=16, prim_fluxo=450, compr=70, vol=4.0, ir="sharp_0")],
-    avanco=[(0, 12), (1000, 12), (2000, 20), (3000, 28), (4000, 32), (8000, 32)],
-    combustivel=dict(mte=2.5, mbe=0.85, energia=48.1), jitter=0.3, freq=18000, limitador=0.06,
-    partida=(100, 300), embreagem=500, veiculo=caminhao(1700),
-))
+# t06 Panther (truggy): .mr feito à mão (som/engine_sim/t06_panther_gm_ls_custom.mr,
+# GM LS com coletor custom que o Matheus achou e escolheu de ouvido, nov/2026).
+# Fica fora do gerador: o arquivo usa coisas que o montar() não faz (peso de
+# som por cilindro, noise, hf_gain). O 2JZ que estava aqui foi reprovado.
 
 # t07 Herbst Truggy (Landshark da Terrible Herbst): Ford 460 big-block
 MOTORES.append(dict(
@@ -716,7 +702,6 @@ AJUSTE = {
     "t03": dict(k_fluxo=1.4764, placa=0.996674),
     "t04": dict(k_fluxo=0.807, placa=0.99527),
     "t05": dict(k_fluxo=1.272, placa=0.9964),  # comando grande: lenta ~1180 (com 0.99667 apagava gravando)
-    "t06": dict(k_fluxo=1.3, placa=0.998663, energia=61.42),  # turbo de mentira ~1.28x; lenta ~1100
     "t07": dict(k_fluxo=1.2495, placa=0.997844),
     "t08": dict(k_fluxo=1.0, placa=0.9956),  # comando grande: lenta ~1300 (com 0.9962 apagava gravando; 0.9958 = 1258)
     "t09": dict(k_fluxo=1.444, placa=0.997376),  # lenta ~1040

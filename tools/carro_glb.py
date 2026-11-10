@@ -8,9 +8,9 @@ O jogo não tem nada disso: tudo aqui é escolha nossa, medida no modelo.
 
 Gera, no frame do modelo do jogo (x = -x do glTF: o glTF com +z pra frente
 tem +x na ESQUERDA; o jogo é mão esquerda, +x na direita):
-  assets/<nome>/<nome>.glb    cópia do modelo (o Godot importa com os
+  assets/carros/<nome>/<nome>.glb    cópia do modelo (o Godot importa com os
                               materiais PBR; o car.gd junta as malhas)
-  assets/<nome>/pecas.json    nós que saem da carroceria (rodas, volante,
+  assets/carros/<nome>/pecas.json    nós que saem da carroceria (rodas, volante,
                               cubos), roda de cada canto, volante
                               (centro, eixo, raio) e a licença do modelo
   data/vehicles/<nome>_points.json  pontos como os do jogo: WHEEL_*, ARSE,
@@ -288,7 +288,7 @@ def main():
     est = est if len(est) == 2 else [est[0], est[0]]
     g = Glb(a.glb)
     nome = a.nome.lower()
-    pasta = os.path.join(PROJ, "assets", nome)
+    pasta = os.path.join(PROJ, "assets", "carros", nome)
     os.makedirs(pasta, exist_ok=True)
     shutil.copyfile(a.glb, os.path.join(pasta, nome + ".glb"))
 

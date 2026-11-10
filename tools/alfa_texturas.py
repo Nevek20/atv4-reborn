@@ -7,7 +7,7 @@ O gob_tex2png.py salva sem alfa (no PS2 o alfa muitas vezes é brilho, não
 transparência). Nos carros só 3 texturas têm alfa "furado" (binário, parte
 em 0): mesh_grey (as redes das janelas, 54% furada), Buggy_05_framework
 (a treliça do Trident, 71%) e driver (7%, nas bordas). Esse script acha o
-.gob de cada PNG de assets/<carro>/ pelo número e, se o alfa do jogo tem
+.gob de cada PNG de assets/carros/<carro>/ pelo número e, se o alfa do jogo tem
 mais de 1% de pixels transparentes, regrava o PNG com alfa. O car.gd liga a
 transparência por recorte nos materiais com textura de alfa.
 
@@ -34,7 +34,7 @@ def main():
         print(__doc__)
         sys.exit(1)
     gobs = os.path.join(sys.argv[1], "gob")
-    pasta = sys.argv[2] if len(sys.argv) > 2 else os.path.join(PROJ, "assets")
+    pasta = sys.argv[2] if len(sys.argv) > 2 else os.path.join(PROJ, "assets", "carros")
     cache = {}
     feitas = 0
     for png in sorted(glob.glob(os.path.join(pasta, "*", "*.png"))):

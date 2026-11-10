@@ -10,9 +10,9 @@ extends SceneTree
 ## pedras saem pro lado em que o carro escorrega (o jogo, drr2).
 ## Uso: godot --headless --path . -s res://tests/teste_pedras.gd [-- veh]
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 
 var terrain
 var car
@@ -71,7 +71,7 @@ func _physics_process(dt: float) -> bool:
 		print("largada na terra em (%.1f, %.1f): %s" % [p.x, p.y, terrain.materials[terrain.material_at(p.x, p.y)].get("Name")])
 		car.reset_to(Vector3(p.x, terrain.height_at(p.x, p.y) + 0.8, p.y), deg_to_rad(Main.SPAWN_YAW))
 		if car.pedras == null:
-			print("teste_pedras: FALHA (sem pedras: falta assets/fx/pedras.png? rode tools/fx_jogo.py)")
+			print("teste_pedras: FALHA (sem pedras: falta assets/efeitos/pedras.png? rode tools/fx_jogo.py)")
 			return true
 	t += dt
 	car.test_input.thr = 1.0 if t > 1.5 else 0.0

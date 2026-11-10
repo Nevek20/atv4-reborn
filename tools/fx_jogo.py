@@ -1,7 +1,7 @@
 """
 fx_jogo.py
 ==========
-Texturas de efeito do jogo -> assets/fx (fora do git): fumaça do escapamento
+Texturas de efeito do jogo -> assets/efeitos (fora do git): fumaça do escapamento
 (fumaca.gd), sujeira do carro e do piloto e lama dos pneus (sujeira.gd).
 
 O efeito "ExhaustSmokeTrail" (Effects/#3ffdac18, xml 01416) usa a textura
@@ -22,7 +22,7 @@ Sprites/WorldFXwater_dust -> agua.png) (Setup/Dust.xml, tipos
 Light/Medium/Heavy), 128x128, atlas de 6 nuvens (2 x 3), cinza com o alfa.
 
 Uso:
-    python tools/fx_jogo.py <unpacked> [saida=assets/fx]
+    python tools/fx_jogo.py <unpacked> [saida=assets/efeitos]
 """
 
 import json
@@ -66,7 +66,7 @@ def main():
         print(__doc__)
         sys.exit(1)
     unpacked = sys.argv[1]
-    saida = sys.argv[2] if len(sys.argv) > 2 else os.path.join(PROJ, "assets", "fx")
+    saida = sys.argv[2] if len(sys.argv) > 2 else os.path.join(PROJ, "assets", "efeitos")
     os.makedirs(saida, exist_ok=True)
     arqs = ler_arquivos()
     gob, _, _ = caminho(unpacked, arqs, "Sprites/Particles.bog")

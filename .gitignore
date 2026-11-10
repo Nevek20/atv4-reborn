@@ -1,10 +1,18 @@
 .godot/
+# assets gerados pelos tools no PC de cada um (docs/assets.md, "Pastas")
+assets/carros/
+assets/piloto/
+assets/sons/
+assets/efeitos/
+assets/pista/rx01/
+assets/pista/terreno/hd/
+assets/**/*.import
+# pastas antigas (até nov/2026; tools/migrar_assets.py move pras novas)
 assets/renegade/
 assets/sphinx/
 assets/rodas/
 assets/buggy_*/
 assets/truck_*/
-assets/piloto/
 assets/sfx/
 assets/fx/
 re/decomp/
@@ -23,4 +31,7 @@ tools/engine_sim_dyno/build/
 som/loops/**/*.import
 assets/escort/
 assets/rx01/
-assets/terrain/hd/
+assets/terrain/
+
+# logs do tests/rodar_tudo.py
+tests/.saida/

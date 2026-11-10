@@ -12,9 +12,9 @@ extends SceneTree
 ##     (0x890) e a roda de tração gira com o motor x embreagem / relação.
 ## Uso: godot --headless --path . -s res://tests/teste_roda.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const VehicleData := preload("res://vehicle_data.gd")
+const VehicleData := preload("res://carro/vehicle_data.gd")
 const RAM := [[0, 0.5, 0.00625], [1, 0.49, 0.0060025]]   # carro, raio, inércia (t·m²)
 
 var car

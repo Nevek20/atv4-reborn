@@ -15,9 +15,9 @@ extends SceneTree
 ##  G. largada (main.gd SPAWN_XZ/SPAWN_YAW) = média dos save states
 ## Uso: godot --headless --path . -s res://tests/teste_mao.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const PECAS := ["frame", "brake", "shock", "chamber", "piston"]
 
 var carros := []                 # [nome, carro]
@@ -59,7 +59,10 @@ func _falha(s: String) -> void:
 
 func _process(_dt: float) -> bool:
 	frames += 1
-	if frames < 3:
+	# espera uns passos de física: o olho usa a posição INTERPOLADA do modelo,
+	# que no 3º quadro às vezes ainda estava 1 passo atrás (falhava ~1 em 2
+	# vezes no Bulldog, 8.5 cm, sem nada errado no carro)
+	if frames < 12:
 		return false
 	for p in carros:
 		_conferir(p[0], p[1])
@@ -83,8 +86,9 @@ func _conferir(nome: String, c) -> void:
 		_falha("%s carroceria fora do frame do jogo (%.3f m)" % [nome, vis.distance_to(fis)])
 	if (cx.affine_inverse() * vis).x <= 0.0:
 		_falha("%s volante fora da esquerda do jogo (+X)" % nome)
-	if c.driver_eye().distance_to(cx * c.corpo(c.DRIVER_EYE)) > 0.001:
-		_falha("%s olho do piloto fora do lugar" % nome)
+	var olho_d: float = c.driver_eye().distance_to(cx * c.corpo(c.DRIVER_EYE))
+	if olho_d > 0.001:
+		_falha("%s olho do piloto fora do lugar (%.4f m)" % [nome, olho_d])
 	# B
 	var base: Transform3D = cx * Transform3D(Basis.from_scale(c.ESPELHO), Vector3.ZERO) \
 		* Transform3D(Basis(), c.model_offset)
@@ -96,7 +100,11 @@ func _conferir(nome: String, c) -> void:
 			var mi = k.get(nm)
 			if mi == null or not ps.has(nm):
 				continue
-			var e: Transform3D = base * ps[nm]
+			var esperado: Transform3D = ps[nm]
+			# haste de trás esticando (melhoria nossa, suspension_visual haste_estica)
+			if nm == "piston" and c._tem("haste_estica"):
+				esperado = c.susp_vis.haste_estica(k, esperado)
+			var e: Transform3D = base * esperado
 			var g: Transform3D = mi.global_transform
 			var err := g.origin.distance_to(e.origin)
 			for i in 3:

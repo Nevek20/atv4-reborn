@@ -7,8 +7,8 @@ extends SceneTree
 ## pelo caminho curto), meia deflexão, pra baixo (olha pra trás), mouse.
 ## Uso: godot --headless --path . -s res://tests/teste_camera_orbita.gd
 
-const GameCamera := preload("res://game_camera.gd")
-const CameraOrbita := preload("res://camera_orbita.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
+const CameraOrbita := preload("res://camera/camera_orbita.gd")
 const CAM_XML := "res://data/cameras.xml"
 const RAMPA := 0.3                       # subida do chão (m por m)
 

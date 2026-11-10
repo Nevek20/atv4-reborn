@@ -10,7 +10,7 @@ extends SceneTree
 ##    a fase anda dt * freq.
 ## Uso: godot --headless --path . -s res://tests/teste_tremida_camera.gd
 
-const J := preload("res://camera_jitter.gd")
+const J := preload("res://camera/camera_jitter.gd")
 const XML := "res://data/cameras.xml"
 const MPH := 2.2374146
 

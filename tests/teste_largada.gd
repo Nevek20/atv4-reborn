@@ -9,9 +9,9 @@ extends SceneTree
 ## Uso: godot --headless --path . -s res://tests/teste_largada.gd [-- veh [passos_por_segundo]]
 ##      (com -- 0 0 imprime também a curva inteira)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 # gravação PAL: segundos desde que anda -> km/h (marcha 2 aparece em 2.60 s,
 # marcha 3 em 3.70 s)
 const VIDEO := [[0.2, 7], [0.4, 13], [0.6, 21], [0.8, 27], [1.0, 31], [1.2, 35], [1.4, 39], [1.6, 43],

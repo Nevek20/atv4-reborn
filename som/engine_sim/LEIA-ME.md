@@ -44,7 +44,7 @@ fábrica do truck, pneu de 17".
 | Shinto | Chevy 350, escape único | 5733 | 1-8-4-3-6-5-7-2 | 255 | 248 @ 4500 | 650 | 667 |
 | Jericho | Ford 5.4 Triton SOHC | 5409 | 1-3-7-2-6-5-4-8 | 288 | 287 @ 4000 | 650 | 639 |
 | Punisher | Ford 351 Windsor | 5766 | 1-3-7-2-6-5-4-8 | 504 | 498 @ 6500 | 800 | 1101 |
-| Panther | Toyota 2JZ-GTE (turbo de mentira) | 2997 | 1-5-3-6-2-4 | 510 | 505 @ 7000 | 850 | 1116 |
+| Panther | GM LS com coletor custom (.mr à mão, do Matheus) | 5326 | 1-8-7-2-6-5-4-3 | 510 | 510 @ 6500 | - | 670 |
 | Herbst Truggy | Ford 460 big-block | 7536 | 1-5-4-2-6-3-7-8 | 540 | 545 @ 6000 | 700 | 683 |
 | Herbst TT | Ford 427 Windsor | 7008 | 1-3-7-2-6-5-4-8 | 638 | 628 @ 7000 | 850 | 1067 |
 | Hammerhead | Dodge 360 Magnum | 5898 | 1-8-4-3-6-5-7-2 | 504 | 500 @ 6000 | 750 | 1036 |
@@ -53,7 +53,12 @@ fábrica do truck, pneu de 17".
 | Chimera | Mitsubishi 6G74 3.5 V6 60° (turbo de mentira) | 3497 | 1-2-3-4-5-6 | 695 | 689 @ 7000 | 850 | 909 |
 | Silverado (bônus) | Chevy 5.3 Vortec LM7 | 5327 | 1-8-7-2-6-5-4-3 | 288 | 294 @ 4000 | 650 | 625 |
 
-- **Lenta alta de propósito** (Punisher, Panther, Herbst TT, Hammerhead):
+- **Panther (t06) é feito à mão:** o `t06_panther_gm_ls_custom.mr` é um LS
+  com coletor custom que o Matheus achou (primários desiguais, pistão e biela
+  leves, `noise` 1.0, peso de som por cilindro). Escolhido de ouvido em
+  nov/2026 contra 2JZ, V8 383 (escape comum e coletor 180°) e diesel
+  Duramax. Fica fora do `gerar_motores.py`: mexer no próprio arquivo.
+- **Lenta alta de propósito** (Punisher, Herbst TT, Hammerhead):
   comando grande, abaixo de ~1000 apagam. A placa tem margem: fechando
   0.0001 a mais ainda não apaga (os buggies Renegade e Hurricane estavam a
   0.00009 de apagar e o Hurricane apagou numa gravação).

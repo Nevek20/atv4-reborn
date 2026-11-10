@@ -12,11 +12,11 @@ extends SceneTree
 ##     ele para antes do plano da barreira; sem, ele atravessa.
 ## Uso: godot --headless --path . -s res://tests/teste_objetos.gd
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
-const Objetos := preload("res://objetos_rx01.gd")
-const Ceu := preload("res://ceu.gd")
+const Terrain := preload("res://pista/terrain.gd")
+const Objetos := preload("res://pista/objetos_rx01.gd")
+const Ceu := preload("res://pista/ceu.gd")
 
 var terrain
 var objetos
@@ -49,7 +49,7 @@ func _physics_process(dt: float) -> bool:
 		if not objetos.is_inside_tree():
 			return false
 		if not objetos.montar():
-			print("teste_objetos: FALHA (sem data/rx01_objetos.json ou assets/rx01: rode tools/rx01_objetos.py)")
+			print("teste_objetos: FALHA (sem data/rx01_objetos.json ou assets/pista/rx01: rode tools/rx01_objetos.py)")
 			return true
 		var j = JSON.parse_string(FileAccess.get_file_as_string(Objetos.ARQ))
 		_checa(objetos.instancias == 707 and objetos.modelos == 34,
@@ -157,7 +157,7 @@ func _ceu() -> void:
 	var ceu = Ceu.new()
 	root.add_child(ceu)
 	if not ceu.montar():
-		_checa(false, "céu: sem data/environment_rx01.xml ou assets/rx01/ceu (rode tools/rx01_objetos.py)")
+		_checa(false, "céu: sem data/environment_rx01.xml ou assets/pista/rx01/ceu (rode tools/rx01_objetos.py)")
 		return
 	var longe := 0.0
 	var raios := []

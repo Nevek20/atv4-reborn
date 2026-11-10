@@ -7,7 +7,7 @@ extends SceneTree
 ## quadro pro outro (mais quanto maior a velocidade).
 ## Uso: godot --headless --path . -s res://tests/teste_camera_passo.gd
 
-const GameCamera := preload("res://game_camera.gd")
+const GameCamera := preload("res://camera/game_camera.gd")
 const CAM_XML := "res://data/cameras.xml"
 const TOL := 0.005                      # m de vai e volta entre quadros
 

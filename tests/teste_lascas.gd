@@ -6,9 +6,9 @@ extends SceneTree
 ## saem da parede pra fora e pra cima (25..35 mph); quicam e param no chão.
 ## Uso: godot --headless --path . -s res://tests/teste_lascas.gd   (VEL=20)
 
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
-const Terrain := preload("res://terrain.gd")
+const Terrain := preload("res://pista/terrain.gd")
 const TesteP := preload("res://tests/teste_pedras.gd")
 
 var terrain
@@ -50,7 +50,7 @@ func _physics_process(dt: float) -> bool:
 		p0 = TesteP.terra_perto(terrain, Main.SPAWN_XZ)
 		car.reset_to(Vector3(p0.x, terrain.height_at(p0.x, p0.y) + 0.8, p0.y), deg_to_rad(Main.SPAWN_YAW))
 		if car.lascas == null:
-			print("teste_lascas: FALHA (sem lascas: falta assets/fx/lasca.json? rode tools/fx_jogo.py)")
+			print("teste_lascas: FALHA (sem lascas: falta assets/efeitos/lasca.json? rode tools/fx_jogo.py)")
 			return true
 		print("cor da lasca (base da pintura): ", car.lascas.cor)
 	t += dt

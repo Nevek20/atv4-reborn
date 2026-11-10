@@ -7,7 +7,7 @@ extends Node3D
 ## solta o volante t segundos depois de virar (acelerador continua no fundo;
 ## DEPOIS=-1 contra-esterça, ACEL=0 solta o acelerador junto).
 ## Uso: VEL=110 godot --headless --path . res://tests/teste_entrada.tscn
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 var car
 var t := 0.0

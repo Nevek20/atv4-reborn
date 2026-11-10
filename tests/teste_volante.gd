@@ -7,7 +7,7 @@ extends SceneTree
 ## Uso: godot --headless --path . -s res://tests/teste_volante.gd   (VEHS=25 só esses;
 ## BANCO=x,y,z e AVANCO=m testam o banco e o volante, car.gd BANCO_NOSSO;
 ## PERFIL=1 imprime o pulo do cotovelo passo a passo)
-const Car := preload("res://car.gd")
+const Car := preload("res://carro/car.gd")
 const Main := preload("res://main.gd")
 
 var i := -1

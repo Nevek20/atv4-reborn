@@ -118,8 +118,14 @@ def processar(mr, saida, passo):
         # ruído = energia fora dos múltiplos da frequência do ciclo (720°): o
         # que não se repete de um ciclo pro outro (motor irregular). Na lenta
         # o rpm não fica preso e varia, então lá a conta não vale (~90%)
+        # (±1 faixa da FFT: num som muito "tonal", como o V8 com coletor 180°,
+        # o pico cai entre duas faixas e sem a folga dava ~100% num loop limpo)
         X = np.abs(np.fft.rfft(loop)) ** 2
-        ruido = 100 * (1 - X[::ciclos].sum() / X.sum())
+        perto = np.zeros(len(X), bool)
+        for d in (-1, 0, 1):
+            j = np.arange(0, len(X), ciclos) + d
+            perto[j[(j >= 0) & (j < len(X))]] = True
+        ruido = 100 * (1 - X[perto].sum() / X.sum())
         linhas.append(dict(arquivo=chave + ".wav", rpm_medido=round(rpm), segundos=round(len(y) / FS, 3),
                            ciclos=ciclos, ganho=round(ganho, 6), nivel_cru_db=round(20 * np.log10(pico), 1),
                            emenda_corr=round(nota, 3), emenda_salto=round(salto, 2),

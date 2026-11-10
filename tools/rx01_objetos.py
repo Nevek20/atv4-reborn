@@ -38,13 +38,13 @@ Instâncias (#def5772a): raiz 4939a99a
 Mundo do jogo -> remake: (X, Y, Z) = (z - 1024, y, x) (terrain.gd, mão).
 
 Uso:
-    python tools/rx01_objetos.py <unpacked> [<texturas>] [--out assets/rx01]
+    python tools/rx01_objetos.py <unpacked> [<texturas>] [--out assets/pista/rx01]
         [--so-json]   só o data/rx01_objetos.json (posições), sem modelos
 Sai:
     data/rx01_objetos.json   instâncias (modelo, matriz do jogo, cor) e entidades
     data/environment_rx01.xml  o Environment.xml da pista (luz, céu, névoa)
-    assets/rx01/<modelo>.obj/.mtl + texturas (fora do git, como os carros)
-    assets/rx01/ceu/<cúpula>.obj  as cúpulas do céu (SkyDome do Environment.xml)
+    assets/pista/rx01/<modelo>.obj/.mtl + texturas (fora do git, como os carros)
+    assets/pista/rx01/ceu/<cúpula>.obj  as cúpulas do céu (SkyDome do Environment.xml)
 """
 
 import argparse
@@ -591,7 +591,7 @@ ARQ_AMBIENTE = "Levels/RX_01/Env/Default/Environment.xml"
 def ceu(unpacked, ind, out):
     """céu do RX01 (Environment.xml, SkyDome): cada Outer/Inner é um .pingu de
     Levels/SkyDomes (o XML diz .clm; o loader 0x1d62b8 troca pela extensão
-    do modelo) com a textura do .pfn ao lado. Sai assets/rx01/ceu/<nome>.obj
+    do modelo) com a textura do .pfn ao lado. Sai assets/pista/rx01/ceu/<nome>.obj
     e copia o Environment.xml pra data/environment_rx01.xml"""
     import re
     import hashlib
@@ -868,7 +868,7 @@ def multidao(unpacked, ind):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unpacked")
-    ap.add_argument("--out", default=os.path.join(PROJ, "assets", "rx01"))
+    ap.add_argument("--out", default=os.path.join(PROJ, "assets", "pista", "rx01"))
     ap.add_argument("--so-json", action="store_true")
     a = ap.parse_args()
     ind = ler_indice()
@@ -921,13 +921,13 @@ def detalhe_chao(unpacked, ind):
     """textura de detalhe do relevo (o renderer do chão 0x1eb758 carrega o
     "detail" da pasta Env da pista): 128 x 128, cor cinza fixa (131) e o
     desenho no ALFA (do PS2, 0x80 = 1.0; 12..190 no RX01). Sai o alfa cru
-    num PNG cinza (valor = alfa do PS2 0..255) em assets/terrain/rx01_detalhe.png"""
+    num PNG cinza (valor = alfa do PS2 0..255) em assets/pista/terreno/rx01_detalhe.png"""
     if ARQ_DETALHE not in ind or not ind[ARQ_DETALHE][3].startswith("gob/"):
         return "não achado"
     from gob_tex2png import convert
     im, _ = convert(os.path.join(unpacked, ind[ARQ_DETALHE][3]))
     alfa = im.convert("RGBA").getchannel("A")
-    destino = os.path.join(PROJ, "assets", "terrain", "rx01_detalhe.png")
+    destino = os.path.join(PROJ, "assets", "pista", "terreno", "rx01_detalhe.png")
     alfa.save(destino)
     return "%s (%dx%d)" % (os.path.relpath(destino, PROJ), alfa.size[0], alfa.size[1])
 

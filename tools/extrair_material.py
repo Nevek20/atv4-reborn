@@ -3,11 +3,11 @@ extrair_material.py
 ===================
 Lê o stream da pista (STREAMT/RX/RX01.000) e gera o mapa de MATERIAL do chão
 (índice 0..15 do Materials.xml da pista) na mesma grade do
-assets/terrain/rx01_height.bin: 1025 x 1025 pontos, 1 m, linha = z, coluna = x,
+assets/pista/terreno/rx01_height.bin: 1025 x 1025 pontos, 1 m, linha = z, coluna = x,
 pixel (gx, gz) = ponto do mundo do jogo (x = gx, z = 1024 + gz).
 
 Uso (na pasta do projeto):
-    python tools/extrair_material.py <RX01.000> assets/terrain
+    python tools/extrair_material.py <RX01.000> assets/pista/terreno
         --materiais <unpacked>/xml/12280   Materials.xml do RX_01 (nomes e
                                            WheelJitter no JSON; pode ser só o
                                            prefixo, o unpacked põe sufixo)
