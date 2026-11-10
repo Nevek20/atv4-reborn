@@ -94,6 +94,7 @@ python tools/extrair_material.py <dados>/stream/RX01.000 assets/pista/terreno --
 :: objetos e céu do RX01 (posições + colisão -> data/rx01_objetos.json, Environment.xml -> data/environment_rx01.xml;
 :: modelos, texturas e cúpulas do céu -> assets/pista/rx01)
 python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
+python tools/rx01_corrida.py <unpacked>          :: traçado da IA, checkpoint e voltas do RX01 -> data/rx01_corrida.json
 
 :: checar um script sem abrir o editor
 %GODOT% --headless --path . --check-only --script res://carro/car.gd

@@ -1280,6 +1280,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   ~20 km/h, mas o HUD do jogo começa a cair ~0.3 s antes. Falta save state
   na curva pra separar física, HUD e o instante em que virou.
 
+## Corrida (nov/2026)
+
+- Plano combinado com o Matheus: dados da corrida -> corrida sozinho
+  (largada, checkpoints, voltas, tempo, chegada; HUD simples primeiro) ->
+  IA portada do exe -> grid com as classes (buggy, truck, mixed) -> coisas
+  do mapa (reposição, câmera de introdução, luzes, LOD).
+- Passo 1 feito: traçado da IA, checkpoint, comprimento e voltas do RX01
+  achados nos arquivos do evento (docs/engenharia_reversa.md, Corrida do
+  RX01). Conferido desenhando o traçado em cima da textura do chão.
+
 ## Pendente / ideias
 
 - Lazarus: física própria feita (lazarus.xml); peças, mapa e decalques

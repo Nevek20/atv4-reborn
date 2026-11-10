@@ -974,6 +974,19 @@ vazios). Tudo vem do evento:
   cFenceNodeEntity + 26 cFenceLinkEntity (cercas entre nós, com os .clm
   GEN_Barrier_RallyFence / SAM_Barrier_RallyFence / SAM_Crowd_BarrierTG).
   Cada uma com pos (3ef310bc), dir (74f784c3), tamanho (44c2fa64).
+- Corrida do RX01 (nov/2026, tools/rx01_corrida.py -> data/rx01_corrida.json):
+  #b953876a (other/12288) = "AIT 1.1 ExportedTrack", o traçado da IA: 75
+  links de 0x70 bytes a partir de 0x3c (+0x00 ponto, +0x0c direção, +0x18
+  normal, +0x28 próximo link, +0x2c/+0x3c anteriores/seguintes, +0x5c
+  centro, +0x68/+0x6c largura esquerda/direita); fecha uma volta e cai em
+  cima da pista na textura do chão. #7c14cf48 = XML dos checkpoints (1 CP
+  Type 2 na linha de chegada, AILink 50, caixa 15.8 x 5.9 x 1.4 m).
+  #c0675b52 = mFirstLink 51, mCircuitLength 1810.4 m, mStartingOffset
+  1759.7, mFirstLapLength 54.8 (a largada fica 54.8 m antes da linha).
+  TrackSetup/RALLYCROSS.xml: Logic (mWarningStray 4, mCheatingStray 8,
+  mCheatingProgress 30, mLinkReadAhead 10, mRespotSpeed 40,
+  mBackwardLimit 100), RollingStart. Eventos (xml 14840): Rallycross
+  Amateur buggy/truck = Laps 5, NumRankings 8.
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice
