@@ -1,37 +1,72 @@
-# ATV4 Reborn (protótipo)
+# ATV4 Reborn
 
-Protótipo em Godot 4 usando assets extraídos do ATV Offroad Fury 4.
+**Remake em Godot 4 do *ATV Offroad Fury 4* (PS2, 2006), feito com os dados e o código do próprio jogo.**
 
-## Antes de abrir
+🇺🇸 [Read in English](README.md)
 
-Os assets do jogo não vão pro git. Gere todos de uma vez (12 buggies:
-carroceria, peças da suspensão, freios, rodas e pintura de fábrica), na
-pasta do projeto:
+O objetivo é ficar **100% fiel ao jogo de PS2**. Física, câmeras, peças e
+pinturas vêm dos XMLs do jogo, e o comportamento é portado do executável
+desmontado no Ghidra (PAL, `SCES_546.88`). Cada número tem fonte: XML, função
+do exe, save state do PCSX2 ou quadro de vídeo.
+
+> **Situação:** protótipo jogável. Uma pista (RX01), 12 buggies, 12 trucks,
+> um truck que o jogo não usa (resgatado dos arquivos) e um carro extra nosso.
+
+## Destaques
+
+**Portado do jogo**
+
+- Física: pneus e derrapagem, motor, embreagem, câmbio, roda patinando,
+  suspensão, anti-pitch, controle no ar, arrasto, atrito e arrasto por tipo
+  de chão. Roda a 50 Hz como o PAL (60 Hz pra comparar com vídeo NTSC)
+- Câmera de corrida: órbita, distância e zoom pela velocidade, amortecimento
+  de altura, folga do chão, solta/prende e tremida
+- Peças de fábrica e upgrades por carro (`vehicles.xml` + `upgrades.xml`)
+- Suspensão visual (balanças, amortecedores, eixo rígido), casco de colisão,
+  piloto com a animação da direção, som de pneu, suspensão e pouso (989snd),
+  poeira e sujeira
+- Pinturas montadas pelas camadas do jogo (cores, logos, número)
+
+**Melhorias nossas** (marcadas no código e nos docs)
+
+- Câmera do piloto com força G na cabeça, FOV e borrão pela velocidade, olhar livre
+- Órbita da câmera no analógico direito, estilo Forza
+- Som do motor gravado por carro no Engine Simulator
+- Painel funcional, volante girando com as mãos do piloto, lanterna de freio,
+  ré e farol, fumaça do escape, motor tremendo e ventoinhas girando
+
+**Conferido com o jogo de verdade**
+
+Save states do PCSX2 (massa, centro de massa, marchas, rpm, curso da
+suspensão, força por roda, câmera) e HUD lido quadro a quadro em vídeos.
+Os testes em `tests/` rodam sem tela e comparam o remake com essas referências.
+
+## Requisitos
+
+- **A sua cópia do ATV Offroad Fury 4 (PS2).** As ferramentas em `tools/`
+  extraem modelos, texturas e sons da sua imagem do disco.
+- [Godot 4.7](https://godotengine.org/) (Forward+)
+- Python 3 com Pillow e zstandard (`pip install pillow zstandard`)
+
+## Como rodar
 
 ```
-python tools\gerar_buggies.py <pasta>\unpacked <pasta>\texturas
-python tools\gerar_pintura.py <pasta>\unpacked BUGGY_04 assets\sphinx --nome pintura_speedrun.png --base 225,225,230 --primary 215,85,20 --secondary 45,35,175
+:: 1. texturas do archive do jogo (uns 6 min)
+python tools\gob_tex2png.py <jogo>\unpacked\gob --out <jogo>\texturas
+
+:: 2. buggies e trucks (carroceria, peças, freios, rodas, pintura)
+python tools\gerar_buggies.py <jogo>\unpacked <jogo>\texturas
+python tools\gerar_buggies.py <jogo>\unpacked <jogo>\texturas --classe truck
+
+:: 3. piloto, sons e efeitos
+python tools\piloto.py <jogo>\unpacked
+python tools\sfx_jogo.py <jogo>\unpacked
+python tools\fx_jogo.py <jogo>\unpacked
 ```
 
-`texturas` é a saída do `gob_tex2png.py` (uns 6 min). Sai tudo em `assets\`
-(`renegade`, `sphinx`, `buggy_NN`, `rodas`). Abra o Godot uma vez pra
-importar. Sem os assets o carro aparece como caixa e as rodas como cilindros.
-Rode de novo sempre que o `pingu2obj.py` mudar.
-
-`python tools\gerar_buggies.py <unpacked> <texturas> --tabela` só mostra os
-blocos de cada carro. O pingu2obj vira os triângulos pelas normais do jogo e o
-Godot descarta a face de trás (`MODEL_CULL` no car.gd).
-
-## Claude Code
-
-O `CLAUDE.md` tem o contexto do projeto (como trabalhamos, mapa do exe,
-referências pra conferir). `docs/` tem os detalhes e `tests/rodar_testes.py`
-roda a física sem tela. Comandos: `/teste` e `/entrega`.
-
-## Rodar
-
-1. Abra o Godot, clique em **Importar** e escolha o `project.godot`
-2. Espere importar os assets e aperte **F5**
+Depois abra o `project.godot` no Godot, espere importar e aperte **F5**. Sem
+os assets o carro aparece como caixa. Rode o `gerar_buggies` de novo sempre
+que o `pingu2obj.py` mudar.
 
 ## Controles
 
@@ -39,57 +74,52 @@ roda a física sem tela. Comandos: `/teste` e `/entrega`.
 |---|---|
 | W / S ou setas | acelerar / frear (parado, segure S pra engatar a ré) |
 | A / D | virar |
-| Espaço | embreagem: segurando abre a embreagem; um toque virando e acelerando faz a "Clutch Turn" (powerslide do jogo). O jogo não tem freio de mão |
+| Espaço | embreagem: segurando abre; um toque virando e acelerando faz a "Clutch Turn". O jogo não tem freio de mão |
+| E / Q | sobe / desce marcha (manual; abaixo da 1ª vem a ré) |
 | M | câmbio automático / manual |
-| P | alterna pneus/derrapagem: portados do jogo x modelo antigo |
-| L | força lateral: por eixo como no jogo x remendo antigo (pra comparar) |
-| E / Q | sobe / desce marcha (manual; abaixo da 1ª vem a ré, como no jogo) |
-| R | desvirar o carro |
-| T | voltar para o início |
-| C | trocar câmera (perto, longe, capô, para-choque, piloto) |
-| Tab | menu de carros (os 12 buggies + Sphinx do speedrun): clique ou Enter |
-| V | próximo carro da lista |
-| F | girar o modelo 180° (se ele parecer andar de ré) |
-| 1/2, 3/4, 5/6, 7/8 | na câmera do piloto: altura, distância, inclinação e campo de visão (valores no HUD) |
+| C | câmera: perto, longe, capô, para-choque, piloto |
+| Tab / V | menu de carros / próximo carro |
+| H | farol |
+| B | troca o estilo do volante |
+| G | liga e desliga os efeitos da câmera do piloto |
+| N | som mudo |
+| R / T | desvirar o carro / voltar pra largada |
+| F | girar o modelo 180° (se parecer andar de ré) |
+| P / L | comparar pneus e força lateral do jogo x modelo antigo |
+| 1 a 8 | câmera do piloto: altura, distância, inclinação e campo de visão |
+| 9 0 - = | câmera do piloto: posição do painel |
 | Esc | sair |
 
-Controle de videogame também funciona (gatilhos e analógico esquerdo).
+Controle de videogame: gatilhos, analógico esquerdo, A = embreagem,
+analógico direito = órbita da câmera, Select = câmera.
 
-## O que já é do jogo
+## Estrutura
 
-- Mão certa: o jogo usa outra convenção de eixos e até out/2026 o remake
-  saía espelhado (pista e carro). Agora carro e pista ficam como no jogo
-- Chão: relevo, textura e material da pista RX01 (tiles do STREAMT). A
-  roda só treme na terra e no cascalho (no asfalto não), como no jogo; o HUD
-  mostra o chão embaixo de cada roda. Atrito do pneu e arrasto por tipo de
-  chão são os do jogo (fora da pista o carro perde muita velocidade). O
-  carro larga na largada do jogo
-- Carros: os 12 buggies, modelo, suspensão, rodas e pintura de fábrica do jogo
-- Física: os XMLs do próprio jogo em `data/vehicles` (`buggy_base.xml` é a
-  base da classe e `buggy_NN.xml` o veículo (Renegade = buggy_10 = 15154). Os arquivos
-  seguem a ordem da lista do jogo: 15145 é a base e também o 1º buggy (Mosquito),
-  15146 o 2º, e assim até 15156 (Storm). Ex.: Sphinx = 15148). Massa, molas, amortecedores, curva
-  de torque, marchas, embreagem, elipse de atrito, subesterço, derrapagem e
-  gravidade no ar saem de lá
-- Peças de fábrica de cada carro: `data/vehicles.xml` (DefaultConfig, 14887) +
-  `data/upgrades.xml` (efeito de cada peça, 14889). Conferido no save state
-- Código de física portado do executável (SCES_546.88): pneus e derrapagem
-  (parte 1), motor, embreagem, câmbio e roda patinando (parte 3), suspensão,
-  anti-pitch e controles no ar (parte 4), arrasto do ar e atrito interno,
-  giro de cada roda por torque (no ar a de tração gira com o motor e a da
-  frente vai parando; contra um muro as rodas patinam com o motor)
-- Câmera: `data/cameras.xml` (o 14880 do unpacked, CameraSet `BuggyCamSet_10`)
-  com o código da câmera do exe portado em `game_camera.gd`: órbita que segue
-  a direção da velocidade, distância e zoom por velocidade, amortecimento de
-  altura, subida em descida, altura mínima do chão. Só a câmera "piloto" é
-  inventada
+```
+car.gd, game_camera.gd ...  scripts do jogo (física e câmera portadas do exe)
+data/                       XMLs do jogo usados em tempo de execução
+tools/                      extratores em Python (modelos, texturas, pintura, sons, save states)
+tests/                      testes de física sem tela + rodar_testes.py
+re/                         engenharia reversa (scripts do Ghidra, exe_util)
+docs/                       mapa do exe, derrapagem, formatos dos assets, som do motor
+som/                        motores do Engine Simulator e loops gravados
+```
 
-- Suspensão visual (`suspension_visual.gd`): balanças giram no pivô do jogo
-  (A_FRAME_*) até a ponta acompanhar o curso da roda, amortecedores apontam
-  de um ponto ao outro, freios e rodas vão presos na balança
+O `CLAUDE.md` e o `docs/engenharia_reversa.md` têm as notas técnicas
+completas: offsets, endereços de função e o porquê de cada decisão. Com o
+Claude Code, `/teste` roda os testes e `/entrega` fecha uma entrega.
 
-## O que ainda é provisório
+## Aviso legal
 
-- Troca de pneu e aro (peças compradas): por enquanto só as de fábrica
-- Tremida da câmera na batida ainda não portada (a por velocidade já é a do
-  jogo: só na terra e acima da velocidade de cada câmera)
+Projeto de fã, sem fins comerciais, feito pra estudo e preservação. Não tem
+ligação com a Sony Interactive Entertainment nem com a Climax Racing, nem
+apoio delas. *ATV Offroad Fury* e todos os nomes, modelos, texturas, sons e
+dados relacionados pertencem aos seus donos. Este repositório não distribui o
+executável, a imagem do disco nem código decompilado do jogo: é preciso ter a
+sua própria cópia, obtida de forma legal.
+
+## Licença
+
+O código original deste repositório (GDScript, Python, Java e scripts shell)
+está sob a [licença MIT](LICENSE). Dados e assets derivados do *ATV Offroad
+Fury 4* **não** entram nessa licença e continuam sendo dos seus donos.
