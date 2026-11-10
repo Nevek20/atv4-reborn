@@ -129,6 +129,7 @@ var hud: Label
 var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
 var terrain
+var corrida                              # pista/corrida.gd (Enter começa, Backspace volta pro treino)
 var objetos                              # objetos_rx01.gd (aviso() no HUD se faltar o assets/pista/rx01)
 var ceu                                  # ceu.gd (null sem assets/pista/rx01/ceu)
 var cam_piloto                           # camera_piloto.gd: efeitos de velocidade e olhar livre
@@ -157,6 +158,12 @@ func _ready() -> void:
 		ceu = null
 
 	spawn_vehicle(0, spawn_point(), deg_to_rad(SPAWN_YAW))
+	corrida = preload("res://pista/corrida.gd").new()
+	corrida.name = "Corrida"
+	add_child(corrida)
+	if not corrida.montar(self):
+		corrida.queue_free()
+		corrida = null
 
 	cam = Camera3D.new()
 	cam.far = 4000.0
@@ -373,6 +380,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				car.reset_to(spawn_point(), deg_to_rad(SPAWN_YAW))
 				car.limpar_sujeira()        # recomeço da corrida: o jogo zera (0x223db0)
 				reset_camera()
+			KEY_ENTER, KEY_KP_ENTER:
+				if corrida:
+					corrida.comecar()
+			KEY_BACKSPACE:
+				if corrida:
+					corrida.parar()
 			KEY_V:
 				_swap_vehicle((veh_idx + 1) % frota().size())
 			KEY_F:
@@ -467,6 +480,8 @@ func _toggle_menu() -> void:
 
 
 func _swap_vehicle(i: int) -> void:
+	if corrida:
+		corrida.parar()          # trocar de carro no meio volta pro treino
 	var p: Vector3 = car.global_position
 	spawn_vehicle(i, Vector3(p.x, terrain.height_at(p.x, p.z) + 1.5, p.z), car.global_rotation.y)
 
@@ -504,7 +519,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
@@ -570,6 +585,22 @@ func ground_normal(x: float, z: float) -> Vector3:
 	var e := 0.5
 	return Vector3(terrain.height_at(x - e, z) - terrain.height_at(x + e, z), 2.0 * e,
 		terrain.height_at(x, z - e) - terrain.height_at(x, z + e)).normalized()
+
+
+## recomeço da corrida (Enter): carro no lugar, sujeira e câmeras zeradas,
+## cercas e fardos de volta (o objetos_rx01 é montado de novo)
+func recomecar(pos: Vector3, yaw: float) -> void:
+	if objetos:
+		objetos.queue_free()
+		objetos = ObjetosRX01.new()
+		objetos.name = "ObjetosNovo"
+		add_child(objetos)
+		objetos.montar()
+		car.objetos = objetos
+		objetos.carro = car
+	car.reset_to(pos, yaw)
+	car.limpar_sujeira()
+	reset_camera()
 
 
 func reset_camera() -> void:

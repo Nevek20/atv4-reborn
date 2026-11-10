@@ -1289,6 +1289,15 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 - Passo 1 feito: traçado da IA, checkpoint, comprimento e voltas do RX01
   achados nos arquivos do evento (docs/engenharia_reversa.md, Corrida do
   RX01). Conferido desenhando o traçado em cima da textura do chão.
+- Passo 2 (pista/corrida.gd, teste_corrida): Enter recomeça tudo (carro na
+  posição 1 do grid, sujeira, câmeras, cercas e fardos de volta) e corre 5
+  voltas; Backspace volta pro treino livre (o padrão). Contagem de 3 s com o
+  freio preso, cronômetro desde o VAI, 1ª passagem pela linha começa a volta
+  1 (a largada fica 54.8 m antes), HUD simples em cima (volta, tempo, última
+  e melhor). NOSSO: a contagem e o jeito de contar a 1ª passagem (o jogo não
+  foi lido). Os links do AIT vêm ao contrário da corrida (a direção de cada
+  um aponta pro índice menor): a lista é invertida. Volta só conta com 60
+  dos 75 links andados (atalho e ida e volta pela linha não contam).
 
 ## Pendente / ideias
 

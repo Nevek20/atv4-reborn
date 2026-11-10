@@ -62,6 +62,13 @@ def main():
         "largada_offset": pega(circ, "mStartingOffset"),
         "primeira_volta": pega(circ, "mFirstLapLength"),
     }
+    # grid: os 8 cStartPosition do RALLYCROSS.bin, pela posição (campo 43b8a9bf)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import rx01_objetos
+    ents = rx01_objetos.entidades(open(os.path.join(u, "other", "12289_bloco.bin"), "rb").read())
+    grid = [e for e in ents if e["classe"] == "cStartPosition"]
+    grid.sort(key=lambda e: e["campos"]["43b8a9bf"])
+    out["grid"] = [{"pos": [round(x, 3) for x in e["pos"]], "dir": [round(x, 4) for x in e["dir"]]} for e in grid]
     sai = os.path.join(PROJ, "data", "rx01_corrida.json")
     json.dump(out, open(sai, "w"), indent=1)
     print(n, "links,", out["comprimento"], "m ->", sai)
