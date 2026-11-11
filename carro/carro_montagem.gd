@@ -707,7 +707,7 @@ func _load_sujeira() -> void:
 
 
 func _load_sfx() -> void:
-	if not SOM_PNEU:
+	if not SOM_PNEU or mudo:
 		return
 	sfx = preload("res://som/sfx_carro.gd").new()
 	sfx.name = "SomPneu"
@@ -718,7 +718,7 @@ func _load_sfx() -> void:
 
 
 func _load_som() -> void:
-	if not (SOM_MOTOR and _tem("som_motor")):
+	if not (SOM_MOTOR and _tem("som_motor")) or mudo:
 		return
 	var dir: String = som_pasta if som_pasta != "" else preload("res://som/motor_som.gd").pasta_do_carro(vehicle_id)
 	if dir == "":

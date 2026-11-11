@@ -13,6 +13,7 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 - Atuar como dev sênior: propor direção, revisar, apontar problema. Não só
   executar.
 - Ciclos curtos e testados: muda, roda o teste, mostra o número, entrega.
+- Pra mostrar: umas 2 prints bastam. Vídeo só quando ele pedir.
 - Toda entrega vem com:
   1. o que mudou (curto),
   2. o **commit como comando de cmd do Windows** pronto pra colar
@@ -58,7 +59,7 @@ carro/               o carro
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
-pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas)
+pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais)
 som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
@@ -170,6 +171,8 @@ Pista RX01
 - Chão com luz assada: sem luz do Godot. PS2 sem tonemap; névoa linear.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
+- IA: o AIT é volta gravada (linha +0x00, velocidade +0x24). O piloto da
+  IA no exe não foi achado: direção, freio e catchup aplicado são NOSSOS.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -204,5 +207,6 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: reposição (cInstantRespotBox), 2 luzes
   direcionais, LOD das árvores.
-- Lasquinhas e som da batida carro com carro (quando tiver IA).
+- IA: piloto do exe (precisa save state numa corrida com rivais), som
+  posicional dos rivais, lasquinhas e som da batida carro com carro.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

@@ -96,6 +96,9 @@ python tools/extrair_material.py <dados>/stream/RX01.000 assets/pista/terreno --
 python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
 %GODOT% --path . --write-movie corrida.avi --fixed-fps 30 -s res://tests/gravar_corrida.gd  :: vídeo da largada: intro, acelerando preso, VAI (DEPOIS=6 s, PULAR=1 pula a intro, CHECA_NAN=1 acha nó com NaN)
 %GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> quadro a quadro)
+%GODOT% --path . --fixed-fps 50 -s res://tests/print_ia.gd -- ia   :: prints da corrida com rivais (QUANDO=-1,2,25: -1 = no grid)
+python tools/ia_dados.py <unpacked>             :: pilotos (AIPlayers) e catchup -> data/ia.json
 python tools/rx01_corrida.py <unpacked>          :: traçado da IA, checkpoint e voltas do RX01 -> data/rx01_corrida.json
 
 :: checar um script sem abrir o editor

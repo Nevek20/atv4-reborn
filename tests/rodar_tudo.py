@@ -44,7 +44,7 @@ RELATORIOS = ["teste_capota.gd", "teste_de_lado.gd", "teste_entrada.tscn", "test
 AMBIENTE = {"teste_batida.gd": {"VEL": "20"}, "teste_lascas.gd": {"VEL": "20"},
             "teste_entrada.tscn": {"VEL": "110"}}
 # os que rodam com passo fixo (o CLAUDE.md passa --fixed-fps 50)
-FIXO_50 = {"teste_treme.gd", "teste_ladeira.gd"}
+FIXO_50 = {"teste_treme.gd", "teste_ladeira.gd", "teste_ia.gd"}
 ARGS = {"teste_treme.gd": ["--", "0"], "teste_ladeira.gd": ["--", "0"]}
 
 RUIDO_RE = re.compile(r"^\s*at: |^ERROR: \d+ resources|^WARNING: \d+ ObjectDB|ObjectDB instances|^Godot Engine")

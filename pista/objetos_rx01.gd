@@ -82,6 +82,7 @@ const ESTOQUE_PECAS := 20                # por modelo (0x140318: até 0x13)
 const BIT_CARRO := 1 << 10               # camada só do carro, pra consulta das cercas
 const CAMADA := 2                       # bit das cercas: a consulta só olha elas
 var carro: RigidBody3D = null            # main.gd põe (o que bate nas cercas)
+var rivais: Array = []                   # carros da IA (pista/ia.gd): também quebram as cercas
 var cercas: Array = []                   # [{corpo, forma, malha, q, xf, quebrada, normal}]
 var blocos: Array = []                   # [{corpo, xf0, mexido, t}]
 var pecas := {}                          # modelo -> [RigidBody3D] (o estoque)
@@ -584,6 +585,19 @@ func _interativo(it: Dictionary, q: Dictionary, malha: Mesh, col: Dictionary) ->
 ## quebra antes da física resolver o contato (o carro atravessa); abaixo
 ## disso ela segura como parede
 func _physics_process(dt: float) -> void:
+	# cada carro (o jogador e os rivais) pelo mesmo código; "carro" volta a
+	# ser o jogador no fim (o resto do arquivo usa ele)
+	var jog := carro
+	for r in rivais:
+		if is_instance_valid(r):
+			carro = r
+			_cercas(dt)
+	carro = jog
+	_cercas(dt)
+	_resto(dt)
+
+
+func _cercas(dt: float) -> void:
 	var tem_carro := carro != null and is_instance_valid(carro)
 	var v: Vector3 = carro.linear_velocity if tem_carro else Vector3.ZERO
 	var pc: Vector3 = carro.global_position if tem_carro else Vector3(INF, INF, INF)
@@ -625,6 +639,11 @@ func _physics_process(dt: float) -> void:
 				n_imp = -(info.normal as Vector3).normalized()
 				p_imp = info.point
 		_bate_cerca(c, imp, n_imp, p_imp)
+
+
+func _resto(dt: float) -> void:
+	var tem_carro := carro != null and is_instance_valid(carro)
+	var pc: Vector3 = carro.global_position if tem_carro else Vector3(INF, INF, INF)
 	# peças não batem no carro (nossa, pelo que o Matheus vê no jogo: a cerca
 	# laranja não freia). Carro novo (menu): exceção com todas
 	if tem_carro and carro != _carro_ant:
@@ -799,8 +818,9 @@ func quebrar(c: Dictionary) -> void:
 		# batida em ângulo tirava mais 4 a 12 km/h. Rola e cai só no chão
 		if not _separando.has(rb):
 			_separando.append(rb)
-		if carro and is_instance_valid(carro):
-			rb.add_collision_exception_with(carro)
+		for k in [carro] + rivais:
+			if k and is_instance_valid(k):
+				rb.add_collision_exception_with(k)
 		lista.append(rb)
 		pecas[p.modelo] = lista
 

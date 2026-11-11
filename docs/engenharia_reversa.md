@@ -990,6 +990,16 @@ vazios). Tudo vem do evento:
   (raw/12287): splines Intro1 (câmera, 7 nós) e Introlookat1 (alvo, 5 nós),
   Speed 35 nas duas. cPreRaceState no exe é do menu, não da contagem;
   mCountdown, Start_Countdown_ e WaitForLaunch sem referência no código.
+- IA (nov/2026): o loader do AIT é 0x329e00 -> 0x329f98 (rotas de 0x48 bytes,
+  0x326a50/0x326c90): na memória cada link vira 0x50 bytes, as ligações
+  entre links viram segmentos de 0xc0 (0x328370) e as rotas 0x3c. O link
+  do arquivo: +0x24 = velocidade da volta gravada (m/s). Pilotos
+  (AIPlayers.xml) lidos em 0x35b530 (Skill, Number, classes). Catchup
+  (8 chaves StartDelay..AIbehindMaxScale) lido em 0x34cb50 / 0x34d9f0.
+  Veículo: Setup do vehicles.xml tem AIRoute e AIControl (0x1f3670), mas
+  não achamos arquivo com esse nome. A vtable do veículo do jogador é
+  0x580958 (pedais 0x202df0 no slot +0xe8/+0xec) e só ele usa: os rivais
+  devem ter outra classe. "AI wasn't able to complete a lap!" em 0x33d1b0.
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice

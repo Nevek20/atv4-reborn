@@ -6,7 +6,9 @@ Dados da corrida do RX01 (Rallycross) -> data/rx01_corrida.json.
 Fontes (Levels/RX_01/Event/Rallycross, data/arquivos.tsv):
   #b953876a (other/12288) "AIT 1.1 ExportedTrack": o traçado da IA. Cabeçalho
     0x14 = n de links (75); links de 0x70 bytes a partir de 0x3c:
-    +0x00 ponto, +0x0c direção, +0x18 normal, +0x24 ?, +0x28 próximo link,
+    +0x00 ponto (a linha da volta gravada, até 12 m fora do centro), +0x0c
+    direção, +0x18 normal, +0x24 velocidade da volta gravada (m/s, 25..34),
+    +0x28 próximo link,
     +0x2c 4 anteriores (o último é o usado), +0x3c 4 seguintes, +0x5c centro,
     +0x68 / +0x6c largura à esquerda (negativa) / direita. Depois, 24 bytes
     por link (todos iguais no RX01: 1, 1.0, -1, -1, -1, 0).
@@ -45,6 +47,7 @@ def main():
             "centro": [round(x, 3) for x in struct.unpack_from("<3f", d, o + 0x5c)],
             "largura": [round(x, 2) for x in struct.unpack_from("<2f", d, o + 0x68)],
             "prox": struct.unpack_from("<i", d, o + 0x28)[0],
+            "vel": round(struct.unpack_from("<f", d, o + 0x24)[0], 2),
         })
     b = open(os.path.join(u, "raw", "12289r_bloco.bin"), "rb").read()
     cp = b[366:366 + 555].decode()

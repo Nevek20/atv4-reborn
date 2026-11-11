@@ -27,6 +27,7 @@ extends Node
 const ARQ := "res://data/rx01_corrida.json"
 const CONTAGEM := 3.0
 const AVANCO_MIN := 60          # dos 75 links
+const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
 enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
 
@@ -51,6 +52,8 @@ var _cp_frente := Vector3.ZERO
 var _cp_lado := Vector3.ZERO
 var _cp_meia := Vector3.ZERO
 var hud: Label
+var ia                          # rivais (pista/ia.gd)
+var t_fim := 0.0                # tempo total do jogador na chegada
 var _intro_cam: Array = []      # caminho da câmera (mundo)
 var _intro_alvo: Array = []
 var _intro_s := 0.0             # metros andados no caminho
@@ -96,6 +99,12 @@ func montar(m) -> bool:
 			_intro_alvo.append(mundo(q))
 		_intro_comp = _comprimento(_intro_cam)
 		_intro_comp_alvo = _comprimento(_intro_alvo)
+	ia = preload("res://pista/ia.gd").new()
+	ia.name = "IA"
+	add_child(ia)
+	if not ia.montar(self):
+		ia.queue_free()
+		ia = null
 	hud = Label.new()
 	hud.name = "HudCorrida"
 	hud.add_theme_font_size_override("font_size", 28)
@@ -177,6 +186,8 @@ func comecar() -> void:
 	main.car.test_input = null
 	main.car.largada_presa = true
 	hud.visible = true
+	if ia and RIVAIS:
+		ia.criar()
 
 
 func _fim_intro() -> void:
@@ -188,6 +199,8 @@ func _fim_intro() -> void:
 func parar() -> void:
 	estado = LIVRE
 	hud.visible = false
+	if ia:
+		ia.limpar()
 	if main.car:
 		main.car.test_input = null
 		main.car.largada_presa = false
@@ -228,9 +241,12 @@ func _physics_process(dt: float) -> void:
 		if t_conta <= 0.0:
 			estado = CORRENDO
 			car.largada_presa = false
+			if ia:
+				ia.soltar()
 		return
 	if estado == CHEGOU:
 		t_conta += dt
+		t += dt                     # os rivais ainda chegando
 		return
 	t += dt
 	var p: Vector3 = car.global_position
@@ -269,6 +285,7 @@ func _cruzou() -> void:
 	if volta >= voltas:
 		estado = CHEGOU
 		t_conta = 0.0
+		t_fim = t
 		# solta tudo: o carro para sozinho (segurar o freio parado engata a ré)
 		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		return
@@ -294,8 +311,17 @@ func _process(_dt: float) -> void:
 				hud.text = "VAI!"
 				return
 			var txt := "Volta %d/%d   %s" % [maxi(volta, 1), voltas, relogio(t)]
+			if ia and not ia.rivais.is_empty():
+				txt = "Pos %d/%d   " % [ia.posicao_jogador(), ia.rivais.size() + 1] + txt
 			if volta > 0:
 				txt += "\nvolta %s   última %s   melhor %s" % [relogio(t - t_volta), relogio(ultima), relogio(melhor)]
 			hud.text = txt
 		CHEGOU:
-			hud.text = "CHEGADA!   %s\nmelhor volta %s\nEnter: correr de novo   Backspace: treino livre" % [relogio(t), relogio(melhor)]
+			var txt := "CHEGADA!   %s\nmelhor volta %s" % [relogio(t_fim), relogio(melhor)]
+			if ia and not ia.rivais.is_empty():
+				var cl: Array = ia.classificacao()
+				for i in cl.size():
+					var e: Dictionary = cl[i]
+					var tt: String = relogio(e.fim) if e.fim >= 0.0 else "volta %d" % clampi(int(e.prog / ia.comp) + 1, 1, voltas)
+					txt += "\n%d. %s   %s" % [i + 1, e.nome, tt]
+			hud.text = txt + "\nEnter: correr de novo   Backspace: treino livre"

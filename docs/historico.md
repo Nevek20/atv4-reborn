@@ -1318,6 +1318,32 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   era o MotorTreme/Motor. A mola do coxim (7 Hz, motor_treme.gd) era
   integrada com o passo do quadro inteiro e explode abaixo de ~37 FPS
   (com tela lenta, xvfb ou gravando a 30). Agora em passos de 1/120 s.
+- Passo 3, IA (pista/ia.gd, teste_ia, print_ia; 1ª versão, nov/2026):
+  - Do jogo: o AIT do RX01 é uma VOLTA GRAVADA ("ExportedTrack"): o ponto
+    +0x00 do link é por onde o carro passou (até 12 m fora do centro, os dois
+    lados) e +0x24 a velocidade ali (25..34 m/s, não segue o raio: R 12 m a
+    32 m/s, então não é calculada). Pilotos: AIPlayers.xml (86, Skill
+    0.20..1.0, classes, Rivalry). Catchup do Rallycross: STDH_04 (Normal).
+    tools/ia_dados.py -> data/ia.json.
+  - Procurado no exe e NÃO achado: o "piloto" (quem preenche o struct de
+    controle que os pedais 0x202df0 recebem) e onde a escala do catchup
+    entra. Os save states que temos não têm rivais (só 1 jogador na lista
+    0x7f48d4+0x10). Ficou NOSSO: direção por perseguição de ponto (7 m +
+    0.55 s à frente, ganho 2.2), velocidade = gravada x (1 - 0.25 (1 -
+    Skill)) x (1 + 0.12 x escala do catchup), preso 2 s -> ré 1.5 s,
+    capotado 2 s ou a 18 m da linha -> volta pra linha (recuando até ter 6 m
+    livres de outro carro), desvio do grid sumindo em 150 m, rivais
+    sorteados da classe do jogador.
+  - Derrapando: a física do jogo não endireita sozinha (RecoveryTorqueCutting)
+    e a IA ficava no acelerador com a direção no batente, 2.5 s indo reto
+    pra fora (trace no teste). Agora: direção > 0.8 e o carro girando pro
+    outro lado -> acelerador 0; direção > 0.95 -> no máximo 0.5 (NOSSO).
+  - Cercas e fardos: objetos_rx01.rivais, o mesmo código de quebra roda pra
+    cada carro. Rivais mudos (o som não é posicional).
+  - teste_ia (1 volta, jogador pilotado pela mesma IA, SEMENTE fixa = 7):
+    os 7 completam; 3 sementes: 1 a 3 reposições/ré por corrida (quando dois
+    se tocam), média 73..99 km/h (a volta gravada dá ~101).
+  - Desempenho: 8 carros = ~10 ms de física por passo na nuvem (1 carro 3.5).
 
 ## Pendente / ideias
 
@@ -1341,6 +1367,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
+- IA: achar o piloto no exe (pedir save state numa corrida COM rivais pra
+  ver o struct de controle deles), som posicional dos rivais, desviar de
+  outro carro, batida carro com carro (VehicleVehicle.hsc).
 - RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
   as 2 luzes direcionais (câmera de introdução feita, seção Corrida). A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
