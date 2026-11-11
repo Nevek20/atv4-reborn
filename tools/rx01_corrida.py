@@ -15,6 +15,9 @@ Fontes (Levels/RX_01/Event/Rallycross, data/arquivos.tsv):
   #c0675b52 (raw/12289+1230) XML do circuito: mFirstLink 51,
     mCircuitLength 1810.4, mStartingOffset 1759.7, mFirstLapLength 54.8.
   RALLYCROSS.bin (other/12289): 8 cStartPosition (o grid).
+  IntroCameras.XML (raw/12287) + CameraSpline.XML (xml/12287_Intro1): a
+    câmera de introdução (caminho Intro1, 7 nós, alvo Introlookat1, 5 nós,
+    as duas a 35 m/s).
   14840 (eventos): Rallycross Amateur buggy/truck Laps="5" NumRankings="8".
 Uso:
     python tools/rx01_corrida.py <unpacked>
@@ -69,6 +72,18 @@ def main():
     grid = [e for e in ents if e["classe"] == "cStartPosition"]
     grid.sort(key=lambda e: e["campos"]["43b8a9bf"])
     out["grid"] = [{"pos": [round(x, 3) for x in e["pos"]], "dir": [round(x, 4) for x in e["dir"]]} for e in grid]
+    # câmera de introdução: IntroCameras.XML (raw/12287) diz os 2 caminhos e as
+    # velocidades; CameraSpline.XML (xml/12287_Intro1.xml) tem os nós
+    ic = open(os.path.join(u, "raw", "12287r_root.xml"), encoding="utf-8", errors="replace").read()
+    sp = open(os.path.join(u, "xml", "12287_Intro1.xml"), encoding="utf-8").read()
+    grupos = {}
+    for nome, corpo in re.findall(r'<cGroupEntity Name="(\w+)">(.*?)</cGroupEntity>', sp, re.S):
+        grupos[nome] = [[float(x) for x in m] for m in re.findall(r'X="([-\d.]+)" Y="([-\d.]+)" Z="([-\d.]+)"', corpo)]
+    out["intro"] = {
+        "caminho": grupos[re.search(r' SplineName="(\w+)"', ic).group(1)],
+        "alvo": grupos[re.search(r'LookAtSplineName="(\w+)"', ic).group(1)],
+        "vel": pega(ic, "SpeedOnSpline"), "vel_alvo": pega(ic, "SpeedOnLookAtSpline"),
+    }
     sai = os.path.join(PROJ, "data", "rx01_corrida.json")
     json.dump(out, open(sai, "w"), indent=1)
     print(n, "links,", out["comprimento"], "m ->", sai)

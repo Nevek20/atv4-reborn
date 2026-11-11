@@ -1298,6 +1298,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   foi lido). Os links do AIT vêm ao contrário da corrida (a direção de cada
   um aponta pro índice menor): a lista é invertida. Volta só conta com 60
   dos 75 links andados (atalho e ida e volta pela linha não contam).
+- Largada como no jogo (pedido do Matheus): câmera de introdução e carro
+  preso que dá pra acelerar.
+  - Introdução: IntroCameras.XML do RX01 (raw/12287), caminho Intro1 (7 nós)
+    olhando pro Introlookat1 (5 nós), os 2 a 35 m/s, ~14.3 s. Enter de novo
+    pula. NOSSO: a curva entre os nós (Catmull-Rom; o jogo não foi lido).
+  - Espera (introdução + contagem): car.largada_presa = embreagem aberta
+    (o motor sobe, chega a 8000 rpm) e freio nas rodas DEPOIS da lógica dos
+    pedais. Bug que o Matheus achou: o carro largava de ré. Causa: a
+    contagem segurava o freio parado e o jogo engata a ré com freio parado
+    (0x202df0). Por isso o freio do jogador é ignorado na espera.
+  - No exe, cPreRaceState é estado de menu, e mCountdown/WaitForLaunch não
+    têm uso achado: a contagem de 3 s continua NOSSA.
+  - teste_corrida: introdução >= 10 s, carro parado (0.15 m, só assentando)
+    com acelerador e freio no fundo, rpm >= 3000, sai pra frente no VAI
+    (47.6 km/h em 2 s).
 
 ## Pendente / ideias
 
@@ -1322,7 +1337,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
 - RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
-  câmera de introdução, as 2 luzes direcionais. A tremida da batida
+  as 2 luzes direcionais (câmera de introdução feita, seção Corrida). A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.
 - Som do motor (melhoria nossa, plano combinado com o Matheus): o jogo só

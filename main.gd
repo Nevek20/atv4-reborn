@@ -620,6 +620,17 @@ func reset_camera() -> void:
 func _update_camera(delta: float) -> void:
 	if not cam_ready:
 		reset_camera()
+	if corrida and corrida.camera_intro(cam):
+		car.model_root.visible = true
+		if car.susp_vis:
+			car.susp_vis.visible = true
+		for w in car.wheels:
+			if w.has("pivot"):
+				w.pivot.visible = true
+		if car.piloto:
+			car.piloto.visible = true
+			car.piloto.sem_cabeca = false
+		return
 	var s := cam_state()
 	# as câmeras de órbita rodam sempre (como no jogo, trocar não dá tranco)
 	for i in 2:

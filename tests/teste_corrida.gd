@@ -1,7 +1,9 @@
 extends SceneTree
 ## Modo corrida (pista/corrida.gd): carrega o main, começa a corrida, espera a
 ## contagem e leva o carro pelo traçado da IA (teleporte a cada quadro, 6 m
-## por passo) por 5 voltas. Confere: freio preso na contagem, volta 0 até
+## por passo) por 5 voltas. Confere: introdução, carro preso na espera com
+## acelerador e freio (o motor sobe, não anda, não engata a ré), sai pra
+## frente no VAI, volta 0 até
 ## cruzar a linha, 5 voltas contadas, chegada; e que ir e voltar pela linha
 ## (atalho) não conta volta.
 ## Uso: godot --headless --path . -s res://tests/teste_corrida.gd
@@ -14,6 +16,11 @@ var s := 0.0                    # distância andada no traçado (m)
 var falhas := 0
 var pontos: Array = []          # o traçado como polilinha (mundo)
 var comp := 0.0
+var p_largada := Vector3.INF
+var t_intro := 0
+var rpm_max := 0.0
+var andou := 0.0
+var fase_vai := 0
 
 
 func _initialize() -> void:
@@ -69,11 +76,37 @@ func _physics_process(_dt: float) -> bool:
 			fase = 1
 			quadros = 0
 		1:
-			if c.estado == c.CONTANDO:
-				if car.test_input == null or car.test_input.brk < 1.0:
-					_falha("contagem sem o freio preso")
+			# espera (introdução + contagem): acelerador E freio no fundo
+			if c.estado == c.INTRO or c.estado == c.CONTANDO:
+				if p_largada == Vector3.INF and t_intro >= 50:
+					p_largada = car.global_position     # depois de assentar (larga 1.5 m acima)
+				car.test_input = {"thr": 1.0, "brk": 1.0, "steer": 0.0}
+				if c.estado == c.INTRO:
+					t_intro += 1
+				rpm_max = maxf(rpm_max, car.rpm)
+				if p_largada != Vector3.INF:
+					var dd: Vector3 = car.global_position - p_largada
+					andou = maxf(andou, Vector2(dd.x, dd.z).length())
+				if not car.largada_presa:
+					_falha("espera sem o carro preso")
 				return false
-			print("contagem: %.2f s (esperado %.1f)" % [quadros / 50.0, c.CONTAGEM])
+			if fase_vai < 100:
+				# VAI: só acelerador por 2 s, tem que sair pra frente
+				car.test_input = {"thr": 1.0, "brk": 0.0, "steer": 0.0}
+				fase_vai += 1
+				return false
+			var vf: float = car.linear_velocity.dot(car.global_transform.basis.z)
+			print("introdução %.1f s; na espera rpm até %.0f, andou %.2f m; 2 s depois do VAI: %.1f km/h pra frente, marcha %s" % [
+				t_intro / 50.0, rpm_max, andou, vf * 3.6, car.gear_label()])
+			if t_intro < 50 * 10:
+				_falha("introdução curta (%.1f s)" % (t_intro / 50.0))
+			if andou > 0.5:
+				_falha("o carro andou %.2f m na espera" % andou)
+			if rpm_max < 3000.0:
+				_falha("não deu pra acelerar na espera (rpm %.0f)" % rpm_max)
+			if vf < 3.0:
+				_falha("não saiu pra frente no VAI (%.1f km/h)" % (vf * 3.6))
+			car.test_input = null
 			# começa no link mais perto do grid e anda pra frente
 			var p0: Vector3 = car.global_position
 			var melhor := INF
@@ -107,6 +140,9 @@ func _physics_process(_dt: float) -> bool:
 			c.comecar()
 			fase = 4
 		4:
+			if c.estado == c.INTRO:
+				c.comecar()             # Enter pula a introdução
+				return false
 			if c.estado == c.CONTANDO:
 				quadros = 0
 				return false

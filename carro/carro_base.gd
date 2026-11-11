@@ -493,6 +493,9 @@ const TRAVA_MPH := 2.0
 const TRAVA_INI := -0.25
 const TRAVA_FIM := -1.0
 var test_input = null         # {thr, brk, steer} pra testes automáticos
+# largada da corrida (pista/corrida.gd): o jogador acelera com o carro preso
+# (embreagem aberta, freio ignorado: segurar o freio parado engataria a ré)
+var largada_presa := false
 # false desliga as melhorias nossas (volante girando e gerado, mãos na IK,
 # som do Engine Simulator, fumaça, painel, motor tremendo e animado, luzes,
 # farol, volante tremendo): fica só o que o jogo faz

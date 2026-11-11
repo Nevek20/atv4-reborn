@@ -5,8 +5,13 @@ extends Node
 ## 15.8 x 5.9 x 1.4 m), traçado da IA (75 links) e 5 voltas (eventos
 ## Rallycross Amateur, xml 14840).
 ##
-## Largada: o carro vai pra posição 1 do grid (a mesma da RAM), contagem de 3 s
-## com o freio preso, cronômetro a partir do "VAI". A largada fica 54.8 m
+## Largada: o carro vai pra posição 1 do grid (a mesma da RAM) e roda a câmera
+## de introdução do jogo (IntroCameras.XML: caminho Intro1 de 7 nós olhando
+## pro Introlookat1 de 5, os 2 a 35 m/s, ~14 s; Enter pula). Depois contagem
+## de 3 s e o cronômetro a partir do "VAI". Na espera toda o jogador pode
+## acelerar com o carro preso (car.largada_presa: embreagem aberta, freio
+## ignorado; até nov/2026 o freio ficava preso e parado o freio engata a ré:
+## o carro largava de ré). A largada fica 54.8 m
 ## antes da linha (mFirstLapLength): a 1ª passagem pela linha começa a volta
 ## 1, cada passagem seguinte fecha uma volta; acaba na 5ª. Tempo total desde
 ## o VAI. NOSSO (o jogo não foi lido): como ele conta essa 1ª passagem e a
@@ -23,7 +28,7 @@ const ARQ := "res://data/rx01_corrida.json"
 const CONTAGEM := 3.0
 const AVANCO_MIN := 60          # dos 75 links
 
-enum { LIVRE, CONTANDO, CORRENDO, CHEGOU }
+enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
 
 var main
 var estado := LIVRE
@@ -46,6 +51,11 @@ var _cp_frente := Vector3.ZERO
 var _cp_lado := Vector3.ZERO
 var _cp_meia := Vector3.ZERO
 var hud: Label
+var _intro_cam: Array = []      # caminho da câmera (mundo)
+var _intro_alvo: Array = []
+var _intro_s := 0.0             # metros andados no caminho
+var _intro_comp := 0.0
+var _intro_comp_alvo := 0.0
 
 
 ## jogo (x, y, z) -> mundo do Godot (z - 1024, y, x)
@@ -79,6 +89,13 @@ func montar(m) -> bool:
 	if _cp_frente.dot(dir_mundo(dados.grid[0].dir)) < 0.0:
 		_cp_frente = -_cp_frente
 	_cp_meia = Vector3(cp.tamanho[0], cp.tamanho[1], cp.tamanho[2]) * 0.5
+	if dados.has("intro"):
+		for q in dados.intro.caminho:
+			_intro_cam.append(mundo(q))
+		for q in dados.intro.alvo:
+			_intro_alvo.append(mundo(q))
+		_intro_comp = _comprimento(_intro_cam)
+		_intro_comp_alvo = _comprimento(_intro_alvo)
 	hud = Label.new()
 	hud.name = "HudCorrida"
 	hud.add_theme_font_size_override("font_size", 28)
@@ -103,12 +120,51 @@ func largada(n: int) -> Array:
 	return [p, atan2(d.x, d.z)]
 
 
-## Enter: reinicia tudo e começa a contagem
+static func _comprimento(pts: Array) -> float:
+	var l := 0.0
+	for i in pts.size() - 1:
+		l += pts[i].distance_to(pts[i + 1])
+	return l
+
+
+## ponto a s metros num caminho Catmull-Rom pelos nós (o jogo não foi lido:
+## a curva entre os nós é NOSSA)
+static func _no_caminho(pts: Array, s: float) -> Vector3:
+	var n := pts.size()
+	for i in n - 1:
+		var l: float = pts[i].distance_to(pts[i + 1])
+		if s <= l or i == n - 2:
+			var f := clampf(s / maxf(l, 1e-4), 0.0, 1.0)
+			var p0: Vector3 = pts[maxi(i - 1, 0)]
+			var p3: Vector3 = pts[mini(i + 2, n - 1)]
+			return (pts[i] as Vector3).cubic_interpolate(pts[i + 1], p0, p3, f)
+		s -= l
+	return pts[n - 1]
+
+
+## a câmera de introdução, se estiver nela (o main não mexe na câmera)
+func camera_intro(cam: Camera3D) -> bool:
+	if estado != INTRO or _intro_cam.is_empty():
+		return false
+	var p := _no_caminho(_intro_cam, _intro_s)
+	# os 2 a 35 m/s: o alvo anda o mesmo tanto no caminho dele
+	var alvo := _no_caminho(_intro_alvo, _intro_s * float(dados.intro.vel_alvo) / float(dados.intro.vel))
+	cam.near = 0.1
+	cam.global_position = p
+	cam.look_at(alvo, Vector3.UP)
+	return true
+
+
+## Enter: reinicia tudo e começa a corrida (pela introdução)
 func comecar() -> void:
+	if estado == INTRO:
+		_fim_intro()            # Enter de novo pula a introdução
+		return
 	var l := largada(0)
 	var p: Vector3 = l[0]
 	main.recomecar(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.5, p.z), l[1])
-	estado = CONTANDO
+	estado = INTRO if not _intro_cam.is_empty() else CONTANDO
+	_intro_s = 0.0
 	t_conta = CONTAGEM
 	t = 0.0
 	volta = 0
@@ -118,8 +174,15 @@ func comecar() -> void:
 	avanco = 0
 	link = _mais_perto(main.car.global_position)
 	_lado_ant = _lado(main.car.global_position)
-	main.car.test_input = {"thr": 0.0, "brk": 1.0, "steer": 0.0}
+	main.car.test_input = null
+	main.car.largada_presa = true
 	hud.visible = true
+
+
+func _fim_intro() -> void:
+	estado = CONTANDO
+	t_conta = CONTAGEM
+	main.reset_camera()
 
 
 func parar() -> void:
@@ -127,6 +190,7 @@ func parar() -> void:
 	hud.visible = false
 	if main.car:
 		main.car.test_input = null
+		main.car.largada_presa = false
 
 
 func _mais_perto(p: Vector3) -> int:
@@ -154,11 +218,16 @@ func _physics_process(dt: float) -> void:
 	if estado == LIVRE or main.car == null:
 		return
 	var car = main.car
+	if estado == INTRO:
+		_intro_s += float(dados.intro.vel) * dt
+		if _intro_s >= _intro_comp:
+			_fim_intro()
+		return
 	if estado == CONTANDO:
 		t_conta -= dt
 		if t_conta <= 0.0:
 			estado = CORRENDO
-			car.test_input = null
+			car.largada_presa = false
 		return
 	if estado == CHEGOU:
 		t_conta += dt
@@ -200,7 +269,8 @@ func _cruzou() -> void:
 	if volta >= voltas:
 		estado = CHEGOU
 		t_conta = 0.0
-		main.car.test_input = {"thr": 0.0, "brk": 1.0, "steer": 0.0}
+		# solta tudo: o carro para sozinho (segurar o freio parado engata a ré)
+		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		return
 	volta += 1
 
@@ -215,6 +285,8 @@ func _process(_dt: float) -> void:
 	if estado == LIVRE:
 		return
 	match estado:
+		INTRO:
+			hud.text = "Enter: pular"
 		CONTANDO:
 			hud.text = "%d" % ceili(t_conta) if t_conta > 0.0 else "VAI!"
 		CORRENDO:

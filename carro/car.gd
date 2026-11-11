@@ -741,6 +741,9 @@ func _physics_process(dt: float) -> void:
 		if Input.is_joy_button_pressed(0, JOY_BUTTON_A):
 			emb_btn = 1.0
 
+	if largada_presa:
+		brk_raw = 0.0           # o freio do jogador não conta (engataria a ré)
+		emb_btn = 1.0
 	var b := global_transform.basis
 	var up := b.y
 	var fwd_body := b.z
@@ -771,6 +774,10 @@ func _physics_process(dt: float) -> void:
 		reverse_hold = 0.0
 	thr_cx = thr_raw
 	brk_cx = brk_raw
+	# largada: o freio fica preso nas rodas DEPOIS da lógica dos pedais (que
+	# engataria a ré com o freio parado); a embreagem aberta deixa acelerar
+	if largada_presa:
+		brk_raw = 1.0
 
 	throttle = move_toward(throttle, thr_raw, dt * (P.thr_up if thr_raw > throttle else P.thr_down))
 	brake_in = move_toward(brake_in, brk_raw, dt * (P.brk_up if brk_raw > brake_in else P.brk_down))

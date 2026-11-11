@@ -58,7 +58,7 @@ carro/               o carro
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
-pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter)
+pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas)
 som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
@@ -200,7 +200,7 @@ Frota
 ## Pendente / ideias
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: reposição (cInstantRespotBox), câmera de introdução, 2 luzes
+- RX01: reposição (cInstantRespotBox), 2 luzes
   direcionais, LOD das árvores.
 - Lasquinhas e som da batida carro com carro (quando tiver IA).
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

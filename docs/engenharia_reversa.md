@@ -986,7 +986,10 @@ vazios). Tudo vem do evento:
   TrackSetup/RALLYCROSS.xml: Logic (mWarningStray 4, mCheatingStray 8,
   mCheatingProgress 30, mLinkReadAhead 10, mRespotSpeed 40,
   mBackwardLimit 100), RollingStart. Eventos (xml 14840): Rallycross
-  Amateur buggy/truck = Laps 5, NumRankings 8.
+  Amateur buggy/truck = Laps 5, NumRankings 8. IntroCameras.XML
+  (raw/12287): splines Intro1 (câmera, 7 nós) e Introlookat1 (alvo, 5 nós),
+  Speed 35 nas duas. cPreRaceState no exe é do menu, não da contagem;
+  mCountdown, Start_Countdown_ e WaitForLaunch sem referência no código.
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice
