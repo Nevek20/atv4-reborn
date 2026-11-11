@@ -94,6 +94,7 @@ python tools/extrair_material.py <dados>/stream/RX01.000 assets/pista/terreno --
 :: objetos e céu do RX01 (posições + colisão -> data/rx01_objetos.json, Environment.xml -> data/environment_rx01.xml;
 :: modelos, texturas e cúpulas do céu -> assets/pista/rx01)
 python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
+%GODOT% --path . --write-movie corrida.avi --fixed-fps 30 -s res://tests/gravar_corrida.gd  :: vídeo da largada: intro, acelerando preso, VAI (DEPOIS=6 s, PULAR=1 pula a intro, CHECA_NAN=1 acha nó com NaN)
 %GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
 python tools/rx01_corrida.py <unpacked>          :: traçado da IA, checkpoint e voltas do RX01 -> data/rx01_corrida.json
 

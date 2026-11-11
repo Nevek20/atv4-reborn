@@ -1313,6 +1313,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   - teste_corrida: introdução >= 10 s, carro parado (0.15 m, só assentando)
     com acelerador e freio no fundo, rpm >= 3000, sai pra frente no VAI
     (47.6 km/h em 2 s).
+- Erro antigo "Condition !v.is_finite()" (instance_set_transform) RESOLVIDO
+  na gravação da largada (tests/gravar_corrida.gd, CHECA_NAN=1 acha o nó):
+  era o MotorTreme/Motor. A mola do coxim (7 Hz, motor_treme.gd) era
+  integrada com o passo do quadro inteiro e explode abaixo de ~37 FPS
+  (com tela lenta, xvfb ou gravando a 30). Agora em passos de 1/120 s.
 
 ## Pendente / ideias
 
@@ -1380,9 +1385,5 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 - Sinal do giro/direção visual: falta save state andando com volante virado.
 - Sujeira: reflexo menor com o carro sujo (0x22ace8, 1 - nível) não
   portado. Sujeira do piloto como o jogo.
-- Erro antigo com tela (não é da poeira): "Condition !v.is_finite()" em
-  instance_set_transform quando o carro pula fora da pista (gravar_poeira na
-  terra: 238 vezes em 2 s, com a poeira desligada também); sem tela não
-  aparece. Algum nó visual recebe transformação com NaN.
 - Para-choque e luzes comprados (componentes Bumper/Lighting; de fábrica é NOT_INSTALLED).
   Os LIGHTRIG são só modelo (sem halo); o Matheus acha feios.

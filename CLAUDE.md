@@ -185,6 +185,8 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Mãos no aro por IK com tabela por carro. Mão de fora parar escorregando
   pelo aro foi reprovado: não voltar. Banco, eixo do volante e braço aberto
   por carro: car.gd BANCO_NOSSO, VOLANTE_EIXO, BRACO_ABERTO.
+- Mola visual integrada no quadro: passos pequenos (a do motor_treme dava
+  NaN abaixo de ~37 FPS, o velho "!v.is_finite()").
 - Motor treme e anima, painel, cabine fechada: tabelas por carro em
   carro_base.gd e nos scripts deles (AJUSTES, NO_LUGAR...).
 - car.gd em 3 camadas por herança (base -> montagem -> física): função nova
@@ -204,5 +206,3 @@ Lista completa no fim do docs/historico.md. Os principais:
   direcionais, LOD das árvores.
 - Lasquinhas e som da batida carro com carro (quando tiver IA).
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.
-- Erro antigo com tela: "Condition !v.is_finite()" quando o carro pula fora
-  da pista (algum nó visual com NaN).
