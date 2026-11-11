@@ -408,9 +408,13 @@ func _unhandled_input(event: InputEvent) -> void:
 						KEY_MINUS: Vector2(-0.01, 0), KEY_EQUAL: Vector2(0.01, 0)}[event.physical_keycode])
 			KEY_ESCAPE:
 				get_tree().quit()
-	# controle: Select troca a câmera (o A é a embreagem, car.gd)
+	# controle: Select troca a câmera (o A é a embreagem, car.gd, e pula a introdução)
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_BACK:
 		_troca_camera()
+	# A pula a introdução da corrida (o X do PS2, como no jogo)
+	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A \
+			and corrida and corrida.estado == corrida.INTRO:
+		corrida.comecar()
 	# olhar livre na câmera do piloto e órbita nas de corrida: botão direito
 	# do mouse apertado
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:

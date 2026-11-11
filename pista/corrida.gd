@@ -7,7 +7,7 @@ extends Node
 ##
 ## Largada: o carro vai pra posição 1 do grid (a mesma da RAM) e roda a câmera
 ## de introdução do jogo (IntroCameras.XML: caminho Intro1 de 7 nós olhando
-## pro Introlookat1 de 5, os 2 a 35 m/s, ~14 s; Enter pula). Depois contagem
+## pro Introlookat1 de 5, os 2 a 35 m/s, ~14 s; Enter ou o A do controle pulam, no PS2 era o X). Depois contagem
 ## de 3 s e o cronômetro a partir do "VAI". Na espera toda o jogador pode
 ## acelerar com o carro preso (car.largada_presa: embreagem aberta, freio
 ## ignorado; até nov/2026 o freio ficava preso e parado o freio engata a ré:
@@ -286,7 +286,7 @@ func _process(_dt: float) -> void:
 		return
 	match estado:
 		INTRO:
-			hud.text = "Enter: pular"
+			hud.text = "Enter / A: pular"
 		CONTANDO:
 			hud.text = "%d" % ceili(t_conta) if t_conta > 0.0 else "VAI!"
 		CORRENDO:

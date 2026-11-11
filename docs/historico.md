@@ -1302,7 +1302,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   preso que dá pra acelerar.
   - Introdução: IntroCameras.XML do RX01 (raw/12287), caminho Intro1 (7 nós)
     olhando pro Introlookat1 (5 nós), os 2 a 35 m/s, ~14.3 s. Enter de novo
-    pula. NOSSO: a curva entre os nós (Catmull-Rom; o jogo não foi lido).
+    ou o A do controle pulam (no jogo pula, com o X do PS2: Matheus). NOSSO: a curva entre os nós (Catmull-Rom; o jogo não foi lido).
   - Espera (introdução + contagem): car.largada_presa = embreagem aberta
     (o motor sobe, chega a 8000 rpm) e freio nas rodas DEPOIS da lógica dos
     pedais. Bug que o Matheus achou: o carro largava de ré. Causa: a
