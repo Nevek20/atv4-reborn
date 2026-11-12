@@ -1000,6 +1000,22 @@ vazios). Tudo vem do evento:
   não achamos arquivo com esse nome. A vtable do veículo do jogador é
   0x580958 (pedais 0x202df0 no slot +0xe8/+0xec) e só ele usa: os rivais
   devem ter outra classe. "AI wasn't able to complete a lap!" em 0x33d1b0.
+- Save state com rivais (corrida_no_normal.p2s, RX01 buggy Normal, nov/2026):
+  os 8 veículos têm a MESMA classe (vtable 0x580958 em veh+4), em
+  0xc7eb00 + k x 0xba0 (k = 0 é o jogador), lista em 0xc7ea90 (+0xc cada);
+  corredores de 0x1d0 bytes em 0xd87f70 + k x 0x1d0 (+0xf0 = veh). Ou seja:
+  a IA usa a física inteira, igual ao jogador. Nos rivais o pedal cru é
+  igual ao suavizado (direção -0.86/-0.86...): a IA escreve direto, sem
+  InputRates. Acelerador 1.0 em 6 dos 7, a 123..139 km/h, 1.15..1.40 x a
+  "velocidade" +0x24 do AIT (então +0x24 NÃO é o alvo da IA) e 3.5..6.8 m
+  fora da linha. Classes só dos rivais: vtables 0x5aea98 (+0x20 -> veh;
+  funções 0x356220..0x359700), 0x5aeaf0 (+0x20 -> veh, lista de vizinhos
+  com veh + nó) e 0x5af920 (+0x44 -> veh; funções 0x364db0..0x368a00).
+  0x359730 = seguir a rota: ponto à frente no segmento (+0x18 = nó),
+  desvio lateral próprio (param[0xd]) preso nas bordas do segmento
+  (0x32a788/0x32a828 nas pontas +0x20/+0x24, margem param[0xe]); quando o
+  ângulo passa de 10° mistura com outro desvio (fator (ang - 0.1745) x
+  5.73). Falta ler o resto (acelerador/freio, catchup, Skill).
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice

@@ -1396,8 +1396,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- IA: achar o piloto no exe (pedir save state numa corrida COM rivais pra
-  ver o struct de controle deles), LOD de verdade (gerar Models_2K/1K/500 e
+- IA: portar o piloto do exe (classes 0x5aea98/0x5aeaf0/0x5af920, achadas
+  com o save state corrida_no_normal; docs/engenharia_reversa.md), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
 - RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
