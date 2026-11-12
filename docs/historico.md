@@ -1344,6 +1344,35 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     os 7 completam; 3 sementes: 1 a 3 reposições/ré por corrida (quando dois
     se tocam), média 73..99 km/h (a volta gravada dá ~101).
   - Desempenho: 8 carros = ~10 ms de física por passo na nuvem (1 carro 3.5).
+- Largada pelo vídeo do speedrun (Amateur National, Hunter Valley, intro
+  pulada): o jogo não conta 3-2-1. A câmera de corrida entra com "Get Ready"
+  (vermelho) por 2.25 s, 2.75 s sem nada, "Go!" (verde, com um sinal verde)
+  e o cronômetro começa: 5 s de espera. Você larga em 8º (confirmado pelo
+  Matheus e pelo HUD do vídeo, POSITION 08/08); os nomes da lista do vídeo
+  (Cullen, Pugh, Clarke, Shiarlis, Wood, Eagle, Dicken) são do AIPlayers.xml.
+  Antes da câmera de corrida o vídeo mostra ~2.5 s de uma câmera baixa
+  andando pela pista: a "câmera que desce até o carro" que o Matheus lembra
+  depois da intro ainda não tem referência (o speedrun pula a intro).
+- Rivais, 2ª rodada (feedback do Matheus: FPS de 240 caiu pra 110, IA burra
+  e lenta, sem desviar, sem som):
+  - FPS: sem tela os 7 rivais custam ~1.3 ms/quadro de CPU (física); o resto
+    era desenho. VehicleLOD.xml: Vehicle_AI troca o modelo pela fração da
+    tela (High 0.24, Mid 0.055, Low 0.0175) e o jogo tem Models_2K (12
+    peças, piloto embutido), 1K (4), 500 (2) e Models_Shadow (só sombra).
+    Ainda não gerados: NOSSO por enquanto, cada peça some abaixo do Low
+    (ia.gd _lod) e a sombra sai de uma cópia da carroceria numa superfície
+    só (de 392 superfícies com sombra pra 7). No meio da corrida ficam 208..304
+    das 499 superfícies dos rivais. O nó espelho tem escala -1 (o raio da
+    peça saía negativo e o LOD não fazia nada).
+  - IA: Skill pesa menos (GANHO_SKILL 0.1); desvio de carro mais lento até
+    25 m à frente pro lado com mais espaço (centro e larguras do AIT, 2.5 m
+    da borda, no máximo 6 m da linha); sem espaço, segue o da frente se ele
+    passar de 5 m/s; vigia: menos de 15 m em 5 s -> volta pra linha; 3 rés
+    sem andar 20 m -> volta pra linha. teste_ia, 4 sementes: os 7 completam,
+    média 83..100 km/h (a volta gravada dá ~101).
+  - Som: os rivais tocam motor e pneus em AudioStreamPlayer3D presos no
+    carro (som_jogo.novo_player; volume cheio até 8 m, cai com 1/d até 150
+    m: NOSSO). ~8 sons por rival tocando.
 
 ## Pendente / ideias
 
@@ -1368,8 +1397,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
 - IA: achar o piloto no exe (pedir save state numa corrida COM rivais pra
-  ver o struct de controle deles), som posicional dos rivais, desviar de
-  outro carro, batida carro com carro (VehicleVehicle.hsc).
+  ver o struct de controle deles), LOD de verdade (gerar Models_2K/1K/500 e
+  Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
+  (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
 - RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
   as 2 luzes direcionais (câmera de introdução feita, seção Corrida). A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)

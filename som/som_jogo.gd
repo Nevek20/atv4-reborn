@@ -75,6 +75,29 @@ static func existe(b: String, n: String) -> bool:
 	return not d.is_empty() and d.bancos.has(b) and d.bancos[b].has(n)
 
 
+# rival da IA (pista/ia.gd): as vozes viram AudioStreamPlayer3D presas no carro
+# (NOSSO: o jogo não foi lido; volume cheio até UNIDADE_3D m, cai com 1/d)
+var ancora: Node3D = null
+const UNIDADE_3D := 8.0
+const MAX_3D := 150.0
+
+
+## player de som: 2D (o jogador) ou 3D preso na ancora (rival)
+static func novo_player(dono: Node, ancora_3d: Node3D) -> Node:
+	if ancora_3d == null:
+		var p := AudioStreamPlayer.new()
+		dono.add_child(p)
+		return p
+	var q := AudioStreamPlayer3D.new()
+	q.unit_size = UNIDADE_3D
+	q.max_distance = MAX_3D
+	q.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+	ancora_3d.add_child(q)
+	# some junto com o dono (o nó do som)
+	dono.tree_exiting.connect(func(): if is_instance_valid(q): q.queue_free())
+	return q
+
+
 func tocar(b: String, n: String) -> void:
 	parar()
 	if not existe(b, n):
@@ -115,7 +138,7 @@ func _process(dt: float) -> void:
 func _vivas(vozes: Array, ticks: float) -> Array:
 	var out: Array = []
 	for v in vozes:
-		var p: AudioStreamPlayer = v.p
+		var p = v.p
 		_env_anda(v, ticks)
 		if not p.playing or v.fase == 4:
 			p.queue_free()
@@ -126,7 +149,7 @@ func _vivas(vozes: Array, ticks: float) -> Array:
 
 
 func _aplicar(v: Dictionary) -> void:
-	var p: AudioStreamPlayer = v.p
+	var p = v.p
 	var solta: bool = v.fase >= 3
 	var vol: float = v.vol if solta else volume * ganho * v.amp
 	p.volume_db = linear_to_db(maxf(vol * v.nivel / 32767.0, 1e-5))
@@ -340,9 +363,8 @@ func _voz(t: Dictionary, c: Dictionary) -> void:
 			return
 		_vozes[k].p.queue_free()
 		_vozes.remove_at(k)
-	var p := AudioStreamPlayer.new()
+	var p = novo_player(self, ancora)
 	p.stream = _wav(t)
-	add_child(p)
 	var adsr: Array = t.get("adsr", ADSR_SECO)
 	var v := {"p": p, "amp": c.amp * tv / 127.0, "loop": bool(t.loop), "cur": c,
 		"pb": t.get("pb", [0, 0]), "a1": int(adsr[0]), "a2": int(adsr[1]),

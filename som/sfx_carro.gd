@@ -129,12 +129,14 @@ func carregar(c) -> bool:
 		var o := SomJogo.new()
 		o.name = ["RodaFL", "RodaRL", "RodaFL2"][k]
 		o.ganho = GANHO_PNEU
+		o.ancora = _ancora()
 		add_child(o)
 		rodas.append({"som": o, "idx": 0 if k != 1 else 1, "sec": k == 2, "trava": 0.0,
 			"mat": -2, "s": 0.0, "vol": 0.0})
 	raspa = SomJogo.new()
 	raspa.name = "Raspao"
 	raspa.ganho = GANHO
+	raspa.ancora = _ancora()
 	add_child(raspa)
 	return not patches.is_empty()
 
@@ -365,6 +367,7 @@ func _tocar_uma(b: String, n: String, vol: float, tom: float) -> void:
 	s.ganho = GANHO
 	s.volume = vol
 	s.tom = tom
+	s.ancora = _ancora()
 	add_child(s)
 	s.tocar(b, n)
 	_uma_vez.append(s)
@@ -376,3 +379,8 @@ func estado() -> Array:
 	for o in rodas:
 		out.append([o.som.nome, o.vol, o.som.tom])
 	return out
+
+
+## rival da IA: o som sai do carro (3D); o jogador: 2D como sempre
+func _ancora() -> Node3D:
+	return car if car and car.get("som_3d") else null

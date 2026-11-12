@@ -25,7 +25,11 @@ extends Node
 ## desde a última passagem.
 
 const ARQ := "res://data/rx01_corrida.json"
-const CONTAGEM := 3.0
+# largada do vídeo do speedrun (Amateur National, Hunter Valley; a intro
+# pulada): a câmera de corrida entra com "Get Ready" por 2.25 s, 2.75 s sem
+# nada, "Go!" com o sinal verde e o cronômetro começa
+const CONTAGEM := 5.0
+const GET_READY := 2.25
 const AVANCO_MIN := 60          # dos 75 links
 const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
@@ -301,14 +305,21 @@ static func relogio(s: float) -> String:
 func _process(_dt: float) -> void:
 	if estado == LIVRE:
 		return
+	# cores do vídeo: "Get Ready" vermelho, "Go!" verde
+	var cor := Color.WHITE
+	if estado == CONTANDO:
+		cor = Color(0.9, 0.1, 0.1)
+	elif estado == CORRENDO and t < 1.0:
+		cor = Color(0.3, 0.9, 0.2)
+	hud.add_theme_color_override("font_color", cor)
 	match estado:
 		INTRO:
 			hud.text = "Enter / A: pular"
 		CONTANDO:
-			hud.text = "%d" % ceili(t_conta) if t_conta > 0.0 else "VAI!"
+			hud.text = "Get Ready" if t_conta > CONTAGEM - GET_READY else ""
 		CORRENDO:
 			if t < 1.0:
-				hud.text = "VAI!"
+				hud.text = "Go!"
 				return
 			var txt := "Volta %d/%d   %s" % [maxi(volta, 1), voltas, relogio(t)]
 			if ia and not ia.rivais.is_empty():

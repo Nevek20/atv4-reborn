@@ -29,6 +29,7 @@ const K_RPM := 0.5
 const K_OFF := 0.5
 const PISO_DB := -12.0        # nenhum loop abaixo disso (lenta ainda se ouve)
 const VOLUME_DB := -4.0        # volume geral
+var ancora: Node3D = null      # rival da IA: loops 3D presos no carro (som_jogo.novo_player)
 const SUAVE := 0.03            # s, constante de tempo da carga (sem estalo)
 const RPM_SUAVE := 0.08        # s, constante de tempo do rpm do som
 const RUIDO_MAX := 20.0        # % de ruído acima disso o loop fica de fora
@@ -118,10 +119,9 @@ func carregar(dir: String) -> bool:
 ## um AudioStreamPlayer parado por loop; volume final = alvo - (nível do
 ## arquivo - nível do arquivo de referência)
 func _tocador(arq: String, i: Dictionary, alvo: float, arq_ref: float) -> Dictionary:
-	var p := AudioStreamPlayer.new()
+	var p = preload("res://som/som_jogo.gd").novo_player(self, ancora)
 	p.stream = _carregar_wav(pasta.path_join(arq))
 	p.name = arq.get_basename()
-	add_child(p)
 	var nivel := float(i.nivel_cru_db) + _db(i.ganho) - arq_ref
 	return {"rpm": float(i.rpm_medido), "db": minf(alvo - nivel, 6.0), "p": p, "arq": arq}
 
@@ -172,7 +172,7 @@ func _camada(lista: Array, r: float, ganho: float) -> void:
 				break
 	for k in lista.size():
 		var s: Dictionary = lista[k]
-		var p: AudioStreamPlayer = s.p
+		var p = s.p
 		var w: float = pesos.get(k, 0.0) * ganho
 		if w < 0.003:
 			if p.playing:
@@ -188,7 +188,7 @@ func _camada(lista: Array, r: float, ganho: float) -> void:
 func tocando() -> Array:
 	var out: Array = []
 	for s in _on + _off:
-		var p: AudioStreamPlayer = s.p
+		var p = s.p
 		if p.playing:
 			out.append([s.arq, db_to_linear(p.volume_db - VOLUME_DB - s.db), p.pitch_scale])
 	return out

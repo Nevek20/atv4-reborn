@@ -17,21 +17,37 @@ extends Node
 ##  - como a escala do catchup e a Skill mexem na velocidade (GANHO_*);
 ##  - preso: dá ré; capotado ou longe da linha: volta pra linha (o jogo tem
 ##    cInstantRespotBox no RX01, não portado);
-##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe).
-## Os rivais não tocam som (o som do jogo/nosso não é posicional ainda).
+##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe);
+##  - desvio: carro até OLHA_CARRO m à frente e mais lento -> vai pro lado
+##    com mais espaço (dentro da pista: centro e larguras do AIT, MARGEM da
+##    borda); sem espaço, acompanha a velocidade dele.
 
 const ARQ := "res://data/ia.json"
 const N_RIVAIS := 7
 const OLHA_MIN := 7.0            # m
 const OLHA_T := 0.55             # s
 const GANHO_VIRA := 2.2          # direção = ângulo do alvo (rad) x isso
-const GANHO_SKILL := 0.25        # velocidade x (1 - GANHO_SKILL x (1 - skill))
+const GANHO_SKILL := 0.1         # velocidade x (1 - GANHO_SKILL x (1 - skill))
 const GANHO_CATCHUP := 0.12      # velocidade x (1 + escala x isso)
 const PRESO_T := 2.0             # s parado correndo -> ré
 const RE_T := 1.5
 const LONGE := 18.0              # m da linha por 1 s -> volta pra linha
 const CAPOTADO_T := 2.0
 const JUNTA := 150.0             # m: o desvio do grid vai sumindo até a linha
+const OLHA_CARRO := 25.0         # m: carro à frente que conta pro desvio
+const LADO := 3.5                # m: distância lateral pra passar
+const MARGEM := 2.5              # m da borda da pista
+const DESVIO_MAX := 6.0          # m: o desvio não se afasta mais que isso da linha
+const DESVIO_VEL := 4.0          # m/s: quão rápido muda de lado
+# VehicleLOD.xml (Buggy_Generic/Truck_Generic, Vehicle_AI): o jogo troca o
+# modelo dos rivais pela fração da tela (High 0.24, Mid 0.055, Low 0.0175).
+# Os modelos 2K/1K/500 ainda não são gerados: NOSSO, cada peça some quando
+# ela mesma cai abaixo do Low (quase nada some: as malhas são por material e
+# pegam o carro todo). Sombra: uma cópia da carroceria (body_mi) juntada numa
+# superfície só, só sombra (1 desenho em vez de 55); o jogo faz a sombra com
+# um modelo próprio, Models_Shadow/Shadow_Buggy_NN (não portado)
+const LOD_LOW := 0.0175
+const LOD_TAN := 0.6             # tan(meio FOV vertical) da câmera de corrida, ~31°
 
 var main
 var corrida
@@ -39,6 +55,8 @@ var dados := {}
 var linha: Array = []            # pontos da linha (mundo), na ordem da corrida
 var vel: Array = []              # m/s da volta gravada em cada ponto
 var acc: Array = []              # distância acumulada até cada ponto (m, plano)
+var centro_lat: Array = []       # centro da pista em relação à linha (m, lateral)
+var meia: Array = []             # meia largura da pista (m)
 var comp := 0.0
 var s_linha := 0.0               # onde a linha de chegada cai na linha da IA
 var rivais: Array = []           # {car, nome, skill, numero, r (rastreio), ...}
@@ -63,6 +81,9 @@ func montar(c) -> bool:
 		acc.append(comp)
 		comp += _plano(linha[(i + 1) % linha.size()] - linha[i]).length()
 	s_linha = _projetar(c._cp_pos)[0]
+	for i in ls.size():
+		centro_lat.append(_lateral(c.mundo(ls[i].centro), acc[i]))
+		meia.append((absf(ls[i].largura[0]) + absf(ls[i].largura[1])) * 0.5)
 	var ev: Dictionary = dados.eventos.get("RALLYCROSS", {})
 	catchup = dados.catchup.get(ev.get("NORMAL", "STDH_04"), {})
 	return true
@@ -175,8 +196,8 @@ func criar() -> void:
 		var v: Dictionary = frota[k % frota.size()]
 		var c = main.Car.new()
 		main.configurar(c, v)
-		c.mudo = true
-		c.desligadas = c.desligadas + ["painel"]
+		c.som_3d = true
+		c.desligadas = c.desligadas + ["painel"] + (Array(OS.get_environment("IA_DESL").split(",")) if OS.has_environment("IA_DESL") else [])
 		c.terrain = main.terrain
 		c.objetos = main.objetos
 		c.name = "Rival%d" % (k + 1)
@@ -186,8 +207,37 @@ func criar() -> void:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
 			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "longe": 0.0, "capotado": 0.0,
-			"desvio": (k % 3 - 1) * 1.5, "repostos": 0, "res": 0, "desvio0": 0.0, "prog0": 0.0})
+			"desvio": (k % 3 - 1) * 1.5, "repostos": 0, "res": 0, "desvio0": 0.0, "prog0": 0.0, "lod": 0, "lat": 0.0})
 	posicionar()
+
+
+## LOD e sombra dos rivais (ver LOD_LOW)
+func _lod(c: Node) -> void:
+	var pilha: Array = [c]
+	while not pilha.is_empty():
+		var n: Node = pilha.pop_back()
+		pilha.append_array(n.get_children())
+		if not (n is GeometryInstance3D) or not (n is VisualInstance3D):
+			continue
+		var g := n as GeometryInstance3D
+		var r: float = g.get_aabb().size.length() * 0.5 * absf((g as Node3D).global_transform.basis.get_scale().x)   # o espelho tem escala -1
+		if r <= 0.0:
+			continue
+		g.visibility_range_end = r / (LOD_LOW * LOD_TAN)
+		g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var body: MeshInstance3D = c.get("body_mi")
+	if body and body.mesh:
+		if body.has_node("SombraRival"):
+			return
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for i in body.mesh.get_surface_count():
+			st.append_from(body.mesh, i, Transform3D.IDENTITY)
+		var sombra := MeshInstance3D.new()
+		sombra.name = "SombraRival"
+		sombra.mesh = st.commit()
+		sombra.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		body.add_child(sombra)
 
 
 func posicionar() -> void:
@@ -204,6 +254,7 @@ func posicionar() -> void:
 		x.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		x.r = novo_rastreio(p)
 		x.desvio0 = _lateral(p, x.r.prog + s_linha)
+		x.lat = x.desvio0
 		x.prog0 = x.r.prog
 		x.preso = 0.0
 		x.re = 0.0
@@ -233,6 +284,11 @@ func _physics_process(dt: float) -> void:
 	var est: int = corrida.estado
 	for x in rivais:
 		var car = x.car
+		# LOD/sombra depois que o carro montou tudo (rodas, piloto, motor vêm depois)
+		if x.lod < 5:
+			x.lod += 1
+			if x.lod == 5:
+				_lod(car)
 		rastrear(x.r, car.global_position)
 		if est == corrida.INTRO or est == corrida.CONTANDO:
 			# na contagem: acelera no último segundo (preso, o motor sobe)
@@ -252,8 +308,7 @@ func _direcao(x: Dictionary, car) -> float:
 	var s: float = x.r.prog + s_linha + OLHA_MIN + v * OLHA_T
 	var alvo := ponto(s)
 	var adiante := _plano(ponto(s + 2.0) - alvo).normalized()
-	var f := clampf((x.r.prog - x.get("prog0", 0.0)) / JUNTA, 0.0, 1.0)
-	alvo += Vector3(adiante.z, 0.0, -adiante.x) * lerpf(x.get("desvio0", 0.0), x.desvio, f)
+	alvo += Vector3(adiante.z, 0.0, -adiante.x) * x.get("lat", 0.0)
 	var loc: Vector3 = car.global_transform.affine_inverse() * alvo
 	return clampf(atan2(loc.x, loc.z) * GANHO_VIRA, -1.0, 1.0)
 
@@ -268,6 +323,7 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	var esc: float = escala_catchup(frente, jogador.prog + corrida.dados.get("primeira_volta", 54.8))
 	var alvo: float = velocidade(x.r.prog + s_linha + v * 0.4) * (1.0 - GANHO_SKILL * (1.0 - x.skill)) \
 		* (1.0 + GANHO_CATCHUP * esc)
+	alvo = _desviar(x, car, dt, alvo)
 	var thr := 0.0
 	var brk := 0.0
 	if v < alvo - 1.0:
@@ -293,8 +349,33 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 		x.preso = 0.0
 		x.re = RE_T
 		x.res += 1
+		# 3 rés sem andar 20 m: volta pra linha
+		if x.r.prog - x.get("prog_re", -INF) < 20.0:
+			x.n_re = x.get("n_re", 0) + 1
+		else:
+			x.n_re = 1
+		x.prog_re = x.r.prog
+		if x.n_re >= 3:
+			x.n_re = 0
+			x.re = 0.0
+			if OS.has_environment("IA_LOG"):
+				print("IA repõe %s em %.0f m (preso)" % [x.nome, x.r.prog])
+			_repor(x)
+			return
 		if OS.has_environment("IA_LOG"):
 			print("IA ré %s em %.0f m (%.1f m da linha, t %.1f)" % [x.nome, x.r.prog, x.r.dist, corrida.t])
+	# vigia: menos de 15 m em 5 s correndo -> volta pra linha
+	x.vigia_t = x.get("vigia_t", 0.0) + dt
+	if x.vigia_t >= 5.0:
+		var andou: float = x.r.prog - x.get("vigia_prog", x.r.prog)
+		x.vigia_t = 0.0
+		x.vigia_prog = x.r.prog
+		if andou < 15.0 and x.has("vigia_ok"):
+			if OS.has_environment("IA_LOG"):
+				print("IA repõe %s em %.0f m (lento: %.0f m em 5 s)" % [x.nome, x.r.prog, andou])
+			_repor(x)
+			return
+		x.vigia_ok = true
 	# capotado ou longe da linha: volta pra linha
 	x.capotado = x.capotado + dt if b.y.y < 0.3 else 0.0
 	x.longe = x.longe + dt if x.r.dist > LONGE else 0.0
@@ -309,6 +390,51 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 		print("trace %5.2f  prog %5.0f  dist %4.1f  v %4.1f/%4.1f  st %5.2f thr %.1f brk %.1f  up %.2f  pos %s  linha %s  frente %s" % [
 			corrida.t, x.r.prog, x.r.dist, v, alvo, st, thr, brk, b.y.y, car.global_position,
 			ponto(x.r.prog + s_linha), b.z])
+
+
+## desvio dos outros carros: muda x.lat (lado em relação à linha) e devolve a
+## velocidade-alvo (limitada à do carro da frente se não der pra passar)
+func _desviar(x: Dictionary, car, dt: float, alvo: float) -> float:
+	var s: float = x.r.prog + s_linha
+	var f := clampf((x.r.prog - x.get("prog0", 0.0)) / JUNTA, 0.0, 1.0)
+	var base: float = lerpf(x.get("desvio0", 0.0), x.desvio, f)
+	var i := _seg(fposmod(s, comp))
+	var lo: float = maxf(centro_lat[i] - meia[i] + MARGEM, -DESVIO_MAX)
+	var hi: float = minf(centro_lat[i] + meia[i] - MARGEM, DESVIO_MAX)
+	var b: Basis = car.global_transform.basis
+	var p: Vector3 = car.global_position
+	var minha: float = car.linear_velocity.dot(b.z)
+	var lat_alvo := base
+	var v_lim := INF
+	var perto := INF
+	for o in [main.car] + rivais.map(func(y): return y.car):
+		if o == car or not is_instance_valid(o):
+			continue
+		var rel: Vector3 = o.global_position - p
+		var frente: float = rel.dot(b.z)
+		var lado: float = rel.dot(b.x)
+		var dele: float = o.linear_velocity.dot(b.z)
+		if frente <= 0.0 or frente > OLHA_CARRO or absf(lado) > LADO or dele > minha - 0.5:
+			continue
+		if frente >= perto:
+			continue
+		perto = frente
+		# o lado do outro em relação à linha; passa pelo lado com mais espaço
+		var o_lat := _lateral(o.global_position, s + frente)
+		var por_dentro := o_lat - LADO
+		var por_fora := o_lat + LADO
+		var cabe_dentro := por_dentro >= lo
+		var cabe_fora := por_fora <= hi
+		if cabe_dentro and (not cabe_fora or absf(por_dentro - x.lat) < absf(por_fora - x.lat)):
+			lat_alvo = por_dentro
+		elif cabe_fora:
+			lat_alvo = por_fora
+		elif frente < 10.0 and dele > 5.0:
+			v_lim = dele          # sem espaço: atrás dele (parado não: desvia igual)
+		else:
+			lat_alvo = por_dentro if absf(por_dentro - x.lat) < absf(por_fora - x.lat) else por_fora
+	x.lat = move_toward(x.get("lat", base), clampf(lat_alvo, lo, hi) if lo < hi else base, DESVIO_VEL * dt)
+	return minf(alvo, v_lim)
 
 
 ## distância com sinal da linha (+ = pro mesmo lado do desvio em _direcao)
@@ -336,6 +462,7 @@ func _repor(x: Dictionary) -> void:
 	x.longe = 0.0
 	x.preso = 0.0
 	x.desvio0 = x.desvio
+	x.lat = x.desvio
 	x.repostos += 1
 
 

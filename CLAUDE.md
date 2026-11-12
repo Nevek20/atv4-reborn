@@ -172,7 +172,8 @@ Pista RX01
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
 - IA: o AIT é volta gravada (linha +0x00, velocidade +0x24). O piloto da
-  IA no exe não foi achado: direção, freio e catchup aplicado são NOSSOS.
+  IA no exe não foi achado: direção, freio, desvio e catchup aplicado são
+  NOSSOS. Largada = vídeo: Get Ready 2.25 s, Go! aos 5 s; você larga em 8º.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -207,6 +208,7 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: reposição (cInstantRespotBox), 2 luzes
   direcionais, LOD das árvores.
-- IA: piloto do exe (precisa save state numa corrida com rivais), som
-  posicional dos rivais, lasquinhas e som da batida carro com carro.
+- IA: piloto do exe (precisa save state numa corrida com rivais), LOD com
+  os modelos 2K/1K/500 do jogo, lasquinhas e som da batida carro com carro.
+- Largada: câmera que desce até o carro depois da intro (sem referência).
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.
