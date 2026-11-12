@@ -97,7 +97,8 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 %GODOT% --path . --write-movie corrida.avi --fixed-fps 30 -s res://tests/gravar_corrida.gd  :: vídeo da largada: intro, acelerando preso, VAI (DEPOIS=6 s, PULAR=1 pula a intro, CHECA_NAN=1 acha nó com NaN)
 %GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
 %GODOT% --headless --path . -s res://tests/teste_batida_carros.gd   :: rival a VEL km/h (50) na traseira do jogador: cascos do VehicleVehicle, empurrão, lasquinhas, som Vehicle
-%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro)
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro), quadro real e cada nó
+  (PERF_CARRO=1 antes: também o car.gd por parte do passo: rodas, pneus, efeitos, piloto, suspensão...)
 %GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph)
 %GODOT% --headless --path . -s res://tests/teste_reposicao.gd   :: as 14 caixas de reposição do RX01: cada uma repõe na linha, chão plano, longe dos rivais
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> quadro a quadro)

@@ -709,7 +709,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # ------------------------------------------------------------------ física
 func _physics_process(dt: float) -> void:
+	var _t := Time.get_ticks_usec() if perf_on else 0
 	_batida_passo()
+	if perf_on: _t = _pf("batida", _t)
 	# ---- comandos
 	var thr_raw := 0.0
 	var brk_raw := 0.0
@@ -808,6 +810,7 @@ func _physics_process(dt: float) -> void:
 	# o do contato. Integrando no fim, como o remake fazia até out/2026, o x
 	# guardado ficava f/m·dt² mais baixo (1 a 4 cm parado; tests/teste_curso.gd).
 	# A física é a mesma: o ciclo de operações não muda.
+	if perf_on: _t = _pf("comandos", _t)
 	_integra_rodas(dt)
 	var space := get_world_3d().direct_space_state
 	var com_w := global_transform * center_of_mass
@@ -817,16 +820,24 @@ func _physics_process(dt: float) -> void:
 	var h_sum := 0.0
 	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
 	var ignorar: Array = objetos.ignorar_roda() if objetos else []
+	# a mesma consulta pras 4 rodas (CPU: montar a lista uma vez por passo)
+	var excluir: Array[RID] = [get_rid()]
+	excluir.append_array(ignorar)
+	excluir.append_array(outros_carros)
+	var q := PhysicsRayQueryParameters3D.new()
 	for w in wheels:
 		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
 		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
 		var reach: float = (w.max - w.min) + w.r + 0.05
-		var q := PhysicsRayQueryParameters3D.create(top, top - up * reach)
-		q.exclude = [get_rid()] + ignorar + outros_carros
+		q.from = top
+		q.to = top - up * reach
+		q.exclude = excluir
 		var hit := space.intersect_ray(q)
 		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
 		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
-			q.exclude = q.exclude + [hit.rid]
+			var mais: Array[RID] = excluir.duplicate()
+			mais.append(hit.rid)
+			q.exclude = mais
 			hit = space.intersect_ray(q)
 		w.hit = false
 		var pen := 0.0
@@ -869,7 +880,9 @@ func _physics_process(dt: float) -> void:
 			(hit.collider as RigidBody3D).sleeping = false
 			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
 
+	if perf_on: _t = _pf("rodas (raio, mola)", _t)
 	_passo_esferas_rodas(space, up)
+	if perf_on: _t = _pf("esferas das rodas", _t)
 	_material_medio()
 	var ground_n := up if grounded == 0 else n_sum.normalized()
 	var fwd := (fwd_body - ground_n * fwd_body.dot(ground_n)).normalized()
@@ -885,6 +898,7 @@ func _physics_process(dt: float) -> void:
 	var drive := _drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)   # 0x20c558: embreagem > 0.1 abre
 	_razao_patinada(v_f)
 
+	if perf_on: _t = _pf("motor e câmbio", _t)
 	var f_fwd := 0.0                        # forças das rodas pra frente (0x5c8) + atrito interno
 	if grounded > 0:
 		air_time = 0.0
@@ -951,6 +965,7 @@ func _physics_process(dt: float) -> void:
 				acc_p = tgt_p - wl.x
 			apply_torque(b.x * inertia.x * acc_p / dt)
 
+	if perf_on: _t = _pf("pneus / no ar", _t)
 	# resistência angular do jogo (amortece rolagem e arfagem)
 	var w_loc := b.transposed() * angular_velocity
 	var res_loc: Vector3 = -Vector3(inertia.x * P.ang_res.x * w_loc.x, inertia.y * P.ang_res.y * w_loc.y, inertia.z * P.ang_res.z * w_loc.z)
@@ -970,6 +985,7 @@ func _physics_process(dt: float) -> void:
 	var a_f: float = (f_fwd - f_arr_f) / mass + get_gravity().dot(fwd) * gravity_scale
 	v_ref = v_f + a_f * dt
 	_giro_rodas(dt, v_f, rear_g)
+	if perf_on: _t = _pf("água, arrasto, giro", _t)
 
 	if corr != Vector3.ZERO:
 		global_position += corr
@@ -983,18 +999,25 @@ func _physics_process(dt: float) -> void:
 		jit_acc -= 1.0 / JIT_HZ
 		_wheel_jitter()
 		_vibracao(1.0 / JIT_HZ, v.dot(left), v_f)
+		if perf_on: _t = _pf("ef: tremida e vibração", _t)
 		_sujeira_passo()
 		_roda_suja_passo(1.0 / JIT_HZ)
+		if perf_on: _t = _pf("ef: sujeira", _t)
 		if poeira:
 			poeira.passo(1.0 / JIT_HZ, v)
+		if perf_on: _t = _pf("ef: poeira", _t)
 		if pedras:
 			pedras.passo(1.0 / JIT_HZ, v)
 		if lascas:
 			lascas.passo(1.0 / JIT_HZ)
-		if sfx:
+		if perf_on: _t = _pf("ef: pedras e lascas", _t)
+		if sfx and not longe_som:
 			sfx.passo(1.0 / JIT_HZ, v.dot(left), v_f)
 			sfx.batida_passo(1.0 / JIT_HZ, contato_som, _v_antes)
+		if perf_on: _t = _pf("ef: som", _t)
+	if perf_on: _t = _pf("efeitos (tremida, sujeira, poeira, pedras, som)", _t)
 	_update_visuals(dt, v_f)
+	if perf_on: _t = _pf("visual (rodas, piloto, suspensão)", _t)
 
 
 ## 0x223e68 (do update do veículo 0x203930, um por quadro = 50 Hz no PAL):

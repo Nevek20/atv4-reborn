@@ -27,6 +27,7 @@ extends Node
 
 const ARQ := "res://data/ia.json"
 const Reposicao := preload("res://pista/reposicao.gd")
+const SomJogo := preload("res://som/som_jogo.gd")
 const N_RIVAIS := 7
 # save state com rivais (objeto do piloto, vtable 0x5ae0d0): o alvo (+0x30)
 # fica 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s) e a direção crua
@@ -45,6 +46,11 @@ const PRESO_T := 2.0             # s parado correndo -> ré
 const RE_T := 1.5
 const CAPOTADO_T := 2.0
 const JUNTA := 150.0             # m: o desvio do grid vai sumindo até a linha
+# CPU (nov/2026, tests/medir_cpu.gd): rival além disso da câmera não mexe
+# braços do piloto nem suspensão visual; além do alcance do som 3D
+# (SomJogo.MAX_3D) não calcula som de pneu. NOSSO, a física não muda
+const VIS_PERTO := 50.0
+const RASTREIO := 60.0           # m: o rastreio procura só nessa janela (não pula de trecho)
 const OLHA_CARRO := 25.0         # m: carro à frente que conta pro desvio
 const LADO := 3.5                # m: distância lateral pra passar
 const MARGEM := 2.5              # m da borda da pista
@@ -168,19 +174,36 @@ func novo_rastreio(p: Vector3) -> Dictionary:
 
 
 func rastrear(r: Dictionary, p: Vector3) -> void:
-	# procura perto do s atual (±60 m), sem pular de trecho
+	# procura perto do s atual (±60 m), sem pular de trecho: projeta nos
+	# trechos da linha que caem na janela (até nov/2026 testava 121 pontos de
+	# 1 em 1 m: 2.4 ms por passo com 8 carros, tests/medir_cpu.gd)
 	var s0: float = r.prog + s_linha
+	var lo := s0 - RASTREIO
+	var hi := s0 + RASTREIO
+	var n := linha.size()
+	var lo_m := fposmod(lo, comp)
+	var volta := lo - lo_m              # início da volta em que lo cai
+	var i := _seg(lo_m)
 	var best := INF
-	var best_d := 0.0
-	var d := -60.0
-	while d <= 60.0:
-		var q := ponto(s0 + d)
-		var e := _plano(p - q).length()
+	var best_s := s0
+	var s_ini: float = volta + acc[i]
+	while s_ini <= hi:
+		var a: Vector3 = linha[i]
+		var ab := _plano(linha[(i + 1) % n] - a)
+		var l := ab.length()
+		var s := s_ini
+		if l > 1e-6:
+			s = clampf(s_ini + _plano(p - a).dot(ab) / l, maxf(s_ini, lo), minf(s_ini + l, hi))
+		var e := _plano(p - (a + ab * ((s - s_ini) / maxf(l, 1e-6)))).length()
 		if e < best:
 			best = e
-			best_d = d
-		d += 1.0
-	r.prog = r.prog + best_d
+			best_s = s
+		i += 1
+		if i >= n:
+			i = 0
+			volta += comp
+		s_ini = volta + acc[i]
+	r.prog = r.prog + (best_s - s0)
 	r.dist = best
 
 
@@ -314,6 +337,13 @@ func _physics_process(dt: float) -> void:
 	if rivais.is_empty() or main.car == null:
 		return
 	rastrear(jogador, main.car.global_position)
+	var cam := get_viewport().get_camera_3d()
+	var olho: Vector3 = cam.global_position if cam else main.car.global_position
+	for y in rivais:
+		if is_instance_valid(y.car):
+			var dc: float = y.car.global_position.distance_to(olho)
+			y.car.longe_vis = dc > VIS_PERTO
+			y.car.longe_som = dc > SomJogo.MAX_3D
 	var est: int = corrida.estado
 	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
 		repor_jogador()

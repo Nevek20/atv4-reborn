@@ -408,6 +408,17 @@ var grounded := 0
 # cada roda (W+0x140, terrain.gd): 0.3 na terra/cascalho do RX_01, 0 no asfalto.
 # No ar a roda fica com o último material (o jogo não mexe no W+0x140).
 const JIT_K := 0.06392613     # 2.2374146 / 35: amplitude cheia a 35 mph com WheelJitter 1
+# medidor de CPU por parte do passo (PERF_CARRO=1; tests/medir_cpu.gd imprime)
+static var perf_on: bool = OS.has_environment("PERF_CARRO")
+static var perf := {}
+
+
+static func _pf(nome: String, t0: int) -> int:
+	var t := Time.get_ticks_usec()
+	perf[nome] = perf.get(nome, 0) + (t - t0)
+	return t
+
+
 const JIT_HZ := 50.0          # passo de física do PAL (FUN_00172778)
 var surface_jitter := 0.3     # sem terreno (teste no plano): terra (Material_1 DIRT/COMMON)
 var terrain = null            # terrain.gd (main.gd põe): material do chão por roda
@@ -494,6 +505,11 @@ const TRAVA_INI := -0.25
 const TRAVA_FIM := -1.0
 var test_input = null         # {thr, brk, steer} pra testes automáticos
 var som_3d := false           # rival da IA (pista/ia.gd): motor e pneus em som 3D preso no carro
+# rival longe da câmera (pista/ia.gd põe a cada passo; NOSSO, só CPU): sem
+# braços do piloto nem suspensão visual (longe_vis) e sem o som de pneu e
+# suspensão (longe_som: além do alcance do som 3D). A física não muda.
+var longe_vis := false
+var longe_som := false
 var direcao_direta := false   # rival da IA: a direção vai direto (na RAM os rivais têm cru = suavizado)
 var _contato_carro := {}      # batida com outro carro neste passo (carro/batida_carros.gd)
 var outros_carros: Array = []  # RIDs dos outros carros: as rodas não pisam neles (batida_carros.separar)

@@ -1416,6 +1416,20 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   partir do último ponto conhecido do carro (o rastreio não pula: quem cai
   na arquibancada volta pra onde saiu da pista) e cair de 1 m. Os rivais
   usam a mesma função nas reposições deles (capotado, longe, travado).
+- CPU da corrida (nov/2026, "240 caindo pra 90 FPS", F2 do Matheus: física
+  11 ms por passo, desenho 1 ms CPU / 0.6 ms GPU; tests/medir_cpu.gd): é
+  CPU numa thread só (GPU 8%, CPU 12-15% no total), o passo de 50 Hz cai em
+  1 de cada ~5 quadros a 240 FPS. Por passo na nuvem (~13 ms): car.gd 0.55
+  ms por carro (som de pneu 0.08, braços do piloto 0.07, raios das rodas
+  0.09, esferas das rodas 0.05, pneus 0.06, suspensão visual 0.05), IA 2.4
+  -> 0.8 ms (rastreio projetando nos trechos em vez de 121 pontos de 1 m),
+  objetos 0.6, batida carro-carro 0.2, o resto é o motor de física do Godot
+  (2057 esferas de colisão dos objetos, 377 pares). NOSSO, só CPU: rival a
+  mais de 50 m da câmera não mexe braços do piloto nem suspensão visual, e
+  além do som 3D (150 m) não calcula som de pneu. A consulta do raio das
+  rodas é montada 1 vez por passo. rodar_testes idêntico antes/depois.
+  Testado e NÃO adotado: a física numa thread separada e o Jolt (~10%,
+  dentro do ruído, e o Jolt muda a colisão do casco).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

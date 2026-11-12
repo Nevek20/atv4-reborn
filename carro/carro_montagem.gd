@@ -1124,7 +1124,10 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 		if piloto and piloto.no_volante():
 			giro = piloto.giro_volante(rider_s)
 		sw_pivot.basis = Basis(SW_AXIS.normalized(), giro + treme)
-	if piloto:
+	var _t := Time.get_ticks_usec() if perf_on else 0
+	if piloto and not longe_vis:
 		piloto.pose(rider_s, treme if VOLANTE_GIRA else 0.0)
-	if susp_vis:
+	if perf_on: _t = _pf("vis: piloto (braços IK)", _t)
+	if susp_vis and not longe_vis:
 		susp_vis.update(a_jogo)
+	if perf_on: _t = _pf("vis: suspensão", _t)
