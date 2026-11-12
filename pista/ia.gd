@@ -18,14 +18,15 @@ extends Node
 ##    de ANG_FREIO (na RAM, 6 de 7 rivais de acelerador cheio a 123..139 km/h,
 ##    1.15..1.40 x o +0x24 do AIT, que NÃO é a velocidade-alvo);
 ##  - como a escala do catchup e a Skill mexem na velocidade (GANHO_*);
-##  - preso: dá ré; capotado ou longe da linha: volta pra linha (o jogo tem
-##    cInstantRespotBox no RX01, não portado);
+##  - preso: dá ré; capotado ou lento: volta pra linha (fora da pista e
+##    contramão: a regra do jogo, pista/reposicao.gd, igual à do jogador);
 ##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe);
 ##  - desvio: carro até OLHA_CARRO m à frente e mais lento -> vai pro lado
 ##    com mais espaço (dentro da pista: centro e larguras do AIT, MARGEM da
 ##    borda); sem espaço, acompanha a velocidade dele.
 
 const ARQ := "res://data/ia.json"
+const Reposicao := preload("res://pista/reposicao.gd")
 const N_RIVAIS := 7
 # save state com rivais (objeto do piloto, vtable 0x5ae0d0): o alvo (+0x30)
 # fica 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s) e a direção crua
@@ -42,7 +43,6 @@ const A_LAT := 14.0              # m/s²: curva à frente (a linha é cortada: a
 const A_FRENA := 8.0             # m/s²: quanto dá pra frear até a curva
 const PRESO_T := 2.0             # s parado correndo -> ré
 const RE_T := 1.5
-const LONGE := 18.0              # m da linha por 1 s -> volta pra linha
 const CAPOTADO_T := 2.0
 const JUNTA := 150.0             # m: o desvio do grid vai sumindo até a linha
 const OLHA_CARRO := 25.0         # m: carro à frente que conta pro desvio
@@ -68,6 +68,9 @@ var vel: Array = []              # m/s da volta gravada em cada ponto
 var acc: Array = []              # distância acumulada até cada ponto (m, plano)
 var centro_lat: Array = []       # centro da pista em relação à linha (m, lateral)
 var meia: Array = []             # meia largura da pista (m)
+var esq: Array = []              # largura do AIT a partir do ponto da linha: esquerda (-) e
+var dir: Array = []              # direita (+) (+0x68 / +0x6c), na ordem da corrida
+var vigia_jogador                # pista/reposicao.gd do jogador
 var comp := 0.0
 var s_linha := 0.0               # onde a linha de chegada cai na linha da IA
 var rivais: Array = []           # {car, nome, skill, numero, r (rastreio), ...}
@@ -96,6 +99,8 @@ func montar(c) -> bool:
 	for i in ls.size():
 		centro_lat.append(_lateral(c.mundo(ls[i].centro), acc[i]))
 		meia.append((absf(ls[i].largura[0]) + absf(ls[i].largura[1])) * 0.5)
+		esq.append(float(ls[i].largura[0]))
+		dir.append(float(ls[i].largura[1]))
 	batidas = preload("res://carro/batida_carros.gd").new()
 	batidas.name = "BatidaCarros"
 	batidas.carros = func(): return [main.car] + rivais.map(func(y): return y.car)
@@ -227,7 +232,7 @@ func criar() -> void:
 		if main.objetos:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
-			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "longe": 0.0, "capotado": 0.0,
+			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "capotado": 0.0,
 			"desvio": (k - 3) * 1.6, "repostos": 0, "res": 0, "desvio0": 0.0, "prog0": 0.0, "lod": 0, "lat": 0.0})
 	posicionar()
 
@@ -279,9 +284,10 @@ func posicionar() -> void:
 		x.prog0 = x.r.prog
 		x.preso = 0.0
 		x.re = 0.0
-		x.longe = 0.0
 		x.capotado = 0.0
+		x.vigia = Reposicao.new(self, x.r.prog)
 	jogador = novo_rastreio(main.car.global_position)
+	vigia_jogador = Reposicao.new(self, jogador.prog)
 
 
 func limpar() -> void:
@@ -303,6 +309,8 @@ func _physics_process(dt: float) -> void:
 		return
 	rastrear(jogador, main.car.global_position)
 	var est: int = corrida.estado
+	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
+		repor_jogador()
 	for x in rivais:
 		var car = x.car
 		# LOD/sombra depois que o carro montou tudo (rodas, piloto, motor vêm depois)
@@ -320,6 +328,11 @@ func _physics_process(dt: float) -> void:
 			x.r.fim = corrida.t
 		if x.r.fim >= 0.0:
 			car.test_input = {"thr": 0.0, "brk": 0.0, "steer": _direcao(x, car)}
+			continue
+		if x.vigia.passo(x.r, car, dt):
+			if OS.has_environment("IA_LOG"):
+				print("IA repõe %s em %.0f m (regra do jogo, t %.1f)" % [x.nome, x.vigia.aceito, corrida.t])
+			_repor(x)
 			continue
 		_dirigir(x, car, dt)
 
@@ -398,13 +411,12 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 			_repor(x)
 			return
 		x.vigia_ok = true
-	# capotado ou longe da linha: volta pra linha
+	# capotado: volta pra linha (NOSSO; fora da pista é a regra do jogo)
 	x.capotado = x.capotado + dt if b.y.y < 0.3 else 0.0
-	x.longe = x.longe + dt if x.r.dist > LONGE else 0.0
-	if x.capotado > CAPOTADO_T or x.longe > 1.0:
+	if x.capotado > CAPOTADO_T:
 		if OS.has_environment("IA_LOG"):
-			print("IA repõe %s em %.0f m (%s, %.1f m da linha, t %.1f)" % [x.nome, x.r.prog,
-				"capotado" if x.capotado > CAPOTADO_T else "longe", x.r.dist, corrida.t])
+			print("IA repõe %s em %.0f m (capotado, %.1f m da linha, t %.1f)" % [x.nome, x.r.prog,
+				x.r.dist, corrida.t])
 		_repor(x)
 		return
 	car.test_input = {"thr": thr, "brk": brk, "steer": st}
@@ -483,14 +495,23 @@ func _lateral(p: Vector3, s: float) -> float:
 	return _plano(p - q).dot(Vector3(adiante.z, 0.0, -adiante.x))
 
 
+## volta pro último progresso aceito (o jogo repõe sempre lá: 0x4d3538)
 func _repor(x: Dictionary) -> void:
+	x.r.prog = x.vigia.aceito
 	repor_em(x.car, x.r.prog + s_linha)
+	x.vigia.recomecar(x.r.prog)
 	x.capotado = 0.0
-	x.longe = 0.0
 	x.preso = 0.0
 	x.desvio0 = x.desvio
 	x.lat = x.desvio
 	x.repostos += 1
+
+
+func repor_jogador() -> void:
+	jogador.prog = vigia_jogador.aceito
+	repor_em(main.car, jogador.prog + s_linha)
+	vigia_jogador.recomecar(jogador.prog)
+	main.reset_camera()
 
 
 ## reposição na linha (todos os carros: rivais e o jogador nas caixas do

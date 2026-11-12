@@ -1416,6 +1416,26 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   partir do último ponto conhecido do carro (o rastreio não pula: quem cai
   na arquibancada volta pra onde saiu da pista) e cair de 1 m. Os rivais
   usam a mesma função nas reposições deles (capotado, longe, travado).
+- Reposição automática fora das caixas (nov/2026, pista/reposicao.gd,
+  teste_reposicao_auto; docs/engenharia_reversa.md, Reposição automática):
+  porta do objeto de progresso de cada corredor (update 0x4d3658), igual pro
+  jogador e os 7 rivais (na RAM os 8 têm reposição ligada). Fora da pista =
+  quanto passou da BORDA do AIT, com a largura esquerda/direita (+0x68 /
+  +0x6c, assimétricas) medida a partir do ponto da linha, não do centro
+  (o grafo de rota da RAM é o próprio AIT: nó = ponto da linha, largura 27.4
+  = 13.7 x 2). Conferido: os 75 centros da pista caem dentro do corredor.
+  Regra: contramão (frente do link . direção da velocidade < -0.5) por 0.2 s
+  mostra "Wrong Way", 2 s depois vira "Off Track, Go Back!" com 3-2-1 e
+  repõe (5.2 s); fora > mWarningStray 4 m (ou trapaça: fora > 8 m, voltou >
+  100 m, pulou > 30 m) por 0.2 s mostra "Off Track, Go Back!", 3-2-1 e repõe
+  (3.2 s). Tem que valer em todo passo; um passo dentro zera. Repõe no último
+  progresso ACEITO (trapaça não aceita avanço). Botão (R na corrida): só
+  abaixo de mRespotSpeed 40 mph (17.88 m/s no exe); acima "Too Fast For
+  Respot". Textos do text/15205_en.txt. A regra NOSSA "longe da linha 18 m
+  por 1 s" dos rivais saiu (agora é a do jogo); capotado, preso e lento
+  continuam NOSSOS. Teste: fora 3.24 s, contramão 5.24 s (1 passo de 50 Hz
+  além do jogo pela soma de 0.02). NOSSO: a mensagem do "Too Fast" fica
+  1.5 s (o jogo mostra enquanto o botão está apertado), cor vermelha, o R.
 - Batida carro com carro (nov/2026, carro/batida_carros.gd,
   teste_batida_carros): o casco é o VehicleVehicle.hsc (o outro casco que o
   0x1fed48 carrega; tools/casco.py grava esferas_carro, 25 no Renegade
@@ -1457,10 +1477,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   com o save state corrida_no_normal; docs/engenharia_reversa.md), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
-- Reposição: ler no exe QUANDO o jogo repõe sozinho além das caixas
-  (mWarningStray/mCheatingStray/mCheatingProgress/mBackwardLimit, o botão
-  com mRespotSpeed 40 e a mensagem Too_Fast_For_Respot) e o que ele faz na
-  hora (tela, câmera). Hoje só as caixas e a regra NOSSA dos rivais.
+- Reposição: falta o efeito na tela/câmera na hora de repor, o pedido
+  tipo 3 (checkpoint perdido), as 2 flags do corredor+0x120 e o botão no
+  controle (seção Reposição automática).
 - RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).
   As 2 luzes direcionais (cLightDirectional) NÃO existem no jogo (nov/2026):
   são só do editor, como as cercas; o exe não tem o nome da classe (toda

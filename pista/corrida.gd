@@ -69,6 +69,7 @@ var t_fim := 0.0                # tempo total do jogador na chegada
 var t_desce := 0.0              # descida da câmera que falta (s)
 var caixas: Array = []          # cInstantRespotBox: [inversa da caixa, meia caixa]
 var reposicoes := 0             # quantas vezes alguém caiu numa caixa
+var t_rapido := 0.0             # "Too Fast For Respot" na tela (s que faltam)
 var _intro_cam: Array = []      # caminho da câmera (mundo)
 var _intro_alvo: Array = []
 var _intro_s := 0.0             # metros andados no caminho
@@ -279,13 +280,29 @@ func _caixas() -> void:
 	if ia == null or caixas.is_empty():
 		return
 	if na_caixa(main.car.global_position):
-		ia.repor_em(main.car, ia.jogador.prog + ia.s_linha)
-		main.reset_camera()
+		ia.repor_jogador()
 		reposicoes += 1
 	for x in ia.rivais:
 		if is_instance_valid(x.car) and na_caixa(x.car.global_position):
 			ia._repor(x)
 			reposicoes += 1
+
+
+## botão de reposição (R) na corrida: o do jogo (pista/reposicao.gd
+## pode_botao: abaixo de mRespotSpeed, 40 mph); acima mostra "Too Fast For
+## Respot" (a mensagem fica TEMPO_RAPIDO s: NOSSO, o jogo mostra enquanto o
+## botão está apertado). Devolve false fora da corrida (o R normal).
+const TEMPO_RAPIDO := 1.5
+
+
+func botao_repor() -> bool:
+	if estado != CORRENDO or ia == null or ia.vigia_jogador == null:
+		return false
+	if ia.vigia_jogador.pode_botao(main.car):
+		ia.repor_jogador()
+	else:
+		t_rapido = TEMPO_RAPIDO
+	return true
 
 
 ## distância com sinal até a linha de chegada (+ = já passou)
@@ -373,7 +390,7 @@ static func relogio(s: float) -> String:
 	return "%d:%05.2f" % [int(s) / 60, fmod(s, 60.0)]
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
 	if estado == LIVRE:
 		return
 	# cores do vídeo: "Get Ready" vermelho, "Go!" verde
@@ -397,6 +414,14 @@ func _process(_dt: float) -> void:
 				txt = "Pos %d/%d   " % [ia.posicao_jogador(), ia.rivais.size() + 1] + txt
 			if volta > 0:
 				txt += "\nvolta %s   última %s   melhor %s" % [relogio(t - t_volta), relogio(ultima), relogio(melhor)]
+			# avisos do jogo (pista/reposicao.gd): contramão, fora da pista
+			var aviso: String = ia.vigia_jogador.texto() if ia and ia.vigia_jogador else ""
+			if t_rapido > 0.0:
+				t_rapido -= dt
+				aviso = "Too Fast For Respot"
+			if aviso != "":
+				txt = aviso + "\n" + txt
+				hud.add_theme_color_override("font_color", Color(0.9, 0.1, 0.1))
 			hud.text = txt
 		CHEGOU:
 			var txt := "CHEGADA!   %s\nmelhor volta %s" % [relogio(t_fim), relogio(melhor)]

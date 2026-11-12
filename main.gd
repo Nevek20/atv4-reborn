@@ -376,6 +376,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_G:
 				cam_piloto.ligado = not cam_piloto.ligado
 			KEY_R:
+				if corrida and corrida.botao_repor():
+					return              # na corrida: o botão de reposição do jogo
 				var p: Vector3 = car.global_position
 				car.reset_to(Vector3(p.x, terrain.height_at(p.x, p.z) + 1.5, p.z), car.global_rotation.y)
 				reset_camera()

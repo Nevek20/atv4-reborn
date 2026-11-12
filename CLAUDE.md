@@ -60,7 +60,8 @@ carro/               o carro
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
-pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais)
+pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
+                     reposicao.gd (reposição automática do jogo, R na corrida)
 som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
@@ -184,6 +185,10 @@ Pista RX01
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
   o ponto segue o Respotting do TrackSetup (chão >= 0.93, sem água, 8 m de
   folga). Volta pro último ponto conhecido na linha, não pro mais perto.
+- Reposição automática (pista/reposicao.gd, todos os carros): fora da pista
+  = além da BORDA do AIT (largura esq/dir a partir do ponto da linha), não
+  distância do centro. Fora > 4 m: 3.2 s; contramão: 5.2 s; um passo dentro
+  zera. Botão (R) só abaixo de 40 mph.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -216,8 +221,7 @@ Frota
 ## Pendente / ideias
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: LOD das árvores. Reposição: falta quando o
-  jogo repõe sozinho fora das caixas (Logic: Stray, Backward, RespotSpeed).
+- RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
 - IA: ler acelerador/freio do piloto do exe (0x5aea98/0x5af920), LOD com
   os modelos 2K/1K/500 do jogo.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

@@ -1115,6 +1115,53 @@ vazios). Tudo vem do evento:
     O import de .obj do Godot não lê o alfa do vértice (v x y z r g b a):
     o rx01_objetos.py manda a malha da camada no modelos.json ("tris").
 
+## Reposição automática (objeto de progresso do corredor)
+
+- Logic do TrackSetup (0x1bf6d8, dentro do 0x1bf220; struct apontada pelo
+  TrackSetup+0x14, na RAM 0xe85860): +0 mWarningStray, +4 mCheatingStray, +8
+  mCheatingProgress, +0xc mLinkReadAhead (int), +0x10 mRespotSpeed, +0x14
+  mBackwardLimit. Respotting é o +0x18 (0x1bfb68).
+- Corredor (vtable 0x562ea0, 8 na RAM a partir de 0xd87f70, passo 0x1d0;
+  lista em 0xd87f40): +0xf0 veículo, +0xfc, +0x120 objeto com os
+  componentes (o de progresso em +0x6c dele), +0x148 PEDIDO de reposição
+  (6 palavras: tempo, tipo, a, b, c, fase), +0x160 "rápido demais" (HUD).
+- Objeto de progresso: base 0x4d2cc0 (vtable 0x5eb940 em +0xac), o da
+  corrida 0x4d4b18 (vtable 0x5eb8f8). +0x10 reposição ligada (1 nos 8),
+  +0x14 timer, +0x30 estado, +0x34 corredor, +0x38 Logic, +0x40..0x50 último
+  aceito (link, distância, ...), +0x70 rastreio (link, t, t x comprimento,
+  +0x7c FORA = metros além da borda), +0xa0 dt acumulado.
+- Update 0x4d3658 (vtable +0xc), em ordem: fora > CheatingStray, progresso
+  < aceito - BackwardLimit e avanço > CheatingProgress (vtable +0x24 =
+  0x4e0b68) = trapaça (não aceita o avanço); flags +0x24/+0x28 do
+  corredor+0x120 -> tipo 2; estado != 0 -> tipo 3; contramão (0x4d58e0:
+  linha 0 do link . velocidade do corpo no plano, normalizada, < -0.5;
+  corpo = veículo+0x60, velocidade em +0x20, |v| em +0x70) -> tipo 1;
+  trapaça ou fora > WarningStray -> tipo 2; senão apaga o pedido.
+- Parâmetros por tipo (vtable +0x34 = 0x4d4808): (a, b, c) = 1: 0.2, 2, 3;
+  2: 0.2, 0, 3; 3: 0.2, 1, 3. 0x4d4ef0 só grava se não tem pedido (o 3
+  passa por cima). 0x4d4f60 conta: fase 1 até a, fase 2 até b (tipo 1 vira
+  2; vai pra 3 só com reposição ligada, 0x4d2d88), fase 3 até c -> devolve 4.
+  0x4d35d0 com 4 chama 0x4d3538: se [0x7f4744]+0x3c == 0, 0x15bd28 repõe e o
+  rastreio volta pro último aceito.
+- Fora da pista (0x4d57e0): t = projeção no link (0..1), lateral =
+  (posição - nó +0x20).linha 0 da matriz do link (quatérnio em +0x30;
+  0x326910), limites = largura esquerda/direita dos 2 nós interpoladas por t
+  (0x329620 / 0x329680 -> 0x32a6c8 / 0x32a708: nó+0x44 = o registro do AIT,
+  +0x20 / +0x24; sem ele, -+ nó+0x40 / 2). O link vai do nó do AIT i pro i-1
+  (o sentido da corrida, = a direção +0x0c do AIT).
+- HUD 0x47bb58 (fases 2 e 3): tipo 1 WRONG_WAY (texto 0xa39), 2
+  Off_Track_Go_Back (0x617), 3 MISSED_CHECKPOINT (0x526) e na fase 3 " - %d"
+  com int(c - tempo) + 1. Índice do texto = posição na tabela de nomes
+  0x54d838 (text/15205_en.txt).
+- Botão (update do corredor, 0x158f..): |v| do corpo < 17.88 m/s (40 mph)
+  repõe (0x15bd28), senão +0x160 = 1 e o HUD 0x4796c0 mostra
+  Too_Fast_For_Respot (0x968) depois de 0.05 s apertado. O 0x4613a0 mostra
+  "Respot" na barra de botões.
+- Não achados: quem liga corredor+0x120 +0x24/+0x28 (zeradas na RAM); as
+  caixas do 0x543b88 ([0x7f5f5c], lista vazia no RX01, limites +0xc0/+0xc4).
+  Na RAM (corrida_no_normal) o pedido do jogador tem a = 0.2, c = 3.0 de uma
+  reposição tipo 2 que já tinha acontecido.
+
 ## Luz e névoa (Environment.xml)
 
 - Leitor 0x1c15d8 (chamado na carga da pista pelo 0x174398; objeto global
