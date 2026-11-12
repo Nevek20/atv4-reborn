@@ -27,9 +27,12 @@ extends Node
 
 const ARQ := "res://data/ia.json"
 const N_RIVAIS := 7
-const OLHA_MIN := 7.0            # m
-const OLHA_T := 0.55             # s
-const GANHO_VIRA := 2.2          # direção = ângulo do alvo (rad) x isso
+# save state com rivais (objeto do piloto, vtable 0x5ae0d0): o alvo (+0x30)
+# fica 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s) e a direção crua
+# (+0xa8) = ângulo até o alvo / 20° nos 7 rivais (0.048..0.052 por grau)
+const OLHA_MIN := 5.0            # m (NOSSO: a RAM só tem rivais rápidos)
+const OLHA_T := 0.5              # s
+const GANHO_VIRA := 2.8648       # 1 / 20° em rad
 const GANHO_SKILL := 0.1         # velocidade x (1 - GANHO_SKILL x (1 - skill))
 const GANHO_CATCHUP := 0.12      # acelerador máximo x (1 + escala x isso)
 const ANG_ALIVIO := 0.30         # rad entre o nariz e o alvo: tira o pé
@@ -314,7 +317,7 @@ func _physics_process(dt: float) -> void:
 
 func _direcao(x: Dictionary, car) -> float:
 	var v: float = car.linear_velocity.length()
-	var s: float = x.r.prog + s_linha + OLHA_MIN + v * OLHA_T
+	var s: float = x.r.prog + s_linha + maxf(OLHA_MIN, v * OLHA_T)
 	var alvo := ponto(s)
 	var adiante := _plano(ponto(s + 2.0) - alvo).normalized()
 	alvo += Vector3(adiante.z, 0.0, -adiante.x) * x.get("lat", 0.0)

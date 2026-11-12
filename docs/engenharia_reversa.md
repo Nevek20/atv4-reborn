@@ -1016,6 +1016,20 @@ vazios). Tudo vem do evento:
   (0x32a788/0x32a828 nas pontas +0x20/+0x24, margem param[0xe]); quando o
   ângulo passa de 10° mistura com outro desvio (fator (ang - 0.1745) x
   5.73). Falta ler o resto (acelerador/freio, catchup, Skill).
+- O PILOTO da IA (nov/2026): objeto com vtable 0x5ae0d0 em +8 (métodos
+  0x34f200..0x34fe78; construtor 0x34f190, sub-objeto em +0x20 por 0x34ec68),
+  um por rival, só nos rivais (achado pelo único ponteiro extra pro corpo
+  do rival, num bloco do heap cujo dono é ele). +0x18 -> objeto 0x5af920
+  (+0x40), cujo +4 é o veículo. +0x30 = ponto-alvo (mundo), +0xa0 = struct
+  de controle (iniciado por 0x395310): +0xa8 = direção ANTES de arredondar
+  pros sétimos que vão pro corpo (-0.893 -> -6/7, 0.077 -> 1/7, -0.587 ->
+  -4/7); +0xa4 = 1.0 em todos, inclusive num rival de acelerador cru 0
+  (então não é o acelerador). Medido nos 7: direção crua = ângulo até o
+  alvo / 20°; alvo 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s).
+  +0x160 = 0.12, 0.10 ... 0.00 (cai 0.02 por rival; uso não achado); +0x40
+  não é a distância pro jogador. Acelerador e freio: não achados (nenhum
+  float 7.0 / 1/7 no código da IA; as escritas nos pedais não aparecem como
+  swc1 com offset fixo).
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice

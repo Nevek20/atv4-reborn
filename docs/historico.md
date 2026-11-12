@@ -1395,6 +1395,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   desvio de cada rival de -4.8 a 4.8 m. teste_ia, 2 voltas, 3 sementes:
   média 89..127 km/h, 0..2 reposições por rival (engavetamento). O piloto
   do exe (acelerador/freio) ainda não foi lido.
+- IA, 4ª rodada: achado o objeto do piloto (vtable 0x5ae0d0; docs/
+  engenharia_reversa.md). Da RAM dos 7 rivais: direção = ângulo até o alvo
+  / 20° (GANHO_VIRA 2.865, era 2.2 nosso) e alvo a 0.5 s de velocidade (era
+  7 m + 0.55 s, longe demais). teste_ia, 2 voltas, 3 sementes: média
+  101..127 km/h, 0..1 reposição por rival (era até 2). Acelerador e freio
+  continuam NOSSOS: pra achar, um save state com um rival FREANDO (freio >
+  0 na RAM) ajudaria a cruzar os campos.
 
 ## Pendente / ideias
 
