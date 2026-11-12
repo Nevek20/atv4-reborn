@@ -171,9 +171,12 @@ Pista RX01
 - Chão com luz assada: sem luz do Godot. PS2 sem tonemap; névoa linear.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
-- IA: o AIT é volta gravada (linha +0x00, velocidade +0x24). O piloto da
-  IA no exe não foi achado: direção, freio, desvio e catchup aplicado são
-  NOSSOS. Largada = vídeo: Get Ready 2.25 s, Go! aos 5 s; você larga em 8º.
+- IA: o AIT é volta gravada (linha +0x00); o +0x24 NÃO é a velocidade da
+  IA (na RAM ela anda 1.15..1.40 x isso, de acelerador cheio). Direção em
+  sétimos, direto (cru = suavizado). Acelerador, freio, desvio e catchup
+  aplicado ainda NOSSOS (classes do exe achadas, não lidas).
+- Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
+  depois; você larga em 8º.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -208,7 +211,6 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: reposição (cInstantRespotBox), 2 luzes
   direcionais, LOD das árvores.
-- IA: piloto do exe (precisa save state numa corrida com rivais), LOD com
+- IA: ler acelerador/freio do piloto do exe (0x5aea98/0x5af920), LOD com
   os modelos 2K/1K/500 do jogo, lasquinhas e som da batida carro com carro.
-- Largada: câmera que desce até o carro depois da intro (sem referência).
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

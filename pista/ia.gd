@@ -13,7 +13,10 @@ extends Node
 ##
 ## NOSSO (o "piloto" da IA no exe não foi achado; docs/historico.md, Corrida):
 ##  - direção por perseguição de ponto (o ponto da linha OLHA_MIN + v x OLHA_T
-##    à frente), acelerador/freio pela velocidade gravada x Skill x catchup;
+##    à frente), em sétimos e direto (como na RAM: -6/7, -4/7, 2/7, 5/7; cru
+##    = suavizado); acelerador cheio, alivia acima de ANG_ALIVIO e freia acima
+##    de ANG_FREIO (na RAM, 6 de 7 rivais de acelerador cheio a 123..139 km/h,
+##    1.15..1.40 x o +0x24 do AIT, que NÃO é a velocidade-alvo);
 ##  - como a escala do catchup e a Skill mexem na velocidade (GANHO_*);
 ##  - preso: dá ré; capotado ou longe da linha: volta pra linha (o jogo tem
 ##    cInstantRespotBox no RX01, não portado);
@@ -28,7 +31,12 @@ const OLHA_MIN := 7.0            # m
 const OLHA_T := 0.55             # s
 const GANHO_VIRA := 2.2          # direção = ângulo do alvo (rad) x isso
 const GANHO_SKILL := 0.1         # velocidade x (1 - GANHO_SKILL x (1 - skill))
-const GANHO_CATCHUP := 0.12      # velocidade x (1 + escala x isso)
+const GANHO_CATCHUP := 0.12      # acelerador máximo x (1 + escala x isso)
+const ANG_ALIVIO := 0.30         # rad entre o nariz e o alvo: tira o pé
+const ANG_FREIO := 0.60          # rad: freia (acima de V_FREIO)
+const V_FREIO := 15.0            # m/s
+const A_LAT := 14.0              # m/s²: curva à frente (a linha é cortada: a IA do jogo passa de 20 na linha)
+const A_FRENA := 8.0             # m/s²: quanto dá pra frear até a curva
 const PRESO_T := 2.0             # s parado correndo -> ré
 const RE_T := 1.5
 const LONGE := 18.0              # m da linha por 1 s -> volta pra linha
@@ -197,6 +205,7 @@ func criar() -> void:
 		var c = main.Car.new()
 		main.configurar(c, v)
 		c.som_3d = true
+		c.direcao_direta = true
 		c.desligadas = c.desligadas + ["painel"] + (Array(OS.get_environment("IA_DESL").split(",")) if OS.has_environment("IA_DESL") else [])
 		c.terrain = main.terrain
 		c.objetos = main.objetos
@@ -207,7 +216,7 @@ func criar() -> void:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
 			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "longe": 0.0, "capotado": 0.0,
-			"desvio": (k % 3 - 1) * 1.5, "repostos": 0, "res": 0, "desvio0": 0.0, "prog0": 0.0, "lod": 0, "lat": 0.0})
+			"desvio": (k - 3) * 1.6, "repostos": 0, "res": 0, "desvio0": 0.0, "prog0": 0.0, "lod": 0, "lat": 0.0})
 	posicionar()
 
 
@@ -310,7 +319,8 @@ func _direcao(x: Dictionary, car) -> float:
 	var adiante := _plano(ponto(s + 2.0) - alvo).normalized()
 	alvo += Vector3(adiante.z, 0.0, -adiante.x) * x.get("lat", 0.0)
 	var loc: Vector3 = car.global_transform.affine_inverse() * alvo
-	return clampf(atan2(loc.x, loc.z) * GANHO_VIRA, -1.0, 1.0)
+	x.ang = atan2(loc.x, loc.z)
+	return roundf(clampf(x.ang * GANHO_VIRA, -1.0, 1.0) * 7.0) / 7.0   # sétimos (RAM)
 
 
 func _dirigir(x: Dictionary, car, dt: float) -> void:
@@ -318,20 +328,20 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	var vf: float = car.linear_velocity.dot(b.z)
 	var v: float = car.linear_velocity.length()
 	var st := _direcao(x, car)
-	# velocidade da volta gravada um pouco à frente x Skill x catchup
+	# acelerador cheio; alivia/freia pelo ângulo até o alvo; Skill e catchup
+	# limitam o acelerador máximo
 	var frente: float = x.r.prog - jogador.prog
 	var esc: float = escala_catchup(frente, jogador.prog + corrida.dados.get("primeira_volta", 54.8))
-	var alvo: float = velocidade(x.r.prog + s_linha + v * 0.4) * (1.0 - GANHO_SKILL * (1.0 - x.skill)) \
-		* (1.0 + GANHO_CATCHUP * esc)
-	alvo = _desviar(x, car, dt, alvo)
-	var thr := 0.0
+	var teto := clampf((1.0 - GANHO_SKILL * (1.0 - x.skill)) * (1.0 + GANHO_CATCHUP * esc), 0.3, 1.0)
+	var v_lim: float = _desviar(x, car, dt, INF)
+	var ang := absf(x.get("ang", 0.0))
+	var thr := teto
 	var brk := 0.0
-	if v < alvo - 1.0:
-		thr = 1.0
-	elif v < alvo + 0.5:
-		thr = 0.4
-	elif v > alvo + 3.0 and vf > 5.0:
-		brk = clampf((v - alvo - 3.0) / 6.0, 0.3, 1.0)
+	v_lim = minf(v_lim, _v_curva(x.r.prog + s_linha))
+	if (ang > ANG_ALIVIO and v > V_FREIO) or v > v_lim + 1.0:
+		thr = 0.0
+	if (ang > ANG_FREIO and v > V_FREIO) or (v > v_lim + 4.0 and vf > 5.0):
+		brk = 1.0
 	# derrapando (direção no batente e o carro girando pro outro lado): tira o
 	# pé, a física do jogo não endireita sozinha (RecoveryTorqueCutting)
 	var giro: float = car.angular_velocity.dot(b.y)
@@ -387,9 +397,26 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 		return
 	car.test_input = {"thr": thr, "brk": brk, "steer": st}
 	if OS.get_environment("IA_TRACE") == x.nome and Engine.get_physics_frames() % 5 == 0:
+		var alvo := v_lim
 		print("trace %5.2f  prog %5.0f  dist %4.1f  v %4.1f/%4.1f  st %5.2f thr %.1f brk %.1f  up %.2f  pos %s  linha %s  frente %s" % [
 			corrida.t, x.r.prog, x.r.dist, v, alvo, st, thr, brk, b.y.y, car.global_position,
 			ponto(x.r.prog + s_linha), b.z])
+
+
+## velocidade máxima pelas curvas à frente: raio = 30 m / (quanto a linha
+## vira em 30 m), v = sqrt(A_LAT x raio), mais o que dá pra frear até lá
+func _v_curva(s: float) -> float:
+	var v_max := INF
+	var d := 5.0
+	while d <= 65.0:
+		var a := _plano(ponto(s + d + 3.0) - ponto(s + d)).normalized()
+		var b := _plano(ponto(s + d + 33.0) - ponto(s + d + 30.0)).normalized()
+		var vira := absf(a.signed_angle_to(b, Vector3.UP))
+		if vira > 0.05:
+			var vc := sqrt(A_LAT * 30.0 / vira)
+			v_max = minf(v_max, sqrt(vc * vc + 2.0 * A_FRENA * d))
+		d += 10.0
+	return v_max
 
 
 ## desvio dos outros carros: muda x.lat (lado em relação à linha) e devolve a

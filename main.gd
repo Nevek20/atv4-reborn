@@ -414,9 +414,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	# controle: Select troca a câmera (o A é a embreagem, car.gd, e pula a introdução)
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_BACK:
 		_troca_camera()
-	# A pula a introdução da corrida (o X do PS2, como no jogo)
+	# A pula a introdução e a descida da câmera (o X do PS2, como no jogo)
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A \
-			and corrida and corrida.estado == corrida.INTRO:
+			and corrida and corrida.pode_pular():
 		corrida.comecar()
 	# olhar livre na câmera do piloto e órbita nas de corrida: botão direito
 	# do mouse apertado
@@ -696,6 +696,8 @@ func _update_camera(delta: float) -> void:
 		if ORBITA:
 			orbita.passo(delta)
 			orbita.aplicar(cam, s.tp, terrain)
+		if corrida:
+			corrida.camera_descida(cam, car)
 		return
 
 	if cam_piloto.car != car:

@@ -1,7 +1,8 @@
 extends SceneTree
 ## Prints da corrida com os rivais (pista/ia.gd): começa, pula a introdução e
 ## deixa o jogador pilotado pela IA; tira um print na câmera de corrida em cada
-## tempo de QUANDO (s depois do VAI; padrão "1,30"): <saida>_<t>.png
+## tempo de QUANDO (s depois do VAI; padrão "1,30"; negativo = -1 - s depois do
+## fim da intro, na descida da câmera e no Get Ready): <saida>_<t>.png
 ## Uso: godot --path . --fixed-fps 50 -s res://tests/print_ia.gd -- ia
 
 var main
@@ -12,6 +13,7 @@ var fase := 0
 var q := 0
 var tempos: Array = []
 var saida := "ia"
+var t_espera := 0.0
 
 
 func _initialize() -> void:
@@ -42,9 +44,10 @@ func _physics_process(dt: float) -> bool:
 		fase = 1
 		return false
 	if c.estado == c.CONTANDO:
-		if not tempos.is_empty() and tempos[0] < 0.0:
-			_print("grid")
+		if not tempos.is_empty() and tempos[0] < 0.0 and t_espera >= -tempos[0] - 1.0:
+			_print("espera%.1f" % t_espera)
 			tempos.pop_front()
+		t_espera += dt
 		return false
 	eu.r = ia.jogador
 	ia._dirigir(eu, main.car, dt)

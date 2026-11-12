@@ -494,6 +494,7 @@ const TRAVA_INI := -0.25
 const TRAVA_FIM := -1.0
 var test_input = null         # {thr, brk, steer} pra testes automáticos
 var som_3d := false           # rival da IA (pista/ia.gd): motor e pneus em som 3D preso no carro
+var direcao_direta := false   # rival da IA: a direção vai direto (na RAM os rivais têm cru = suavizado)
 # largada da corrida (pista/corrida.gd): o jogador acelera com o carro preso
 # (embreagem aberta, freio ignorado: segurar o freio parado engataria a ré)
 var largada_presa := false

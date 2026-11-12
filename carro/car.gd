@@ -794,6 +794,8 @@ func _physics_process(dt: float) -> void:
 		else:
 			st_rate = P.st_opp
 	steer = move_toward(steer, st_raw, dt * st_rate)
+	if direcao_direta:
+		steer = st_raw          # rivais: a IA escreve o suavizado também (save state com rivais)
 	steer_cx = st_raw
 
 	# ---- suspensão portada (0x248768 contato, 0x248a80 mola, 0x2484c8 roda)

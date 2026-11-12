@@ -30,6 +30,14 @@ const ARQ := "res://data/rx01_corrida.json"
 # nada, "Go!" com o sinal verde e o cronômetro começa
 const CONTAGEM := 5.0
 const GET_READY := 2.25
+# depois do voo da intro (vídeo do Matheus, PCSX2 nov/2026, RX01 de truck):
+# corta pra uma câmera alta atrás do carro, olhando pra baixo, que desce até
+# a câmera de corrida em 5.0 s (7.05 -> 12.1 s no vídeo) chegando devagar
+# (a mudança por quadro cai quase em linha reta: posição 1 - (1 - t)^2); o
+# HUD e o "Get Ready" entram logo depois (12.2 s). A altura de saída é NOSSA,
+# estimada no quadro (o carro do mesmo tamanho, ~35° pra baixo)
+const DESCIDA := 5.0
+const DESCIDA_ALTURA := 5.0
 const AVANCO_MIN := 60          # dos 75 links
 const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
@@ -58,6 +66,7 @@ var _cp_meia := Vector3.ZERO
 var hud: Label
 var ia                          # rivais (pista/ia.gd)
 var t_fim := 0.0                # tempo total do jogador na chegada
+var t_desce := 0.0              # descida da câmera que falta (s)
 var _intro_cam: Array = []      # caminho da câmera (mundo)
 var _intro_alvo: Array = []
 var _intro_s := 0.0             # metros andados no caminho
@@ -173,6 +182,9 @@ func comecar() -> void:
 	if estado == INTRO:
 		_fim_intro()            # Enter de novo pula a introdução
 		return
+	if estado == CONTANDO and t_desce > 0.0:
+		t_desce = 0.0           # e de novo pula a descida da câmera
+		return
 	var l := largada(0)
 	var p: Vector3 = l[0]
 	main.recomecar(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.5, p.z), l[1])
@@ -197,7 +209,27 @@ func comecar() -> void:
 func _fim_intro() -> void:
 	estado = CONTANDO
 	t_conta = CONTAGEM
+	t_desce = DESCIDA
 	main.reset_camera()
+
+
+## Enter / A pulam: a intro ou a descida da câmera
+func pode_pular() -> bool:
+	return estado == INTRO or (estado == CONTANDO and t_desce > 0.0)
+
+
+## a descida depois da intro, por cima da câmera de corrida já calculada
+## (main._update_camera)
+func camera_descida(cam: Camera3D, car: Node3D) -> void:
+	if estado != CONTANDO or t_desce <= 0.0:
+		return
+	var f := 1.0 - t_desce / DESCIDA
+	var k := (1.0 - f) * (1.0 - f)          # quanto falta (1 -> 0, chegando devagar)
+	var fim: Transform3D = cam.global_transform
+	var p := fim.origin + Vector3.UP * DESCIDA_ALTURA * k
+	var olha := Basis.looking_at(car.global_position - p, Vector3.UP)
+	var q := Quaternion(olha.orthonormalized()).slerp(Quaternion(fim.basis.orthonormalized()), 1.0 - k)
+	cam.global_transform = Transform3D(Basis(q), p)
 
 
 func parar() -> void:
@@ -241,6 +273,9 @@ func _physics_process(dt: float) -> void:
 			_fim_intro()
 		return
 	if estado == CONTANDO:
+		if t_desce > 0.0:
+			t_desce -= dt           # a câmera descendo: a contagem ainda não anda
+			return
 		t_conta -= dt
 		if t_conta <= 0.0:
 			estado = CORRENDO
@@ -316,7 +351,7 @@ func _process(_dt: float) -> void:
 		INTRO:
 			hud.text = "Enter / A: pular"
 		CONTANDO:
-			hud.text = "Get Ready" if t_conta > CONTAGEM - GET_READY else ""
+			hud.text = "Get Ready" if t_desce <= 0.0 and t_conta > CONTAGEM - GET_READY else ""
 		CORRENDO:
 			if t < 1.0:
 				hud.text = "Go!"

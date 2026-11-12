@@ -1373,6 +1373,28 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   - Som: os rivais tocam motor e pneus em AudioStreamPlayer3D presos no
     carro (som_jogo.novo_player; volume cheio até 8 m, cai com 1/d até 150
     m: NOSSO). ~8 sons por rival tocando.
+- Câmera depois da intro (vídeo do Matheus no PCSX2, RX01 de truck): o voo
+  da intro corta (7.05 s) pra uma câmera alta atrás do carro olhando ~35°
+  pra baixo, que desce até a câmera de corrida em 5.0 s chegando devagar
+  (a mudança por quadro cai quase em linha reta: posição 1 - (1 - t)^2);
+  12.2 s entra o HUD com "Get Ready". corrida.gd camera_descida, por cima
+  da câmera de corrida já calculada; a altura de saída (5 m) é NOSSA,
+  estimada no quadro. Enter/A na intro vai pra descida, na descida pula
+  pro Get Ready.
+- IA, 3ª rodada, pelo save state com rivais (corrida_no_normal, buggy
+  Normal; docs/engenharia_reversa.md): os rivais andam a 123..139 km/h de
+  acelerador cheio, 1.15..1.40 x o +0x24 do AIT (que NÃO é a velocidade-
+  alvo, foi engano da 1ª versão), 3.5..6.8 m fora da linha, direção em
+  sétimos (-6/7, -4/7, 2/7, 5/7) escrita direto (cru = suavizado; o
+  acelerador é suavizado normal). Seguir a linha nesses pontos a 38 m/s
+  pediria 20..48 m/s² de lateral: a IA corta pela pista larga. Agora:
+  direção em sétimos e direta (car.direcao_direta), acelerador cheio (Skill
+  e catchup só limitam o máximo), alivia acima de 17° até o alvo andando a
+  mais de 15 m/s, freia acima de 34°, e limite pela curva até 65 m à frente
+  (raio pela virada da linha em 30 m, A_LAT 14, frenagem 8 m/s²: NOSSO);
+  desvio de cada rival de -4.8 a 4.8 m. teste_ia, 2 voltas, 3 sementes:
+  média 89..127 km/h, 0..2 reposições por rival (engavetamento). O piloto
+  do exe (acelerador/freio) ainda não foi lido.
 
 ## Pendente / ideias
 
