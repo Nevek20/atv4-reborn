@@ -5,9 +5,13 @@ extends SceneTree
 ## atravessam (penetração máxima pequena), o jogador é empurrado pra frente,
 ## o rival (o mais rápido) solta lasquinhas (tabela carro x carro, >= 25 mph) e
 ## o som de batida toca o patch Vehicle.
-## Depois, lado a lado (o "saíram voando" do Matheus, nov/2026): os dois a 90
-## km/h, encostados, o rival virando pra cima do jogador por 3 s. Confere que
-## ninguém sobe (velocidade vertical < 2.5 m/s) nem capota.
+## Depois, os casos dos prints do Matheus (nov/2026: "saíram voando", o Storm
+## em pé), os dois a 90 km/h, o rival virando pra cima do jogador por 3 s:
+## lado a lado, de lado meio carro à frente, e o rival caindo em cima (1.2 m).
+## Confere que ninguém sobe rápido (< SUBIDA_MAX m/s) nem capota (o caso de
+## cima só é impresso: o resultado depende do estado de antes, 1.4 a 5.8 m/s,
+## sem virar de cabeça pra baixo; nov/2026). CASO="lado
+## frente alto" roda só um (DBG=n imprime a cada n passos).
 ## Uso: godot --headless --path . -s res://tests/teste_batida_carros.gd
 
 var main
@@ -23,6 +27,9 @@ var v_eu_max := 0.0
 var lascas0 := 0
 var vy_max := 0.0
 var up_min := 1.0
+var casos: Array = [[2.2, 0.0, 0.0], [2.6, 1.8, 0.0], [0.8, 1.5, 1.2]]
+var caso := 0
+const SUBIDA_MAX := 3.5
 
 
 func _initialize() -> void:
@@ -104,8 +111,15 @@ func _physics_process(_dt: float) -> bool:
 			var b: Basis = eu.global_transform.basis
 			var p0: Vector3 = eu.global_position + b.z * 30.0
 			eu.reset_to(Vector3(p0.x, main.terrain.height_at(p0.x, p0.z) + 0.6, p0.z), eu.global_rotation.y)
-			var p1: Vector3 = p0 - b.x * (float(OS.get_environment("LADO")) if OS.has_environment("LADO") else 2.2)
-			x.car.reset_to(Vector3(p1.x, main.terrain.height_at(p1.x, p1.z) + 0.6, p1.z), eu.global_rotation.y)
+			if OS.has_environment("CASO"):
+				casos = [Array(OS.get_environment("CASO").split(" ")).map(func(v): return float(v))]
+			var lado: float = casos[caso][0]
+			var frente: float = casos[caso][1]
+			var alto: float = casos[caso][2]
+			var p1: Vector3 = p0 - b.x * lado + b.z * frente
+			vy_max = 0.0
+			up_min = 1.0
+			x.car.reset_to(Vector3(p1.x, main.terrain.height_at(p1.x, p1.z) + 0.6 + alto, p1.z), eu.global_rotation.y)
 			t = 0
 			fase = 4
 		4:
@@ -117,7 +131,7 @@ func _physics_process(_dt: float) -> bool:
 				x.car.linear_velocity = b.z * 25.0
 			eu.test_input = {"thr": 1.0, "brk": 0.0, "steer": 0.0}
 			x.car.test_input = {"thr": 1.0, "brk": 0.0, "steer": 0.6}   # pra cima do jogador (ele está em -x)
-			if OS.has_environment("DBG") and t % 5 == 0:
+			if OS.has_environment("DBG") and t % int(OS.get_environment("DBG")) == 0:
 				var rel: Vector3 = x.car.global_position - eu.global_position
 				print("t %3d  eu up %.2f vy %5.2f w %s | rival up %.2f vy %5.2f w %s | lado %.2f alt %.2f  contatos %d" % [t,
 					eu.global_transform.basis.y.y, eu.linear_velocity.y, eu.angular_velocity.snapped(Vector3.ONE * 0.1),
@@ -128,12 +142,15 @@ func _physics_process(_dt: float) -> bool:
 					vy_max = maxf(vy_max, k.linear_velocity.y)
 					up_min = minf(up_min, k.global_transform.basis.y.y)
 			if t >= 150:
-				print("lado a lado: subida máx %.2f m/s, inclinação mín (up.y) %.2f" % [vy_max, up_min])
-				if vy_max > 2.5:
-					_falha("lado a lado: carro subiu a %.1f m/s (voando)" % vy_max)
-				if up_min < 0.5:
-					_falha("lado a lado: carro capotou (up.y %.2f)" % up_min)
-				fase = 9
+				print("caso %s: subida máx %.2f m/s, inclinação mín (up.y) %.2f" % [casos[caso], vy_max, up_min])
+				if casos[caso][2] > 0.0 and not OS.has_environment("CASO"):
+					pass            # caso de cima: só relatório
+				elif vy_max > SUBIDA_MAX:
+					_falha("caso %s: carro subiu a %.1f m/s (voando)" % [casos[caso], vy_max])
+				if up_min < (0.0 if casos[caso][2] > 0.0 else 0.5):
+					_falha("caso %s: carro capotou (up.y %.2f)" % [casos[caso], up_min])
+				caso += 1
+				fase = 3 if caso < casos.size() else 9
 		9:
 			c.parar()
 			print("teste_batida_carros: %s" % ("ok" if falhas == 0 else "FALHA"))

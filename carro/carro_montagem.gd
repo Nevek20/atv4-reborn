@@ -735,24 +735,32 @@ func _load_som() -> void:
 
 
 func _process(delta: float) -> void:
+	var _t := Time.get_ticks_usec() if perf_on else 0
 	if som:
 		som.atualizar(rpm, som_carga, delta)
+	if perf_on: _t = _pf("q: som do motor", _t)
 	if fumaca:
 		fumaca.atualizar(som_carga, rpm)
 	if motor_treme:
 		motor_treme.atualizar(rpm, som_carga, delta)
+	if perf_on: _t = _pf("q: motor treme", _t)
 	if fumaca:
 		fumaca.seguir()             # depois do motor_treme: o cano já tremeu neste quadro
+	if perf_on: _t = _pf("q: fumaça", _t)
 	if motor_anima:
 		motor_anima.atualizar(delta, rpm)
+	if perf_on: _t = _pf("q: motor anima", _t)
 	if luzes:
 		luzes.atualizar(delta, brake_in, gear == -1)
 	if farol:
 		farol.atualizar(delta)
+	if perf_on: _t = _pf("q: luzes e farol", _t)
 	if sujeira:
 		sujeira.atualizar(sujeira_nivel, roda_cor)
+	if perf_on: _t = _pf("q: sujeira", _t)
 	if painel:
 		painel.atualizar(delta)
+	if perf_on: _t = _pf("q: painel", _t)
 
 
 func _load_steering_wheel() -> void:

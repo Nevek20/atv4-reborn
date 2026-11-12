@@ -1430,6 +1430,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   rodas é montada 1 vez por passo. rodar_testes idêntico antes/depois.
   Testado e NÃO adotado: a física numa thread separada e o Jolt (~10%,
   dentro do ruído, e o Jolt muda a colisão do casco).
+  2ª rodada (F2 do Matheus: física 5-8 ms por passo, "process" 7 ms com pico
+  de 24, FPS 150-170 -> 110 com carro na tela): a POEIRA custava 3.9 ms por
+  quadro com 8 carros (3 arrays por nuvem por quadro e 10 resize por nuvem
+  que morria): agora grava direto no buffer e compacta numa passada, ~1.4
+  ms. O resto do _process por quadro: car.gd 0.8, som_jogo 0.6, main 0.4.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
@@ -1481,6 +1486,20 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   (90 km/h, o rival virando pra cima do jogador 3 s): antes subida 6.1 m/s e
   capotou (up.y -0.66), agora 1.4 m/s e up.y >= 0.97; batida de trás agora
   empurra a 42.6 km/h (era 26: a correção não freia mais o empurrão).
+  2ª rodada (prints do Matheus: roda com roda ainda bugava, o Storm ficou em
+  pé). A CAUSA DE VERDADE: o apply_impulse do Godot só entra no passo
+  seguinte (linear_velocity não muda na hora), então cada contato e cada
+  passada reaplicava o impulso inteiro em cima da velocidade velha (até 8x
+  o necessário). Agora a conta usa velocidades locais e grava 1 vez no fim.
+  Mais: o atrito entre carros é só horizontal; a correção de posição nunca
+  afunda o de baixo no chão (o Godot devolvia ele com velocidade: bomba de
+  energia), só levanta o de cima; a batida não joga ninguém pra cima mais
+  que 1 m/s por passo (NOSSO). Testado e NÃO adotado: rodas como esferas
+  na batida (piorou: 5.4 m/s), empurrão na altura do centro de massa,
+  normal sempre horizontal. teste_batida_carros: lado a lado 2.3 m/s, de
+  lado meio carro à frente 1.4 m/s (up.y 0.98); caindo em cima (1.2 m) só
+  relatório: 1.4 a 5.8 m/s conforme o estado de antes, sem virar de cabeça
+  pra baixo. Batida de trás empurra a 25 km/h (a correção ficou certa).
 
 ## Pendente / ideias
 

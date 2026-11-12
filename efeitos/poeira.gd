@@ -336,34 +336,84 @@ func _nuvem(e: Dictionary, p: Vector3, idade: float, ini: float, alfa: float, co
 func _process(delta: float) -> void:
 	if mm == null:
 		return
-	var i := 0
-	while i < n_pos.size():
-		n_idade[i] += delta
-		if n_idade[i] >= n_vida[i]:
-			_tira(i)
-		else:
-			i += 1
+	# envelhece e tira as mortas numa passada só (compacta e redimensiona 1
+	# vez; tirar uma por uma fazia 10 resize por nuvem). A ordem das vivas
+	# muda em relação ao jeito antigo (troca com a última): só a ordem de
+	# desenho, nuvens transparentes iguais
+	var w := 0
+	var total := n_pos.size()
+	for i in total:
+		var idade := n_idade[i] + delta
+		if idade >= n_vida[i]:
+			continue
+		if w != i:
+			n_pos[w] = n_pos[i]
+			n_vida[w] = n_vida[i]
+			n_max[w] = n_max[i]
+			n_ini[w] = n_ini[i]
+			n_alvo[w] = n_alvo[i]
+			n_a0[w] = n_a0[i]
+			n_cor[w] = n_cor[i]
+			n_cel[w] = n_cel[i]
+			n_agua[w] = n_agua[i]
+		n_idade[w] = idade
+		w += 1
+	if w != total:
+		n_pos.resize(w)
+		n_idade.resize(w)
+		n_vida.resize(w)
+		n_max.resize(w)
+		n_ini.resize(w)
+		n_alvo.resize(w)
+		n_a0.resize(w)
+		n_cor.resize(w)
+		n_cel.resize(w)
+		n_agua.resize(w)
 	var n := n_pos.size()
 	if buf.size() != max_nuvens * 20:
 		buf.resize(max_nuvens * 20)
 		buf_agua.resize(max_nuvens * 20)
 	var np := 0
 	var na := 0
+	# grava direto no buffer (escala nas 3 diagonais, posição, cor, célula):
+	# até nov/2026 montava 3 arrays por nuvem por quadro e a poeira dos 8
+	# carros custava ~3.9 ms por quadro (tests/medir_cpu.gd)
 	for k in n:
 		var tg := clampf(n_idade[k] / n_max[k], 0.0, 1.0)
-		var f := 1.0 - pow(1.0 - tg, 4.0)
+		var u := 1.0 - tg
+		var f := 1.0 - u * u * u * u
 		var tam := (n_ini[k] * (1.0 - f) + n_alvo[k] * f) * escala
 		var t := n_idade[k] / n_vida[k]
 		var a := n_a0[k] * (1.0 - t * t)
 		var p := n_pos[k]
-		var agua_k := n_agua[k] == 1 and mm_agua != null
 		var c := n_cor[k]
-		var val := [tam, p.x, p.y, p.z, c.r, c.g, c.b, a, n_cel[k]]
-		if agua_k:
-			_grava(true, na * 20, val)
+		if n_agua[k] == 1 and mm_agua != null:
+			var o := na * 20
+			buf_agua[o] = tam
+			buf_agua[o + 5] = tam
+			buf_agua[o + 10] = tam
+			buf_agua[o + 3] = p.x
+			buf_agua[o + 7] = p.y
+			buf_agua[o + 11] = p.z
+			buf_agua[o + 12] = c.r
+			buf_agua[o + 13] = c.g
+			buf_agua[o + 14] = c.b
+			buf_agua[o + 15] = a
+			buf_agua[o + 16] = n_cel[k]
 			na += 1
 		else:
-			_grava(false, np * 20, val)
+			var o := np * 20
+			buf[o] = tam
+			buf[o + 5] = tam
+			buf[o + 10] = tam
+			buf[o + 3] = p.x
+			buf[o + 7] = p.y
+			buf[o + 11] = p.z
+			buf[o + 12] = c.r
+			buf[o + 13] = c.g
+			buf[o + 14] = c.b
+			buf[o + 15] = a
+			buf[o + 16] = n_cel[k]
 			np += 1
 	if np > 0:
 		mm.buffer = buf
@@ -372,46 +422,6 @@ func _process(delta: float) -> void:
 		if na > 0:
 			mm_agua.buffer = buf_agua
 		mm_agua.visible_instance_count = na
-
-
-## uma nuvem no buffer da MultiMesh (escala, posição, cor, célula do atlas),
-## gravada direto no membro (um Packed*Array passado como parâmetro copia)
-func _grava(agua_b: bool, o: int, val: Array) -> void:
-	var idx := [o, o + 5, o + 10, o + 3, o + 7, o + 11, o + 12, o + 13, o + 14, o + 15, o + 16]
-	var vs := [val[0], val[0], val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7], val[8]]
-	if agua_b:
-		for j in idx.size():
-			buf_agua[idx[j]] = vs[j]
-	else:
-		for j in idx.size():
-			buf[idx[j]] = vs[j]
-
-
-func _tira(i: int) -> void:
-	var u := n_pos.size() - 1
-	n_pos[i] = n_pos[u]
-	n_idade[i] = n_idade[u]
-	n_vida[i] = n_vida[u]
-	n_max[i] = n_max[u]
-	n_ini[i] = n_ini[u]
-	n_alvo[i] = n_alvo[u]
-	n_a0[i] = n_a0[u]
-	n_cor[i] = n_cor[u]
-	n_cel[i] = n_cel[u]
-	n_agua[i] = n_agua[u]
-	n_agua.resize(u)
-	n_pos.resize(u)
-	n_idade.resize(u)
-	n_vida.resize(u)
-	n_max.resize(u)
-	n_ini.resize(u)
-	n_alvo.resize(u)
-	n_a0.resize(u)
-	n_cor.resize(u)
-	n_cel.resize(u)
-
-
-## quantas nuvens vivas (testes)
 func vivas() -> int:
 	return n_pos.size()
 

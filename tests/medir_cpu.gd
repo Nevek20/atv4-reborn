@@ -20,9 +20,11 @@ var proc: Array = []
 var real: Array = []
 var _us := 0
 var nos := {}
+var procs: Array = []
+var t_proc := {}
 var t_nos := {}
 var etapa := 0
-var etapas := ["tudo ligado", "sem batida carro-carro", "sem IA (rivais sem dirigir)", "sem _process dos carros (visual)", "sem o script de física dos carros", "por nó (chamado na mão)"]
+var etapas := ["tudo ligado", "sem batida carro-carro", "sem IA (rivais sem dirigir)", "sem _process dos carros (visual)", "sem o script de física dos carros", "por nó (chamado na mão)", "_process por script (chamado na mão)"]
 var resultado: Array = []
 
 
@@ -68,6 +70,13 @@ func _physics_process(dt: float) -> bool:
 						var t0 := Time.get_ticks_usec()
 						nos[k]._physics_process(dt)
 						t_nos[k] += Time.get_ticks_usec() - t0
+			if etapa == 6:
+				for n in procs:
+					if is_instance_valid(n):
+						var t0 := Time.get_ticks_usec()
+						n._process(dt)
+						var chave: String = n.get_script().resource_path.get_file()
+						t_proc[chave] = t_proc.get(chave, 0) + Time.get_ticks_usec() - t0
 			eu.r = ia.jogador
 			eu.vigia = ia.vigia_jogador
 			if etapa != 2:
@@ -103,6 +112,18 @@ func _ligar(k: int) -> void:
 		4:
 			for x in [main.car] + ia.rivais.map(func(y): return y.car):
 				x.set_physics_process(false)
+		6:
+			for nome in nos:
+				if nos[nome]:
+					nos[nome].set_physics_process(true)
+			nos = {}
+			var pilha: Array = [root]
+			while not pilha.is_empty():
+				var n: Node = pilha.pop_back()
+				pilha.append_array(n.get_children())
+				if n != self and n.get_script() and n.has_method("_process") and n.is_processing():
+					procs.append(n)
+					n.set_process(false)
 		5:
 			for x in [main.car] + ia.rivais.map(func(y): return y.car):
 				x.set_physics_process(true)
@@ -126,6 +147,12 @@ func _fechar() -> void:
 	var f := _stat(fis)
 	var p := _stat(proc)
 	var r := _stat(real)
+	if etapa == 6:
+		var nq: float = maxf(fis.size(), 1)
+		var ks: Array = t_proc.keys()
+		ks.sort_custom(func(x, y): return t_proc[x] > t_proc[y])
+		for k in ks:
+			resultado.append("  _process %-40s %6.3f ms por quadro" % [k, t_proc[k] / 1000.0 / nq])
 	if etapa == 5:
 		var n: float = maxf(fis.size(), 1)
 		for k in t_nos:

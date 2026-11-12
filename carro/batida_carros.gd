@@ -31,6 +31,7 @@ const PASSADAS := 2
 const EMPURRA := 0.4
 const EMPURRA_MAX := 0.05         # m por passo
 const FOLGA := 0.01
+const SOBE_MAX := 1.0            # m/s por passo
 const NORMAL_DE_CIMA := 0.7       # |n.y| acima disso o contato é de cima
 const MAX_CONTATOS := 4
 const PERTO := 9.0                # m entre as origens pra testar o par
@@ -124,41 +125,72 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 		if -vn0 > forte:
 			forte = -vn0
 			forte_c = c
+	# velocidades locais: o apply_impulse do Godot só entra no próximo passo
+	# (linear_velocity não muda na hora). Até nov/2026 cada contato e cada
+	# passada reaplicava o impulso inteiro em cima da velocidade velha: até 8x
+	# o necessário, e os carros saíam voando / ficavam em pé (prints do
+	# Matheus; teste_batida_carros, um caindo em cima do outro)
 	var va := a.linear_velocity
 	var vb := b.linear_velocity
+	var wa := a.angular_velocity
+	var wb := b.angular_velocity
+	var va0 := va
+	var vb0 := vb
 	for _k in PASSADAS:
 		for c in cs:
 			var p: Vector3 = c[0]
 			var n: Vector3 = c[1]
 			var ra := p - ca
 			var rb := p - cb
-			var vrel := _vrel(a, b, p, ca, cb)
+			var vrel := (va + wa.cross(ra)) - (vb + wb.cross(rb))
 			var vn := vrel.dot(n)
 			if vn >= 0.0:
 				continue            # já se afastando
 			var k := ma_inv + mb_inv + n.dot((ia_inv * ra.cross(n)).cross(ra)) + n.dot((ib_inv * rb.cross(n)).cross(rb))
-			var j := -(1.0 + (e if _k == 0 else 0.0)) * vn / k
-			a.apply_impulse(n * j, p - a.global_position)
-			b.apply_impulse(-n * j, p - b.global_position)
+			var jn := -(1.0 + (e if _k == 0 else 0.0)) * vn / k
+			va += n * jn * ma_inv
+			vb -= n * jn * mb_inv
+			wa += ia_inv * ra.cross(n * jn)
+			wb -= ib_inv * rb.cross(n * jn)
 			# atrito (Coulomb, até mu x j)
-			vrel = _vrel(a, b, p, ca, cb)
+			vrel = (va + wa.cross(ra)) - (vb + wb.cross(rb))
 			var vt := vrel - n * vrel.dot(n)
+			vt.y = 0.0                  # atrito só na horizontal (raspando de lado não levanta)
 			var vtl := vt.length()
 			if vtl > 1e-4:
 				var t := vt / vtl
 				var kt := ma_inv + mb_inv + t.dot((ia_inv * ra.cross(t)).cross(ra)) + t.dot((ib_inv * rb.cross(t)).cross(rb))
-				var jt := minf(vtl / kt, mu * j)
-				a.apply_impulse(-t * jt, p - a.global_position)
-				b.apply_impulse(t * jt, p - b.global_position)
+				var jt := minf(vtl / kt, mu * jn)
+				va -= t * jt * ma_inv
+				vb += t * jt * mb_inv
+				wa -= ia_inv * ra.cross(t * jt)
+				wb += ib_inv * rb.cross(t * jt)
 			contatos += 1
+	# NOSSO: a batida entre carros não joga ninguém pra cima mais que SOBE_MAX
+	# por passo (um caindo em cima do outro lançava o de cima)
+	va.y = minf(va.y, maxf(va0.y, 0.0) + SOBE_MAX)
+	vb.y = minf(vb.y, maxf(vb0.y, 0.0) + SOBE_MAX)
+	a.linear_velocity = va
+	b.linear_velocity = vb
+	a.angular_velocity = wa
+	b.angular_velocity = wb
+	va = va0
+	vb = vb0
 	# penetração: separa mexendo a posição (o contato mais fundo), pela massa
 	var fundo: Array = cs[0]
 	var corr := minf(EMPURRA * maxf(float(fundo[2]) - FOLGA, 0.0), EMPURRA_MAX)
 	if corr > 0.0:
 		var nn: Vector3 = fundo[1]
 		var soma := ma_inv + mb_inv
-		a.global_position += nn * corr * ma_inv / soma
-		b.global_position -= nn * corr * mb_inv / soma
+		var da := nn * corr * ma_inv / soma
+		var db := -nn * corr * mb_inv / soma
+		# a parte vertical só levanta o de cima, nunca afunda o de baixo no chão
+		# (o Godot devolvia o de baixo com velocidade: bomba de energia)
+		var dy := nn.y * corr
+		da.y = maxf(dy, 0.0)
+		db.y = maxf(-dy, 0.0)
+		a.global_position += da
+		b.global_position += db
 	if forte <= 0.0:
 		return
 	var pf: Vector3 = forte_c[0]
