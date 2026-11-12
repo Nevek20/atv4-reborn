@@ -47,13 +47,14 @@ func _physics_process(dt: float) -> bool:
 				fase = 9
 				return false
 			eu = {"nome": "Você", "car": main.car, "r": ia.jogador, "desvio": 0.0, "desvio0": ia._lateral(main.car.global_position, ia.jogador.prog + ia.s_linha), "prog0": ia.jogador.prog, "skill": 1.0, "preso": 0.0,
-				"re": 0.0, "longe": 0.0, "capotado": 0.0, "repostos": 0, "res": 0}
+				"re": 0.0, "capotado": 0.0, "repostos": 0, "res": 0}
 			fase = 1
 			q = 0
 		1:
 			if c.estado == c.CONTANDO:
 				return false
 			eu.r = ia.jogador
+			eu.vigia = ia.vigia_jogador     # a reposição do jogo do jogador (pista/reposicao.gd)
 			ia._dirigir(eu, main.car, dt)
 			var voltas := int(OS.get_environment("VOLTAS")) if OS.has_environment("VOLTAS") else 1
 			var todos: bool = ia.rivais.all(func(x): return x.r.prog >= voltas * ia.comp)
