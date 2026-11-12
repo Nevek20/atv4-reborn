@@ -52,9 +52,8 @@ const DESVIO_MAX := 6.0          # m: o desvio não se afasta mais que isso da l
 const DESVIO_VEL := 4.0          # m/s: quão rápido muda de lado
 # VehicleLOD.xml (Buggy_Generic/Truck_Generic, Vehicle_AI): o jogo troca o
 # modelo dos rivais pela fração da tela (High 0.24, Mid 0.055, Low 0.0175).
-# Os modelos 2K/1K/500 ainda não são gerados: NOSSO, cada peça some quando
-# ela mesma cai abaixo do Low (quase nada some: as malhas são por material e
-# pegam o carro todo). Sombra: uma cópia da carroceria (body_mi) juntada numa
+# Os modelos 2K/1K/500 ainda não são gerados: NOSSO, o carro inteiro some
+# quando cai abaixo do Low (pelo tamanho da carroceria; todas as peças juntas). Sombra: uma cópia da carroceria (body_mi) juntada numa
 # superfície só, só sombra (1 desenho em vez de 55); o jogo faz a sombra com
 # um modelo próprio, Models_Shadow/Shadow_Buggy_NN (não portado)
 const LOD_LOW := 0.0175
@@ -239,6 +238,12 @@ func criar() -> void:
 
 ## LOD e sombra dos rivais (ver LOD_LOW)
 func _lod(c: Node) -> void:
+	# o carro inteiro some junto, pelo tamanho do maior pedaço (a carroceria):
+	# até nov/2026 cada peça usava o próprio tamanho e a suspensão e as rodas
+	# sumiam antes, sobrando a carroceria voando (prints do Matheus). O jogo
+	# troca o modelo inteiro (2K/1K/500 têm rodas)
+	var geos: Array = []
+	var r_carro := 0.0
 	var pilha: Array = [c]
 	while not pilha.is_empty():
 		var n: Node = pilha.pop_back()
@@ -246,10 +251,11 @@ func _lod(c: Node) -> void:
 		if not (n is GeometryInstance3D) or not (n is VisualInstance3D):
 			continue
 		var g := n as GeometryInstance3D
-		var r: float = g.get_aabb().size.length() * 0.5 * absf((g as Node3D).global_transform.basis.get_scale().x)   # o espelho tem escala -1
-		if r <= 0.0:
-			continue
-		g.visibility_range_end = r / (LOD_LOW * LOD_TAN)
+		geos.append(g)
+		r_carro = maxf(r_carro, g.get_aabb().size.length() * 0.5 * absf((g as Node3D).global_transform.basis.get_scale().x))   # o espelho tem escala -1
+	for g in geos:
+		if r_carro > 0.0:
+			g.visibility_range_end = r_carro / (LOD_LOW * LOD_TAN)
 		g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var body: MeshInstance3D = c.get("body_mi")
 	if body and body.mesh:

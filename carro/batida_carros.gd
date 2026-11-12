@@ -18,12 +18,20 @@ extends Node
 ##
 ## NOSSO (o resolvedor do jogo não foi portado; o do mundo é o do Godot):
 ## impulso com restituição e atrito médios dos dois (RigidBody Restitution e
-## Friction do XML), 2 passadas, empurrão de 20% da penetração por passo
-## acima de 1 cm, no máximo 4 contatos por par (os mais fundos).
+## Friction do XML), 2 passadas, no máximo 4 contatos por par (os mais
+## fundos). A velocidade só cancela a aproximação (+ restituição na 1ª
+## passada); a penetração acima de 1 cm é desfeita MEXENDO A POSIÇÃO (EMPURRA
+## dela por passo, até EMPURRA_MAX), pela massa de cada um, sem virar
+## velocidade. Até nov/2026 a penetração virava velocidade (20%/passo): lado
+## a lado o contato durava vários passos, cada um somava empurrão (parte pra
+## cima: as esferas ficam em alturas diferentes) e os carros saíam voando
+## (prints do Matheus; teste_batida_carros, lado a lado).
 
 const PASSADAS := 2
-const EMPURRA := 0.2
+const EMPURRA := 0.4
+const EMPURRA_MAX := 0.05         # m por passo
 const FOLGA := 0.01
+const NORMAL_DE_CIMA := 0.7       # |n.y| acima disso o contato é de cima
 const MAX_CONTATOS := 4
 const PERTO := 9.0                # m entre as origens pra testar o par
 
@@ -47,10 +55,17 @@ func esferas(car) -> Array:
 	return out
 
 
-## sem colisão do Godot entre os cascos de mundo de dois carros
+## sem colisão do Godot entre os cascos de mundo de dois carros, e as rodas
+## (raio e esfera do car.gd) de um não pisam no outro: carro com carro é só
+## pelas esferas do VehicleVehicle. Até nov/2026 a roda subia no casco do
+## vizinho lado a lado e o carro capotava/voava (teste_batida_carros).
 static func separar(a: PhysicsBody3D, b: PhysicsBody3D) -> void:
 	a.add_collision_exception_with(b)
 	b.add_collision_exception_with(a)
+	if "outros_carros" in a and not a.outros_carros.has(b.get_rid()):
+		a.outros_carros.append(b.get_rid())
+	if "outros_carros" in b and not b.outros_carros.has(a.get_rid()):
+		b.outros_carros.append(a.get_rid())
 
 
 func _physics_process(dt: float) -> void:
@@ -78,7 +93,17 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 			if pen <= 0.0 or dist < 1e-5:
 				continue
 			var n := d / dist                      # de B pra A
-			cs.append([pb + n * (float(eb[1]) - pen * 0.5), n, pen])
+			var pc := pb + n * (float(eb[1]) - pen * 0.5)
+			# NOSSO: contato de lado empurra só na horizontal (a normal de
+			# esferas em alturas diferentes é inclinada e o nosso resolvedor
+			# fazia um carro subir no outro lado a lado, a cada passo um
+			# pouco; o resolvedor do jogo não foi portado). De cima (|n.y| >=
+			# NORMAL_DE_CIMA, cair em cima do outro) fica como está.
+			if absf(n.y) < NORMAL_DE_CIMA:
+				var h := Vector3(n.x, 0.0, n.z)
+				if h.length_squared() > 1e-6:
+					n = h.normalized()
+			cs.append([pc, n, pen])
 	if cs.is_empty():
 		return
 	cs.sort_custom(func(x, y): return x[2] > y[2])
@@ -109,14 +134,10 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 			var rb := p - cb
 			var vrel := _vrel(a, b, p, ca, cb)
 			var vn := vrel.dot(n)
-			var bias := EMPURRA * maxf(float(c[2]) - FOLGA, 0.0) / dt
-			var alvo := -(1.0 + e) * minf(vn, 0.0) + bias
-			if alvo <= 0.0:
-				continue
+			if vn >= 0.0:
+				continue            # já se afastando
 			var k := ma_inv + mb_inv + n.dot((ia_inv * ra.cross(n)).cross(ra)) + n.dot((ib_inv * rb.cross(n)).cross(rb))
-			var j := maxf((alvo - maxf(vn, 0.0)) / k, 0.0)
-			if j <= 0.0:
-				continue
+			var j := -(1.0 + (e if _k == 0 else 0.0)) * vn / k
 			a.apply_impulse(n * j, p - a.global_position)
 			b.apply_impulse(-n * j, p - b.global_position)
 			# atrito (Coulomb, até mu x j)
@@ -130,6 +151,14 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 				a.apply_impulse(-t * jt, p - a.global_position)
 				b.apply_impulse(t * jt, p - b.global_position)
 			contatos += 1
+	# penetração: separa mexendo a posição (o contato mais fundo), pela massa
+	var fundo: Array = cs[0]
+	var corr := minf(EMPURRA * maxf(float(fundo[2]) - FOLGA, 0.0), EMPURRA_MAX)
+	if corr > 0.0:
+		var nn: Vector3 = fundo[1]
+		var soma := ma_inv + mb_inv
+		a.global_position += nn * corr * ma_inv / soma
+		b.global_position -= nn * corr * mb_inv / soma
 	if forte <= 0.0:
 		return
 	var pf: Vector3 = forte_c[0]

@@ -1416,6 +1416,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   partir do último ponto conhecido do carro (o rastreio não pula: quem cai
   na arquibancada volta pra onde saiu da pista) e cair de 1 m. Os rivais
   usam a mesma função nas reposições deles (capotado, longe, travado).
+- LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
+  a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
+  agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
 - Reposição automática fora das caixas (nov/2026, pista/reposicao.gd,
   teste_reposicao_auto; docs/engenharia_reversa.md, Reposição automática):
   porta do objeto de progresso de cada corredor (update 0x4d3658), igual pro
@@ -1452,6 +1455,18 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   penetração acima de 1 cm, até 4 contatos por par). Teste: rival a 50 km/h
   na traseira do jogador parado: penetração máx 0.105 m, jogador empurrado
   a 26 km/h, 4 lasquinhas do rival, som Vehicle.
+  Carros voando (prints do Matheus, nov/2026: 4 carros se batendo e 2 lado a
+  lado saíram voando). 3 causas, todas do lado NOSSO: (1) o raio e a esfera
+  das rodas (car.gd) pisavam no casco de mundo do OUTRO carro (a exceção de
+  colisão do Godot não vale pra consulta): agora excluem os outros carros
+  (car.outros_carros, preenchido pelo separar); (2) a penetração virava
+  velocidade (20%/passo): agora é desfeita na posição (40%/passo, até 5 cm)
+  e a velocidade só cancela a aproximação; (3) contato de lado com a normal
+  inclinada (esferas em alturas diferentes) fazia um subir no outro: de lado
+  (|n.y| < 0.7) a normal fica horizontal. teste_batida_carros lado a lado
+  (90 km/h, o rival virando pra cima do jogador 3 s): antes subida 6.1 m/s e
+  capotou (up.y -0.66), agora 1.4 m/s e up.y >= 0.97; batida de trás agora
+  empurra a 42.6 km/h (era 26: a correção não freia mais o empurrão).
 
 ## Pendente / ideias
 

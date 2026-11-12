@@ -140,7 +140,7 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 		var q := PhysicsShapeQueryParameters3D.new()
 		q.shape = w.esfera_teste
 		q.transform = Transform3D(Basis(), global_transform * c)
-		q.exclude = [get_rid()]
+		q.exclude = [get_rid()] + outros_carros
 		var info := space.get_rest_info(q)
 		# roda de lado na cerca: o jogo mede pelo 0x153390 (0x154088, rodas)
 		# antes do contato; quebrou, a esfera não liga (senão vira parede)
@@ -822,7 +822,7 @@ func _physics_process(dt: float) -> void:
 		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
 		var reach: float = (w.max - w.min) + w.r + 0.05
 		var q := PhysicsRayQueryParameters3D.create(top, top - up * reach)
-		q.exclude = [get_rid()] + ignorar
+		q.exclude = [get_rid()] + ignorar + outros_carros
 		var hit := space.intersect_ray(q)
 		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
 		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):

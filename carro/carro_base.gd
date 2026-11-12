@@ -496,6 +496,7 @@ var test_input = null         # {thr, brk, steer} pra testes automáticos
 var som_3d := false           # rival da IA (pista/ia.gd): motor e pneus em som 3D preso no carro
 var direcao_direta := false   # rival da IA: a direção vai direto (na RAM os rivais têm cru = suavizado)
 var _contato_carro := {}      # batida com outro carro neste passo (carro/batida_carros.gd)
+var outros_carros: Array = []  # RIDs dos outros carros: as rodas não pisam neles (batida_carros.separar)
 
 
 ## batida com outro carro: entra no som (patch Vehicle) e na tremida da

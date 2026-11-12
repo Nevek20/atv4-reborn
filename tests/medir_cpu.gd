@@ -17,6 +17,8 @@ var eu := {}
 var t := 0.0
 var fis: Array = []
 var proc: Array = []
+var real: Array = []
+var _us := 0
 var etapa := 0
 var etapas := ["tudo ligado", "sem batida carro-carro", "sem IA (rivais sem dirigir)", "sem _process dos carros (visual)", "sem o script de física dos carros"]
 var resultado: Array = []
@@ -52,6 +54,10 @@ func _physics_process(dt: float) -> bool:
 			if t > 3.0:            # deixa a largada passar
 				fis.append(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0)
 				proc.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
+				var agora := Time.get_ticks_usec()
+				if _us > 0:
+					real.append((agora - _us) / 1000.0)
+				_us = agora
 			eu.r = ia.jogador
 			eu.vigia = ia.vigia_jogador
 			if etapa != 2:
@@ -68,6 +74,8 @@ func _physics_process(dt: float) -> bool:
 				t = 0.0
 				fis.clear()
 				proc.clear()
+				real.clear()
+				_us = 0
 	return false
 
 
@@ -90,8 +98,9 @@ func _ligar(k: int) -> void:
 func _fechar() -> void:
 	var f := _stat(fis)
 	var p := _stat(proc)
-	resultado.append("%-34s física %5.2f ms/passo (pior %5.2f)   process %5.2f ms/quadro (pior %5.2f)" % [
-		etapas[etapa], f[0], f[1], p[0], p[1]])
+	var r := _stat(real)
+	resultado.append("%-34s física %5.2f ms/passo (pior %5.2f)   process %5.2f ms/quadro (pior %5.2f)   quadro real %5.2f ms (pior %5.2f)" % [
+		etapas[etapa], f[0], f[1], p[0], p[1], r[0], r[1]])
 
 
 static func _stat(a: Array) -> Array:
