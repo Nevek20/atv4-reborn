@@ -1461,8 +1461,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   (mWarningStray/mCheatingStray/mCheatingProgress/mBackwardLimit, o botão
   com mRespotSpeed 40 e a mensagem Too_Fast_For_Respot) e o que ele faz na
   hora (tela, câmera). Hoje só as caixas e a regra NOSSA dos rivais.
-- RX01, falta: LOD das árvores,
-  as 2 luzes direcionais (câmera de introdução feita, seção Corrida). A tremida da batida
+- RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).
+  As 2 luzes direcionais (cLightDirectional) NÃO existem no jogo (nov/2026):
+  são só do editor, como as cercas; o exe não tem o nome da classe (toda
+  entidade usada tem). Brancas, quase horizontais, uma em cada ponta do
+  mapa: devem ter servido pra assar a luz. A luz da corrida é só a do
+  Environment.xml, já portada. FECHADO (docs/engenharia_reversa.md). A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.
 - Som do motor (melhoria nossa, plano combinado com o Matheus): o jogo só

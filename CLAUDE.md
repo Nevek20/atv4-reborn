@@ -171,6 +171,8 @@ Pista RX01
 - Terreno e material do stream do jogo (conferidos com a RAM). Objetos vêm
   do evento (#def5772a + RALLYCROSS.bin); instâncias são espelhadas.
 - Chão com luz assada: sem luz do Godot. PS2 sem tonemap; névoa linear.
+- Luz da pista = só o Environment.xml. As 2 cLightDirectional e as cFence
+  são do editor (o exe não tem as classes): não portar.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
 - IA: o AIT é volta gravada (linha +0x00); o +0x24 NÃO é a velocidade da
@@ -214,7 +216,7 @@ Frota
 ## Pendente / ideias
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: 2 luzes direcionais, LOD das árvores. Reposição: falta quando o
+- RX01: LOD das árvores. Reposição: falta quando o
   jogo repõe sozinho fora das caixas (Logic: Stray, Backward, RespotSpeed).
 - IA: ler acelerador/freio do piloto do exe (0x5aea98/0x5af920), LOD com
   os modelos 2K/1K/500 do jogo.

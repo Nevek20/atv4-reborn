@@ -1074,7 +1074,20 @@ vazios). Tudo vem do evento:
   bantams no #def5772a. 2 das 6 correntes não têm peça gravada e não
   aparecem no jogo (conferido pelo Matheus).
 - Não portado: LOD (TREE_*_LOD1), cor de luz por instância, cIntroCamera,
-  cInstantRespotBox (reposição), cGenTrigger, cCrowdEffectBox, as 2 luzes.
+  cGenTrigger, cCrowdEffectBox (cIntroCamera e cInstantRespotBox: feitos,
+  seção Corrida).
+- As 2 cLightDirectional (nov/2026): só do EDITOR, como as cercas. Toda
+  entidade que o jogo usa tem o nome no exe (cIntroCamera, cStartPosition,
+  cInstantRespotBox, cCrowdEffectBox, cGenTrigger); "cLightDirectional" e
+  até "Directional" não aparecem nenhuma vez, e o hash do tipo (9bcf9905)
+  também não (o carregador acha a classe pelo nome; nenhum tipo tem o hash
+  no exe). Dados: pos (40.3, 247.4, 1455.7) e (999.3, 242.1, 1494.7), nas
+  2 pontas do mapa, dir quase horizontal (+x e -x, y ~0.02), tamanho 10,
+  bloco 9be2d228 com 4 x 1.0 (cor branca) e b52636d6 = 1.0; ebdb6098 /
+  0d69da5d / 6fe6fb71 são ids do editor (toda entidade tem). Provável luz
+  do editor pra assar a luz no chão e nas cores dos objetos. O
+  cLightManagerATV (0x330b50, global 0x800d38) é do menu (garagem), não da
+  pista. A luz da corrida é só o Environment.xml (seção Luz e névoa).
 
 - Camada do lote de pingu (2ª textura pelo 2º UV), como o GS desenha:
   - O registro do lote (0x50 bytes em 0xD0 + i·0x50) passa pelo 0x289228:
