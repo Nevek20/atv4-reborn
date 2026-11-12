@@ -185,7 +185,7 @@ func _ready() -> void:
 	layer.add_child(hud)
 	fps_label = Label.new()
 	fps_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	fps_label.offset_left = -140
+	fps_label.offset_left = -420
 	fps_label.offset_right = -16
 	fps_label.offset_top = 12
 	fps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -193,6 +193,7 @@ func _ready() -> void:
 	fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	fps_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(fps_label)
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 	_make_menu(layer)
 	cam_piloto = CameraPiloto.new()
 	cam_piloto.name = "CameraPiloto"
@@ -368,6 +369,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				hud.visible = not hud.visible
 			KEY_F2:
 				fps_label.visible = not fps_label.visible
+				# mede o tempo de desenho na CPU e na GPU (só com o F2 ligado)
+				RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 			KEY_C:
 				_troca_camera()
 			KEY_G:
@@ -511,7 +514,7 @@ func _process(delta: float) -> void:
 		ceu.seguir(cam, delta)
 	if fps_label.visible:
 		var f := Engine.get_frames_per_second()
-		fps_label.text = "%d FPS" % f
+		fps_label.text = "%d FPS" % f + _medidor(delta)
 		fps_label.add_theme_color_override("font_color",
 			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
 	if not hud.visible:
@@ -589,6 +592,34 @@ func ground_normal(x: float, z: float) -> Vector3:
 	var e := 0.5
 	return Vector3(terrain.height_at(x - e, z) - terrain.height_at(x + e, z), 2.0 * e,
 		terrain.height_at(x, z - e) - terrain.height_at(x, z + e)).normalized()
+
+
+## F2: onde vai o tempo do quadro (média de 0.5 s). process = o monitor do
+## Godot (o quadro todo), física = um passo de 50 Hz (os carros), desenho =
+## CPU montando e GPU desenhando, chamadas = draw calls do quadro
+var _med := {"n": 0, "t": 0.0, "proc": 0.0, "fis": 0.0, "cpu": 0.0, "gpu": 0.0, "txt": ""}
+func _medidor(delta: float) -> String:
+	var vp := get_viewport().get_viewport_rid()
+	_med.n += 1
+	_med.t += delta
+	_med.proc += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	_med.fis += Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+	_med.cpu += RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu()
+	_med.gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
+	if _med.t >= 0.5:
+		var n: float = _med.n
+		var rivais: int = corrida.ia.rivais.size() if corrida and corrida.ia else 0
+		_med.txt = "\nquadro %.2f ms   (Godot: process %.2f ms)\nfísica %.2f ms por passo de 50 Hz\ndesenho CPU %.2f ms   GPU %.2f ms\nchamadas %d   objetos %d   rivais %d" % [
+			_med.t / n * 1000.0, _med.proc / n, _med.fis / n, _med.cpu / n, _med.gpu / n,
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), rivais]
+		_med.n = 0
+		_med.t = 0.0
+		_med.proc = 0.0
+		_med.fis = 0.0
+		_med.cpu = 0.0
+		_med.gpu = 0.0
+	return _med.txt
 
 
 ## recomeço da corrida (Enter): carro no lugar, sujeira e câmeras zeradas,

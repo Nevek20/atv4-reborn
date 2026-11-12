@@ -161,3 +161,6 @@ funções que contêm o endereço ou referenciam a string.
 Arquivos do jogo ficam fora do repo, na pasta de engenharia reversa do
 Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia reversa`
 (`unpacked\` com other/raw/gob/xml, o exe, os scripts antigos).
+
+No jogo: F2 = FPS + onde vai o tempo (quadro, física por passo, desenho CPU/GPU,
+chamadas de desenho, rivais), média de 0.5 s.
