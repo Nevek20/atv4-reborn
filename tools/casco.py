@@ -22,7 +22,8 @@ exatamente na superfície de uma esfera, num caso 3.4 cm fora dos planos. Os
 planos ficam no .json só de referência.
 
 Saída: data/vehicles/<id>_casco.json com planos, esferas e vértices do
-poliedro dos planos (frame do modelo do jogo).
+poliedro dos planos (frame do modelo do jogo) e esferas_carro (as esferas do
+VehicleVehicle.hsc da mesma pasta: carro contra carro, pista/batida_carros.gd).
 
 Uso: python tools/casco.py <unpacked> [--tabela]
 """
@@ -115,6 +116,13 @@ def main():
                 "planos": [[round(x, 5) for x in p] for p in pl],
                 "esferas": [[round(x, 5) for x in e] for e in es],
                 "vertices": [[round(float(x), 5) for x in p] for p in v]}
+        # carro contra carro: o VehicleVehicle.hsc da mesma pasta (o par 2 x 2
+        # do exe, 0x1529d0, cria um contato por ponto como o do mundo)
+        vv = "Vehicles/%s/Collision/%s/VehicleVehicle.hsc" % (classe, nome)
+        if vv.lower() in indice:
+            pv, ev = hsc(bytes_do_arquivo(a.unpacked, indice, vv))
+            info["fonte_carro"] = vv
+            info["esferas_carro"] = [[round(x, 5) for x in e] for e in ev]
         saida = os.path.join(PROJ, "data", "vehicles", carro + "_casco.json")
         json.dump(info, open(saida, "w", newline="\n"), separators=(",", ":"))
         E = np.array(es)

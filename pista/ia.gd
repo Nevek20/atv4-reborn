@@ -73,6 +73,7 @@ var s_linha := 0.0               # onde a linha de chegada cai na linha da IA
 var rivais: Array = []           # {car, nome, skill, numero, r (rastreio), ...}
 var jogador := {}                # rastreio do jogador
 var catchup := {}
+var batidas                      # carro/batida_carros.gd
 
 
 func montar(c) -> bool:
@@ -95,6 +96,10 @@ func montar(c) -> bool:
 	for i in ls.size():
 		centro_lat.append(_lateral(c.mundo(ls[i].centro), acc[i]))
 		meia.append((absf(ls[i].largura[0]) + absf(ls[i].largura[1])) * 0.5)
+	batidas = preload("res://carro/batida_carros.gd").new()
+	batidas.name = "BatidaCarros"
+	batidas.carros = func(): return [main.car] + rivais.map(func(y): return y.car)
+	add_child(batidas)
 	var ev: Dictionary = dados.eventos.get("RALLYCROSS", {})
 	catchup = dados.catchup.get(ev.get("NORMAL", "STDH_04"), {})
 	return true
@@ -214,6 +219,10 @@ func criar() -> void:
 		c.objetos = main.objetos
 		c.name = "Rival%d" % (k + 1)
 		main.add_child(c)
+		# carro com carro só pelas esferas do VehicleVehicle (batida_carros.gd)
+		batidas.separar(c, main.car)
+		for y in rivais:
+			batidas.separar(c, y.car)
 		var pl: Dictionary = pilotos[k]
 		if main.objetos:
 			main.objetos.rivais.append(c)

@@ -56,6 +56,7 @@ carro/               o carro
   motor_anima.gd       ventoinhas, polias e correia girando (melhoria nossa)
   luzes.gd, farol.gd   lanterna de freio, ré e farol acesos (melhoria nossa)
   sujeira.gd           sujeira do jogo na pintura e lama nas rodas
+  batida_carros.gd     carro com carro (esferas do VehicleVehicle.hsc, lasquinha e som)
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
@@ -149,7 +150,8 @@ Física
 - Suspensão = cCompPlace_* do exe (teste_pecas com a RAM). Trucks: tan(x /
   W.x), RearAxle pelo curso médio.
 - Casco = só as esferas do VehicleWorld.hsc + a roda como esfera fora do
-  cone da suspensão.
+  cone da suspensão. Carro com carro = as esferas do VehicleVehicle.hsc
+  (batida_carros.gd; o resolvedor é NOSSO), lasquinha só do mais rápido.
 - Material do chão: só atrito e Damping mexem na física. Hardness, Sink e
   Bounciness o jogo não lê: não portar.
 - Pedais: cru e suavizado; parado o jogo põe freio 1.0 sozinho. NÃO tem
@@ -215,5 +217,5 @@ Lista completa no fim do docs/historico.md. Os principais:
 - RX01: 2 luzes direcionais, LOD das árvores. Reposição: falta quando o
   jogo repõe sozinho fora das caixas (Logic: Stray, Backward, RespotSpeed).
 - IA: ler acelerador/freio do piloto do exe (0x5aea98/0x5af920), LOD com
-  os modelos 2K/1K/500 do jogo, lasquinhas e som da batida carro com carro.
+  os modelos 2K/1K/500 do jogo.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

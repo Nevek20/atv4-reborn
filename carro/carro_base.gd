@@ -495,6 +495,14 @@ const TRAVA_FIM := -1.0
 var test_input = null         # {thr, brk, steer} pra testes automáticos
 var som_3d := false           # rival da IA (pista/ia.gd): motor e pneus em som 3D preso no carro
 var direcao_direta := false   # rival da IA: a direção vai direto (na RAM os rivais têm cru = suavizado)
+var _contato_carro := {}      # batida com outro carro neste passo (carro/batida_carros.gd)
+
+
+## batida com outro carro: entra no som (patch Vehicle) e na tremida da
+## câmera do próximo _batida_passo
+func contato_carro(vn: float, r: Vector3) -> void:
+	if _contato_carro.is_empty() or vn > _contato_carro.vn:
+		_contato_carro = {"vn": vn, "r": r, "mat": false}
 # largada da corrida (pista/corrida.gd): o jogador acelera com o carro preso
 # (embreagem aberta, freio ignorado: segurar o freio parado engataria a ré)
 var largada_presa := false

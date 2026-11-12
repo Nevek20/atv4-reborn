@@ -34,6 +34,7 @@ const TEXTURA := "res://assets/efeitos/lasca.png"
 const MAX := 8                        # NumParticlesPerGroup 8 x 1 grupo (0x3bade8; RAM)
 const MPH := 0.44694445
 const MUNDO := [30.0, 80.0, 25.0, 35.0, 2.0, 1.5, 2, 6, 0.7]   # gerente +0x64 (0x1515e0)
+const CARRO := [25.0, 45.0, 24.0, 27.0, 4.0, 3.0, 4, 6, 0.7]   # gerente +0x88 (carro x carro, 0x1529d0)
 const VIDA := 4.0                     # pool +0xa8
 const GRAVIDADE := 30.0               # pool +0xa4
 const SOME := 1.0                     # pool +0xb0 (1 / 1 s)
@@ -169,14 +170,15 @@ static func cor_base(c) -> Color:
 	return melhor
 
 
-## 0x3bbd60 (mundo): contato do casco em p (mundo), normal n saindo do que
-## foi batido, v = velocidade do corpo
-func batida(p: Vector3, n: Vector3, v: Vector3) -> void:
+## 0x3bbd60: contato do casco em p (mundo), normal n saindo do que foi
+## batido, v = velocidade do corpo (com outro carro: a relativa e a tabela
+## CARRO, carro/batida_carros.gd)
+func batida(p: Vector3, n: Vector3, v: Vector3, tabela: Array = MUNDO) -> void:
 	if p.distance_squared_to(ultimo) < 1.0:
 		return
 	ultimo = p
 	var vel := v.length()
-	var f: Array = MUNDO
+	var f: Array = tabela
 	if vel < f[0] * MPH:
 		return
 	var t := clampf((vel - f[0] * MPH) / ((f[1] - f[0]) * MPH), 0.0, 1.0)

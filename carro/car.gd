@@ -1027,6 +1027,12 @@ func _batida_passo() -> void:
 				if n.dot(com - p) < 0.0:
 					n = -n
 				lascas.batida(p, n, _v_antes)
+	# outro carro (carro/batida_carros.gd): som com o patch Vehicle e tremida
+	if not _contato_carro.is_empty():
+		batida = maxf(batida, _contato_carro.vn)
+		if contato_som.is_empty() or _contato_carro.vn > contato_som.vn:
+			contato_som = _contato_carro
+		_contato_carro = {}
 	_v_antes = linear_velocity
 	_w_antes = angular_velocity
 

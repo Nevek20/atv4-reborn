@@ -312,7 +312,7 @@ func batida_objeto(amostra: String) -> void:
 ##  - |r̂ . v̂| > 0.7 (o contato na direção do movimento): raspão por
 ##    MinScrapeTime (0.25 s).
 ## Objetos interativos (outro tipo 9) são o batida_objeto; carro x carro (tipo
-## 2, patch Vehicle) não existe no remake.
+## 2, patch Vehicle) chega pelo car.contato_carro (carro/batida_carros.gd).
 func batida_passo(dt: float, c: Dictionary, v: Vector3) -> void:
 	var livre := true
 	if _bat_ret > 0.0:

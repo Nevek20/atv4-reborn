@@ -576,7 +576,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   exe também lê o material do chão), a >= 1 m do anterior e >= 30 mph:
   int((2 + 4 t) x de frente) lascas (mínimo 1), 12..35 mph pra fora e pra
   cima da parede + 70% do deslize; vivem 4 s, quicam com 0.5, giram; no
-  máximo 8 de uma vez. Carro com carro (25..45 mph) fica pra quando tiver IA.
+  máximo 8 de uma vez. Carro com carro (25..45 mph): feito em nov/2026,
+  seção Batida carro com carro (Corrida).
   Conferido no crash_Storm (5 vivas, tamanhos, giro). teste_lascas.
   FECHADO (Matheus: "ficou perfeito").
 
@@ -1415,6 +1416,20 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   partir do último ponto conhecido do carro (o rastreio não pula: quem cai
   na arquibancada volta pra onde saiu da pista) e cair de 1 m. Os rivais
   usam a mesma função nas reposições deles (capotado, longe, travado).
+- Batida carro com carro (nov/2026, carro/batida_carros.gd,
+  teste_batida_carros): o casco é o VehicleVehicle.hsc (o outro casco que o
+  0x1fed48 carrega; tools/casco.py grava esferas_carro, 25 no Renegade
+  contra 20 do VehicleWorld) e as esferas do VehicleWorld não batem em outro
+  carro (exceção de colisão do Godot entre os carros). O par (2, 2) do exe
+  (0x1529d0) cria um contato comum por ponto e as lasquinhas só do mais
+  rápido, com a velocidade relativa e a tabela de carro com carro do
+  gerente (+0x88: 25, 45, 24, 27, 4, 3, 4, 6, 0.7; lascas.gd CARRO). Som:
+  contato sem material = patch Vehicle; entra também na tremida da câmera
+  (car.contato_carro). NOSSO: o resolvedor (impulso com restituição e
+  atrito médios do RigidBody do XML, 2 passadas, empurra 20% da
+  penetração acima de 1 cm, até 4 contatos por par). Teste: rival a 50 km/h
+  na traseira do jogador parado: penetração máx 0.105 m, jogador empurrado
+  a 26 km/h, 4 lasquinhas do rival, som Vehicle.
 
 ## Pendente / ideias
 
