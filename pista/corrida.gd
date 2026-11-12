@@ -67,6 +67,8 @@ var hud: Label
 var ia                          # rivais (pista/ia.gd)
 var t_fim := 0.0                # tempo total do jogador na chegada
 var t_desce := 0.0              # descida da câmera que falta (s)
+var caixas: Array = []          # cInstantRespotBox: [inversa da caixa, meia caixa]
+var reposicoes := 0             # quantas vezes alguém caiu numa caixa
 var _intro_cam: Array = []      # caminho da câmera (mundo)
 var _intro_alvo: Array = []
 var _intro_s := 0.0             # metros andados no caminho
@@ -105,6 +107,15 @@ func montar(m) -> bool:
 	if _cp_frente.dot(dir_mundo(dados.grid[0].dir)) < 0.0:
 		_cp_frente = -_cp_frente
 	_cp_meia = Vector3(cp.tamanho[0], cp.tamanho[1], cp.tamanho[2]) * 0.5
+	# caixas de reposição na hora (RALLYCROSS.bin): centradas em pos, Z = dir
+	# (bate com o eixo Z do modelo da arquibancada embaixo), tamanho inteiro
+	for c in dados.get("reposicao", {}).get("caixas", []):
+		var z := dir_mundo(c.dir)
+		z.y = 0.0
+		z = z.normalized()
+		var xx := Vector3.UP.cross(z)
+		var xf := Transform3D(Basis(xx, Vector3.UP, z), mundo(c.pos))
+		caixas.append([xf.affine_inverse(), Vector3(c.tamanho[0], c.tamanho[1], c.tamanho[2]) * 0.5])
 	if dados.has("intro"):
 		for q in dados.intro.caminho:
 			_intro_cam.append(mundo(q))
@@ -253,6 +264,30 @@ func _mais_perto(p: Vector3) -> int:
 	return melhor_i
 
 
+## o carro (a origem) dentro de alguma cInstantRespotBox
+func na_caixa(p: Vector3) -> bool:
+	for c in caixas:
+		var l: Vector3 = (c[0] as Transform3D) * p
+		var m: Vector3 = c[1]
+		if absf(l.x) <= m.x and absf(l.y) <= m.y and absf(l.z) <= m.z:
+			return true
+	return false
+
+
+## caiu numa caixa de reposição: volta pra linha (pista/ia.gd repor_em)
+func _caixas() -> void:
+	if ia == null or caixas.is_empty():
+		return
+	if na_caixa(main.car.global_position):
+		ia.repor_em(main.car, ia.jogador.prog + ia.s_linha)
+		main.reset_camera()
+		reposicoes += 1
+	for x in ia.rivais:
+		if is_instance_valid(x.car) and na_caixa(x.car.global_position):
+			ia._repor(x)
+			reposicoes += 1
+
+
 ## distância com sinal até a linha de chegada (+ = já passou)
 func _lado(p: Vector3) -> float:
 	return (p - _cp_pos).dot(_cp_frente)
@@ -288,6 +323,7 @@ func _physics_process(dt: float) -> void:
 		t += dt                     # os rivais ainda chegando
 		return
 	t += dt
+	_caixas()
 	var p: Vector3 = car.global_position
 	# avança pelo traçado: só pros vizinhos (não pula pra outro trecho da pista)
 	var n := links.size()

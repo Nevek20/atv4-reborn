@@ -16,7 +16,11 @@ Fontes (Levels/RX_01/Event/Rallycross, data/arquivos.tsv):
     chegada, AILink 50.
   #c0675b52 (raw/12289+1230) XML do circuito: mFirstLink 51,
     mCircuitLength 1810.4, mStartingOffset 1759.7, mFirstLapLength 54.8.
-  RALLYCROSS.bin (other/12289): 8 cStartPosition (o grid).
+  RALLYCROSS.bin (other/12289): 8 cStartPosition (o grid) e 14
+    cInstantRespotBox (reposição na hora: em cima das arquibancadas e cabanas).
+  TrackSetup/RALLYCROSS.xml (raw/12290): Respotting (mSafePlayerDistance 8,
+    mUprightTolerance 0.93, mWaterUprightTolerance 0.99, mWaterDepthTolerance
+    0.01), Logic, Boundary, RollingStart.
   IntroCameras.XML (raw/12287) + CameraSpline.XML (xml/12287_Intro1): a
     câmera de introdução (caminho Intro1, 7 nós, alvo Introlookat1, 5 nós,
     as duas a 35 m/s).
@@ -75,6 +79,22 @@ def main():
     grid = [e for e in ents if e["classe"] == "cStartPosition"]
     grid.sort(key=lambda e: e["campos"]["43b8a9bf"])
     out["grid"] = [{"pos": [round(x, 3) for x in e["pos"]], "dir": [round(x, 4) for x in e["dir"]]} for e in grid]
+    # reposição: as 14 cInstantRespotBox do RALLYCROSS.bin (caixa centrada em
+    # pos, Z = dir na horizontal, tamanho inteiro: em cima das arquibancadas e
+    # das cabanas) e as seções Respotting/Logic do TrackSetup/RALLYCROSS.xml
+    out["reposicao"] = {
+        "caixas": [{"pos": [round(x, 3) for x in e["pos"]], "dir": [round(x, 4) for x in e["dir"]],
+                    "tamanho": [round(x, 3) for x in e["tamanho"]]}
+                   for e in ents if e["classe"] == "cInstantRespotBox"],
+    }
+    ts = open(os.path.join(u, "raw", "12290r_root.xml"), "rb").read()
+    ts = ts[:ts.find(b"</Root>")].decode("latin1")
+    for sec in ("Respotting", "Logic", "Boundary", "RollingStart"):
+        m = re.search(r"<%s ([^/>]*)/>" % sec, ts)
+        if m:
+            out["reposicao" if sec == "Respotting" else sec.lower()] = dict(
+                out.get("reposicao", {}) if sec == "Respotting" else {},
+                **{k: float(v) for k, v in re.findall(r'(\w+)="([-\d.]+)"', m.group(1))})
     # câmera de introdução: IntroCameras.XML (raw/12287) diz os 2 caminhos e as
     # velocidades; CameraSpline.XML (xml/12287_Intro1.xml) tem os nós
     ic = open(os.path.join(u, "raw", "12287r_root.xml"), encoding="utf-8", errors="replace").read()

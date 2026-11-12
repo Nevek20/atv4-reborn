@@ -1402,6 +1402,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   101..127 km/h, 0..1 reposição por rival (era até 2). Acelerador e freio
   continuam NOSSOS: pra achar, um save state com um rival FREANDO (freio >
   0 na RAM) ajudaria a cruzar os campos.
+- Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
+  teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
+  das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
+  pista: cair numa repõe na hora (o jogador e os rivais). Caixa centrada em
+  pos, Z = dir (bate com o eixo Z do modelo da arquibancada embaixo, nas
+  6), tamanho inteiro. O ponto de reposição segue a seção Respotting do
+  TrackSetup/RALLYCROSS.xml (lida em 0x1bfb68): chão com normal.y >=
+  mUprightTolerance 0.93, sem água mais funda que mWaterDepthTolerance 0.01
+  (na água, normal >= mWaterUprightTolerance 0.99) e ninguém a menos de
+  mSafePlayerDistance 8 m. NOSSO: voltar pela linha da IA de 4 em 4 m a
+  partir do último ponto conhecido do carro (o rastreio não pula: quem cai
+  na arquibancada volta pra onde saiu da pista) e cair de 1 m. Os rivais
+  usam a mesma função nas reposições deles (capotado, longe, travado).
 
 ## Pendente / ideias
 
@@ -1429,7 +1442,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   com o save state corrida_no_normal; docs/engenharia_reversa.md), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
-- RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
+- Reposição: ler no exe QUANDO o jogo repõe sozinho além das caixas
+  (mWarningStray/mCheatingStray/mCheatingProgress/mBackwardLimit, o botão
+  com mRespotSpeed 40 e a mensagem Too_Fast_For_Respot) e o que ele faz na
+  hora (tela, câmera). Hoje só as caixas e a regra NOSSA dos rivais.
+- RX01, falta: LOD das árvores,
   as 2 luzes direcionais (câmera de introdução feita, seção Corrida). A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.

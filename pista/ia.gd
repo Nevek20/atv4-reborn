@@ -475,25 +475,48 @@ func _lateral(p: Vector3, s: float) -> float:
 
 
 func _repor(x: Dictionary) -> void:
-	var s: float = x.r.prog + s_linha
-	# não põe em cima de outro carro: recua pela linha até ter 6 m livres
-	for _k in 8:
-		var livre := true
-		for o in [main.car] + rivais.map(func(y): return y.car):
-			if o != x.car and is_instance_valid(o) and _plano(o.global_position - ponto(s)).length() < 6.0:
-				livre = false
-		if livre:
-			break
-		s -= 8.0
-	var p := ponto(s)
-	var d := _plano(ponto(s + 3.0) - p)
-	x.car.reset_to(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.5, p.z), atan2(d.x, d.z))
+	repor_em(x.car, x.r.prog + s_linha)
 	x.capotado = 0.0
 	x.longe = 0.0
 	x.preso = 0.0
 	x.desvio0 = x.desvio
 	x.lat = x.desvio
 	x.repostos += 1
+
+
+## reposição na linha (todos os carros: rivais e o jogador nas caixas do
+## jogo). Do TrackSetup (seção Respotting): o ponto tem que ter o chão plano
+## (normal.y >= mUprightTolerance 0.93), sem água mais funda que
+## mWaterDepthTolerance (0.01; na água, plano >= mWaterUprightTolerance) e
+## ninguém a menos de mSafePlayerDistance (8 m). NOSSO: voltar pela linha de
+## 4 em 4 m a partir de onde o carro está e cair de 1 m de altura
+func repor_em(car: Node3D, s: float) -> void:
+	var rp: Dictionary = corrida.dados.get("reposicao", {})
+	var seguro: float = rp.get("mSafePlayerDistance", 8.0)
+	var plano: float = rp.get("mUprightTolerance", 0.93)
+	var plano_agua: float = rp.get("mWaterUprightTolerance", 0.99)
+	var fundo: float = rp.get("mWaterDepthTolerance", 0.01)
+	var outros: Array = [main.car] + rivais.map(func(y): return y.car)
+	var escolhido := s
+	for k in 40:
+		var q := ponto(s - 4.0 * k)
+		var y: float = main.terrain.height_at(q.x, q.z)
+		var n: Vector3 = main.ground_normal(q.x, q.z)
+		var ok := n.y >= plano
+		if ok and main.objetos:
+			var ag: Array = main.objetos.agua_em(Vector3(q.x, y, q.z), null)
+			if ag[0] != null:
+				ok = ag[1] <= fundo and n.y >= plano_agua
+		if ok:
+			for o in outros:
+				if o != car and is_instance_valid(o) and _plano(o.global_position - q).length() < seguro:
+					ok = false
+		if ok:
+			escolhido = s - 4.0 * k
+			break
+	var p := ponto(escolhido)
+	var d := _plano(ponto(escolhido + 3.0) - p)
+	car.reset_to(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.0, p.z), atan2(d.x, d.z))
 
 
 ## colocação: quem chegou (pelo tempo) e depois pela distância de corrida

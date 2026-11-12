@@ -177,6 +177,9 @@ Pista RX01
   aplicado ainda NOSSOS (classes do exe achadas, não lidas).
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
   depois; você larga em 8º.
+- Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
+  o ponto segue o Respotting do TrackSetup (chão >= 0.93, sem água, 8 m de
+  folga). Volta pro último ponto conhecido na linha, não pro mais perto.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -209,8 +212,8 @@ Frota
 ## Pendente / ideias
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: reposição (cInstantRespotBox), 2 luzes
-  direcionais, LOD das árvores.
+- RX01: 2 luzes direcionais, LOD das árvores. Reposição: falta quando o
+  jogo repõe sozinho fora das caixas (Logic: Stray, Backward, RespotSpeed).
 - IA: ler acelerador/freio do piloto do exe (0x5aea98/0x5af920), LOD com
   os modelos 2K/1K/500 do jogo, lasquinhas e som da batida carro com carro.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.
