@@ -188,7 +188,8 @@ Pista RX01
 - Reposição automática (pista/reposicao.gd, todos os carros): fora da pista
   = além da BORDA do AIT (largura esq/dir a partir do ponto da linha), não
   distância do centro. Fora > 4 m: 3.2 s; contramão: 5.2 s; um passo dentro
-  zera. Botão (R) só abaixo de 40 mph.
+  zera. Manual = "Reposicionar" do menu de pausa, só abaixo de 40 mph (R
+  é NOSSO até ter menu).
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não

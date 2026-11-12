@@ -1433,7 +1433,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   abaixo de mRespotSpeed 40 mph (17.88 m/s no exe); acima "Too Fast For
   Respot". Textos do text/15205_en.txt. A regra NOSSA "longe da linha 18 m
   por 1 s" dos rivais saiu (agora é a do jogo); capotado, preso e lento
-  continuam NOSSOS. Teste: fora 3.24 s, contramão 5.24 s (1 passo de 50 Hz
+  continuam NOSSOS. No jogo o botão é a opção "Reposicionar" do menu de
+  pausa (o Matheus, nov/2026): o R é NOSSO até ter menu de pausa (aí a
+  opção chama corrida.botao_repor). Teste: fora 3.24 s, contramão 5.24 s (1 passo de 50 Hz
   além do jogo pela soma de 0.02). NOSSO: a mensagem do "Too Fast" fica
   1.5 s (o jogo mostra enquanto o botão está apertado), cor vermelha, o R.
 - Batida carro com carro (nov/2026, carro/batida_carros.gd,
@@ -1478,8 +1480,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
 - Reposição: falta o efeito na tela/câmera na hora de repor, o pedido
-  tipo 3 (checkpoint perdido), as 2 flags do corredor+0x120 e o botão no
-  controle (seção Reposição automática).
+  tipo 3 (checkpoint perdido), as 2 flags do corredor+0x120 e a opção
+  "Reposicionar" no menu de pausa (quando tiver menu; seção Reposição
+  automática).
 - RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).
   As 2 luzes direcionais (cLightDirectional) NÃO existem no jogo (nov/2026):
   são só do editor, como as cercas; o exe não tem o nome da classe (toda
