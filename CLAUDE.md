@@ -194,6 +194,8 @@ Pista RX01
 - Terreno e material do stream do jogo (conferidos com a RAM). Objetos vêm
   do evento (#def5772a + RALLYCROSS.bin); instâncias são espelhadas.
 - Chão com luz assada: sem luz do Godot. PS2 sem tonemap; névoa linear.
+  O terreno recebe a sombra do carro mas não projeta (a dos morros está na
+  textura; projetando eram 2 milhões de triângulos por quadro à toa).
 - Luz da pista = só o Environment.xml. As 2 cLightDirectional e as cFence
   são do editor (o exe não tem as classes): não portar.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).

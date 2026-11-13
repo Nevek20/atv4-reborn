@@ -1613,8 +1613,10 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   2.18 milhões de triângulos por quadro: é o terreno inteiro (524 mil)
   nas 4 faixas da sombra.
   - Lentes e brilhos das luzes (luzes.gd, farol.gd) escondidos apagados:
-    são aditivos x aceso, apagados somam zero mas gastavam desenho (-43
-    chamadas na largada). E o Godot soma a cor da névoa em material
+    são aditivos x aceso, apagados somam zero mas gastavam desenho (as
+    lentes e brilhos todos são 43 chamadas com os 8 carros; na largada o
+    freio segurado e o farol ligado acendem quase todos e sai -11, correndo
+    sem frear sai a maior parte). E o Godot soma a cor da névoa em material
     aditivo (testado: pixel 1.0 com a lente apagada x 0.8 sem): a lente
     apagada clareava nos carros a mais de 87.5 m. Prints do Storm (farol,
     freio, ré) acesas e apagadas iguais às de antes.
@@ -1629,10 +1631,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     chamadas); juntar as peças paradas de cada rival (metade das
     superfícies tem material repetido, mas o que sobra parado dá ~14
     chamadas por rival, com risco). O que resolve os rivais é o LOD do jogo
-    (Models_2K/1K/500, pendente). Sombra do terreno: ele se sombreia por
-    cima da luz assada (sombra dobrada nos morros, contra a regra "só a
-    sombra do carro escurece") e custa os 2 milhões de triângulos: decisão
-    do Matheus (visual).
+    (Models_2K/1K/500, pendente; os 2K são por peça como os 4K, com várias
+    texturas cada).
+  - Terreno não projeta mais sombra (recebe a do carro). Ele entrava
+    inteiro nas 4 faixas da sombra do sol: 2.18 milhões -> 79 mil
+    triângulos por quadro na sombra. Com o jogo pausado em 4 pontos da
+    volta, com e sem: 0 a 3 pixels diferentes em 57600 (sol a 51°; a sombra
+    dos morros já está na textura, regra "só a sombra do carro escurece").
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
