@@ -99,6 +99,7 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 %GODOT% --headless --path . -s res://tests/teste_batida_carros.gd   :: rival a VEL km/h (50) na traseira do jogador: cascos do VehicleVehicle, empurrão, lasquinhas, som Vehicle
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro), quadro real e cada nó
   (PERF_CARRO=1 antes: também o car.gd por parte do passo: rodas, pneus, efeitos, piloto, suspensão...)
+bash: TIMEFORMAT=%U; time $GODOT --headless --path . --fixed-fps 50 -s res://tests/bench_corrida.gd   :: CPU de uma corrida fixa de 15 s (comparar versões; PASSOS=1 = só o carregamento)
 %GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph)
 %GODOT% --headless --path . -s res://tests/teste_reposicao.gd   :: as 14 caixas de reposição do RX01: cada uma repõe na linha, chão plano, longe dos rivais
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> quadro a quadro)

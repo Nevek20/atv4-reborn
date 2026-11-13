@@ -651,6 +651,7 @@ func _resto(dt: float) -> void:
 		for pr in _separando:
 			if is_instance_valid(pr):
 				(pr as RigidBody3D).add_collision_exception_with(carro)
+	_dormir_pecas(dt)
 	for b in blocos:
 		var rb: RigidBody3D = b.corpo
 		_bloco_batida(b, dt)
@@ -823,6 +824,29 @@ func quebrar(c: Dictionary) -> void:
 				rb.add_collision_exception_with(k)
 		lista.append(rb)
 		pecas[p.modelo] = lista
+
+
+## CPU (nov/2026): peça de cerca quase parada por DORME_T s dorme (o Godot
+## não punha pra dormir: tremia no relevo e ficava ativa pra sempre, ~12 de 20
+## simuladas a cada passo). Acorda sozinha quando algo bate nela
+const DORME_V := 0.2              # m/s e rad/s
+const DORME_T := 1.0
+var _parada := {}
+
+
+func _dormir_pecas(dt: float) -> void:
+	for lista in pecas.values():
+		for rb in lista:
+			if not is_instance_valid(rb) or rb.sleeping:
+				continue
+			var id: int = rb.get_instance_id()
+			if rb.linear_velocity.length() < DORME_V and rb.angular_velocity.length() < DORME_V:
+				_parada[id] = _parada.get(id, 0.0) + dt
+				if _parada[id] >= DORME_T:
+					rb.sleeping = true
+					_parada.erase(id)
+			else:
+				_parada.erase(id)
 
 
 ## aviso pro HUD (vazio = tudo carregado)

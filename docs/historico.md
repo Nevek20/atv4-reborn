@@ -1435,6 +1435,14 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   quadro com 8 carros (3 arrays por nuvem por quadro e 10 resize por nuvem
   que morria): agora grava direto no buffer e compacta numa passada, ~1.4
   ms. O resto do _process por quadro: car.gd 0.8, som_jogo 0.6, main 0.4.
+  3ª rodada (F2: 141 FPS, física 6.5 ms por passo; tests/bench_corrida.gd =
+  tempo de CPU do processo numa corrida fixa de 15 s, ruído ~5%, bem menor
+  que o do relógio na nuvem): 14.0 -> 13.0 s (3.1 s são o carregamento, a
+  corrida caiu ~10%). Esfera das rodas só mexe na forma quando muda; HUD de
+  depuração 10x/s; rival além do som 3D não solta poeira/pedrinha nova;
+  peça de cerca parada 1 s dorme (ficava ativa tremendo no relevo). Motor
+  do Godot ~5 ms por passo, ~1.5 dele são os objetos da pista. Testado sem
+  efeito: tirar a colisão contínua (CCD) dos carros.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

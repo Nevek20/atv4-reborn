@@ -508,6 +508,9 @@ func _ajusta_piloto(k: int) -> void:
 	car.update_eye()
 
 
+var _hud_t := 0.0
+
+
 func _process(delta: float) -> void:
 	if car == null:
 		return
@@ -521,6 +524,11 @@ func _process(delta: float) -> void:
 			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
 	if not hud.visible:
 		return
+	# CPU: o texto grande do HUD 10x por segundo (era a cada quadro)
+	_hud_t -= delta
+	if _hud_t > 0.0:
+		return
+	_hud_t = 0.1
 	var kmh: float = car.linear_velocity.length() * 3.6
 	var fp := ""
 	if cam_mode == 4:

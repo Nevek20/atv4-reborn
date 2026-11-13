@@ -24,7 +24,7 @@ var procs: Array = []
 var t_proc := {}
 var t_nos := {}
 var etapa := 0
-var etapas := ["tudo ligado", "sem batida carro-carro", "sem IA (rivais sem dirigir)", "sem _process dos carros (visual)", "sem o script de física dos carros", "por nó (chamado na mão)", "_process por script (chamado na mão)"]
+var etapas := ["tudo ligado", "sem batida carro-carro", "sem IA (rivais sem dirigir)", "sem _process dos carros (visual)", "sem o script de física dos carros", "por nó (chamado na mão)", "_process por script (chamado na mão)", "objetos da pista sem colisão"]
 var resultado: Array = []
 
 
@@ -124,7 +124,23 @@ func _ligar(k: int) -> void:
 				if n != self and n.get_script() and n.has_method("_process") and n.is_processing():
 					procs.append(n)
 					n.set_process(false)
+		7:
+			for n in procs:
+				if is_instance_valid(n):
+					n.set_process(true)
+			procs.clear()
+			var pilha: Array = [main.objetos] if main.objetos else []
+			var desl := 0
+			while not pilha.is_empty():
+				var n: Node = pilha.pop_back()
+				pilha.append_array(n.get_children())
+				if n is CollisionObject3D and not (n is VehicleBody3D):
+					(n as CollisionObject3D).collision_layer = 0
+					(n as CollisionObject3D).collision_mask = 0
+					desl += 1
+			print("  objetos sem colisão: ", desl)
 		5:
+			main.car.perf.clear()
 			for x in [main.car] + ia.rivais.map(func(y): return y.car):
 				x.set_physics_process(true)
 				x.set_process(true)
@@ -155,8 +171,18 @@ func _fechar() -> void:
 			resultado.append("  _process %-40s %6.3f ms por quadro" % [k, t_proc[k] / 1000.0 / nq])
 	if etapa == 5:
 		var n: float = maxf(fis.size(), 1)
+		var scripts := 0.0
 		for k in t_nos:
 			resultado.append("  nó %-44s %6.3f ms por passo" % [k, t_nos[k] / 1000.0 / n])
+			scripts += t_nos[k] / 1000.0 / n
+		if not main.car.perf.is_empty():
+			var carros := 0.0
+			for k in main.car.perf:
+				if not String(k).begins_with("q:"):
+					carros += main.car.perf[k] / 1000.0 / n
+			resultado.append("  %-47s %6.3f ms por passo" % ["car.gd física (8 carros)", carros])
+			scripts += carros
+			resultado.append("  %-47s %6.3f ms por passo" % ["MOTOR DO GODOT (física - scripts)", f[0] - scripts])
 	resultado.append("%-34s física %5.2f ms/passo (pior %5.2f)   process %5.2f ms/quadro (pior %5.2f)   quadro real %5.2f ms (pior %5.2f)" % [
 		etapas[etapa], f[0], f[1], p[0], p[1], r[0], r[1]])
 

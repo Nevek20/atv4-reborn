@@ -153,6 +153,10 @@ Física
 - Casco = só as esferas do VehicleWorld.hsc + a roda como esfera fora do
   cone da suspensão. Carro com carro = as esferas do VehicleVehicle.hsc
   (batida_carros.gd; o resolvedor é NOSSO), lasquinha só do mais rápido.
+  As rodas não pisam no outro carro. FECHADO pelo Matheus (nov/2026).
+- apply_impulse do Godot só entra no passo seguinte (linear_velocity não
+  muda na hora): resolvedor próprio conta com velocidades locais e grava no
+  fim. Correção de posição nunca afunda corpo no chão (bomba de energia).
 - Material do chão: só atrito e Damping mexem na física. Hardness, Sink e
   Bounciness o jogo não lê: não portar.
 - Pedais: cru e suavizado; parado o jogo põe freio 1.0 sozinho. NÃO tem

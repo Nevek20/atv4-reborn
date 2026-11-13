@@ -136,7 +136,6 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 		if cs == null:
 			continue
 		var c := Vector3(w.px, w.y0 + clampf(w.x, w.min, w.max), w.pz)
-		cs.position = c
 		var q := PhysicsShapeQueryParameters3D.new()
 		q.shape = w.esfera_teste
 		q.transform = Transform3D(Basis(), global_transform * c)
@@ -148,7 +147,15 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 				and objetos.roda_na_cerca(instance_from_id(info.collider_id), info.point, info.normal):
 			q.exclude = q.exclude + [info.rid]
 			info = space.get_rest_info(q)
-		cs.set_deferred("disabled", info.is_empty() or (info.normal as Vector3).dot(up) >= w.cos_max)
+		var off: bool = info.is_empty() or (info.normal as Vector3).dot(up) >= w.cos_max
+		# CPU: mexer na forma (posição, disabled) atualiza o corpo no motor de
+		# física; só quando ela está ligada / quando o estado muda (até nov/2026
+		# era a cada passo nas 4 rodas dos 8 carros). O efeito é o mesmo
+		if not off:
+			cs.position = c
+		if off != w.get("esfera_off", true) or off != cs.disabled:
+			cs.set_deferred("disabled", off)
+			w.esfera_off = off
 
 
 ## pecas.json (tools/gerar_buggies.py): modelo, peças e rodas do carro
@@ -1003,10 +1010,12 @@ func _physics_process(dt: float) -> void:
 		_sujeira_passo()
 		_roda_suja_passo(1.0 / JIT_HZ)
 		if perf_on: _t = _pf("ef: sujeira", _t)
-		if poeira:
+		# rival além do som 3D (150 m): não solta poeira nem pedrinha nova
+		# (minúsculas na tela; as soltas continuam). NOSSO, só CPU
+		if poeira and not longe_som:
 			poeira.passo(1.0 / JIT_HZ, v)
 		if perf_on: _t = _pf("ef: poeira", _t)
-		if pedras:
+		if pedras and not longe_som:
 			pedras.passo(1.0 / JIT_HZ, v)
 		if lascas:
 			lascas.passo(1.0 / JIT_HZ)
