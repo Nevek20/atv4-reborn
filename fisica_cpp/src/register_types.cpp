@@ -6,6 +6,8 @@
 #include <godot_cpp/godot.hpp>
 
 #include "fisica_carro.h"
+#include "piloto.h"
+#include "suspensao.h"
 
 using namespace godot;
 
@@ -14,6 +16,8 @@ void initialize_atv4_fisica(ModuleInitializationLevel p_level) {
 		return;
 	}
 	GDREGISTER_CLASS(FisicaCarro);
+	GDREGISTER_CLASS(PilotoCpp);
+	GDREGISTER_CLASS(SuspensaoCpp);
 }
 
 void uninitialize_atv4_fisica(ModuleInitializationLevel p_level) {

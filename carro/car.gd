@@ -850,7 +850,10 @@ func _physics_process(dt: float) -> void:
 		corr = _r_corr
 
 	if perf_on: _t = _pf("rodas (raio, mola)", _t)
-	_passo_esferas_rodas(space, up)
+	if cpp:
+		cpp.esferas(space, up)
+	else:
+		_passo_esferas_rodas(space, up)
 	if perf_on: _t = _pf("esferas das rodas", _t)
 	_material_medio()
 	var ground_n := up if grounded == 0 else n_sum.normalized()

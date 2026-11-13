@@ -55,6 +55,7 @@ var rally := false
 var spares := []             # transform de cada estepe (frame do modelo)
 var truck := {}              # peças dos trucks: frames, freios e eixo (ver o topo)
 var barras := []             # barras soltas das balanças/freios de trás (melhoria nossa, _barras)
+var _cpp: RefCounted = null  # update em C++ (fisica_cpp/src/suspensao.cpp, a mesma conta)
 
 
 func build(c, pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary,
@@ -113,6 +114,10 @@ func build(c, pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary,
 			var xf := Transform3D(rot.get(pn, Basis()), pts[pn])
 			_place(mi, xf)
 			spares.append(xf)
+	if ClassDB.class_exists("SuspensaoCpp") and OS.get_environment("ATV4_CPP") != "0":
+		_cpp = ClassDB.instantiate("SuspensaoCpp")
+		if not _cpp.configurar(self):
+			_cpp = null
 
 
 ## peças do eixo rígido dos trucks (só monta as que o pecas.json tem)
@@ -568,6 +573,8 @@ static func haste_estica(k: Dictionary, hs: Transform3D) -> Transform3D:
 
 ## steer_angle: ângulo das rodas no frame do jogo (car.gd a_jogo)
 func update(steer_angle: float) -> void:
+	if _cpp and _cpp.update(steer_angle):
+		return
 	for k in corners:
 		var w: Dictionary = k.wheel
 		# curso visual do jogo (0x222078) = curso + tremida (car.gd)

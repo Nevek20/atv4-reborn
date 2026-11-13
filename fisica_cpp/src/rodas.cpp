@@ -7,6 +7,9 @@
 
 #include <godot_cpp/classes/physics_direct_space_state3d.hpp>
 #include <godot_cpp/classes/physics_ray_query_parameters3d.hpp>
+#include <godot_cpp/classes/physics_shape_query_parameters3d.hpp>
+#include <godot_cpp/classes/collision_shape3d.hpp>
+#include <godot_cpp/classes/shape3d.hpp>
 #include <godot_cpp/classes/rigid_body3d.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 
@@ -178,4 +181,57 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 	res.push_back(h_sum);
 	res.push_back(corr);
 	return res;
+}
+
+// _passo_esferas_rodas: liga a esfera de cada roda quando o chão perto dela
+// está fora do cone da suspensão
+void FisicaCarro::esferas(PhysicsDirectSpaceState3D *space, Vector3 up) {
+	Object *c = carro();
+	RigidBody3D *b = Object::cast_to<RigidBody3D>(c);
+	if (b == nullptr || space == nullptr) {
+		return;
+	}
+	const Nomes &N = nomes();
+	Array wd = c->get(N.wheels);
+	int64_t nw = wd.size() < (int64_t)rf.size() ? wd.size() : (int64_t)rf.size();
+	Object *objetos = c->get(N.objetos);
+	TypedArray<RID> excluir;
+	excluir.push_back(b->get_rid());
+	excluir.append_array(c->get(N.outros_carros));
+	if (query_esfera.is_null()) {
+		query_esfera.instantiate();
+	}
+	Transform3D xf = b->get_global_transform();
+	for (int64_t i = 0; i < nw; i++) {
+		Dictionary d = wd[i];
+		const RodaFixa &w = rf[i];
+		CollisionShape3D *cs = Object::cast_to<CollisionShape3D>((Object *)d.get(N.esfera, Variant()));
+		if (cs == nullptr) {
+			continue;
+		}
+		double x = d[N.x];
+		Vector3 cc((real_t)w.px, (real_t)(w.y0 + clampd(x, w.min, w.max)), (real_t)w.pz);
+		Ref<PhysicsShapeQueryParameters3D> q = query_esfera;
+		q->set_shape(d[N.esfera_teste]);
+		q->set_transform(Transform3D(Basis(), xf.xform(cc)));
+		q->set_exclude(excluir);
+		Dictionary info = space->get_rest_info(q);
+		if (objetos != nullptr && !info.is_empty() && (double)((Vector3)info[N.normal]).dot(up) < w.cos_max) {
+			Object *col = ObjectDB::get_instance(ObjectID((uint64_t)(int64_t)info[N.collider_id]));
+			if ((bool)objetos->call(N.roda_na_cerca, col, info[N.point], info[N.normal])) {
+				TypedArray<RID> mais = excluir.duplicate();
+				mais.push_back(info[N.rid]);
+				q->set_exclude(mais);
+				info = space->get_rest_info(q);
+			}
+		}
+		bool off = info.is_empty() || (double)((Vector3)info[N.normal]).dot(up) >= w.cos_max;
+		if (!off) {
+			cs->set_position(cc);
+		}
+		if (off != (bool)d.get(N.esfera_off, true) || off != cs->is_disabled()) {
+			cs->set_deferred("disabled", off);
+			d[N.esfera_off] = off;
+		}
+	}
 }

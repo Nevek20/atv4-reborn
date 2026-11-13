@@ -1508,6 +1508,17 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   P no _ready; o teste_freio desliga o ABS depois e falhou até chamar
   car.p_mudou(). No Windows o seno/cosseno da DLL pode diferir no último
   bit do GDScript (outra libm): mesma física, não bit a bit.
+  Parte 4 (nov/2026): esferas das rodas (rodas.cpp esferas, física, mesma
+  conferência) e o visual: pose do piloto (piloto.cpp, PilotoCpp: STEER_LEFT
+  + IK dos braços pela tabela; montagem e tabela continuam no piloto.gd) e
+  suspensão visual (suspensao.cpp, SuspensaoCpp: cantos, barras, eixo do
+  truck, telescópio, balança deslocada). Desenho não precisa ser bit a bit:
+  teste_cpp compara ossos e peças com o GDScript (C++ primeiro, senão um C++
+  que não mexesse em nada passaria), pior diferença 3e-7 em 7 carros.
+  As conferências do piloto (erro_maos, medidas_bracos, juntas_bracos) leem
+  a pose do esqueleto (_globais_agora), não o _lp/_lr. Medido (por carro):
+  piloto 0.063 -> 0.013 ms, suspensão 0.044 -> 0.016, esferas 0.049 ->
+  0.041 (o resto é a consulta de forma do Godot).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

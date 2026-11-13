@@ -20,6 +20,7 @@ void FisicaCarro::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("pneus", "dt", "v", "fwd", "left", "n", "com_w", "h", "drive"), &FisicaCarro::pneus);
 	ClassDB::bind_method(D_METHOD("arrasto", "spd", "dt"), &FisicaCarro::arrasto);
 	ClassDB::bind_method(D_METHOD("rodas", "dt", "space", "up"), &FisicaCarro::rodas);
+	ClassDB::bind_method(D_METHOD("esferas", "space", "up"), &FisicaCarro::esferas);
 }
 
 String FisicaCarro::versao() {

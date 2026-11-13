@@ -47,7 +47,8 @@ FisicaCarro::Nomes::Nomes() :
 		outros_carros("outros_carros"), roda_na_cerca("roda_na_cerca"), collider("collider"),
 		position("position"), rid("rid"), material_at("material_at"), atrito("atrito"),
 		amortecimento("amortecimento"), kc("kc"), dc("dc"), k("k"), c("c"), mw("mw"), vmax("vmax"),
-		cos_max("cos_max"), min("min"), max("max") {}
+		cos_max("cos_max"), min("min"), max("max"), esfera("esfera"), esfera_teste("esfera_teste"),
+		esfera_off("esfera_off"), collider_id("collider_id") {}
 
 static void ler(Object *c, const FisicaCarro::Nomes &N, EstadoMotor &e) {
 	e.air_time = c->get(N.air_time);

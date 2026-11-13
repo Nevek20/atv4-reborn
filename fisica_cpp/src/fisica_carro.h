@@ -10,6 +10,7 @@
 #include <godot_cpp/core/object_id.hpp>
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/classes/physics_ray_query_parameters3d.hpp>
+#include <godot_cpp/classes/physics_shape_query_parameters3d.hpp>
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -53,6 +54,7 @@ public:
 		StringName v, f, point, normal, mat, amort, objetos, terrain, pneu, ignorar_roda, outros_carros;
 		StringName roda_na_cerca, collider, position, rid, material_at, atrito, amortecimento;
 		StringName kc, dc, k, c, mw, vmax, cos_max, min, max;
+		StringName esfera, esfera_teste, esfera_off, collider_id;
 		Nomes();
 	};
 	static const Nomes &nomes();
@@ -98,6 +100,7 @@ private:
 	ObjectID car_id;
 	std::vector<RodaFixa> rf;
 	Ref<PhysicsRayQueryParameters3D> query;
+	Ref<PhysicsShapeQueryParameters3D> query_esfera;
 	Params p;
 	std::vector<float> gears;
 	atv4::Curva drive_curve, fric_curve, steer_curve, ps_rate, ps_scale, rtc_th, rtc_max, rtc_cut;
@@ -133,6 +136,7 @@ public:
 	double arrasto(double spd, double dt) const;
 	// rodas e molas (rodas.cpp)
 	Array rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up);
+	void esferas(PhysicsDirectSpaceState3D *space, Vector3 up);
 };
 
 } // namespace godot
