@@ -377,7 +377,10 @@ func _physics_process(dt: float) -> void:
 		if is_instance_valid(y.car):
 			var dc: float = y.car.global_position.distance_to(olho)
 			y.car.longe_vis = dc > VIS_PERTO
-			y.car.longe_som = dc > SomJogo.MAX_3D
+			var longe: bool = dc > SomJogo.MAX_3D
+			if longe and not y.car.longe_som:
+				y.car.calar_som()          # saiu do alcance: para o som (religa ao voltar)
+			y.car.longe_som = longe
 	var est: int = corrida.estado
 	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
 		repor_jogador()

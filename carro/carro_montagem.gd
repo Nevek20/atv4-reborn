@@ -734,6 +734,16 @@ func _load_som() -> void:
 		som = null
 
 
+## rival passou do alcance do som 3D (ia.gd, longe_som): motor e pneus param
+## na hora em vez de seguir tocando sem volume (CPU, NOSSO: no fim da 1ª
+## volta eram ~40 tocadores 3D tocando à toa). Voltando, religam sozinhos
+func calar_som() -> void:
+	if som:
+		som.calar()
+	if sfx:
+		sfx.calar()
+
+
 func _process(delta: float) -> void:
 	var _t := Time.get_ticks_usec() if perf_on else 0
 	# CPU (NOSSO, nov/2026): rival além do som 3D (150 m) não atualiza os loops

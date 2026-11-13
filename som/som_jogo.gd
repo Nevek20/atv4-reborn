@@ -106,6 +106,10 @@ static func novo_player(dono: Node, ancora_3d: Node3D, liga_saida := true) -> No
 	q.unit_size = UNIDADE_3D
 	q.max_distance = MAX_3D
 	q.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+	# CPU: o projeto não tem Area3D (reverb, troca de bus): sem a máscara o
+	# tocador não procura área a cada atualização (era uma consulta de física
+	# por tocador tocando por passo, ~110 tocando na corrida)
+	q.area_mask = 0
 	ancora_3d.add_child(q)
 	if liga_saida:
 		dono.tree_exiting.connect(func(): if is_instance_valid(q): q.queue_free())
@@ -133,6 +137,20 @@ func tocar(b: String, n: String) -> void:
 	tocando = true
 	_acum = 0.0
 	_novo_cursor(n, 1.0, [0, 0, 0, 0], 0)
+
+
+## silencia na hora, sem release (rival além do alcance do som 3D, onde já
+## é inaudível): os players somem e o próximo tocar() recomeça (CPU)
+func calar() -> void:
+	for l in [_vozes, _soltas]:
+		for v in l:
+			if is_instance_valid(v.p):
+				v.p.queue_free()
+		l.clear()
+	_cursores.clear()
+	tocando = false
+	nome = ""
+	set_process(false)
 
 
 ## key-off: as vozes vão pro release com o volume e o tom de agora

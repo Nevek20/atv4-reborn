@@ -1652,6 +1652,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   custom_aabb em volta das partículas vivas (nuvens.cpp, poeira.gd, pedras.gd,
   lascas.gd: centro agora a 2-80 m, junto do carro dono), que também
   acerta a ordem de desenho entre as transparentes de carros diferentes.
+- Otimização, 4ª rodada (nov/2026, Matheus já cravado em 240 FPS; o alvo é
+  o quadro com passo de física, que no PC dele ficava em cima dos 4.17 ms):
+  - Som 3D: 219 tocadores 3D na corrida, até ~110 tocando juntos. Cada um
+    tocando faz, a cada passo, a conta de volume/posição e procura Area3D
+    de reverb/bus (uma consulta de física). O projeto não tem Area3D:
+    area_mask 0 no novo_player (som igual; passo+quadro ~3-5% menor).
+  - Rivais além de 150 m (longe_som, onde o 3D já zera o volume) seguiam com
+    motor e pneus tocando: aos 105 s eram 48 tocadores em 6 rivais longe
+    contra 17 nos de perto. Agora calar_som() para tudo na hora em que ele
+    sai do alcance e o próprio passo religa quando volta (testado: rival
+    calado perto volta com 9 tocadores em 0.1 s). Entre 60 e 120 s de
+    corrida o passo+quadro foi de ~3.1-3.3 pra ~2.9-3.2 ms (nuvem, ruído
+    grande). NOSSO, só CPU: o que se ouve não muda.
+  - Medido e NÃO mexido: avisar os ~130 nós de cada carro que ele andou
+    custa só 0.5 µs (o Godot só marca como sujo).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

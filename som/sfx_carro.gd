@@ -402,6 +402,20 @@ func _tocar_uma(b: String, n: String, vol: float, tom: float) -> void:
 
 
 ## conferência (tests/teste_sfx.gd): [nome, volume, tom] de cada roda
+## rival além do alcance do som 3D (ia.gd): pneus, raspão e sons curtos param
+## na hora (inaudíveis, mas seguiam tocando e sendo calculados). Voltando pra
+## perto, o passo religa (tocar() no _roda / rodas_passo do C++)
+func calar() -> void:
+	for o in rodas:
+		o.som.calar()
+	if raspa:
+		raspa.calar()
+	for s in _uma_vez:
+		if is_instance_valid(s):
+			s.queue_free()
+	_uma_vez.clear()
+
+
 func estado() -> Array:
 	var out: Array = []
 	for o in rodas:

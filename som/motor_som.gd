@@ -159,6 +159,15 @@ static func _carregar_wav(caminho: String) -> AudioStream:
 
 
 ## rpm do jogo e carga (0..1) do motor a cada quadro
+## rival além do alcance do som 3D (ia.gd): os loops param (inaudíveis); o
+## atualizar (GDScript e C++) religa os que pesam quando ele volta
+func calar() -> void:
+	for lista in [_on, _off]:
+		for s in lista:
+			if s.p.playing:
+				s.p.stop()
+
+
 var _dt_som := 0.0
 func atualizar(rpm_jogo: float, carga: float, dt: float) -> void:
 	# CPU: no máximo ~75 vezes por segundo (som_jogo.gd PASSO_SOM): até 75 FPS

@@ -231,6 +231,9 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no
   _exit_tree. Ligar função no tree_exiting por voz acumulava milhares numa
   corrida (erro "Lambda capture ... was freed" na saída).
+- Tocador 3D: area_mask 0 (o projeto não tem Area3D de som). Rival além de
+  150 m (longe_som): calar_som() para motor e pneus na hora; o passo religa
+  quando ele volta. Inaudível de qualquer jeito, só CPU (NOSSO).
 - Som (som_jogo, motor_som) e texto do HUD da corrida andam no máximo ~75
   vezes por segundo (PASSO_SOM, PASSO_HUD): até 75 FPS igual, acima o tempo
   acumulado entra de uma vez. Não voltar pra "todo quadro".
