@@ -263,14 +263,29 @@ func passo(dt: float) -> void:
 		cursor += 1
 
 
+var _r_malha := -1.0             # meia diagonal da malha da lasca (caixa da MultiMesh)
+
+
 func _process(_delta: float) -> void:
 	if mm == null:
 		return
 	var f := Engine.get_physics_interpolation_fraction()
 	var n := l_pos.size()
+	# caixa das lascas vivas (custom_aabb, como na poeira): sem ela o Forward+
+	# mede a MultiMesh com os espaços vazios (na origem do mundo)
+	if _r_malha < 0.0 and mm.mesh:
+		var cx: AABB = mm.mesh.get_aabb()
+		_r_malha = maxf(cx.position.length(), cx.end.length())
+	var lo := Vector3.ZERO
+	var hi := Vector3.ZERO
+	var r := 0.0
 	for k in n:
 		var b: Basis = l_base_ant[k].slerp(l_base[k], f) * Basis.from_scale(l_esc[k])
 		var p := l_ant[k].lerp(l_pos[k], f)
+		lo = p if k == 0 else lo.min(p)
+		hi = p if k == 0 else hi.max(p)
+		var e: Vector3 = l_esc[k]
+		r = maxf(r, maxf(absf(e.x), maxf(absf(e.y), absf(e.z))) * _r_malha)
 		var o := k * 16
 		buf[o] = b.x.x; buf[o + 1] = b.y.x; buf[o + 2] = b.z.x; buf[o + 3] = p.x
 		buf[o + 4] = b.x.y; buf[o + 5] = b.y.y; buf[o + 6] = b.z.y; buf[o + 7] = p.y
@@ -278,6 +293,7 @@ func _process(_delta: float) -> void:
 		buf[o + 12] = cor.r; buf[o + 13] = cor.g; buf[o + 14] = cor.b
 		buf[o + 15] = clampf((VIDA - l_idade[k]) * SOME, 0.0, 1.0)
 	if n > 0:
+		mm.custom_aabb = AABB(lo - Vector3(r, r, r), hi - lo + Vector3(r, r, r) * 2.0)
 		mm.buffer = buf
 	mm.visible_instance_count = n
 

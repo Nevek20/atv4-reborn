@@ -277,6 +277,12 @@ func _process(_delta: float) -> void:
 	if n == 0 and mm.visible_instance_count == 0:
 		return
 	var f := Engine.get_physics_interpolation_fraction()
+	# caixa das pedras vivas (custom_aabb): sem ela o Forward+ mede a
+	# MultiMesh com os espaços vazios (na origem do mundo) e a ordem das
+	# transparentes erra (poeira.gd, nuvens.cpp)
+	var lo := Vector3.ZERO
+	var hi := Vector3.ZERO
+	var r := 0.0
 	# CPU: as casas que são sempre 0 (fora da diagonal e as 2 últimas) já
 	# nascem 0 no buffer e ninguém mais escreve nelas: não regrava
 	for k in n:
@@ -290,7 +296,11 @@ func _process(_delta: float) -> void:
 		var c := p_cor[k]
 		buf[o + 12] = c.r; buf[o + 13] = c.g; buf[o + 14] = c.b; buf[o + 15] = maxf(a, 0.0)
 		buf[o + 16] = float(p_cel[k]); buf[o + 17] = float(p_tipo[k])
+		lo = p if k == 0 else lo.min(p)
+		hi = p if k == 0 else hi.max(p)
+		r = maxf(r, s)
 	if n > 0:
+		mm.custom_aabb = AABB(lo - Vector3(r, r, r), hi - lo + Vector3(r, r, r) * 2.0)
 		mm.buffer = buf
 	mm.visible_instance_count = n
 

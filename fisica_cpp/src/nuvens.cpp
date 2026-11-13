@@ -3,6 +3,8 @@
 // como os Packed*32 do GDScript, mesma compactação e mesmos campos do buffer.
 #include "nuvens.h"
 
+#include <godot_cpp/variant/aabb.hpp>
+
 #include <godot_cpp/classes/multi_mesh.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/packed_color_array.hpp>
@@ -156,6 +158,12 @@ int64_t NuvensCpp::quadro(double delta, double escala) {
 	float *ba = buf_agua.ptrw();
 	int64_t np = 0;
 	int64_t na = 0;
+	// caixa das nuvens vivas (custom_aabb): sem ela o Forward+ mede a MultiMesh
+	// com os espaços vazios (zerados na origem do mundo), o centro fica a
+	// centenas de metros e a ordem das transparentes (e o LOD dos rivais) erra
+	Vector3 lo_p, hi_p, lo_a, hi_a;
+	float r_p = 0.0f;
+	float r_a = 0.0f;
 	for (int64_t k = 0; k < n; k++) {
 		double tg = clampd((double)idade[k] / (double)maxi[k], 0.0, 1.0);
 		double u = 1.0 - tg;
@@ -168,9 +176,15 @@ int64_t NuvensCpp::quadro(double delta, double escala) {
 		float *o;
 		if (agua[k] == 1 && ma != nullptr) {
 			o = ba + na * 20;
+			lo_a = na == 0 ? p : lo_a.min(p);
+			hi_a = na == 0 ? p : hi_a.max(p);
+			r_a = r_a > (float)tam ? r_a : (float)tam;
 			na += 1;
 		} else {
 			o = b + np * 20;
+			lo_p = np == 0 ? p : lo_p.min(p);
+			hi_p = np == 0 ? p : hi_p.max(p);
+			r_p = r_p > (float)tam ? r_p : (float)tam;
 			np += 1;
 		}
 		o[0] = (float)tam;
@@ -186,11 +200,15 @@ int64_t NuvensCpp::quadro(double delta, double escala) {
 		o[16] = cel[k];
 	}
 	if (np > 0) {
+		Vector3 e(r_p, r_p, r_p);
+		m->set_custom_aabb(AABB(lo_p - e, hi_p - lo_p + e * 2.0f));
 		m->set_buffer(buf);
 	}
 	m->set_visible_instance_count(np);
 	if (ma) {
 		if (na > 0) {
+			Vector3 e(r_a, r_a, r_a);
+			ma->set_custom_aabb(AABB(lo_a - e, hi_a - lo_a + e * 2.0f));
 			ma->set_buffer(buf_agua);
 		}
 		ma->set_visible_instance_count(na);

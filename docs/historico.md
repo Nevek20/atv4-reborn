@@ -1638,6 +1638,20 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     triângulos por quadro na sombra. Com o jogo pausado em 4 pontos da
     volta, com e sem: 0 a 3 pixels diferentes em 57600 (sol a 51°; a sombra
     dos morros já está na textura, regra "só a sombra do carro escurece").
+- Terra dos rivais sumindo e piscando (Matheus, nov/2026, depois de cravar
+  240 FPS). Poeira, pedrinhas, lascas e espirro são MultiMesh top_level na
+  origem do mundo, filhos do carro: o LOD dos rivais (ia._lod) punha neles
+  o visibility_range_end do carro (273-299 m). O Godot mede essa distância
+  até o centro da caixa da instância, e no Forward+ a caixa da MultiMesh
+  conta TODOS os espaços (os vazios zerados na origem): ia da origem até a
+  pista, centro a ~300 m da câmera, em cima do corte. Medido no lavapipe
+  numa corrida: 83% dos quadros com terra viva nos rivais saíam cortados e
+  16 trocas aparece/some em 20 s. No OpenGL a caixa só conta as visíveis
+  (não aparecia) e o jogador não tem LOD (não piscava). Correção: o LOD
+  pula as MultiMesh top_level (0% cortado, 0 trocas) e as três gravam
+  custom_aabb em volta das partículas vivas (nuvens.cpp, poeira.gd, pedras.gd,
+  lascas.gd: centro agora a 2-80 m, junto do carro dono), que também
+  acerta a ordem de desenho entre as transparentes de carros diferentes.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

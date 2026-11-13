@@ -453,6 +453,14 @@ func _process(delta: float) -> void:
 		buf_agua.resize(cap * 20)
 	var np := 0
 	var na := 0
+	# caixa das nuvens vivas (custom_aabb, como no nuvens.cpp): sem ela o
+	# Forward+ mede a MultiMesh com os espaços vazios (na origem do mundo)
+	var lo_p := Vector3.ZERO
+	var hi_p := Vector3.ZERO
+	var lo_a := Vector3.ZERO
+	var hi_a := Vector3.ZERO
+	var r_p := 0.0
+	var r_a := 0.0
 	# grava direto no buffer (escala nas 3 diagonais, posição, cor, célula):
 	# até nov/2026 montava 3 arrays por nuvem por quadro e a poeira dos 8
 	# carros custava ~3.9 ms por quadro (tests/medir_cpu.gd)
@@ -478,6 +486,9 @@ func _process(delta: float) -> void:
 			buf_agua[o + 14] = c.b
 			buf_agua[o + 15] = a
 			buf_agua[o + 16] = n_cel[k]
+			lo_a = p if na == 0 else lo_a.min(p)
+			hi_a = p if na == 0 else hi_a.max(p)
+			r_a = maxf(r_a, tam)
 			na += 1
 		else:
 			var o := np * 20
@@ -492,12 +503,17 @@ func _process(delta: float) -> void:
 			buf[o + 14] = c.b
 			buf[o + 15] = a
 			buf[o + 16] = n_cel[k]
+			lo_p = p if np == 0 else lo_p.min(p)
+			hi_p = p if np == 0 else hi_p.max(p)
+			r_p = maxf(r_p, tam)
 			np += 1
 	if np > 0:
+		mm.custom_aabb = AABB(lo_p - Vector3(r_p, r_p, r_p), hi_p - lo_p + Vector3(r_p, r_p, r_p) * 2.0)
 		mm.buffer = buf
 	mm.visible_instance_count = np
 	if mm_agua:
 		if na > 0:
+			mm_agua.custom_aabb = AABB(lo_a - Vector3(r_a, r_a, r_a), hi_a - lo_a + Vector3(r_a, r_a, r_a) * 2.0)
 			mm_agua.buffer = buf_agua
 		mm_agua.visible_instance_count = na
 func vivas() -> int:

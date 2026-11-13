@@ -222,6 +222,10 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
   lido, calibrado em prints). Fumaça é melhoria nossa (o jogo não solta).
   Poeira: o jogador usa o CamSubject do Dust.xml, os rivais o Other.
+- Efeito solto no mundo (MultiMesh top_level na origem: poeira, pedrinhas,
+  lascas, espirro) fica FORA do LOD dos rivais e grava custom_aabb das
+  partículas vivas: no Forward+ a caixa contava os espaços vazios (origem
+  do mundo) e a terra dos rivais sumia e piscava.
 - Som de pneu, suspensão, pouso e batida = do jogo (989snd). Mistura nossa
   por cima: SO_DERRAPANDO e GANHO_PNEU 0.6.
 - Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no

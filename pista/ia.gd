@@ -300,6 +300,13 @@ func _lod(c: Node) -> void:
 		pilha.append_array(n.get_children())
 		if not (n is GeometryInstance3D) or not (n is VisualInstance3D):
 			continue
+		# efeitos soltos no mundo (poeira, pedrinhas, lascas, espirro: MultiMesh
+		# top_level na origem) não são peça do carro: no Forward+ a caixa deles
+		# conta os espaços vazios da MultiMesh (zerados na origem do mundo), ia
+		# da origem até a pista e o centro ficava em volta da distância de corte:
+		# a terra dos rivais sumia (83% dos quadros) e piscava (Matheus, nov/2026)
+		if n is MultiMeshInstance3D and (n as Node3D).top_level:
+			continue
 		var g := n as GeometryInstance3D
 		geos.append(g)
 		r_carro = maxf(r_carro, g.get_aabb().size.length() * 0.5 * absf((g as Node3D).global_transform.basis.get_scale().x))   # o espelho tem escala -1
