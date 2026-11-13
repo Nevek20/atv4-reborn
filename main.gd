@@ -586,7 +586,9 @@ func _make_cameras() -> void:
 	]
 
 
-func cam_state() -> Dictionary:
+## normal = false: sem a normal do chão (4 alturas do terreno), que só entra
+## no passo de 60 Hz das câmeras de corrida (game_camera._step)
+func cam_state(normal := true) -> Dictionary:
 	# transform interpolado: é o que aparece na tela (física roda a 50 Hz)
 	var xf: Transform3D = car.get_global_transform_interpolated()
 	var b := xf.basis.orthonormalized()
@@ -596,8 +598,18 @@ func cam_state() -> Dictionary:
 		"tp": tp, "basis": b, "vel": v, "v_f": v.dot(b.z),
 		"speed": v.length(), "chao": car.jitter_chao, "batida": car.batida,
 		"air_time": car.air_time, "grounded": car.grounded,
-		"ground_n": ground_normal(tp.x, tp.z),
+		"ground_n": ground_normal(tp.x, tp.z) if normal else Vector3.UP,
 	}
+
+
+## CPU: alguma das 2 câmeras de corrida vai dar passo neste quadro? A mesma
+## conta do GameCamera.update (acc += minf(delta, 0.25); passo se >= STEP).
+## A 200 FPS 3 de cada 4 quadros não têm passo e não precisam da normal
+func _algum_passo(delta: float) -> bool:
+	for i in 2:
+		if gcams[i].acc + minf(delta, 0.25) >= GameCamera.STEP:
+			return true
+	return false
 
 
 func ground_normal(x: float, z: float) -> Vector3:
@@ -705,7 +717,7 @@ func _update_camera(delta: float) -> void:
 			car.piloto.visible = true
 			car.piloto.sem_cabeca = false
 		return
-	var s := cam_state()
+	var s := cam_state(_algum_passo(delta))
 	# as câmeras de órbita rodam sempre (como no jogo, trocar não dá tranco)
 	for i in 2:
 		gcams[i].update(delta, s, terrain)

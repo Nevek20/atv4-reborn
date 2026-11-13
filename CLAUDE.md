@@ -225,10 +225,15 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no
   _exit_tree. Ligar função no tree_exiting por voz acumulava milhares numa
   corrida (erro "Lambda capture ... was freed" na saída).
+- Som (som_jogo, motor_som) e texto do HUD da corrida andam no máximo ~75
+  vezes por segundo (PASSO_SOM, PASSO_HUD): até 75 FPS igual, acima o tempo
+  acumulado entra de uma vez. Não voltar pra "todo quadro".
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo
   (o Matheus achou o do jogo mais feio). Não voltar.
+- Lente e brilho apagados ficam escondidos (aditivos x aceso 0 = nada; o
+  Godot soma a névoa em material aditivo, aí a lente apagada clareava longe).
 - Volante: no jogo não gira; o nosso gira, um estilo por carro. Alisar o
   aro do jogo quebrou: não voltar.
 - Mãos no aro por IK com tabela por carro. Mão de fora parar escorregando

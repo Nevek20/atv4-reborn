@@ -1606,6 +1606,33 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     nuvem (Vulkan em software, 2 FPS até em 320x180). Na print do Matheus
     (0.6) o desenho era 2.23 ms de CPU num quadro de 9.16 ms: fica pra ele
     testar no PC (--render-thread separate, docs/comandos.md).
+- Otimização, 3ª rodada (nov/2026, desenho e FPS alto). Chamadas de
+  desenho contadas na largada (lavapipe, câmera atrás do jogador, os 8
+  carros na frente): 704 no total = 102 do jogador + 507 dos 7 rivais (~72
+  cada) + 92 dos objetos + 3 de céu e terreno. A sombra do sol desenha
+  2.18 milhões de triângulos por quadro: é o terreno inteiro (524 mil)
+  nas 4 faixas da sombra.
+  - Lentes e brilhos das luzes (luzes.gd, farol.gd) escondidos apagados:
+    são aditivos x aceso, apagados somam zero mas gastavam desenho (-43
+    chamadas na largada). E o Godot soma a cor da névoa em material
+    aditivo (testado: pixel 1.0 com a lente apagada x 0.8 sem): a lente
+    apagada clareava nos carros a mais de 87.5 m. Prints do Storm (farol,
+    freio, ré) acesas e apagadas iguais às de antes.
+  - Som e HUD no máximo ~75 vezes por segundo (som_jogo PASSO_SOM, motor_som,
+    corrida PASSO_HUD): o PS2 atualizava por quadro (50/60 Hz) e a mistura do
+    Godot anda em blocos de ~10 ms. Até 75 FPS a conta é a mesma (bench a 50
+    igual); acima, o tempo acumulado entra de uma vez. A 200 FPS (sem tela)
+    a CPU por quadro foi de ~2.14 pra ~1.92 ms (mediana 1.44 -> 1.25).
+  - Câmera: a normal do chão (4 alturas do terreno) só nos quadros com passo
+    de 60 Hz de alguma das 2 câmeras de corrida (mesma decisão do update).
+  - Medido e NÃO mexido: esconder efeito vazio (o Godot já pula, -4
+    chamadas); juntar as peças paradas de cada rival (metade das
+    superfícies tem material repetido, mas o que sobra parado dá ~14
+    chamadas por rival, com risco). O que resolve os rivais é o LOD do jogo
+    (Models_2K/1K/500, pendente). Sombra do terreno: ele se sombreia por
+    cima da luz assada (sombra dobrada nos morros, contra a regra "só a
+    sombra do carro escurece") e custa os 2 milhões de triângulos: decisão
+    do Matheus (visual).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

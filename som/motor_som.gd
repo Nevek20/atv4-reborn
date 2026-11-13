@@ -23,6 +23,7 @@ extends Node
 ## info.csv, parte que não repete a cada ciclo do motor) ficam de fora: o
 ## off_4000 do Phantom tem 53% (o motor fica irregular ali, toda vez).
 
+const PASSO_SOM := preload("res://som/som_jogo.gd").PASSO_SOM
 const JOGO_LENTA := 1000.0
 const JOGO_CORTE := 8000.0
 const K_RPM := 0.5
@@ -158,7 +159,15 @@ static func _carregar_wav(caminho: String) -> AudioStream:
 
 
 ## rpm do jogo e carga (0..1) do motor a cada quadro
+var _dt_som := 0.0
 func atualizar(rpm_jogo: float, carga: float, dt: float) -> void:
+	# CPU: no máximo ~75 vezes por segundo (som_jogo.gd PASSO_SOM): até 75 FPS
+	# igual a antes; acima, o tempo acumulado entra de uma vez
+	_dt_som += dt
+	if _dt_som < PASSO_SOM:
+		return
+	dt = _dt_som
+	_dt_som = 0.0
 	if _cpp and _cpp.atualizar(rpm_jogo, carga, dt):
 		return
 	_carga += (clampf(carga, 0.0, 1.0) - _carga) * (1.0 - exp(-dt / SUAVE))

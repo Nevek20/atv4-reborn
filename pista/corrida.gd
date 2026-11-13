@@ -399,9 +399,21 @@ func _cor_hud(c: Color) -> void:
 		_cor_atual = c
 
 
+## CPU: o texto do HUD (relógio com centésimos: muda todo quadro e o rótulo
+## mede o texto de novo a cada troca) no máximo ~75 vezes por segundo, como a
+## tela do PS2 (50/60 Hz). Até 75 FPS é igual a antes
+const PASSO_HUD := 1.0 / 75.0
+var _dt_hud := 0.0
+
+
 func _process(dt: float) -> void:
 	if estado == LIVRE:
 		return
+	_dt_hud += dt
+	if _dt_hud < PASSO_HUD:
+		return
+	dt = _dt_hud
+	_dt_hud = 0.0
 	# cores do vídeo: "Get Ready" vermelho, "Go!" verde
 	var cor := Color.WHITE
 	if estado == CONTANDO:

@@ -184,6 +184,7 @@ var faces := {"freio": 0, "re": 0}     # faces de lente achadas por tipo
 var halos := {"freio": 0, "re": 0}
 var aceso := {"freio": 0.0, "re": 0.0}
 var _mats := {"freio": [], "re": []}
+var _nos := {"freio": [], "re": []}   # lente e brilhos de cada tipo (escondidos apagados)
 var _imgs := {}
 
 
@@ -339,6 +340,8 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 	no.mesh = malha
 	no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.add_child(no)
+	no.visible = false              # apagada (aceso 0): ver _anda
+	_nos[tipo].append(no)
 	for g in _juntar(grupos):
 		var n: Vector3 = g.n.normalized() if g.n.length() > 0.0 else Vector3(0, 0, -1)
 		var ext: Vector3 = g.hi - g.lo
@@ -358,6 +361,8 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 		h.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.extra_cull_margin = 1.0
 		mi.add_child(h, true)
+		h.visible = false
+		_nos[tipo].append(h)
 		_mats[tipo].append(mat)
 		halos[tipo] += 1
 
@@ -411,6 +416,13 @@ func _anda(tipo: String, alvo: float, delta: float) -> void:
 	if _aplicado.get(tipo) == null or aceso[tipo] != _aplicado[tipo]:
 		for m in _mats[tipo]:
 			m.set_shader_parameter("aceso", aceso[tipo])
+		# apagada, lente e brilho somam zero (blend_add x aceso 0): escondidos
+		# não gastam desenho (eram ~40 chamadas na largada) e a lente deixa de
+		# pegar a cor da névoa nos carros longe (o Godot soma a névoa em
+		# material aditivo: lente apagada clareava a mais de 87.5 m)
+		var ve: bool = aceso[tipo] > 0.0
+		for n in _nos[tipo]:
+			n.visible = ve
 		_aplicado[tipo] = aceso[tipo]
 
 

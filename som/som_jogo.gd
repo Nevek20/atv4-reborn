@@ -54,6 +54,13 @@ var _vozes: Array = []            # {p, amp, loop, a1, a2, fase, nivel, vol, tom
 var _soltas: Array = []           # vozes no release (depois do parar)
 var _acum := 0.0                  # tempo que sobrou do relógio de 240 Hz
 var tocando := false
+## CPU: o som anda no máximo ~75 vezes por segundo. O PS2 atualizava o som
+## uma vez por quadro (50/60 Hz) e a mistura do Godot anda em blocos de ~10 ms:
+## a 240 FPS eram 3-4 atualizações por bloco sem diferença no que se ouve.
+## Até 75 FPS (e nos testes, a 50) é a mesma conta de antes (motor_som.gd usa
+## o mesmo passo)
+const PASSO_SOM := 1.0 / 75.0
+var _dt_som := 0.0
 
 
 static func banco() -> Dictionary:
@@ -143,6 +150,11 @@ func parar() -> void:
 
 
 func _process(dt: float) -> void:
+	_dt_som += dt
+	if _dt_som < PASSO_SOM:
+		return
+	dt = _dt_som
+	_dt_som = 0.0
 	# CPU: sem programa andando (só os loops tocando) os ticks não fazem nada;
 	# programa novo só nasce no tocar(), que zera o _acum
 	if tocando and not _cursores.is_empty():
