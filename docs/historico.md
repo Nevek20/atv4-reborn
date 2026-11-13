@@ -1538,6 +1538,48 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Print do Matheus no PC (59 FPS, física 11.7 ms por passo, pior que os 6.5
   de antes) sem dar pra saber se o C++ tinha carregado: o F2 agora mostra
   o estado e o F3 liga/desliga na hora (carro.liga_cpp em cada carro).
+- Otimização geral (nov/2026, "hiper focado em otimizar", tests/medir_cpu.gd
+  com 8 carros, nuvem): física 9.9 -> ~6.4 ms por passo e quadro real 8.1
+  -> ~6.0 ms; corrida fixa do bench_corrida 11.6-12.2 s de CPU sem C++ e
+  8.7-9.4 com (os dois com ~3.1 s de carregamento). Tudo conferido: corrida
+  igual com ATV4_CPP=0 e 1 e igual à de antes, rodar_testes idêntico, 36
+  testes ok, teste_cpp byte a byte nas partes novas.
+  - Objetos da pista 0.68 -> 0.05 ms/passo: as 128 cercas numa grade de 16 m
+    (cada carro só olha as casas em volta, na ordem de antes). Os 51 fardos
+    nasciam ACORDADOS (o 1º passo do motor acorda corpo recém-criado, mesmo
+    dormindo; medido com e sem a thread de física), ~20 nunca dormiam
+    (tremendo no relevo, simulados a cada passo) e uns 10 escorregavam mais
+    de 0.5 m sozinhos em 10 s: agora voltam a dormir nos 5 primeiros passos e,
+    depois de uma batida, dormem quase parados (0.3 m/s e rad/s por 1 s,
+    NOSSO, como as peças da cerca; 3 de 11 empurrados ficavam tremendo pra
+    sempre). O passo dos fardos só visita os acordados (sleeping_state_changed).
+  - IA 0.89 -> ~0.4 ms/passo: a linha (ponto, segmento, curva à frente,
+    lateral, direção, rastreio) em C++ (linha_ia.cpp, LinhaIA); a lista de
+    carros do desvio feita 1 vez no laço (refeita quando alguém é reposto).
+  - Batida carro-carro 0.55 -> ~0.08 ms/passo: posição lida 1 vez, raio que
+    envolve as esferas (longe: pula o par) e os contatos esfera x esfera em
+    C++ (a ordenação continua no GDScript, pros empates darem igual).
+  - Poeira 0.87 -> ~0.08 ms/quadro: nuvens guardadas e desenhadas em C++
+    (nuvens.cpp, NuvensCpp); o sorteio e onde nascem continuam no GDScript.
+  - Tocador de som (som_jogo): parado dorme o _process; sem programa andando
+    não conta os ticks; volume/tom só regravados quando mudam.
+  - Rodas: material do chão lido direto no mapa do terreno e atrito/Damping
+    guardados por material; posição e giros das rodas, água e arrasto em
+    C++. Pegadinha: no godot-cpp, mapa[i] num Packed* vindo do GDScript pede
+    escrita e COPIA o array (1 MB do mapa a cada roda: rodas 0.06 -> 0.13
+    ms); ler pelo ptr().
+  - Som do pneu: números do XML convertidos uma vez (era float("...") de
+    cada atributo a cada passo). HUD da corrida troca a cor só quando muda.
+  - Rival além do som 3D (150 m) não atualiza os loops do motor; a mais de
+    50 m da câmera, motor tremendo, ventoinhas e painel param (NOSSO, CPU).
+  - Medido e NÃO mexido: o motor de física é quase todo o casco dos carros
+    (esferas x terreno; sem casco, só pra medir: 10.9 -> 6.2 ms). O CCD dos
+    carros (continuous_cd) custa ~20% da física (1.2-1.6 ms por passo), não
+    age na corrida nem no rodar_testes, mas age em batida forte (Storm na
+    parede a 20 m/s: 17.60 m/s com CCD, 18.09 sem) e evita atravessar parede
+    fina: fica, decisão do Matheus. Crash achado no caminho: giro_volante do
+    C++ chamado antes do volante configurado (lista vazia); corrigido e
+    protegido.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

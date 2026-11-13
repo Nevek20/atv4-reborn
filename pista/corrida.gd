@@ -390,6 +390,15 @@ static func relogio(s: float) -> String:
 	return "%d:%05.2f" % [int(s) / 60, fmod(s, 60.0)]
 
 
+## CPU: a cor do texto só é trocada quando muda (trocar avisa o rótulo de
+## tema novo; era em todo quadro)
+var _cor_atual = null
+func _cor_hud(c: Color) -> void:
+	if _cor_atual == null or c != _cor_atual:
+		hud.add_theme_color_override("font_color", c)
+		_cor_atual = c
+
+
 func _process(dt: float) -> void:
 	if estado == LIVRE:
 		return
@@ -399,7 +408,7 @@ func _process(dt: float) -> void:
 		cor = Color(0.9, 0.1, 0.1)
 	elif estado == CORRENDO and t < 1.0:
 		cor = Color(0.3, 0.9, 0.2)
-	hud.add_theme_color_override("font_color", cor)
+	_cor_hud(cor)
 	match estado:
 		INTRO:
 			hud.text = "Enter / A: pular"
@@ -421,7 +430,7 @@ func _process(dt: float) -> void:
 				aviso = "Too Fast For Respot"
 			if aviso != "":
 				txt = aviso + "\n" + txt
-				hud.add_theme_color_override("font_color", Color(0.9, 0.1, 0.1))
+				_cor_hud(Color(0.9, 0.1, 0.1))
 			hud.text = txt
 		CHEGOU:
 			var txt := "CHEGADA!   %s\nmelhor volta %s" % [relogio(t_fim), relogio(melhor)]

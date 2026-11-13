@@ -164,8 +164,12 @@ Física
   ATV4_CPP=0 x 1 (bench_corrida). O C++ guarda o P no _ready: mexeu no P
   depois, car.p_mudou(). Visual e som em C++ também (piloto.cpp,
   suspensao.cpp, som.cpp, efeitos.cpp): mudou piloto.gd, suspension_visual,
-  sfx_carro, motor_som ou a tremida/vibração, muda o .cpp (teste_cpp e
-  bench_corrida comparam).
+  sfx_carro, motor_som, a tremida/vibração, a linha da IA, os contatos
+  carro-carro, a poeira ou a água, muda o .cpp (teste_cpp e bench_corrida
+  comparam). No C++, Packed* vindo do GDScript se lê pelo ptr(): arr[i]
+  pede escrita e copia o array inteiro.
+- CCD dos carros (continuous_cd) custa ~20% da física, mas segura batida
+  forte e parede fina: não desligar sem o Matheus decidir.
 - apply_impulse do Godot só entra no passo seguinte (linear_velocity não
   muda na hora): resolvedor próprio conta com velocidades locais e grava no
   fim. Correção de posição nunca afunda corpo no chão (bomba de energia).
@@ -192,6 +196,8 @@ Pista RX01
   são do editor (o exe não tem as classes): não portar.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
+  Fardo fica dormindo até alguém bater (o 1º passo do motor acorda corpo
+  novo: objetos_rx01 põe pra dormir de novo) e dorme quase parado (NOSSO).
 - IA: o AIT é volta gravada (linha +0x00); o +0x24 NÃO é a velocidade da
   IA (na RAM ela anda 1.15..1.40 x isso, de acelerador cheio). Direção,
   acelerador e freio em sétimos, direto (cru = suavizado; antes de arredondar

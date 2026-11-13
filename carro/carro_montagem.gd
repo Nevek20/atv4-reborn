@@ -736,18 +736,22 @@ func _load_som() -> void:
 
 func _process(delta: float) -> void:
 	var _t := Time.get_ticks_usec() if perf_on else 0
-	if som:
+	# CPU (NOSSO, nov/2026): rival além do som 3D (150 m) não atualiza os loops
+	# do motor (não se ouve); a mais de 50 m da câmera (longe_vis, como o piloto
+	# e a suspensão) motor tremendo, ventoinhas e ponteiros do painel param
+	# (menores que um pixel). Luzes, farol, fumaça e sujeira continuam
+	if som and not longe_som:
 		som.atualizar(rpm, som_carga, delta)
 	if perf_on: _t = _pf("q: som do motor", _t)
 	if fumaca:
 		fumaca.atualizar(som_carga, rpm)
-	if motor_treme:
+	if motor_treme and not longe_vis:
 		motor_treme.atualizar(rpm, som_carga, delta)
 	if perf_on: _t = _pf("q: motor treme", _t)
 	if fumaca:
 		fumaca.seguir()             # depois do motor_treme: o cano já tremeu neste quadro
 	if perf_on: _t = _pf("q: fumaça", _t)
-	if motor_anima:
+	if motor_anima and not longe_vis:
 		motor_anima.atualizar(delta, rpm)
 	if perf_on: _t = _pf("q: motor anima", _t)
 	if luzes:
@@ -758,7 +762,7 @@ func _process(delta: float) -> void:
 	if sujeira:
 		sujeira.atualizar(sujeira_nivel, roda_cor)
 	if perf_on: _t = _pf("q: sujeira", _t)
-	if painel:
+	if painel and not longe_vis:
 		painel.atualizar(delta)
 	if perf_on: _t = _pf("q: painel", _t)
 

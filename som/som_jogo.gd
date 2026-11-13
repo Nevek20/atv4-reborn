@@ -125,7 +125,9 @@ func parar() -> void:
 
 
 func _process(dt: float) -> void:
-	if tocando:
+	# CPU: sem programa andando (só os loops tocando) os ticks não fazem nada;
+	# programa novo só nasce no tocar(), que zera o _acum
+	if tocando and not _cursores.is_empty():
 		_acum += dt
 		while _acum >= 1.0 / TICK_HZ:
 			_acum -= 1.0 / TICK_HZ
@@ -157,8 +159,16 @@ func _aplicar(v: Dictionary) -> void:
 	var p = v.p
 	var solta: bool = v.fase >= 3
 	var vol: float = v.vol if solta else volume * ganho * v.amp
-	p.volume_db = linear_to_db(maxf(vol * v.nivel / 32767.0, 1e-5))
-	p.pitch_scale = clampf(v.tom if solta else tom * _dobra(v), 0.05, 8.0)
+	# CPU: só regrava no player quando muda (loop parado no mesmo volume e tom
+	# regravava as 2 propriedades em todo quadro)
+	var db := linear_to_db(maxf(vol * v.nivel / 32767.0, 1e-5))
+	if db != v.get("db_ult", INF):
+		p.volume_db = db
+		v.db_ult = db
+	var pt := clampf(v.tom if solta else tom * _dobra(v), 0.05, 8.0)
+	if pt != v.get("pt_ult", INF):
+		p.pitch_scale = pt
+		v.pt_ult = pt
 
 
 ## pitch bend do 989snd (PitchBend): pb >= 0 sobe até PBHigh semitons, < 0
