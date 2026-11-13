@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+# Física do carro em C++ (GDExtension). Build (docs/comandos.md):
+#   cd fisica_cpp
+#   scons platform=linux target=template_debug          (e template_release)
+#   scons platform=windows use_mingw=yes target=template_debug   (DLL do Windows na nuvem)
+#   no Windows com Visual Studio: scons platform=windows target=template_debug
+# As bibliotecas saem em ../bin/ (vão no git: o jogo roda sem compilar).
+env = SConscript("godot-cpp/SConstruct")
+env.Append(CPPPATH=["src/"])
+sources = Glob("src/*.cpp")
+library = env.SharedLibrary(
+    "../bin/libatv4fisica{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+    source=sources,
+)
+Default(library)

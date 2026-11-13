@@ -170,3 +170,20 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
 
 No jogo: F2 = FPS + onde vai o tempo (quadro, física por passo, desenho CPU/GPU,
 chamadas de desenho, rivais), média de 0.5 s.
+
+## Física em C++ (fisica_cpp/, GDExtension)
+
+As bibliotecas prontas ficam em bin/ (no git): o jogo roda sem compilar. Sem
+a biblioteca do sistema o carro usa o GDScript. Pra recompilar:
+
+```
+git submodule update --init          :: baixa o godot-cpp (1ª vez)
+pip install scons
+cd fisica_cpp
+scons platform=windows target=template_debug       :: Windows com Visual Studio (editor/F5)
+scons platform=windows target=template_release     :: Windows, jogo exportado
+:: na nuvem/Linux: scons platform=linux target=template_debug
+::                 scons platform=windows use_mingw=yes target=template_debug   (DLL do Windows via mingw)
+%GODOT% --headless --path . -s res://tests/teste_cpp.gd   :: a extensão carrega e as contas batem com o GDScript
+```
+A 1ª compilação leva uns 3 min por alvo (o godot-cpp); depois só o que mudou.

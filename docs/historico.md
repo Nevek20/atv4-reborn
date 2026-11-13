@@ -1477,6 +1477,17 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   rodadas cada, 4 núcleos). O que pesa no carro (raios, esferas, efeitos,
   visual) precisa da thread principal. Caminho que sobra pra ganho grande:
   a física do carro em C# ou C++ (GDExtension).
+  Física do carro em C++ (nov/2026, escolha do Matheus: C++ por ser o mais
+  rápido e não trocar de Godot): fisica_cpp/ (GDExtension, godot-cpp 4.5
+  como submódulo; extensão de versão menor roda no 4.7.1), classe
+  FisicaCarro, bin/atv4_fisica.gdextension + as bibliotecas compiladas no
+  git (Linux .so e Windows .dll, a do Windows feita na nuvem com mingw).
+  Sem a biblioteca, o carro segue no GDScript; tests/teste_cpp.gd confere
+  que carrega e que cada conta portada bate com o GDScript. Medida antes de
+  portar (por carro e passo, nuvem): pneus 0.06 ms, motor 0.02,
+  água/arrasto/giro 0.03, raios das rodas 0.09, esferas 0.05, efeitos 0.14
+  (som 0.08), visual 0.14 (piloto 0.07, suspensão 0.05): o ganho vem de
+  levar o passo inteiro, não só os pneus.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

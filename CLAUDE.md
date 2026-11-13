@@ -67,6 +67,8 @@ som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
                      truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
+fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/, SConstruct
+bin/                 as bibliotecas compiladas (.dll Windows, .so Linux) + atv4_fisica.gdextension (vão no git)
 tests/               testes sem tela (rodar_tudo.py roda todos), prints e gravações
 tools/               scripts Python de extração (pingu2obj, pintura, savestate, efeitos, sons)
 re/                  engenharia reversa: scripts do Ghidra, exe_util, dumps

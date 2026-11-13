@@ -1,0 +1,12 @@
+; Física do carro em C++ (fisica_cpp/, GDExtension). Sem a biblioteca do
+; sistema, o carro usa o GDScript (carro/car.gd) e o jogo roda igual.
+[configuration]
+entry_symbol = "atv4_fisica_init"
+compatibility_minimum = "4.5"
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 = "res://bin/libatv4fisica.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://bin/libatv4fisica.linux.template_release.x86_64.so"
+windows.debug.x86_64 = "res://bin/libatv4fisica.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "res://bin/libatv4fisica.windows.template_release.x86_64.dll"
