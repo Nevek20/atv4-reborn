@@ -38,8 +38,10 @@ func _physics_process(dt: float) -> bool:
 		ia._dirigir(eu, main.car, dt)
 		n += 1
 		if n >= PASSOS:
-			print("bench: %d passos, jogador em %.0f m" % [n, ia.jogador.prog])
+			print("bench: %d passos, jogador em %.0f m, C++ %s" % [n, ia.jogador.prog, main.car.cpp != null])
 			for car in [main.car] + ia.rivais.map(func(y): return y.car):
+				# estado final (pra comparar ATV4_CPP=0 x 1: tem que sair igual)
+				print("  %-10s pos %s  rpm %.6f  marcha %d" % [car.name, car.global_position, car.rpm, car.gear])
 				if car.poeira:
 					print("  poeira %-10s %-10s soltas %5d  vivas %4d  cap %d" % [car.name, car.poeira.conjunto, car.poeira.soltas, car.poeira.vivas(), car.poeira.cap])
 			return true

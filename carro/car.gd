@@ -528,6 +528,9 @@ func _load_physics() -> void:
 	P.axle_f = (wheels[0].pz + wheels[1].pz) * 0.5 - model_offset.z
 	P.axle_r = (wheels[2].pz + wheels[3].pz) * 0.5 - model_offset.z
 	reset_drivetrain()
+	if usar_cpp:
+		cpp = ClassDB.instantiate("FisicaCarro")
+		cpp.configurar(self)
 
 
 ## Mola do jogo (0x248a80): F = k x curva(x normalizado) x x, em kN.
@@ -902,8 +905,13 @@ func _physics_process(dt: float) -> void:
 
 	# ---- motor e câmbio
 	var driven_g := rear_g if REAR_DRIVE else grounded
-	var drive := _drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)   # 0x20c558: embreagem > 0.1 abre
-	_razao_patinada(v_f)
+	var drive: float                         # 0x20c558: embreagem > 0.1 abre
+	if cpp:
+		drive = cpp.drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)
+		cpp.razao_patinada(v_f)
+	else:
+		drive = _drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)
+		_razao_patinada(v_f)
 
 	if perf_on: _t = _pf("motor e câmbio", _t)
 	var f_fwd := 0.0                        # forças das rodas pra frente (0x5c8) + atrito interno
@@ -991,7 +999,10 @@ func _physics_process(dt: float) -> void:
 	var f_arr_f: float = f_arr * v_f / spd if spd > 1e-6 else 0.0
 	var a_f: float = (f_fwd - f_arr_f) / mass + get_gravity().dot(fwd) * gravity_scale
 	v_ref = v_f + a_f * dt
-	_giro_rodas(dt, v_f, rear_g)
+	if cpp:
+		cpp.giro_rodas(dt, v_f, rear_g)
+	else:
+		_giro_rodas(dt, v_f, rear_g)
 	if perf_on: _t = _pf("água, arrasto, giro", _t)
 
 	if corr != Vector3.ZERO:

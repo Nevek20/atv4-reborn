@@ -351,6 +351,10 @@ var rtc_max: Dictionary       # onde corta tudo e quanto corta, pela velocidade
 var rtc_cut: Dictionary
 var mu_t := 1.0               # 0 = atrito mínimo do XML, 1 = máximo
 var gears := PackedFloat32Array()
+## física em C++ (fisica_cpp/, bin/atv4_fisica.gdextension): motor e câmbio
+## por enquanto. null = sem a biblioteca ou ATV4_CPP=0 (tudo no GDScript).
+var cpp: RefCounted = null
+static var usar_cpp := ClassDB.class_exists("FisicaCarro") and OS.get_environment("ATV4_CPP") != "0"
 
 # ---- estado ----
 var steer := 0.0              # direção (-1..1), + = esquerda

@@ -1488,6 +1488,14 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   água/arrasto/giro 0.03, raios das rodas 0.09, esferas 0.05, efeitos 0.14
   (som 0.08), visual 0.14 (piloto 0.07, suspensão 0.05): o ganho vem de
   levar o passo inteiro, não só os pneus.
+  Parte 1, motor e câmbio (fisica_cpp/src/motor.cpp: _drivetrain, _gearbox,
+  _shift_step, _razao_patinada, _giro_rodas): porta linha a linha, escalar
+  em double e vetor em Vector3 (float) como o GDScript. Uma FisicaCarro por
+  carro (car.cpp, configurar(car) guarda P, marchas e curvas); o estado
+  continua nas variáveis do car.gd, lido no começo e gravado no fim.
+  Conferido: rodar_testes idêntico e bench_corrida (8 carros, 15 s) com
+  posição, rpm e marcha iguais com ATV4_CPP=0 e 1. Ganho de CPU nesta
+  parte some no ruído (o motor era 0.02 ms): é base pras próximas.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
