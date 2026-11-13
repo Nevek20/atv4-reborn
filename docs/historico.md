@@ -1449,6 +1449,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   peça de cerca parada 1 s dorme (ficava ativa tremendo no relevo). Motor
   do Godot ~5 ms por passo, ~1.5 dele são os objetos da pista. Testado sem
   efeito: tirar a colisão contínua (CCD) dos carros.
+  Física do Godot numa thread separada (project.godot
+  physics/3d/run_on_separate_thread, nov/2026): ADOTADA. Medida no tempo de
+  parede do bench_corrida, 3 rodadas cada: 11.5 -> 10.0 s (a corrida sem o
+  carregamento ~18% mais rápida); suíte e rodar_testes idênticos. Na 1ª
+  tentativa a medida no relógio da nuvem tinha ruído demais pra ver.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
