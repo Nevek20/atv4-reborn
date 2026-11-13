@@ -40,7 +40,6 @@ class PilotoCpp : public RefCounted {
 	std::vector<Transform3D> g;
 
 	void quadro(double tm, int &k, double &f) const;
-	double giro_volante(double s) const;
 	void anima(double s);
 	Vector3 cotovelo_ang(const Vector3 &a, const Vector3 &w, double l1, double l2, double th,
 			const Vector3 &fora, const Vector3 &ref) const;
@@ -52,6 +51,7 @@ protected:
 public:
 	bool configurar(Object *piloto);
 	bool pose(double s, double extra);
+	double giro_volante(double s) const;
 };
 
 } // namespace godot

@@ -17,6 +17,9 @@ extends SceneTree
 ##    quadro, o buffer da MultiMesh e as nuvens que sobram iguais byte a byte.
 ##  - posição e giros das rodas (rodas.cpp visual_rodas): iguais ao
 ##    _visual_rodas_gd byte a byte, com curso, tremida, giro e esterço variados.
+##  - água das rodas (pneus.cpp agua_passo): a água achada e a profundidade de
+##    cada roda iguais ao _agua_passo, em volta de cada poça (com e sem a
+##    água de antes).
 ##  - suspensão visual (suspensao.cpp): todas as peças e pivôs das rodas
 ##    iguais até TOL_POSE, com cursos e esterço variados (Mosquito: barras;
 ##    Storm: rally; Hammerhead: telescópio; Fireball: balança deslocada).
@@ -121,6 +124,12 @@ func _piloto(car) -> void:
 				if d > TOL_POSE:
 					_falha("%s piloto s=%s extra=%s osso %d: diferença %s" % [car.vehicle_name, s, extra, i, d])
 					break
+			if pil.no_volante():
+				pil._cpp = null
+				var gv_gd: float = pil.giro_volante(s)
+				pil._cpp = cpp
+				if gv_gd != pil.giro_volante(s):
+					_falha("%s giro do volante s=%s: %s x %s" % [car.vehicle_name, s, gv_gd, pil.giro_volante(s)])
 			if absf(alc_gd - alc_cpp) > TOL_POSE:
 				_falha("%s piloto alcance %s x %s" % [car.vehicle_name, alc_gd, alc_cpp])
 
@@ -385,6 +394,41 @@ func _visual_rodas(car) -> void:
 		car.wheels[i].spin = guarda[i][2]
 
 
+func _agua(car) -> void:
+	var ob = main.objetos
+	if ob == null or ob.aguas.is_empty() or car.cpp == null:
+		print("  sem água pra conferir")
+		return
+	var xf0: Transform3D = car.global_transform
+	var guarda_agua = car.agua
+	var guarda_prof: PackedFloat32Array = car.agua_prof.duplicate()
+	var n := 0
+	var dentro := 0
+	for a in ob.aguas:
+		var centro: Vector3 = (a.inv as Transform3D).affine_inverse() * Vector3(a.cx, 0.0, a.cz)
+		for k in 16:
+			var desl := Vector3(cos(k * 0.9) * (a.hx * 0.15 * (k % 9)), 0.0, sin(k * 1.3) * (a.hz * 0.15 * (k % 7)))
+			var alt: float = a.y - 0.6 + 0.12 * (k % 11)
+			car.global_transform = Transform3D(Basis(Vector3.UP, k * 0.4), Vector3(centro.x, alt, centro.z) + desl)
+			for antes in [null, a]:
+				car.agua = antes
+				car._agua_passo()
+				var g := [car.agua, car.agua_prof.duplicate()]
+				car.agua = antes
+				car.cpp.agua_passo()
+				var c := [car.agua, car.agua_prof.duplicate()]
+				contas += 1
+				n += 1
+				if g[0] != null:
+					dentro += 1
+				if not is_same(g[0], c[0]) or var_to_bytes(g[1]) != var_to_bytes(c[1]):
+					_falha("água caso %d: GD %s %s, C++ %s %s" % [k, g[0] != null, g[1], c[0] != null, c[1]])
+	car.global_transform = xf0
+	car.agua = guarda_agua
+	car.agua_prof = guarda_prof
+	print("  agua das rodas: %d casos conferidos (%d com roda na agua)" % [n, dentro])
+
+
 func _physics_process(_dt: float) -> bool:
 	q += 1
 	if main.car == null:
@@ -414,6 +458,7 @@ func _physics_process(_dt: float) -> bool:
 	_linha_ia()
 	_contatos()
 	_nuvens(main.car)
+	_agua(main.car)
 	# F3: desliga e religa tudo na hora
 	var Base := preload("res://carro/carro_base.gd")
 	main._troca_cpp()

@@ -970,11 +970,14 @@ func _physics_process(dt: float) -> void:
 	var res_loc: Vector3 = -Vector3(inertia.x * P.ang_res.x * w_loc.x, inertia.y * P.ang_res.y * w_loc.y, inertia.z * P.ang_res.z * w_loc.z)
 	apply_torque(b * res_loc)
 
-	_agua_passo()
+	if cpp:
+		cpp.agua_passo()
+	else:
+		_agua_passo()
 	# 0x20e5e8: arrasto do ar + do chão, contra a velocidade
 	var f_arr := 0.0
 	if spd > 1e-6:
-		f_arr = _arrasto(spd, dt)
+		f_arr = cpp.arrasto(spd, dt) if cpp else _arrasto(spd, dt)
 		apply_central_force(-v / spd * f_arr)
 
 	# 0x211e48: velocidade pra frente prevista no fim do passo = a de agora +

@@ -27,6 +27,7 @@ inline double deg_to_rad(double d) { return d * (PI_ / 180.0); }
 void PilotoCpp::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("configurar", "piloto"), &PilotoCpp::configurar);
 	ClassDB::bind_method(D_METHOD("pose", "s", "extra"), &PilotoCpp::pose);
+	ClassDB::bind_method(D_METHOD("giro_volante", "s"), &PilotoCpp::giro_volante);
 }
 
 bool PilotoCpp::configurar(Object *pil) {
@@ -115,6 +116,9 @@ void PilotoCpp::quadro(double tm, int &k, double &f) const {
 }
 
 double PilotoCpp::giro_volante(double s) const {
+	if (!ok || tempos.size() < 2 || giro.size() < tempos.size()) {
+		return 0.0;   // sem o volante (o GDScript não chama assim: _cpp_vol)
+	}
 	int k;
 	double f;
 	quadro(absd(s) * dur, k, f);

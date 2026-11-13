@@ -100,11 +100,13 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 	Object *terrain = c->get(N.terrain);
 	Variant pneu = c->get(N.pneu);
 	PackedByteArray mapa;
+	const uint8_t *mapa_p = nullptr;
 	int64_t lado = 0;
 	if (terrain != nullptr) {
 		static const StringName S_MAT_MAP("mat_map"), S_SIZE("size");
 		mapa = terrain->get(S_MAT_MAP);
 		lado = terrain->get(S_SIZE);
+		mapa_p = mapa.ptr();
 		// cache do atrito/Damping vale pro mesmo terreno e o mesmo pneu
 		if (ObjectID(terrain->get_instance_id()) != chao_terreno || (String)pneu != chao_pneu) {
 			mat_chao.clear();
@@ -170,7 +172,7 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 				int64_t iz = (int64_t)std::floor((double)hp.z);
 				ix = ix < 0 ? 0 : (ix > lado - 1 ? lado - 1 : ix);
 				iz = iz < 0 ? 0 : (iz > lado - 1 ? lado - 1 : iz);
-				m = mapa[iz * lado + ix];
+				m = mapa_p[iz * lado + ix];   // ponteiro de leitura: mapa[i] pediria escrita e copiaria o mapa todo
 			}
 			d[N.mat] = m;
 			auto it = mat_chao.find(m);
@@ -275,24 +277,29 @@ Array FisicaCarro::contatos_esferas(Transform3D xa, PackedVector3Array ca, Packe
 		Transform3D xb, PackedVector3Array cb, PackedFloat64Array rb) {
 	const double NORMAL_DE_CIMA = 0.7;   // batida_carros.gd
 	Array cs;
+	// leitura pelos ponteiros (ca[i] num Packed* pede escrita e copia o array)
+	const Vector3 *cap_ = ca.ptr();
+	const Vector3 *cbp = cb.ptr();
+	const double *rap = ra.ptr();
+	const double *rbp = rb.ptr();
 	int64_t nb = cb.size();
 	std::vector<Vector3> pbs((size_t)nb);
 	for (int64_t j = 0; j < nb; j++) {
-		pbs[j] = xb.xform(cb[j]);
+		pbs[j] = xb.xform(cbp[j]);
 	}
 	for (int64_t i = 0; i < ca.size(); i++) {
-		Vector3 pa = xa.xform(ca[i]);
-		double r_a = ra[i];
+		Vector3 pa = xa.xform(cap_[i]);
+		double r_a = rap[i];
 		for (int64_t j = 0; j < nb; j++) {
 			const Vector3 &pb = pbs[j];
 			Vector3 d = pa - pb;
 			double dist = d.length();
-			double pen = r_a + rb[j] - dist;
+			double pen = r_a + rbp[j] - dist;
 			if (pen <= 0.0 || dist < 1e-5) {
 				continue;
 			}
 			Vector3 n = d / (real_t)dist;
-			Vector3 pc = pb + n * (real_t)(rb[j] - pen * 0.5);
+			Vector3 pc = pb + n * (real_t)(rbp[j] - pen * 0.5);
 			if (absd(n.y) < NORMAL_DE_CIMA) {
 				Vector3 h(n.x, 0.0f, n.z);
 				if ((double)h.length_squared() > 1e-6) {

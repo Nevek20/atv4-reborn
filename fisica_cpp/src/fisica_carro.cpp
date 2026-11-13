@@ -23,6 +23,7 @@ void FisicaCarro::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("rodas", "dt", "space", "up"), &FisicaCarro::rodas);
 	ClassDB::bind_method(D_METHOD("esferas", "space", "up"), &FisicaCarro::esferas);
 	ClassDB::bind_method(D_METHOD("visual_rodas", "a_jogo"), &FisicaCarro::visual_rodas);
+	ClassDB::bind_method(D_METHOD("agua_passo"), &FisicaCarro::agua_passo);
 	ClassDB::bind_method(D_METHOD("tremida", "dt", "v_l", "v_f"), &FisicaCarro::tremida);
 }
 

@@ -139,6 +139,7 @@ func carregar(c) -> bool:
 	raspa.ganho = GANHO
 	raspa.ancora = _ancora()
 	add_child(raspa)
+	_prepara()
 	liga_cpp()
 	return not patches.is_empty()
 
@@ -256,26 +257,41 @@ func _roda(o: Dictionary, dt: float, v: float) -> void:
 	som.volume = o.vol * (ROLAGEM + (1.0 - ROLAGEM) * derrapa if SO_DERRAPANDO else 1.0)
 
 
+## CPU: os números do XML (texto) convertidos uma vez (antes: float("...")
+## de cada atributo a cada passo). _prepara() no fim do carregar()
+var _m_coll := 0.8                # master CollisionVolume
+var _m_sfx := 1.0                 # master SFXVolume
+var _susp_n := {}                 # Small/Large -> [Volume, Threshold, Probability, VolumeSpeed, MinRetriggerTime, FirstSample]
+
+
+func _prepara() -> void:
+	_m_coll = _f(master, "CollisionVolume", 0.8)
+	_m_sfx = _f(master, "SFXVolume", 1.0)
+	for k in ["Small", "Large"]:
+		var a: Dictionary = susp.get(k, {})
+		_susp_n[k] = [_f(a, "Volume"), _f(a, "Threshold"), _f(a, "Probability"), _f(a, "VolumeSpeed"),
+			_f(a, "MinRetriggerTime", 0.25), a.get("FirstSample", "")]
+
+
 func _suspensao(dt: float, v_f: float) -> void:
 	if absf(v_f) < car.SUSP_VEL:                # 0x418: velocidade pra frente
 		return
 	for k in ["Small", "Large"]:
-		var a: Dictionary = susp.get(k, {})
-		if _f(a, "Volume") < 0.05:
+		var a: Array = _susp_n[k]
+		if a[0] < 0.05:
 			continue
 		if _susp_ret[k] > 0.0:
 			_susp_ret[k] -= dt
 			if _susp_ret[k] > 0.0:
 				continue
-		var acima: bool = car.susp_taxa > _f(a, "Threshold")
+		var acima: bool = car.susp_taxa > a[1]
 		if not acima:
 			_susp_flag[k] = false
 		elif not _susp_flag[k]:
-			if randf() < _f(a, "Probability"):
-				var vol := (1.0 - _f(a, "VolumeSpeed") * (1.0 - spd)) * _f(master, "CollisionVolume", 0.8) \
-					* _f(master, "SFXVolume", 1.0) * _f(a, "Volume")
-				_tocar_uma("Coll_Big", a.get("FirstSample", ""), vol, 1.0)
-				_susp_ret[k] = _f(a, "MinRetriggerTime", 0.25)
+			if randf() < a[2]:
+				var vol: float = (1.0 - a[3] * (1.0 - spd)) * _m_coll * _m_sfx * a[0]
+				_tocar_uma("Coll_Big", a[5], vol, 1.0)
+				_susp_ret[k] = a[4]
 			_susp_flag[k] = true
 
 
@@ -332,7 +348,7 @@ func batida_passo(dt: float, c: Dictionary, v: Vector3) -> void:
 		livre = _bat_ret < 0.0
 		if livre:
 			_bat_ret = 0.0
-	var vol_bat := clampf(_f(master, "CollisionVolume", 0.8) * _f(master, "SFXVolume", 1.0), 0.0, 1.0)
+	var vol_bat := clampf(_m_coll * _m_sfx, 0.0, 1.0)
 	if _raspa_t == 0.0:
 		if raspa.tocando:
 			raspa.parar()

@@ -84,15 +84,19 @@ const TAB_N := 41
 const SUAVIZA := 6          # passadas de [1 2 1]/4 na tabela (~1.7 casa)
 # pose em C++ (fisica_cpp/src/piloto.cpp, a mesma conta): null = GDScript
 var _cpp: RefCounted = null
+var _cpp_vol := false          # o C++ foi configurado já com o volante (a tabela)
 
 
 ## (re)copia tudo pro C++ depois de montar (carregar, prender_no_volante)
 func _liga_cpp() -> void:
 	_cpp = null
+	_cpp_vol = false
 	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("PilotoCpp"):
 		_cpp = ClassDB.instantiate("PilotoCpp")
 		if not _cpp.configurar(self):
 			_cpp = null
+		else:
+			_cpp_vol = _vol
 
 
 ## monta tudo a partir de dir/piloto.json; false se o asset não existe
@@ -326,6 +330,8 @@ func no_volante() -> bool:
 ## giro do volante (rad, em volta do eixo do aro) pra direção suavizada s do
 ## remake, o mesmo que as mãos fazem no STEER_LEFT (espelhado: sinal trocado)
 func giro_volante(s: float) -> float:
+	if _cpp and _cpp_vol:
+		return _cpp.giro_volante(s)
 	var kf := _quadro(absf(s) * _dur)
 	var g := lerpf(_giro[int(kf.x)], _giro[int(kf.x) + 1], kf.y)
 	return -g if -s > 0.0 else g

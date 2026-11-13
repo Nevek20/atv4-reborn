@@ -107,6 +107,13 @@ private:
 	Ref<PhysicsShapeQueryParameters3D> query_esfera;
 	std::map<int64_t, double> jitter_mat;   // WheelJitter por material do terreno
 	std::map<int64_t, std::pair<double, double>> mat_chao;   // material -> (atrito, Damping)
+	struct Caixa {   // caixa de água (objetos_rx01.aguas)
+		Dictionary d;
+		Transform3D inv;
+		double cx = 0, cz = 0, hx = 0, hz = 0, y = 0;
+	};
+	std::vector<Caixa> caixas;
+	ObjectID aguas_de;
 	ObjectID chao_terreno;
 	String chao_pneu;
 
@@ -150,6 +157,7 @@ public:
 	Array rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up);
 	void esferas(PhysicsDirectSpaceState3D *space, Vector3 up);
 	void visual_rodas(double a_jogo);
+	void agua_passo();
 	// tremida das rodas + vibração (efeitos.cpp)
 	void tremida(double dt, double v_l, double v_f);
 };

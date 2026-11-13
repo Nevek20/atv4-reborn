@@ -184,7 +184,7 @@ bool SomPneuCpp::rodas_passo(double dt, double v, double spd, double side, doubl
 			}
 		}
 		const Mat *mat = &mat_de(nome);
-		if (na_agua && (double)prof[ri] > -0.05 && tem_agua) {
+		if (na_agua && ri < prof.size() && (double)prof.ptr()[ri] > -0.05 && tem_agua) {
 			m = -3;
 			mat = &agua;
 		}

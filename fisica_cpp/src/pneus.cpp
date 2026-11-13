@@ -7,6 +7,7 @@
 
 #include <godot_cpp/classes/rigid_body3d.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 #include "mat.h"
 
@@ -52,8 +53,9 @@ double FisicaCarro::arrasto_de(Object *c, double amort_medio, int64_t n_rodas, d
 		PackedFloat32Array prof = c->get(N.agua_prof);
 		double d = 0.0;
 		int64_t m = n_rodas < prof.size() ? n_rodas : prof.size();
+		const float *pr = prof.ptr();   // leitura (prof[i] pediria escrita: cópia)
 		for (int64_t i = 0; i < m; i++) {
-			d += prof[i];
+			d += pr[i];
 		}
 		d /= (double)n_rodas;
 		if (d > 0.0) {
@@ -683,4 +685,88 @@ double FisicaCarro::pneus(double dt, Vector3 v, Vector3 fwd, Vector3 left, Vecto
 	c->set(N.ps_emb_ant, e.ps_emb_ant);
 	c->set(N.drive_slip, e.drive_slip);
 	return f_int;
+}
+
+// car.gd _agua_passo + objetos_rx01.agua_em: profundidade de cada roda na
+// água (fundo = centro - raio em y) e a água da última roda. Mesma ordem do
+// GDScript, inclusive a profundidade da última caixa quando não está em
+// nenhuma (os testes leem)
+void FisicaCarro::agua_passo() {
+	Object *c = carro();
+	RigidBody3D *b = Object::cast_to<RigidBody3D>(c);
+	if (b == nullptr) {
+		return;
+	}
+	static const StringName S_AGUAS("aguas"), S_INV("inv"), S_CX("cx"), S_CZ("cz"), S_HX("hx"), S_HZ("hz"), S_Y("y");
+	const Nomes &N = nomes();
+	Variant ant = c->get(N.agua);
+	c->set(N.agua, Variant());
+	Object *objetos = c->get(N.objetos);
+	if (objetos == nullptr) {
+		return;
+	}
+	Array aguas = objetos->get(S_AGUAS);
+	if (aguas.is_empty()) {
+		return;
+	}
+	// caixas guardadas (mudam só se o objetos for montado de novo)
+	if (ObjectID(objetos->get_instance_id()) != aguas_de || (int64_t)caixas.size() != aguas.size()) {
+		caixas.clear();
+		for (int64_t i = 0; i < aguas.size(); i++) {
+			Dictionary a = aguas[i];
+			Caixa k;
+			k.d = a;
+			k.inv = a[S_INV];
+			k.cx = a[S_CX];
+			k.cz = a[S_CZ];
+			k.hx = a[S_HX];
+			k.hz = a[S_HZ];
+			k.y = a[S_Y];
+			caixas.push_back(k);
+		}
+		aguas_de = ObjectID(objetos->get_instance_id());
+	}
+	// a de antes (se houver) vem primeiro, depois todas ([antes] + aguas; ela
+	// pode nem estar mais na lista se a pista foi montada de novo)
+	bool tem_ant = false;
+	Caixa ca;
+	if (ant.get_type() == Variant::DICTIONARY) {
+		Dictionary ad = ant;
+		ca.d = ad;
+		ca.inv = ad[S_INV];
+		ca.cx = ad[S_CX];
+		ca.cz = ad[S_CZ];
+		ca.hx = ad[S_HX];
+		ca.hz = ad[S_HZ];
+		ca.y = ad[S_Y];
+		tem_ant = true;
+	}
+	Transform3D xf = b->get_global_transform();
+	Array wd = c->get(N.wheels);
+	PackedFloat32Array prof = c->get(N.agua_prof);
+	int64_t n = wd.size() < prof.size() ? wd.size() : prof.size();
+	Variant agua;
+	for (int64_t i = 0; i < n; i++) {
+		Dictionary w = wd[i];
+		Vector3 cc = xf.xform(Vector3((real_t)(double)w[N.px], (real_t)((double)w[N.y0] + (double)w[N.x]), (real_t)(double)w[N.pz]));
+		Vector3 p = cc - Vector3(0, (real_t)(double)w[N.r], 0);
+		double pr = 0.0;
+		Variant achou;
+		int total = (int)caixas.size() + (tem_ant ? 1 : 0);
+		for (int k = 0; k < total; k++) {
+			const Caixa &a = tem_ant ? (k == 0 ? ca : caixas[k - 1]) : caixas[k];
+			pr = a.y - (double)p.y;
+			if (pr >= 0.0) {
+				Vector3 l = a.inv.xform(p);
+				if (absd((double)l.x - a.cx) < a.hx && absd((double)l.z - a.cz) < a.hz) {
+					achou = a.d;
+					break;
+				}
+			}
+		}
+		agua = achou;
+		prof.set(i, (float)pr);
+	}
+	c->set(N.agua, agua);
+	c->set(N.agua_prof, prof);
 }
