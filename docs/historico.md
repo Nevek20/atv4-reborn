@@ -1403,6 +1403,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   101..127 km/h, 0..1 reposição por rival (era até 2). Acelerador e freio
   continuam NOSSOS: pra achar, um save state com um rival FREANDO (freio >
   0 na RAM) ajudaria a cruzar os campos.
+- Acelerador e freio da IA em sétimos (nov/2026, save state freiando.p2s
+  do Matheus): como a direção, os 3 comandos vão pro corpo em round(x x 7)
+  / 7 (ia.gd). Um rival a 124 km/h com a direção no batente estava de
+  acelerador 0 e freio só 1/7 (o nosso freia 1.0 acima de ANG_FREIO: fica
+  NOSSO até achar quem escreve a struct, docs/engenharia_reversa.md). teste_ia
+  1 volta: 96..121 km/h, 1 reposição.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da

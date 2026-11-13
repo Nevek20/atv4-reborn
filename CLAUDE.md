@@ -181,8 +181,9 @@ Pista RX01
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
 - IA: o AIT é volta gravada (linha +0x00); o +0x24 NÃO é a velocidade da
-  IA (na RAM ela anda 1.15..1.40 x isso, de acelerador cheio). Direção em
-  sétimos, direto (cru = suavizado). Acelerador, freio, desvio e catchup
+  IA (na RAM ela anda 1.15..1.40 x isso, de acelerador cheio). Direção,
+  acelerador e freio em sétimos, direto (cru = suavizado; antes de arredondar
+  no piloto +0xa0 freio, +0xa4 acel, +0xa8 dir). Acelerador, freio, desvio e catchup
   aplicado ainda NOSSOS (classes do exe achadas, não lidas).
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
   depois; você larga em 8º.

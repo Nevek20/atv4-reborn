@@ -1027,9 +1027,20 @@ vazios). Tudo vem do evento:
   (então não é o acelerador). Medido nos 7: direção crua = ângulo até o
   alvo / 20°; alvo 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s).
   +0x160 = 0.12, 0.10 ... 0.00 (cai 0.02 por rival; uso não achado); +0x40
-  não é a distância pro jogador. Acelerador e freio: não achados (nenhum
-  float 7.0 / 1/7 no código da IA; as escritas nos pedais não aparecem como
-  swc1 com offset fixo).
+  não é a distância pro jogador.
+- Save state freiando.p2s (nov/2026, um rival freando): a struct de controle
+  do piloto (+0xa0, mesmo layout do controle do jogador lido em 0x3957f0:
+  [1] acelerador, [2] direção) tem os valores ANTES de arredondar: +0xa0
+  freio, +0xa4 acelerador, +0xa8 direção; no corpo vão round(x x 7) / 7 nos
+  TRÊS (acelerador 0.176 -> 1/7, 0.298 -> 2/7, 0.681 -> 5/7; freio 0.14 ->
+  1/7). Os 7 rivais: 133 km/h dir -0.47 acel 0.68; 124 km/h dir 1.0 acel 0
+  freio 0.14; 131 km/h dir 0.83 acel 0.30; 114 km/h dir 0.67 acel 0.18; 3
+  retos de acelerador cheio. O acelerador cai com a curva mas não só pela
+  direção (114 km/h e dir 0.67 tem MENOS acelerador que 131 km/h e dir
+  0.83): tem alvo de velocidade. Quem escreve a struct não foi achado (não
+  é o piloto 0x34f100..0x350000 nem as classes 0x35a000..0x369000 por
+  offset fixo; 0x15bab8(..., +0xa0) é a reposição, não o controle). O 7.0
+  em 0x348708 é de outra coisa.
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice

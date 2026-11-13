@@ -455,6 +455,11 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 				x.r.dist, corrida.t])
 		_repor(x)
 		return
+	# acelerador e freio em sétimos, como a direção (save state freiando.p2s,
+	# nov/2026: 5/7, 2/7, 1/7, 0 e freio 1/7; o valor antes de arredondar fica
+	# no piloto +0xa0 freio, +0xa4 acelerador, +0xa8 direção)
+	thr = roundf(thr * 7.0) / 7.0
+	brk = roundf(brk * 7.0) / 7.0
 	car.test_input = {"thr": thr, "brk": brk, "steer": st}
 	if OS.get_environment("IA_TRACE") == x.nome and Engine.get_physics_frames() % 5 == 0:
 		var alvo := v_lim
