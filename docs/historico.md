@@ -1666,7 +1666,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     corrida o passo+quadro foi de ~3.1-3.3 pra ~2.9-3.2 ms (nuvem, ruído
     grande). NOSSO, só CPU: o que se ouve não muda.
   - Medido e NÃO mexido: avisar os ~130 nós de cada carro que ele andou
-    custa só 0.5 µs (o Godot só marca como sujo).
+    custa só 0.5 µs (o Godot só marca como sujo). C++ lendo/gravando
+    variável do GDScript: 17-22 ns (entrada do dicionário da roda 37-51 ns),
+    então a interface não pesa; chamada GDScript -> C++ ~0.85 µs (~15 por
+    carro por passo, ~0.1 ms nos 8). IA inteira ~0.3 ms/passo (o desvio é
+    0.07). O passo do carro (~0.3 ms) está espalhado em muita linha de
+    GDScript de ~1 µs: o próximo salto seria o passo inteiro em C++, grande
+    demais pro ganho com o jogo já cravado em 240 FPS no PC do Matheus.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
