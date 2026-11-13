@@ -355,6 +355,9 @@ var gears := PackedFloat32Array()
 ## por enquanto. null = sem a biblioteca ou ATV4_CPP=0 (tudo no GDScript).
 var cpp: RefCounted = null
 static var usar_cpp := ClassDB.class_exists("FisicaCarro") and OS.get_environment("ATV4_CPP") != "0"
+## a biblioteca carregou? (F2 mostra; F3 liga/desliga o usar_cpp na hora)
+static func cpp_carregou() -> bool:
+	return ClassDB.class_exists("FisicaCarro")
 
 # ---- estado ----
 var steer := 0.0              # direção (-1..1), + = esquerda

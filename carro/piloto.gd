@@ -89,7 +89,7 @@ var _cpp: RefCounted = null
 ## (re)copia tudo pro C++ depois de montar (carregar, prender_no_volante)
 func _liga_cpp() -> void:
 	_cpp = null
-	if ClassDB.class_exists("PilotoCpp") and OS.get_environment("ATV4_CPP") != "0":
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("PilotoCpp"):
 		_cpp = ClassDB.instantiate("PilotoCpp")
 		if not _cpp.configurar(self):
 			_cpp = null

@@ -38,7 +38,7 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 ## Estrutura
 
 ```
-main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 esconde, F2 FPS e onde vai o tempo), menu de carros (Tab, V);
+main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 esconde, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
                      VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro/               o carro
   car.gd               a FÍSICA portada do exe (suspensão, pneus, motor, câmbio, pedais, casco,

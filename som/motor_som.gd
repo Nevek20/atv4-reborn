@@ -114,11 +114,17 @@ func carregar(dir: String) -> bool:
 	var alvo_le := maxf(K_RPM * (float(o0.nivel_cru_db) - ref) + K_OFF * (float(le.nivel_cru_db) - float(o0.nivel_cru_db)), PISO_DB)
 	_off.append(_tocador("lenta.wav", le, alvo_le, arq_ref))
 	_off.sort_custom(func(a, b): return a.rpm < b.rpm)
-	if ClassDB.class_exists("MotorSomCpp") and OS.get_environment("ATV4_CPP") != "0":
+	liga_cpp()
+	return true
+
+
+## (re)liga o atualizar em C++ conforme o carro_base.usar_cpp (F3)
+func liga_cpp() -> void:
+	_cpp = null
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("MotorSomCpp"):
 		_cpp = ClassDB.instantiate("MotorSomCpp")
 		if not _cpp.configurar(self):
 			_cpp = null
-	return true
 
 
 ## um AudioStreamPlayer parado por loop; volume final = alvo - (nível do

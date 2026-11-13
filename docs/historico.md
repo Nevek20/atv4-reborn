@@ -1535,6 +1535,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   car.gd inteiro 0.69 -> 0.38 ms por carro com tudo em C++. Poeira (0.019)
   e pedras (0.014) ficaram: o que sobra é guardar as nuvens nos arrays do
   GDScript; portar exige levar as partículas inteiras pro C++.
+  Print do Matheus no PC (59 FPS, física 11.7 ms por passo, pior que os 6.5
+  de antes) sem dar pra saber se o C++ tinha carregado: o F2 agora mostra
+  o estado e o F3 liga/desliga na hora (carro.liga_cpp em cada carro).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

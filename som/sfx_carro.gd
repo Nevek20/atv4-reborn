@@ -139,11 +139,17 @@ func carregar(c) -> bool:
 	raspa.ganho = GANHO
 	raspa.ancora = _ancora()
 	add_child(raspa)
-	if ClassDB.class_exists("SomPneuCpp") and OS.get_environment("ATV4_CPP") != "0":
+	liga_cpp()
+	return not patches.is_empty()
+
+
+## (re)liga o laço das rodas em C++ conforme o carro_base.usar_cpp (F3)
+func liga_cpp() -> void:
+	_cpp = null
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("SomPneuCpp"):
 		_cpp = ClassDB.instantiate("SomPneuCpp")
 		if not _cpp.configurar(self):
 			_cpp = null
-	return not patches.is_empty()
 
 
 func _f(d: Dictionary, k: String, padrao := 0.0) -> float:

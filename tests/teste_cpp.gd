@@ -264,6 +264,17 @@ func _physics_process(_dt: float) -> bool:
 		k += 1
 		espera = 3
 		return false
+	# F3: desliga e religa tudo na hora
+	var Base := preload("res://carro/carro_base.gd")
+	main._troca_cpp()
+	if Base.usar_cpp or main.car.cpp != null or main.car.sfx._cpp != null:
+		_falha("F3 não desligou o C++")
+	main._troca_cpp()
+	if not Base.usar_cpp or main.car.cpp == null or (main.car.piloto and main.car.piloto._cpp == null):
+		_falha("F3 não religou o C++")
+	if not main._cpp_txt().begins_with("C++: ligado"):
+		_falha("linha do F2: " + main._cpp_txt())
+	print("  F2: " + main._cpp_txt())
 	print("  %d contas comparadas (piloto e suspensão: pior diferença %s)" % [contas, pior_pose])
 	print("teste_cpp: %s" % ("ok" if falhas == 0 and contas > 0 else "FALHA (%d de %d)" % [falhas, contas]))
 	return true

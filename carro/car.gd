@@ -540,6 +540,24 @@ func p_mudou() -> void:
 		cpp.configurar(self)
 
 
+## liga/desliga tudo que tem C++ neste carro (física, piloto, suspensão, som)
+## conforme o usar_cpp (main.gd F3: comparar na hora, no mesmo lugar). O
+## estado mora nas variáveis do GDScript: trocar no meio da corrida não pula.
+func liga_cpp() -> void:
+	cpp = null
+	if usar_cpp:
+		cpp = ClassDB.instantiate("FisicaCarro")
+		cpp.configurar(self)
+	if piloto:
+		piloto._liga_cpp()
+	if susp_vis:
+		susp_vis.liga_cpp()
+	if sfx:
+		sfx.liga_cpp()
+	if som and som.has_method("liga_cpp"):
+		som.liga_cpp()
+
+
 ## Mola do jogo (0x248a80): F = k x curva(x normalizado) x x, em kN.
 ## Normaliza por Maximum_position comprimindo e por Minimum_position esticando;
 ## esticada (x < 0) com a roda no chão, ela puxa o carro pra baixo.

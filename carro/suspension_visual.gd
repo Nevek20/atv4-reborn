@@ -114,7 +114,13 @@ func build(c, pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary,
 			var xf := Transform3D(rot.get(pn, Basis()), pts[pn])
 			_place(mi, xf)
 			spares.append(xf)
-	if ClassDB.class_exists("SuspensaoCpp") and OS.get_environment("ATV4_CPP") != "0":
+	liga_cpp()
+
+
+## (re)liga o update em C++ conforme o carro_base.usar_cpp (F3)
+func liga_cpp() -> void:
+	_cpp = null
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("SuspensaoCpp"):
 		_cpp = ClassDB.instantiate("SuspensaoCpp")
 		if not _cpp.configurar(self):
 			_cpp = null

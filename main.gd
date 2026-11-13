@@ -371,6 +371,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				fps_label.visible = not fps_label.visible
 				# mede o tempo de desenho na CPU e na GPU (só com o F2 ligado)
 				RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
+			KEY_F3:
+				_troca_cpp()
 			KEY_C:
 				_troca_camera()
 			KEY_G:
@@ -536,7 +538,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
@@ -604,6 +606,31 @@ func ground_normal(x: float, z: float) -> Vector3:
 		terrain.height_at(x, z - e) - terrain.height_at(x, z + e)).normalized()
 
 
+## F3: liga/desliga a física, o visual e o som em C++ em todos os carros, na
+## hora (comparar o F2 no mesmo lugar). Sem a biblioteca não faz nada.
+func _troca_cpp() -> void:
+	var Base := preload("res://carro/carro_base.gd")
+	if not Base.cpp_carregou():
+		return
+	Base.usar_cpp = not Base.usar_cpp
+	var carros: Array = [car]
+	if corrida and corrida.ia:
+		for r in corrida.ia.rivais:
+			carros.append(r.car)
+	for c in carros:
+		if is_instance_valid(c) and c.has_method("liga_cpp"):
+			c.liga_cpp()
+
+
+## linha do C++ no F2
+func _cpp_txt() -> String:
+	var Base := preload("res://carro/carro_base.gd")
+	if not Base.cpp_carregou():
+		return "C++: NÃO CARREGOU (falta a biblioteca em bin/ ou o Godot recusou: veja o Output)"
+	return "C++: %s (%s)   F3 liga/desliga" % ["ligado" if Base.usar_cpp else "DESLIGADO",
+		ClassDB.class_call_static("FisicaCarro", "versao")]
+
+
 ## F2: onde vai o tempo do quadro (média de 0.5 s). process = o monitor do
 ## Godot (o quadro todo), física = um passo de 50 Hz (os carros), desenho =
 ## CPU montando e GPU desenhando, chamadas = draw calls do quadro
@@ -619,10 +646,10 @@ func _medidor(delta: float) -> String:
 	if _med.t >= 0.5:
 		var n: float = _med.n
 		var rivais: int = corrida.ia.rivais.size() if corrida and corrida.ia else 0
-		_med.txt = "\nquadro %.2f ms   (Godot: process %.2f ms)\nfísica %.2f ms por passo de 50 Hz\ndesenho CPU %.2f ms   GPU %.2f ms\nchamadas %d   objetos %d   rivais %d" % [
+		_med.txt = "\nquadro %.2f ms   (Godot: process %.2f ms)\nfísica %.2f ms por passo de 50 Hz\ndesenho CPU %.2f ms   GPU %.2f ms\nchamadas %d   objetos %d   rivais %d\n" % [
 			_med.t / n * 1000.0, _med.proc / n, _med.fis / n, _med.cpu / n, _med.gpu / n,
 			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
-			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), rivais]
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), rivais] + _cpp_txt()
 		_med.n = 0
 		_med.t = 0.0
 		_med.proc = 0.0

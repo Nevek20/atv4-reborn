@@ -187,6 +187,11 @@ scons platform=windows target=template_release     :: Windows, jogo exportado
 %GODOT% --headless --path . -s res://tests/teste_cpp.gd   :: a extensão carrega e as contas batem com o GDScript
 ```
 A 1ª compilação leva uns 3 min por alvo (o godot-cpp); depois só o que mudou.
+No jogo: o F2 mostra se a biblioteca carregou ("C++: ligado/DESLIGADO/NÃO
+CARREGOU") e o F3 liga e desliga o C++ em todos os carros na hora (comparar o
+F2 no mesmo lugar). NÃO CARREGOU: veja o Output do Godot (erro do
+GDExtension) e reabra o editor depois do pull (ele registra o
+bin/atv4_fisica.gdextension na .godot/extension_list.cfg).
 Paridade do que já foi portado (motor, câmbio, pneus, rodas e molas): `set ATV4_CPP=0` volta pro
 GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
 no fim (e a soma do som), e com 0 e 1 tem que sair igual (e o rodar_testes
