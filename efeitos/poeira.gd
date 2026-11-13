@@ -247,6 +247,9 @@ func _multimesh(arq: String, nome: String) -> MultiMesh:
 	return m
 
 
+var _q_folga: PhysicsRayQueryParameters3D = null   # consulta do _folga (reaproveitada)
+
+
 ## um quadro do jogo (0x225108): v = velocidade do carro (mundo)
 func passo(dt: float, v: Vector3) -> void:
 	var vel := v.length()
@@ -314,9 +317,14 @@ func passo(dt: float, v: Vector3) -> void:
 ## folga da roda no ar até o chão embaixo dela (o raio da física só alcança
 ## 5 cm abaixo da roda esticada; aqui até 0.3 m, além da regra dos 0.25)
 func _folga(centro: Vector3, up: Vector3, r: float) -> float:
-	var q := PhysicsRayQueryParameters3D.create(centro, centro - up * (r + 0.3))
-	q.exclude = [car.get_rid()]
-	var hit: Dictionary = car.get_world_3d().direct_space_state.intersect_ray(q)
+	# CPU: a mesma consulta reaproveitada (era um objeto e uma lista novos por
+	# roda no ar a cada passo)
+	if _q_folga == null:
+		_q_folga = PhysicsRayQueryParameters3D.new()
+		_q_folga.exclude = [car.get_rid()]
+	_q_folga.from = centro
+	_q_folga.to = centro - up * (r + 0.3)
+	var hit: Dictionary = car.get_world_3d().direct_space_state.intersect_ray(_q_folga)
 	if hit.is_empty():
 		return 1.0
 	return maxf(centro.distance_to(hit.position) - r, 0.0)

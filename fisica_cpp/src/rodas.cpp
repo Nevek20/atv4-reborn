@@ -116,8 +116,17 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 	}
 	TypedArray<RID> excluir;
 	excluir.push_back(b->get_rid());
+	// CPU: o roda_na_cerca e o ignorar_roda (GDScript) só quando podem dar
+	// algo: chão que não é cerca e nenhuma peça separando devolvem false e
+	// [] sem fazer nada (os mesmos dicionário e lista que eles olham primeiro;
+	// eram 4 chamadas ao GDScript por carro por passo)
+	Dictionary cercas_ids;
 	if (objetos != nullptr) {
-		excluir.append_array(objetos->call(N.ignorar_roda));
+		static const StringName S_CERCAS("_cerca_do_corpo"), S_SEPARANDO("_separando");
+		cercas_ids = objetos->get(S_CERCAS);
+		if (!((Array)objetos->get(S_SEPARANDO)).is_empty()) {
+			excluir.append_array(objetos->call(N.ignorar_roda));
+		}
 	}
 	excluir.append_array(c->get(N.outros_carros));
 	if (query.is_null()) {
@@ -138,7 +147,7 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 		q->set_to(top - up * (real_t)reach);
 		q->set_exclude(excluir);
 		Dictionary hit = space->intersect_ray(q);
-		if (objetos != nullptr && !hit.is_empty() &&
+		if (objetos != nullptr && !hit.is_empty() && cercas_ids.has(hit[N.collider_id]) &&
 				(bool)objetos->call(N.roda_na_cerca, hit[N.collider], hit[N.position], hit[N.normal])) {
 			TypedArray<RID> mais = excluir.duplicate();
 			mais.push_back(hit[N.rid]);

@@ -884,6 +884,8 @@ func _bloco_batida(b: Dictionary, dt: float) -> void:
 
 ## roda do carro (raio da suspensão) encostando numa cerca: o jogo trata as
 ## rodas pelo mesmo 0x153390 (0x154088). true = quebrou (refazer o raio)
+## (o C++ das rodas, fisica_cpp/src/rodas.cpp, olha o _cerca_do_corpo e o
+## _separando antes de chamar este e o ignorar_roda: mudou um, muda o outro)
 func roda_na_cerca(corpo: Object, ponto: Vector3, normal: Vector3) -> bool:
 	if corpo == null or not _cerca_do_corpo.has(corpo.get_instance_id()):
 		return false

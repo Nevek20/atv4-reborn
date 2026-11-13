@@ -169,7 +169,15 @@ Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia revers
 (`unpacked\` com other/raw/gob/xml, o exe, os scripts antigos).
 
 No jogo: F2 = FPS + onde vai o tempo (quadro, física por passo, desenho CPU/GPU,
-chamadas de desenho, rivais), média de 0.5 s.
+chamadas de desenho, rivais), média de 0.5 s. "process" e "física" são o
+PIOR quadro/passo do último segundo (monitores do Godot), não a média.
+
+Teste de FPS com a renderização em thread separada (o desenho roda junto
+com os scripts em vez de depois deles): Projeto > Configurações do Projeto
+> Editor > Run > Main Run Args = `--render-thread separate`, F5 e comparar
+o F2 no mesmo lugar com e sem. Ou direto: `%GODOT% --path . --render-thread
+separate`. Se ficar melhor e sem defeito na tela, vai pro project.godot
+(rendering/driver/threads/thread_model).
 
 ## Física em C++ (fisica_cpp/, GDExtension)
 
@@ -195,4 +203,5 @@ bin/atv4_fisica.gdextension na .godot/extension_list.cfg).
 Paridade do que já foi portado (motor, câmbio, pneus, rodas e molas): `set ATV4_CPP=0` volta pro
 GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
 no fim (e a soma do som), e com 0 e 1 tem que sair igual (e o rodar_testes
-idêntico). Visual, tremida e som do piloto/suspensão: tests/teste_cpp.gd.
+idêntico). Visual, tremida, som do piloto/suspensão e vozes do som do jogo:
+tests/teste_cpp.gd.

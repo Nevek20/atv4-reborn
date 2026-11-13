@@ -28,7 +28,7 @@ void FisicaCarro::_bind_methods() {
 }
 
 String FisicaCarro::versao() {
-	return "atv4_fisica 0.8";
+	return "atv4_fisica 0.9";
 }
 
 double FisicaCarro::curva_sample(const Dictionary &c, double x) {

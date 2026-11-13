@@ -39,6 +39,10 @@ static var _db: Dictionary = {}
 static var _cache: Dictionary = {}
 static var _anterior: Dictionary = {}     # RAND_PLAY: última opção de cada grão
 static var _regs_globais: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+## vozes em C++ (fisica_cpp/src/som_jogo.cpp, a mesma conta do _vivas): um
+## só pra todos os tocadores; segue o carro_base.usar_cpp (F3)
+static var _cpp: Object = ClassDB.instantiate("SomJogoCpp") if ClassDB.class_exists("SomJogoCpp") else null
+const _CB := preload("res://carro/carro_base.gd")
 
 var volume := 1.0
 var tom := 1.0
@@ -82,8 +86,11 @@ const UNIDADE_3D := 8.0
 const MAX_3D := 150.0
 
 
-## player de som: 2D (o jogador) ou 3D preso na ancora (rival)
-static func novo_player(dono: Node, ancora_3d: Node3D) -> Node:
+## player de som: 2D (o jogador) ou 3D preso na ancora (rival). O 3D fica
+## fora do dono e some junto com ele: liga_saida = false quando o dono cuida
+## disso (as vozes do SomJogo, no _exit_tree: uma ligação por voz acumulava
+## milhares no sinal do dono numa corrida, e cada uma dava erro na saída)
+static func novo_player(dono: Node, ancora_3d: Node3D, liga_saida := true) -> Node:
 	if ancora_3d == null:
 		var p := AudioStreamPlayer.new()
 		dono.add_child(p)
@@ -93,9 +100,20 @@ static func novo_player(dono: Node, ancora_3d: Node3D) -> Node:
 	q.max_distance = MAX_3D
 	q.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
 	ancora_3d.add_child(q)
-	# some junto com o dono (o nó do som)
-	dono.tree_exiting.connect(func(): if is_instance_valid(q): q.queue_free())
+	if liga_saida:
+		dono.tree_exiting.connect(func(): if is_instance_valid(q): q.queue_free())
 	return q
+
+
+## as vozes 3D (rival) ficam na âncora, fora deste nó: somem junto com ele
+func _exit_tree() -> void:
+	if ancora == null:
+		return
+	for l in [_vozes, _soltas]:
+		for v in l:
+			if is_instance_valid(v.p):
+				v.p.queue_free()
+		l.clear()
 
 
 func tocar(b: String, n: String) -> void:
@@ -132,8 +150,12 @@ func _process(dt: float) -> void:
 		while _acum >= 1.0 / TICK_HZ:
 			_acum -= 1.0 / TICK_HZ
 			_tick()
-	_vozes = _vivas(_vozes, dt * SPU_HZ)
-	_soltas = _vivas(_soltas, dt * SPU_HZ)
+	if _cpp and _CB.usar_cpp:
+		_vozes = _cpp.vivas(_vozes, dt * SPU_HZ, volume, ganho, tom)
+		_soltas = _cpp.vivas(_soltas, dt * SPU_HZ, volume, ganho, tom)
+	else:
+		_vozes = _vivas(_vozes, dt * SPU_HZ)
+		_soltas = _vivas(_soltas, dt * SPU_HZ)
 	if tocando and _cursores.is_empty() and _vozes.is_empty():
 		tocando = false
 	# CPU: parado e sem voz soltando, o quadro não faz nada: dorme até o
@@ -398,7 +420,7 @@ func _voz(t: Dictionary, c: Dictionary) -> void:
 			return
 		_vozes[k].p.queue_free()
 		_vozes.remove_at(k)
-	var p = novo_player(self, ancora)
+	var p = novo_player(self, ancora, false)
 	p.stream = _wav(t)
 	var adsr: Array = t.get("adsr", ADSR_SECO)
 	var v := {"p": p, "amp": c.amp * tv / 127.0, "loop": bool(t.loop), "cur": c,

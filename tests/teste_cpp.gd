@@ -23,6 +23,9 @@ extends SceneTree
 ##  - suspensão visual (suspensao.cpp): todas as peças e pivôs das rodas
 ##    iguais até TOL_POSE, com cursos e esterço variados (Mosquito: barras;
 ##    Storm: rally; Hammerhead: telescópio; Fireball: balança deslocada).
+##  - vozes do tocador do jogo (som_jogo.cpp): envelope (ADSR do sons.json e
+##    bordas), volume e tom gravados no player e vozes que morrem iguais ao
+##    _vivas byte a byte, quadro a quadro, com key-off e player parando.
 ## Uso: godot --headless --path . -s res://tests/teste_cpp.gd
 
 const VD := preload("res://carro/vehicle_data.gd")
@@ -435,6 +438,88 @@ func _agua(car) -> void:
 	print("  agua das rodas: %d casos conferidos (%d com roda na agua)" % [n, dentro])
 
 
+## vozes do som do jogo: o _vivas do GDScript x o SomJogoCpp, duas listas
+## iguais (players separados, mesmo tratamento), quadro a quadro
+func _som_jogo() -> void:
+	if not ClassDB.class_exists("SomJogoCpp"):
+		_falha("SomJogoCpp não existe")
+		return
+	var SJ := preload("res://som/som_jogo.gd")
+	var sj: Node = SJ.new()
+	root.add_child(sj)
+	var cpp = ClassDB.instantiate("SomJogoCpp")
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = 22050
+	var dados := PackedByteArray()
+	dados.resize(4000)
+	wav.data = dados
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_end = 2000
+	# os 13 ADSR do sons.json + bordas: seco, ataque linear, sustentação linear
+	# subindo/descendo, release linear
+	var adsrs := [[33023, 40896], [33023, 40908], [33023, 40909], [33023, 40910], [33023, 40911],
+		[33023, 52430], [33023, 52494], [33023, 57294], [45567, 40908], [45823, 40908], [46079, 40908],
+		[47103, 40896], [50687, 40910], [0x80ff, 0x9fc0], [0x1f35, 0x1fc6], [0x2a77, 0x5f8a],
+		[0x0000, 0x0000], [0xffff, 0xffff], [0x7fff, 0x4040]]
+	var pbs := [[0, 0], [2, 5], [7, 0], [3, 3], [0, 10]]
+	var listas := [[], []]
+	var curs := []
+	for i in adsrs.size():
+		var c := {"pb": 0}
+		curs.append(c)
+		for l in 2:
+			var p := AudioStreamPlayer.new()
+			p.stream = wav
+			sj.add_child(p)
+			p.play()
+			listas[l].append({"p": p, "amp": 0.3 + 0.05 * i, "loop": true, "cur": c,
+				"pb": pbs[i % pbs.size()], "a1": adsrs[i][0], "a2": adsrs[i][1],
+				"fase": 0, "nivel": 0.0, "vol": 0.0, "tom": 1.0})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var n := 0
+	for fr in 300:
+		var dt := 1.0 / 60.0 + rng.randf_range(-0.004, 0.02)
+		sj.volume = rng.randf_range(0.2, 1.2)
+		sj.ganho = 0.6 if fr % 50 < 25 else 1.0
+		if fr % 7 == 0:
+			sj.tom = rng.randf_range(0.5, 2.0)
+		if fr % 13 == 0:
+			for c in curs:
+				c.pb = rng.randi_range(-32768, 32767)
+		if fr == 150 or fr == 240:
+			# key-off (o parar() do som_jogo) de metade das vozes
+			for l in 2:
+				for j in listas[l].size():
+					var v: Dictionary = listas[l][j]
+					if j % 2 == fr / 150 - 1 and v.fase < 3:
+						v.fase = 3
+						v.vol = sj.volume * sj.ganho * v.amp
+						v.tom = sj.tom * SJ._dobra(v)
+		if fr == 60 or fr == 200:
+			# player parando (som sem loop que acabou)
+			for l in 2:
+				if listas[l].size() > 3:
+					listas[l][3].p.stop()
+		var ticks := dt * SJ.SPU_HZ
+		listas[0] = sj._vivas(listas[0], ticks)
+		listas[1] = cpp.vivas(listas[1], ticks, sj.volume, sj.ganho, sj.tom)
+		contas += 1
+		var a := []
+		var b := []
+		for v in listas[0]:
+			a.append([v.fase, v.nivel, v.get("db_ult"), v.get("pt_ult"), v.p.volume_db, v.p.pitch_scale])
+		for v in listas[1]:
+			b.append([v.fase, v.nivel, v.get("db_ult"), v.get("pt_ult"), v.p.volume_db, v.p.pitch_scale])
+		if var_to_bytes(a) != var_to_bytes(b):
+			_falha("som do jogo quadro %d: GD %s, C++ %s" % [fr, a, b])
+			break
+		n += a.size()
+	print("  vozes do som do jogo: 300 quadros, %d vozes conferidas (sobraram %d)" % [n, listas[0].size()])
+	sj.queue_free()
+
+
 func _physics_process(_dt: float) -> bool:
 	q += 1
 	if main.car == null:
@@ -465,6 +550,7 @@ func _physics_process(_dt: float) -> bool:
 	_contatos()
 	_nuvens(main.car)
 	_agua(main.car)
+	_som_jogo()
 	# F3: desliga e religa tudo na hora
 	var Base := preload("res://carro/carro_base.gd")
 	main._troca_cpp()

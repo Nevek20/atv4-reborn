@@ -1580,6 +1580,32 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     fina: fica, decisão do Matheus. Crash achado no caminho: giro_volante do
     C++ chamado antes do volante configurado (lista vazia); corrigido e
     protegido.
+- Otimização, 2ª rodada (nov/2026, "deixa o CCD ligado, pode seguir
+  otimizando"; medir_cpu na nuvem): passo do carro 0.370 -> 0.339 ms por
+  carro, tocador de som 0.46 -> 0.28 ms/quadro, bench_corrida 8.5 s de CPU
+  com C++ (era 8.7-9.4). Corrida igual com ATV4_CPP=0 e 1 e igual à de
+  antes, rodar_testes idêntico, 36 testes ok.
+  - Vozes do som do jogo em C++ (som_jogo.cpp, SomJogoCpp.vivas): envelope
+    do SPU, vozes que morrem e volume/tom gravados no player, a mesma conta
+    do _vivas (teste_cpp: 300 quadros com key-off e player parando, byte a
+    byte). O sequenciador dos grãos continua no GDScript.
+  - Vazamento achado: cada voz 3D (rival) ligava uma função no tree_exiting
+    do tocador e nunca desligava. Numa corrida eram milhares de ligações e,
+    ao trocar de carro ou sair, um erro "Lambda capture ... was freed" por
+    voz que já tinha morrido (1456 por rodada do medir_cpu; 28 ligações em
+    10 s de um tocador só). Agora o tocador solta as vozes 3D vivas no
+    _exit_tree (as mesmas que a ligação soltava).
+  - Rodas em C++: o roda_na_cerca (GDScript) só é chamado quando o chão é
+    uma cerca (_cerca_do_corpo) e o ignorar_roda só com peça separando:
+    eram 4 chamadas ao GDScript por carro por passo pra devolver false.
+    Rodas 0.050 -> 0.043 ms por carro.
+  - Poeira: o raio da folga (roda no ar) reaproveita a consulta.
+  - Medido e NÃO mexido: câmera de corrida, 0.03 ms por passo de 60 Hz
+    cada uma das 2 (portar pra C++ não compensa). Renderização em thread
+    separada (rendering/driver/threads/thread_model): não dá pra medir na
+    nuvem (Vulkan em software, 2 FPS até em 320x180). Na print do Matheus
+    (0.6) o desenho era 2.23 ms de CPU num quadro de 9.16 ms: fica pra ele
+    testar no PC (--render-thread separate, docs/comandos.md).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

@@ -11,6 +11,7 @@
 #include "som.h"
 #include "linha_ia.h"
 #include "nuvens.h"
+#include "som_jogo.h"
 
 using namespace godot;
 
@@ -25,6 +26,7 @@ void initialize_atv4_fisica(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(MotorSomCpp);
 	GDREGISTER_CLASS(LinhaIA);
 	GDREGISTER_CLASS(NuvensCpp);
+	GDREGISTER_CLASS(SomJogoCpp);
 }
 
 void uninitialize_atv4_fisica(ModuleInitializationLevel p_level) {

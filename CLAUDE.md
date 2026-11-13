@@ -69,7 +69,7 @@ assets/              gerados pelos tools (fora do git, menos o terreno): carros/
                      truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
 fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
                      pneus.cpp, rodas.cpp, curvas.cpp, efeitos.cpp; visual e som: piloto.cpp,
-                     suspensao.cpp, som.cpp), SConstruct
+                     suspensao.cpp, som.cpp, som_jogo.cpp; linha_ia.cpp, nuvens.cpp), SConstruct
 bin/                 as bibliotecas compiladas (.dll Windows, .so Linux) + atv4_fisica.gdextension (vão no git)
 tests/               testes sem tela (rodar_tudo.py roda todos), prints e gravações
 tools/               scripts Python de extração (pingu2obj, pintura, savestate, efeitos, sons)
@@ -164,10 +164,12 @@ Física
   ATV4_CPP=0 x 1 (bench_corrida). O C++ guarda o P no _ready: mexeu no P
   depois, car.p_mudou(). Visual e som em C++ também (piloto.cpp,
   suspensao.cpp, som.cpp, efeitos.cpp): mudou piloto.gd, suspension_visual,
-  sfx_carro, motor_som, a tremida/vibração, a linha da IA, os contatos
-  carro-carro, a poeira ou a água, muda o .cpp (teste_cpp e bench_corrida
-  comparam). No C++, Packed* vindo do GDScript se lê pelo ptr(): arr[i]
-  pede escrita e copia o array inteiro.
+  sfx_carro, motor_som, as vozes do som_jogo, a tremida/vibração, a linha
+  da IA, os contatos carro-carro, a poeira ou a água, muda o .cpp
+  (teste_cpp e bench_corrida comparam). O rodas.cpp olha o _cerca_do_corpo
+  e o _separando do objetos_rx01 antes de chamar o GDScript. No C++,
+  Packed* vindo do GDScript se lê pelo ptr(): arr[i] pede escrita e copia o
+  array inteiro.
 - CCD dos carros (continuous_cd) custa ~20% da física, mas segura batida
   forte e parede fina: não desligar sem o Matheus decidir.
 - apply_impulse do Godot só entra no passo seguinte (linear_velocity não
@@ -220,6 +222,9 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
   Poeira: o jogador usa o CamSubject do Dust.xml, os rivais o Other.
 - Som de pneu, suspensão, pouso e batida = do jogo (989snd). Mistura nossa
   por cima: SO_DERRAPANDO e GANHO_PNEU 0.6.
+- Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no
+  _exit_tree. Ligar função no tree_exiting por voz acumulava milhares numa
+  corrida (erro "Lambda capture ... was freed" na saída).
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo
