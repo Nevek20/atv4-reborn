@@ -187,6 +187,6 @@ scons platform=windows target=template_release     :: Windows, jogo exportado
 %GODOT% --headless --path . -s res://tests/teste_cpp.gd   :: a extensão carrega e as contas batem com o GDScript
 ```
 A 1ª compilação leva uns 3 min por alvo (o godot-cpp); depois só o que mudou.
-Paridade do que já foi portado (motor e câmbio): `set ATV4_CPP=0` volta pro
+Paridade do que já foi portado (motor, câmbio, pneus, rodas e molas): `set ATV4_CPP=0` volta pro
 GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
 no fim, e com 0 e 1 tem que sair igual (e o rodar_testes idêntico).

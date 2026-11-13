@@ -67,7 +67,8 @@ som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
                      truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
-fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/, SConstruct
+fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
+                     pneus.cpp, rodas.cpp, curvas.cpp), SConstruct
 bin/                 as bibliotecas compiladas (.dll Windows, .so Linux) + atv4_fisica.gdextension (vão no git)
 tests/               testes sem tela (rodar_tudo.py roda todos), prints e gravações
 tools/               scripts Python de extração (pingu2obj, pintura, savestate, efeitos, sons)
@@ -156,6 +157,11 @@ Física
   cone da suspensão. Carro com carro = as esferas do VehicleVehicle.hsc
   (batida_carros.gd; o resolvedor é NOSSO), lasquinha só do mais rápido.
   As rodas não pisam no outro carro. FECHADO pelo Matheus (nov/2026).
+- Física em C++ (fisica_cpp/: motor, câmbio, pneus, rodas e molas) tem que
+  dar os MESMOS números do GDScript (o _drivetrain/_tires/_rodas_gd ficam
+  como reserva): mudou a conta num, muda no outro e confere com ATV4_CPP=0
+  x 1 (bench_corrida). O C++ guarda o P no _ready: mexeu no P depois,
+  car.p_mudou().
 - apply_impulse do Godot só entra no passo seguinte (linear_velocity não
   muda na hora): resolvedor próprio conta com velocidades locais e grava no
   fim. Correção de posição nunca afunda corpo no chão (bomba de energia).

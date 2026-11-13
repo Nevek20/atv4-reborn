@@ -55,6 +55,7 @@ func _physics_process(dt: float) -> bool:
 		car.reset_to(Vector3(0, 1.0, -1500), 0.0)
 		if rodada == 1:
 			car.P.abs_on = false
+			car.p_mudou()                    # a física em C++ guarda o P
 	t += dt
 	var ti = car.test_input
 	ti.thr = 1.0 if t > 0.5 and t < 5.5 else 0.0

@@ -1496,6 +1496,18 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Conferido: rodar_testes idêntico e bench_corrida (8 carros, 15 s) com
   posição, rpm e marcha iguais com ATV4_CPP=0 e 1. Ganho de CPU nesta
   parte some no ruído (o motor era 0.02 ms): é base pras próximas.
+  Parte 2, pneus (pneus.cpp: _tires, _powerslide, _corte_recuperacao,
+  _side_to_fwd, _h_lat, _arrasto) e parte 3, rodas e molas (rodas.cpp:
+  _integra_rodas, _spring, _damper, _add_corr e o laço do raio de cada
+  roda; terreno e cercas continuam no GDScript, chamados do C++). Mesma
+  conferência: rodar_testes idêntico e bench_corrida igual com 0 e 1.
+  Medido (medir_cpu, PERF_CARRO=1, por carro e passo, nuvem): pneus 0.061
+  -> 0.017 ms, motor 0.023 -> 0.013, rodas 0.083 -> 0.059 (o raio do Godot
+  e as 3 chamadas do terreno por roda ficam), giro 0.025 -> 0.021. Uns 0.08
+  ms por carro, ~0.65 ms por passo com 8 carros. Pegadinha: o C++ guarda o
+  P no _ready; o teste_freio desliga o ABS depois e falhou até chamar
+  car.p_mudou(). No Windows o seno/cosseno da DLL pode diferir no último
+  bit do GDScript (outra libm): mesma física, não bit a bit.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

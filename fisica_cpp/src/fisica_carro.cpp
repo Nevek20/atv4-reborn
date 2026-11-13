@@ -2,6 +2,7 @@
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/object.hpp>
+#include <godot_cpp/classes/physics_direct_space_state3d.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 
 using namespace godot;
@@ -16,10 +17,13 @@ void FisicaCarro::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("drivetrain", "dt", "v_f", "driven_on_ground", "forced_open"), &FisicaCarro::drivetrain);
 	ClassDB::bind_method(D_METHOD("razao_patinada", "v_f"), &FisicaCarro::razao_patinada);
 	ClassDB::bind_method(D_METHOD("giro_rodas", "dt", "v_f", "rear_g"), &FisicaCarro::giro_rodas);
+	ClassDB::bind_method(D_METHOD("pneus", "dt", "v", "fwd", "left", "n", "com_w", "h", "drive"), &FisicaCarro::pneus);
+	ClassDB::bind_method(D_METHOD("arrasto", "spd", "dt"), &FisicaCarro::arrasto);
+	ClassDB::bind_method(D_METHOD("rodas", "dt", "space", "up"), &FisicaCarro::rodas);
 }
 
 String FisicaCarro::versao() {
-	return "atv4_fisica 0.3";
+	return "atv4_fisica 0.5";
 }
 
 double FisicaCarro::curva_sample(const Dictionary &c, double x) {
@@ -84,8 +88,102 @@ void FisicaCarro::configurar(Object *car) {
 		p.down_diff.push_back(dd[i]);
 	}
 	brake_fscale = atv4::Trio(P.get(String("brake_fscale"), Dictionary()));
+	// pneus
+	p.axle_f = f("axle_f");
+	p.axle_r = f("axle_r");
+	p.understeer_raw = f("understeer_raw");
+	p.abs_eng = f("abs_eng");
+	p.abs_dis = f("abs_dis");
+	p.ss_full = f("ss_full");
+	p.ss_zero = f("ss_zero");
+	p.ss_max = f("ss_max");
+	p.tail_off = f("tail_off");
+	p.yaw_acc = f("yaw_acc");
+	p.cs_scale_ss = f("cs_scale_ss");
+	p.cs_scale = f("cs_scale");
+	p.width_scale = f("width_scale");
+	p.height_scale = f("height_scale");
+	p.ell_disable = f("ell_disable");
+	p.ps_ellipse = f("ps_ellipse");
+	p.slip_max = f("slip_max");
+	p.slip_grow = f("slip_grow");
+	p.lock_grow = f("lock_grow");
+	p.lock_recover = f("lock_recover");
+	p.slip_recover = f("slip_recover");
+	p.h_long_stf = f("h_long_stf");
+	p.h_long = f("h_long");
+	p.h_lat = f("h_lat");
+	p.h_lat_s0 = f("h_lat_s0");
+	p.h_lat_s1 = f("h_lat_s1");
+	p.h_lat_roll = f("h_lat_roll");
+	p.ifd_lo_speed = f("ifd_lo_speed");
+	p.ifd_hi_speed = f("ifd_hi_speed");
+	p.ifd_lo = f("ifd_lo");
+	p.ifd_hi = f("ifd_hi");
+	p.air_drag = f("air_drag");
+	p.ground_drag = f("ground_drag");
+	p.water_drag = f("water_drag");
+	p.water_depth = f("water_depth");
+	p.ps_air = f("ps_air");
+	p.ps_growth = f("ps_growth");
+	p.ps_decay = f("ps_decay");
+	p.rtc_front = f("rtc_front");
+	p.rtc_rear = f("rtc_rear");
+	p.side_to_fwd_max = f("side_to_fwd_max");
+	p.side_to_fwd_min = f("side_to_fwd_min");
+	p.side_to_fwd = f("side_to_fwd");
+	p.ps_side_to_fwd = f("ps_side_to_fwd");
+	p.abs_on = P.get(String("abs_on"), false);
+	p.rtc_on = P.get(String("rtc_on"), false);
+	p.rtc_steer = P.get(String("rtc_steer"), false);
+	auto dic = [&P](const char *k) -> Dictionary { return P.get(String(k), Dictionary()); };
+	p.side_std = atv4::Trio(dic("side_std"));
+	p.side_cs = atv4::Trio(dic("side_cs"));
+	p.yaw_inc = atv4::FCurvas(dic("yaw_inc"));
+	p.yaw_dec_zero = atv4::FCurvas(dic("yaw_dec_zero"));
+	p.yaw_dec_full = atv4::FCurvas(dic("yaw_dec_full"));
+	p.yaw_dec_cs = atv4::FCurvas(dic("yaw_dec_cs"));
+	p.ss_rate_inc = atv4::FCurvas(dic("ss_rate_inc"));
+	p.ss_rate_dec = atv4::FCurvas(dic("ss_rate_dec"));
+	for (int i = 0; i < 2; i++) {
+		Dictionary e = dic(i == 0 ? "ell_FrontWheels" : "ell_RearWheels");
+		Elipse &el = i == 0 ? p.ell_f : p.ell_r;
+		el.w = atv4::Trio(e.get(String("w"), Dictionary()));
+		el.h = atv4::Trio(e.get(String("h"), Dictionary()));
+		el.ms = atv4::Trio(e.get(String("ms"), Dictionary()));
+		el.shrink = e.get(String("shrink"), 1.0);
+		el.recover = e.get(String("recover"), 1.0);
+	}
 	PackedFloat32Array g = car->get(N.gears);
 	gears.assign(g.ptr(), g.ptr() + g.size());
 	drive_curve = atv4::Curva(car->get(N.drive_curve));
 	fric_curve = atv4::Curva(car->get(N.fric_curve));
+	steer_curve = atv4::Curva(car->get(N.steer_curve));
+	ps_rate = atv4::Curva(car->get(N.ps_rate));
+	ps_scale = atv4::Curva(car->get(N.ps_scale));
+	rtc_th = atv4::Curva(car->get(N.rtc_th));
+	rtc_max = atv4::Curva(car->get(N.rtc_max));
+	rtc_cut = atv4::Curva(car->get(N.rtc_cut));
+	// rodas
+	rf.clear();
+	Array ws = car->get(N.wheels);
+	for (int64_t i = 0; i < ws.size(); i++) {
+		Dictionary w = ws[i];
+		RodaFixa r;
+		r.px = w[N.px];
+		r.y0 = w[N.y0];
+		r.pz = w[N.pz];
+		r.max = w[N.max];
+		r.min = w[N.min];
+		r.r = w[N.r];
+		r.cos_max = w[N.cos_max];
+		r.vmax = w[N.vmax];
+		r.k = w[N.k];
+		r.c = w[N.c];
+		r.mw = w[N.mw];
+		r.front = w[N.front];
+		r.kc = atv4::Curva(w[N.kc]);
+		r.dc = atv4::Curva(w[N.dc]);
+		rf.push_back(r);
+	}
 }

@@ -530,6 +530,13 @@ func _load_physics() -> void:
 	reset_drivetrain()
 	if usar_cpp:
 		cpp = ClassDB.instantiate("FisicaCarro")
+		p_mudou()
+
+
+## O C++ guarda o P, as curvas e as rodas no _ready: quem mexer no P depois
+## (testes) chama isto pra ele reler.
+func p_mudou() -> void:
+	if cpp:
 		cpp.configurar(self)
 
 
@@ -821,74 +828,26 @@ func _physics_process(dt: float) -> void:
 	# guardado ficava f/m·dt² mais baixo (1 a 4 cm parado; tests/teste_curso.gd).
 	# A física é a mesma: o ciclo de operações não muda.
 	if perf_on: _t = _pf("comandos", _t)
-	_integra_rodas(dt)
 	var space := get_world_3d().direct_space_state
-	var com_w := global_transform * center_of_mass
-	grounded = 0
+	var com_w: Vector3
 	var n_sum := Vector3.ZERO
 	var rear_g := 0
 	var h_sum := 0.0
 	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
-	var ignorar: Array = objetos.ignorar_roda() if objetos else []
-	# a mesma consulta pras 4 rodas (CPU: montar a lista uma vez por passo)
-	var excluir: Array[RID] = [get_rid()]
-	excluir.append_array(ignorar)
-	excluir.append_array(outros_carros)
-	var q := PhysicsRayQueryParameters3D.new()
-	for w in wheels:
-		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
-		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
-		var reach: float = (w.max - w.min) + w.r + 0.05
-		q.from = top
-		q.to = top - up * reach
-		q.exclude = excluir
-		var hit := space.intersect_ray(q)
-		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
-		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
-			var mais: Array[RID] = excluir.duplicate()
-			mais.append(hit.rid)
-			q.exclude = mais
-			hit = space.intersect_ray(q)
-		w.hit = false
-		var pen := 0.0
-		if not hit.is_empty():
-			var hn0: Vector3 = hit.normal
-			# distância do ponto de fixação até o chão, e quanto a roda (no
-			# curso atual) entra nele
-			var d0: float = top.distance_to(hit.position) - w.max
-			pen = (w.r - w.x) - d0
-			w.hit = pen > 0.0 and hn0.dot(up) >= w.cos_max
-		if not w.hit:
-			w.f = 0.0
-			continue
-		var hp: Vector3 = hit.position
-		var hn: Vector3 = hit.normal
-		w.point = hp
-		w.normal = hn
-		if terrain:
-			w.mat = terrain.material_at(hp.x, hp.z)
-			w.mu = terrain.atrito(w.mat, pneu)
-			w.amort = terrain.amortecimento(w.mat)
-		grounded += 1
-		n_sum += hn
-		if not w.front:
-			rear_g += 1
-		h_sum += (com_w - hp).dot(up)
-		w.x += pen
-		if w.x > w.max:
-			# batente: o jogo empurra o carro pra fora, sem mexer na velocidade
-			corr = _add_corr(corr, hn * (w.x - w.max))
-			w.x = w.max
-		var vp: Vector3 = linear_velocity + angular_velocity.cross(attach - com_w)
-		w.v = clampf(-hn.dot(vp) * hn.dot(up), -w.vmax, w.vmax)
-		var f_s: float = _spring(w, w.x) + _damper(w, w.v)
-		w.f = f_s
-		apply_force(hn * f_s, attach - global_position)
-		# roda em cima de corpo solto (fardo, peça da cerca): a reação vai
-		# nele, senão ele vira rampa fixa (no jogo é contato entre os dois)
-		if hit.collider is RigidBody3D and f_s > 0.0:
-			(hit.collider as RigidBody3D).sleeping = false
-			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
+	if cpp:
+		var r: Array = cpp.rodas(dt, space, up)   # o mesmo de baixo, em C++
+		com_w = r[0]
+		n_sum = r[1]
+		rear_g = r[2]
+		h_sum = r[3]
+		corr = r[4]
+	else:
+		_rodas_gd(dt, space, up)
+		com_w = _r_com_w
+		n_sum = _r_n_sum
+		rear_g = _r_rear_g
+		h_sum = _r_h_sum
+		corr = _r_corr
 
 	if perf_on: _t = _pf("rodas (raio, mola)", _t)
 	_passo_esferas_rodas(space, up)
@@ -920,7 +879,9 @@ func _physics_process(dt: float) -> void:
 		air_lat_state = 0
 		air_lat_scale = 1.0
 		gravity_scale = 1.0
-		if use_ported:
+		if use_ported and cpp:
+			f_fwd = cpp.pneus(dt, v, fwd, left, ground_n, com_w, h_sum / grounded, drive)
+		elif use_ported:
 			f_fwd = _tires(dt, v, fwd, left, ground_n, com_w, h_sum / grounded, drive)
 		else:
 			_tires_legacy(dt, v, fwd, left, ground_n, com_w, h_sum / grounded, drive, false)
@@ -1049,6 +1010,90 @@ func _physics_process(dt: float) -> void:
 ## roda (0x224418, não portada). Confere com 2 save states: tests/teste_derrapagem.gd.
 ## 0x215140: maior velocidade na normal dos contatos do casco no último passo,
 ## com a velocidade do ponto de antes desse passo (_v_antes, _w_antes)
+
+## Rodas e molas no GDScript (sem a biblioteca C++; fisica_cpp/src/rodas.cpp é
+## a mesma conta). Resultado em _r_* pro _physics_process.
+var _r_com_w := Vector3.ZERO
+var _r_n_sum := Vector3.ZERO
+var _r_rear_g := 0
+var _r_h_sum := 0.0
+var _r_corr := Vector3.ZERO
+func _rodas_gd(dt: float, space: PhysicsDirectSpaceState3D, up: Vector3) -> void:
+	_integra_rodas(dt)
+	var com_w := global_transform * center_of_mass
+	grounded = 0
+	var n_sum := Vector3.ZERO
+	var rear_g := 0
+	var h_sum := 0.0
+	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
+	var ignorar: Array = objetos.ignorar_roda() if objetos else []
+	# a mesma consulta pras 4 rodas (CPU: montar a lista uma vez por passo)
+	var excluir: Array[RID] = [get_rid()]
+	excluir.append_array(ignorar)
+	excluir.append_array(outros_carros)
+	var q := PhysicsRayQueryParameters3D.new()
+	for w in wheels:
+		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
+		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
+		var reach: float = (w.max - w.min) + w.r + 0.05
+		q.from = top
+		q.to = top - up * reach
+		q.exclude = excluir
+		var hit := space.intersect_ray(q)
+		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
+		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
+			var mais: Array[RID] = excluir.duplicate()
+			mais.append(hit.rid)
+			q.exclude = mais
+			hit = space.intersect_ray(q)
+		w.hit = false
+		var pen := 0.0
+		if not hit.is_empty():
+			var hn0: Vector3 = hit.normal
+			# distância do ponto de fixação até o chão, e quanto a roda (no
+			# curso atual) entra nele
+			var d0: float = top.distance_to(hit.position) - w.max
+			pen = (w.r - w.x) - d0
+			w.hit = pen > 0.0 and hn0.dot(up) >= w.cos_max
+		if not w.hit:
+			w.f = 0.0
+			continue
+		var hp: Vector3 = hit.position
+		var hn: Vector3 = hit.normal
+		w.point = hp
+		w.normal = hn
+		if terrain:
+			w.mat = terrain.material_at(hp.x, hp.z)
+			w.mu = terrain.atrito(w.mat, pneu)
+			w.amort = terrain.amortecimento(w.mat)
+		grounded += 1
+		n_sum += hn
+		if not w.front:
+			rear_g += 1
+		h_sum += (com_w - hp).dot(up)
+		w.x += pen
+		if w.x > w.max:
+			# batente: o jogo empurra o carro pra fora, sem mexer na velocidade
+			corr = _add_corr(corr, hn * (w.x - w.max))
+			w.x = w.max
+		var vp: Vector3 = linear_velocity + angular_velocity.cross(attach - com_w)
+		w.v = clampf(-hn.dot(vp) * hn.dot(up), -w.vmax, w.vmax)
+		var f_s: float = _spring(w, w.x) + _damper(w, w.v)
+		w.f = f_s
+		apply_force(hn * f_s, attach - global_position)
+		# roda em cima de corpo solto (fardo, peça da cerca): a reação vai
+		# nele, senão ele vira rampa fixa (no jogo é contato entre os dois)
+		if hit.collider is RigidBody3D and f_s > 0.0:
+			(hit.collider as RigidBody3D).sleeping = false
+			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
+
+	_r_com_w = com_w
+	_r_n_sum = n_sum
+	_r_rear_g = rear_g
+	_r_h_sum = h_sum
+	_r_corr = corr
+
+
 func _batida_passo() -> void:
 	batida = 0.0
 	contato_som = {}

@@ -8,32 +8,11 @@
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
-#include <cmath>
+#include "mat.h"
 
 using namespace godot;
 
-namespace {
-
-const double TAU_ = 6.28318530717958647692;
-const double RPM2RAD = TAU_ / 60.0;
-const double MPH = 0.44704;
-const double MPH_G = 0.44694445;
-const double GIRO_LIVRE = 3.14159265358979323846;
-
-inline double absd(double x) { return x < 0.0 ? -x : x; }
-inline double maxd(double a, double b) { return a > b ? a : b; }   // maxf do Godot
-inline double mind(double a, double b) { return a < b ? a : b; }
-inline double signd(double x) { return x > 0.0 ? 1.0 : (x < 0.0 ? -1.0 : 0.0); }
-inline double lerpd(double a, double b, double t) { return a + (b - a) * t; }
-inline double fposmod(double x, double y) {
-	double v = std::fmod(x, y);
-	if ((v < 0.0 && y > 0.0) || (v > 0.0 && y < 0.0)) {
-		v += y;
-	}
-	return v;
-}
-
-} // namespace
+using namespace atv4;
 
 // ---- estado do motor (variáveis do car.gd)
 struct EstadoMotor {
@@ -57,7 +36,18 @@ FisicaCarro::Nomes::Nomes() :
 		preso("preso"), shift_flag("shift_flag"), want_rev("want_rev"), manual("manual"), limiter("limiter"),
 		preso_t("preso_t"), preso_pos("preso_pos"), pos_ant("pos_ant"),
 		front("front"), sr("sr"), omega("omega"), hit("hit"), r("r"), slip("slip"), inercia("inercia"),
-		spin("spin") {}
+		spin("spin"), agua("agua"), agua_prof("agua_prof"), ps_qtd("ps_qtd"), ps_esc("ps_esc"),
+		ps_emb_ant("ps_emb_ant"), steer("steer"), steer_cx("steer_cx"), amort_medio("amort_medio"),
+		ps_estado("ps_estado"), grounded("grounded"), lateral_game("lateral_game"), drive_slip("drive_slip"),
+		rtc_patinou("rtc_patinou"), jit_order("jit_order"), stf_blend("stf_blend"), sideslip("sideslip"),
+		abs("abs"), sat("sat"), grip("grip"), mu("mu"), y0("y0"), x("x"), px("px"), pz("pz"), fx("fx"), fz("fz"),
+		steer_curve("steer_curve"), ps_rate("ps_rate"), ps_scale("ps_scale"), rtc_th("rtc_th"),
+		rtc_max("rtc_max"), rtc_cut("rtc_cut"), v("v"), f("f"), point("point"), normal("normal"), mat("mat"),
+		amort("amort"), objetos("objetos"), terrain("terrain"), pneu("pneu"), ignorar_roda("ignorar_roda"),
+		outros_carros("outros_carros"), roda_na_cerca("roda_na_cerca"), collider("collider"),
+		position("position"), rid("rid"), material_at("material_at"), atrito("atrito"),
+		amortecimento("amortecimento"), kc("kc"), dc("dc"), k("k"), c("c"), mw("mw"), vmax("vmax"),
+		cos_max("cos_max"), min("min"), max("max") {}
 
 static void ler(Object *c, const FisicaCarro::Nomes &N, EstadoMotor &e) {
 	e.air_time = c->get(N.air_time);
