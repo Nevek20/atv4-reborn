@@ -1333,7 +1333,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   - Do jogo: o AIT do RX01 é uma VOLTA GRAVADA ("ExportedTrack"): o ponto
     +0x00 do link é por onde o carro passou (até 12 m fora do centro, os dois
     lados) e +0x24 a velocidade ali (25..34 m/s, não segue o raio: R 12 m a
-    32 m/s, então não é calculada). Pilotos: AIPlayers.xml (86, Skill
+    32 m/s, então não é calculada; ENGANO, é a largura da pista: ver IA,
+    acelerador e freio do exe). Pilotos: AIPlayers.xml (86, Skill
     0.20..1.0, classes, Rivalry). Catchup do Rallycross: STDH_04 (Normal).
     tools/ia_dados.py -> data/ia.json.
   - Procurado no exe e NÃO achado: o "piloto" (quem preenche o struct de
@@ -1419,6 +1420,38 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   acelerador 0 e freio só 1/7 (o nosso freia 1.0 acima de ANG_FREIO: fica
   NOSSO até achar quem escreve a struct, docs/engenharia_reversa.md). teste_ia
   1 volta: 96..121 km/h, 1 reposição.
+- IA, acelerador e freio do exe (nov/2026, pedido do Matheus; docs/
+  engenharia_reversa.md, Acelerador e freio + Catchup; re/ia_alvo_ram.py):
+  - Lei 0x34ed10: k = (v_alvo - v) x 0.2 preso em +-1 (k > 0 acelera, < 0
+    freia). v_alvo (0x359eb8) = o menor de 2 arcos de bicicleta do próprio
+    carro (0x214328) até a rota à frente. Saiu o NOSSO (alivia acima de 17°,
+    freia acima de 34°, A_LAT/A_FRENA, teto da Skill e do catchup).
+  - 1ª tentativa (só a lei e os arcos na volta gravada): reposições 1 -> 13
+    em 4 sementes, mesma média. O limite de velocidade por link (+0x4c) não
+    salvava: -1 mph nos 75 (vale só 1..150).
+  - Faltavam 2 coisas, as duas da RAM dos rivais: (1) o catchup vai na
+    FÍSICA do rival, corpo+0x720 potência (0.95..1.11) e +0x724 subesterço
+    (1.77..2.10; com a flag +0xc em 0 o jogo usa s - 0.5: 2 - 2s), que entra
+    na direção e no arco: curva a ~1/raiz(2) da velocidade; o catchup do
+    jogo (0x34cea8) também é outro: a mesma escala pra todos os rivais da
+    frente (de trás), pela distância do jogador pro carro LOGO à frente
+    (atrás), e o bônus da Skill acima de 0.5. (2) O zero da IA é o CENTRO
+    +0x5c do link, não a volta gravada: com DAT_0055155c = 0 a pista é
+    +-largura/2 (+0x24, que é LARGURA e não velocidade) em volta do ponto e o
+    zero fica no centro. Na RAM o alvo da direção de 4 dos 7 rivais está a
+    0.0 m dele. Com o centro, a velocidade-alvo bate 0..5% em 11 de 14
+    rivais (corrida_no_normal + freiando) e a lei dá os pedais crus da RAM.
+  - O espalhamento NOSSO (-4.8..4.8 m por rival) virou o do jogo: só Skill <
+    0.5 anda desviada ((0.5 - Skill) x 2 x sorteio [0, 10) m, 0x360550), no
+    zero nos primeiros 5 s. NOSSO: sorteia 1 vez por corrida.
+  - teste_ia, 1 volta, 4 sementes (28 voltas de rival): 0 reposições (era 1
+    no NOSSO e 13 na 1ª tentativa), 98..146 km/h de média (era 97..126).
+    bench_corrida igual com ATV4_CPP=0 e 1 (o C++ lê mult_pot / mult_sub;
+    libs 0.11). Física do jogador idêntica (os 2 ficam em 1 nele).
+  - teste_batida_carros: os casos laterais dos prints foram montados com o
+    rival sem catchup; com o subesterço x2 o volante 0.6 do teste não segura
+    o rival no jogador e ele decola num barranco a 17..21 m (sem contato).
+    O teste é do resolvedor: roda com os rivais sem catchup.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
@@ -1761,8 +1794,10 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- IA: portar o piloto do exe (classes 0x5aea98/0x5aeaf0/0x5af920, achadas
-  com o save state corrida_no_normal; docs/engenharia_reversa.md), LOD de verdade (gerar Models_2K/1K/500 e
+- IA: os outros 7 comportamentos do cérebro (seguir, ultrapassar... 0x35e758;
+  o desvio pra passar é NOSSO), quando o 0x360550 sorteia de novo, a demora
+  da largada pela posição (0x352c98 +0x158) e a flag +0xc do catchup (0
+  nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
 - Reposição: falta o efeito na tela/câmera na hora de repor, o pedido

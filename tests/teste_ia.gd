@@ -46,7 +46,7 @@ func _physics_process(dt: float) -> bool:
 				_falha("rivais: %d" % (0 if ia == null else ia.rivais.size()))
 				fase = 9
 				return false
-			eu = {"nome": "Você", "car": main.car, "r": ia.jogador, "desvio": 0.0, "desvio0": ia._lateral(main.car.global_position, ia.jogador.prog + ia.s_linha), "prog0": ia.jogador.prog, "skill": 1.0, "preso": 0.0,
+			eu = {"nome": "Você", "car": main.car, "r": ia.jogador, "desvio": 0.0, "desvio0": ia._lateral(main.car.global_position, ia.jogador.prog + ia.s_linha) - ia.lat_zero(ia.jogador.prog + ia.s_linha), "prog0": ia.jogador.prog, "skill": 1.0, "preso": 0.0,
 				"re": 0.0, "capotado": 0.0, "repostos": 0, "res": 0}
 			fase = 1
 			q = 0
@@ -61,7 +61,7 @@ func _physics_process(dt: float) -> bool:
 			if OS.has_environment("DBG") and q % 25 == 0:
 				for x in ia.rivais:
 					var v: float = x.car.linear_velocity.length()
-					var alvo: float = ia.velocidade(x.r.prog + ia.s_linha)
+					var alvo: float = x.get("v_alvo", 0.0)
 					if v < alvo * 0.6:
 						print("  lento %-9s prog %5.0f  v %4.1f  alvo %4.1f  dist linha %4.1f  up %.2f  thr %s" % [x.nome, x.r.prog, v, alvo, x.r.dist, x.car.global_transform.basis.y.y, x.car.test_input])
 			if q % 500 == 0:

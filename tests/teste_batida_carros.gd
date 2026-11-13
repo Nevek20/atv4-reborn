@@ -61,6 +61,14 @@ func _physics_process(_dt: float) -> bool:
 			if c.estado != c.CORRENDO:
 				return false
 			ia = c.ia
+			# o teste é do resolvedor: rivais sem o catchup do jogo (0x353408),
+			# como quando os casos dos prints foram montados. Com o subesterço x2
+			# o volante 0.6 não segura o rival no jogador: ele cruza na frente e
+			# decola num barranco a 17..21 m (sem contato; nov/2026)
+			ia.catchup = {}
+			for y in ia.rivais:
+				y.car.mult_pot = 1.0
+				y.car.mult_sub = 1.0
 			# só um rival na conta: os outros longe
 			for k in ia.rivais.size():
 				var y = ia.rivais[k]

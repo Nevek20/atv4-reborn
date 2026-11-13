@@ -442,6 +442,10 @@ const AGUA_REG := {"DustColour": Color(0, 0, 0, 0), "DustType": "Water",
 var jit_seed := 0
 var jit_acc := 0.0
 var spd_ground := 0.0         # corpo+0x440: velocidade no plano do chão (m/s)
+var n_chao := Vector3.UP      # corpo+0x3f0: normal do chão (rodas no chão; no ar a de cima), pra IA
+# catchup aplicado na física (0x353408; só os rivais, o jogador fica em 1 na RAM)
+var mult_pot := 1.0          # corpo+0x720: x torque do motor (0x2113e0 rodas, 0x20c7a8 embreagem)
+var mult_sub := 1.0          # corpo+0x724: x subesterço (0x20ede8 direção, 0x214328 IA)
 var jit_order := []           # índices das rodas na ordem do jogo: FL, RL, FR, RR
 var jitter_chao := 0.0        # veículo+0xac0: média do WheelJitter embaixo de FL, RL, FR no chão (câmera)
 # batida (0x215140): a cada passo o jogo guarda os contatos do casco por

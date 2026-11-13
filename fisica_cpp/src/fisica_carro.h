@@ -58,6 +58,7 @@ public:
 		StringName v, f, point, normal, mat, amort, objetos, terrain, pneu, ignorar_roda, outros_carros;
 		StringName roda_na_cerca, collider, position, rid, material_at, atrito, amortecimento;
 		StringName kc, dc, k, c, mw, vmax, cos_max, min, max;
+		StringName mult_pot, mult_sub;
 		StringName esfera, esfera_teste, esfera_off, collider_id;
 		Nomes();
 	};

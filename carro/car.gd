@@ -877,6 +877,7 @@ func _physics_process(dt: float) -> void:
 	if perf_on: _t = _pf("esferas das rodas", _t)
 	_material_medio()
 	var ground_n := up if grounded == 0 else n_sum.normalized()
+	n_chao = ground_n                       # a IA lê (velocidade-alvo, 0x214328)
 	var fwd := (fwd_body - ground_n * fwd_body.dot(ground_n)).normalized()
 	var left := ground_n.cross(fwd)
 	var v := linear_velocity
@@ -1255,7 +1256,7 @@ func _tires(dt: float, v: Vector3, fwd: Vector3, left: Vector3, n: Vector3, com_
 
 	# ---- 0x20ede8: curvatura. Subesterço entra como U * v² * 0.001
 	var delta: float = steer * VehicleData.sample(steer_curve, mph) * DEG
-	var kappa: float = delta / ((P.axle_f - P.axle_r) + v_p * v_p * P.understeer_raw * 0.001)
+	var kappa: float = delta / ((P.axle_f - P.axle_r) + v_p * v_p * P.understeer_raw * mult_sub * 0.001)
 	if absf(v_f) < 0.223472:
 		kappa *= absf(v_f) / 0.223472
 
@@ -1996,7 +1997,7 @@ func _razao_patinada(v_f: float) -> void:
 ##    contra o freio, sem passar do giro do motor.
 ## O "torque" do freio aqui é desaceleração x parte do eixo / rodas x raio, sem
 ## a massa (o jogo divide pela inércia em t·m²; com a inércia em kg·m² entra
-## x1000). 0x720 = 1 (RAM, multiplica o motor).
+## x1000). Motor x corpo+0x720 (mult_pot: catchup dos rivais, 1 no jogador).
 func _giro_rodas(dt: float, v_f: float, rear_g: int) -> void:
 	# 0x2113e0: preso. Acelerando (botão da embreagem em 0) a menos de 0,5 m/s e o
 	# carro não sai de 3 cm (0.0009 m²) por 0,33 s
@@ -2033,7 +2034,7 @@ func _giro_rodas(dt: float, v_f: float, rear_g: int) -> void:
 	var d_fr: float = P.front_bias * dmax
 	for w in wheels:
 		var I: float = w.inercia
-		var t_mot := clutch * ratio * eng_torque / n_tr if _motriz(w) else 0.0
+		var t_mot := clutch * ratio * eng_torque * mult_pot / n_tr if _motriz(w) else 0.0
 		var t_frei: float = (d_fr / nf_s if w.front else (dmax - d_fr) / nr_s) * w.r * 1000.0
 		var t: float
 		if not _motriz(w):
@@ -2161,14 +2162,15 @@ func _gearbox(dt: float, v_f: float, out_rpm: float, auto_ok: bool, forced: bool
 				cstate = 2
 				shift_flag = true
 
-	# torque que a embreagem passa
+	# torque que a embreagem passa (câmbio+0x38 = torque do motor x 0x720, 0x20c7a8)
+	var t_m := eng_torque * mult_pot
 	if clutch <= 0.0 or gear == 0:
 		clutch_t = 0.0
 	elif cstate == 3:
-		clutch_t = eng_torque
+		clutch_t = t_m
 	elif cstate == 2:
 		var cap: float = clutch * P.clutch_max
-		clutch_t = 0.0 if eng_torque <= 0.0 else minf(cap, eng_torque)
+		clutch_t = 0.0 if t_m <= 0.0 else minf(cap, t_m)
 	elif cstate == 1:
 		clutch_t = signf(diff) * clutch * P.clutch_max
 	return clutch_t

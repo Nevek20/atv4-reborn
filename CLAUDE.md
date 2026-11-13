@@ -202,11 +202,15 @@ Pista RX01
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
   Fardo fica dormindo até alguém bater (o 1º passo do motor acorda corpo
   novo: objetos_rx01 põe pra dormir de novo) e dorme quase parado (NOSSO).
-- IA: o AIT é volta gravada (linha +0x00); o +0x24 NÃO é a velocidade da
-  IA (na RAM ela anda 1.15..1.40 x isso, de acelerador cheio). Direção,
-  acelerador e freio em sétimos, direto (cru = suavizado; antes de arredondar
-  no piloto +0xa0 freio, +0xa4 acel, +0xa8 dir). Acelerador, freio, desvio e catchup
-  aplicado ainda NOSSOS (classes do exe achadas, não lidas).
+- IA: o zero da rota é o CENTRO +0x5c do link (DAT_0055155c = 0; a pista é
+  +-largura/2 em volta do ponto +0x00, e o +0x24 é a LARGURA, não
+  velocidade). Pedais = (v_alvo - v) x 0.2 (0x34ed10), v_alvo = arcos de
+  bicicleta até o zero (0x359eb8 / 0x214328); re/ia_alvo_ram.py confere com
+  a RAM. Catchup do jogo (0x34cea8) vai na física do rival: potência x
+  (1 + s), subesterço x (2 - 2s) (car.gd mult_pot / mult_sub, o C++ lê; 1
+  no jogador). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
+  freio, +0xa4 acel, +0xa8 dir). NOSSO: desvio pra ultrapassar, ré/preso/
+  capotado, o sorteio da Skill 1 vez por corrida.
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
   depois; você larga em 8º.
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
@@ -266,6 +270,6 @@ Frota
 
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
-- IA: ler acelerador/freio do piloto do exe (0x5aea98/0x5af920), LOD com
+- IA: os outros comportamentos do cérebro (seguir, ultrapassar), LOD com
   os modelos 2K/1K/500 do jogo.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

@@ -23,7 +23,7 @@ struct Roda {
 // estado do carro que os pneus usam
 struct EstadoPneu {
 	double stf_blend, sideslip, steer, steer_cx, ps_qtd, ps_esc, ps_emb_ant, drive_slip;
-	double throttle, brake_in, mu_medio, amort_medio, air_time, emb_in;
+	double throttle, brake_in, mu_medio, amort_medio, air_time, emb_in, mult_sub;
 	int64_t ps_estado, gear, grounded;
 	bool rtc_patinou, lateral_game;
 };
@@ -213,6 +213,7 @@ double FisicaCarro::pneus(double dt, Vector3 v, Vector3 fwd, Vector3 left, Vecto
 	e.lateral_game = c->get(N.lateral_game);
 	e.drive_slip = c->get(N.drive_slip);
 	e.rtc_patinou = c->get(N.rtc_patinou);
+	e.mult_sub = c->get(N.mult_sub);
 
 	Array wd = c->get(N.wheels);
 	std::vector<Roda> ws((size_t)wd.size());
@@ -254,7 +255,7 @@ double FisicaCarro::pneus(double dt, Vector3 v, Vector3 fwd, Vector3 left, Vecto
 
 	// curvatura
 	double delta = e.steer * steer_curve.sample(mph) * DEG;
-	double kappa = delta / ((p.axle_f - p.axle_r) + v_p * v_p * p.understeer_raw * 0.001);
+	double kappa = delta / ((p.axle_f - p.axle_r) + v_p * v_p * p.understeer_raw * e.mult_sub * 0.001);
 	if (absd(v_f) < 0.223472) {
 		kappa *= absd(v_f) / 0.223472;
 	}

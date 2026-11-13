@@ -17,7 +17,7 @@ using namespace atv4;
 // ---- estado do motor (variáveis do car.gd)
 struct EstadoMotor {
 	double air_time, rpm, brake_in, throttle, clutch, lim_k, eng_torque, clutch_t;
-	double thr_cx, shift_timer, slip_sign, som_carga, emb_in, mu_medio, v_ref;
+	double thr_cx, shift_timer, slip_sign, som_carga, emb_in, mu_medio, v_ref, mult_pot;
 	int64_t gear, cstate, shift_to;
 	bool preso, shift_flag, want_rev, manual, limiter;
 };
@@ -48,7 +48,7 @@ FisicaCarro::Nomes::Nomes() :
 		position("position"), rid("rid"), material_at("material_at"), atrito("atrito"),
 		amortecimento("amortecimento"), kc("kc"), dc("dc"), k("k"), c("c"), mw("mw"), vmax("vmax"),
 		cos_max("cos_max"), min("min"), max("max"), esfera("esfera"), esfera_teste("esfera_teste"),
-		esfera_off("esfera_off"), collider_id("collider_id") {}
+		esfera_off("esfera_off"), collider_id("collider_id"), mult_pot("mult_pot"), mult_sub("mult_sub") {}
 
 static void ler(Object *c, const FisicaCarro::Nomes &N, EstadoMotor &e) {
 	e.air_time = c->get(N.air_time);
@@ -66,6 +66,7 @@ static void ler(Object *c, const FisicaCarro::Nomes &N, EstadoMotor &e) {
 	e.emb_in = c->get(N.emb_in);
 	e.mu_medio = c->get(N.mu_medio);
 	e.v_ref = c->get(N.v_ref);
+	e.mult_pot = c->get(N.mult_pot);
 	e.gear = c->get(N.gear);
 	e.cstate = c->get(N.cstate);
 	e.shift_to = c->get(N.shift_to);
@@ -235,13 +236,14 @@ double FisicaCarro::gearbox(EstadoMotor &e, double dt, double v_f, double out_rp
 		}
 	}
 
+	double t_m = e.eng_torque * e.mult_pot; // câmbio+0x38 (0x20c7a8)
 	if (e.clutch <= 0.0 || e.gear == 0) {
 		e.clutch_t = 0.0;
 	} else if (e.cstate == 3) {
-		e.clutch_t = e.eng_torque;
+		e.clutch_t = t_m;
 	} else if (e.cstate == 2) {
 		double cap = e.clutch * p.clutch_max;
-		e.clutch_t = e.eng_torque <= 0.0 ? 0.0 : mind(cap, e.eng_torque);
+		e.clutch_t = t_m <= 0.0 ? 0.0 : mind(cap, t_m);
 	} else if (e.cstate == 1) {
 		e.clutch_t = signd(diff) * e.clutch * p.clutch_max;
 	}
@@ -420,7 +422,7 @@ void FisicaCarro::giro_rodas(double dt, double v_f, int64_t rear_g) {
 		double rr = w[N.r];
 		double sl = w[N.slip];
 		bool hit = w[N.hit];
-		double t_mot = motriz ? e.clutch * rt * e.eng_torque / n_tr : 0.0;
+		double t_mot = motriz ? e.clutch * rt * e.eng_torque * e.mult_pot / n_tr : 0.0;
 		double t_frei = (fr ? d_fr / nf_s : (dmax - d_fr) / nr_s) * rr * 1000.0;
 		double t;
 		if (!motriz) {

@@ -5,13 +5,18 @@ Dados da corrida do RX01 (Rallycross) -> data/rx01_corrida.json.
 
 Fontes (Levels/RX_01/Event/Rallycross, data/arquivos.tsv):
   #b953876a (other/12288) "AIT 1.1 ExportedTrack": o traçado da IA. Cabeçalho
-    0x14 = n de links (75); links de 0x70 bytes a partir de 0x3c:
-    +0x00 ponto (a linha da volta gravada, até 12 m fora do centro), +0x0c
-    direção, +0x18 normal, +0x24 velocidade da volta gravada (m/s, 25..34),
-    +0x28 próximo link,
-    +0x2c 4 anteriores (o último é o usado), +0x3c 4 seguintes, +0x5c centro,
-    +0x68 / +0x6c largura à esquerda (negativa) / direita. Depois, 24 bytes
-    por link (todos iguais no RX01: 1, 1.0, -1, -1, -1, 0).
+    0x14 = n de links (75); links de 0x70 bytes a partir de 0x3c (loader
+    0x329f98): +0x00 ponto (a linha da volta gravada, até 12 m fora do
+    centro), +0x0c direção, +0x18 normal, +0x24 LARGURA da pista (m, 25..34;
+    não é velocidade: 0x32a6c8/0x32a708 = -/+ metade dela), +0x28 4 ligações
+    pra um lado e +0x38 4 pro outro (-1 = nenhuma; +0x28 = "prox"), +0x48 tem
+    bloco extra (68 de 75), +0x4c bloco (0x32a990): limite de velocidade em
+    mph (-1 em todos = nenhum; vale 1..150 mph), +0x5c centro, +0x68 / +0x6c
+    largura à esquerda (negativa) / direita. Com DAT_0055155c = 0 (RAM do
+    RX01) o jogo NÃO usa as larguras do bloco: a pista vai de -largura/2 a
+    +largura/2 em volta do ponto e o zero da IA (0x32a8d0) é o centro +0x5c
+    (sem bloco: o meio, o próprio ponto). Depois, 24 bytes por link (todos
+    iguais no RX01: 1, 1.0, -1, -1, -1, 0).
   #7c14cf48 (raw/12289+366) XML dos checkpoints: 1 CP (Type 2) na linha de
     chegada, AILink 50.
   #c0675b52 (raw/12289+1230) XML do circuito: mFirstLink 51,
@@ -51,7 +56,9 @@ def main():
             "centro": [round(x, 3) for x in struct.unpack_from("<3f", d, o + 0x5c)],
             "largura": [round(x, 2) for x in struct.unpack_from("<2f", d, o + 0x68)],
             "prox": struct.unpack_from("<i", d, o + 0x28)[0],
-            "vel": round(struct.unpack_from("<f", d, o + 0x24)[0], 2),
+            "largura_total": round(struct.unpack_from("<f", d, o + 0x24)[0], 2),
+            "n": [round(x, 4) for x in struct.unpack_from("<3f", d, o + 0x18)],
+            "bloco": struct.unpack_from("<i", d, o + 0x48)[0] != 0,
         })
     b = open(os.path.join(u, "raw", "12289r_bloco.bin"), "rb").read()
     cp = b[366:366 + 555].decode()
