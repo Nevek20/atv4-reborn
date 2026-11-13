@@ -1464,6 +1464,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   parede do bench_corrida, 3 rodadas cada: 11.5 -> 10.0 s (a corrida sem o
   carregamento ~18% mais rápida); suíte e rodar_testes idênticos. Na 1ª
   tentativa a medida no relógio da nuvem tinha ruído demais pra ver.
+  Carros divididos entre os núcleos (pedido do Matheus, nov/2026): TESTADO E
+  NÃO ADOTADO. O passo do car.gd foi dividido em 3 fases (consulta na thread
+  principal: a consulta de física só existe nela, World3D.direct_space_state
+  dá nulo em outra thread; conta em paralelo no WorkerThreadPool com
+  Thread.set_thread_safety_checks_enabled(false); efeitos e visual na
+  principal: MultiMesh, som, nós). A divisão sozinha deu rodar_testes
+  idêntico e a corrida igual (jogador no mesmo metro, nuvens iguais até a
+  unidade), mas a parte paralelizável é pequena (motor, câmbio, pneus,
+  arrasto: ~0.1-0.15 ms por carro) e a coordenação das threads come o
+  ganho: bench_corrida 9.0 s de parede sem threads x 9.4-10.1 s com (3
+  rodadas cada, 4 núcleos). O que pesa no carro (raios, esferas, efeitos,
+  visual) precisa da thread principal. Caminho que sobra pra ganho grande:
+  a física do carro em C# ou C++ (GDExtension).
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
