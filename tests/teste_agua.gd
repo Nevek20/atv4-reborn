@@ -117,8 +117,9 @@ func _physics_process(dt: float) -> bool:
 			var seco: float = (car.P.air_drag * 0.65 + car.amort_medio * car.P.ground_drag * 10.0) * spd * spd
 			medidas.drag_max = maxf(medidas.drag_max, car._arrasto(spd, dt) - minf(seco, car.mass * spd / dt))
 		if car.poeira:
-			for k in car.poeira.n_agua.size():
-				if car.poeira.n_agua[k] == 1:
+			var aguas: PackedByteArray = car.poeira.agua_vivas()
+			for k in aguas.size():
+				if aguas[k] == 1:
 					medidas.espirro += 1
 					break
 		if car.sfx:

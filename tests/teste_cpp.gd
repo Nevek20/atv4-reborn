@@ -13,6 +13,10 @@ extends SceneTree
 ##    direção e rastreio iguais ao GDScript com == numa grade da volta toda.
 ##  - contatos das esferas carro com carro (rodas.cpp contatos_esferas): a
 ##    mesma lista, na mesma ordem, do batida_carros._contatos_gd (byte a byte).
+##  - nuvens da poeira (nuvens.cpp): com as mesmas nuvens entrando, quadro a
+##    quadro, o buffer da MultiMesh e as nuvens que sobram iguais byte a byte.
+##  - posição e giros das rodas (rodas.cpp visual_rodas): iguais ao
+##    _visual_rodas_gd byte a byte, com curso, tremida, giro e esterço variados.
 ##  - suspensão visual (suspensao.cpp): todas as peças e pivôs das rodas
 ##    iguais até TOL_POSE, com cursos e esterço variados (Mosquito: barras;
 ##    Storm: rally; Hammerhead: telescópio; Fireball: balança deslocada).
@@ -298,6 +302,89 @@ func _contatos() -> void:
 	print("  contatos das esferas: 60 casos, %d contatos conferidos" % n_cont)
 
 
+func _nuvens(car) -> void:
+	var pz = car.poeira
+	if pz == null:
+		print("  sem poeira (falta o asset?)")
+		return
+	var guarda = pz._cpp
+	pz._cpp = null
+	for a in [pz.n_pos, pz.n_idade, pz.n_vida, pz.n_max, pz.n_ini, pz.n_alvo, pz.n_a0, pz.n_cor, pz.n_cel, pz.n_agua]:
+		a.clear()
+	var cap0: int = pz.cap
+	var nc = ClassDB.instantiate("NuvensCpp")
+	nc.configurar(pz.mm, pz.mm_agua, cap0, pz.max_nuvens)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var cap_gd := cap0
+	var n_buf := 0
+	for fr in 80:
+		for k in 9:
+			var v := [Vector3(rng.randf_range(-50, 50), rng.randf_range(0, 9), rng.randf_range(-50, 50)),
+				rng.randf() * 0.2, rng.randf_range(0.3, 1.5), rng.randf_range(0.3, 1.0), rng.randf_range(0.1, 0.6),
+				rng.randf_range(0.5, 1.5), rng.randf(), Color(rng.randf(), rng.randf(), rng.randf(), rng.randf()),
+				float(k % 6), 1 if k == 8 else 0]
+			pz.n_pos.append(v[0]); pz.n_idade.append(v[1]); pz.n_vida.append(v[2]); pz.n_max.append(v[3])
+			pz.n_ini.append(v[4]); pz.n_alvo.append(v[5]); pz.n_a0.append(v[6]); pz.n_cor.append(v[7])
+			pz.n_cel.append(v[8]); pz.n_agua.append(v[9])
+			nc.add(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9])
+		var delta := 1.0 / 60.0 + fr * 0.0007
+		pz.cap = cap_gd
+		pz._process(delta)
+		cap_gd = pz.cap
+		var vis_gd: int = pz.mm.visible_instance_count
+		var vis_agua_gd: int = pz.mm_agua.visible_instance_count if pz.mm_agua else 0
+		var bg: PackedFloat32Array = pz.buf.slice(0, vis_gd * 20)
+		var ag: PackedFloat32Array = pz.buf_agua.slice(0, vis_agua_gd * 20)
+		var cap_c: int = nc.quadro(delta, pz.escala)
+		var bs: Array = nc.buffers()
+		var vis_c: int = pz.mm.visible_instance_count
+		var vis_agua_c: int = pz.mm_agua.visible_instance_count if pz.mm_agua else 0
+		var gd_vivas := [pz.n_pos, pz.n_idade, pz.n_vida, pz.n_max, pz.n_ini, pz.n_alvo, pz.n_a0, pz.n_cor, pz.n_cel, pz.n_agua]
+		contas += 1
+		n_buf += bg.size() + ag.size()
+		if cap_gd != cap_c or vis_gd != vis_c or vis_agua_gd != vis_agua_c \
+				or var_to_bytes(bg) != var_to_bytes((bs[0] as PackedFloat32Array).slice(0, vis_c * 20)) \
+				or var_to_bytes(ag) != var_to_bytes((bs[1] as PackedFloat32Array).slice(0, vis_agua_c * 20)) \
+				or var_to_bytes(gd_vivas) != var_to_bytes(nc.exportar()):
+			_falha("nuvens quadro %d: cap %d x %d, visíveis %d x %d, água %d x %d" % [fr, cap_gd, cap_c, vis_gd, vis_c, vis_agua_gd, vis_agua_c])
+			break
+	print("  nuvens da poeira: 80 quadros, %d floats do buffer conferidos" % n_buf)
+	for a in [pz.n_pos, pz.n_idade, pz.n_vida, pz.n_max, pz.n_ini, pz.n_alvo, pz.n_a0, pz.n_cor, pz.n_cel, pz.n_agua]:
+		a.clear()
+	pz._cpp = guarda
+
+
+func _visual_rodas(car) -> void:
+	if car.cpp == null:
+		return
+	var guarda := []
+	for w in car.wheels:
+		guarda.append([w.x, w.get("jit", 0.0), w.spin])
+	for k in 12:
+		var a := -0.6 + 0.11 * k
+		for i in car.wheels.size():
+			var w: Dictionary = car.wheels[i]
+			w.x = (w.max - w.min) * fposmod(0.37 * k + 0.21 * i, 1.0) + w.min - 0.02
+			w.jit = 0.004 * sin(k + i)
+			w.spin = fposmod(1.7 * k + i, TAU)
+		car.cpp.visual_rodas(a)
+		var c := []
+		for w in car.wheels:
+			c.append([w.pivot.transform, w.spin_node.transform])
+		car._visual_rodas_gd(a)
+		var g := []
+		for w in car.wheels:
+			g.append([w.pivot.transform, w.spin_node.transform])
+		contas += 1
+		if var_to_bytes(g) != var_to_bytes(c):
+			_falha("%s visual das rodas caso %d diferente" % [car.vehicle_name, k])
+	for i in car.wheels.size():
+		car.wheels[i].x = guarda[i][0]
+		car.wheels[i].jit = guarda[i][1]
+		car.wheels[i].spin = guarda[i][2]
+
+
 func _physics_process(_dt: float) -> bool:
 	q += 1
 	if main.car == null:
@@ -312,6 +399,7 @@ func _physics_process(_dt: float) -> bool:
 			_piloto(main.car)
 			_suspensao(main.car)
 			_tremida(main.car)
+			_visual_rodas(main.car)
 			print("  %s: curvas conferidas" % main.car.vehicle_name)
 		return false
 	if k < carros.size():
@@ -325,6 +413,7 @@ func _physics_process(_dt: float) -> bool:
 		return false
 	_linha_ia()
 	_contatos()
+	_nuvens(main.car)
 	# F3: desliga e religa tudo na hora
 	var Base := preload("res://carro/carro_base.gd")
 	main._troca_cpp()

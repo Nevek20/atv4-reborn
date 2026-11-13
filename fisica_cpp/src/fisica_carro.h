@@ -106,6 +106,9 @@ private:
 	Ref<PhysicsRayQueryParameters3D> query;
 	Ref<PhysicsShapeQueryParameters3D> query_esfera;
 	std::map<int64_t, double> jitter_mat;   // WheelJitter por material do terreno
+	std::map<int64_t, std::pair<double, double>> mat_chao;   // material -> (atrito, Damping)
+	ObjectID chao_terreno;
+	String chao_pneu;
 
 	Params p;
 	std::vector<float> gears;
@@ -146,6 +149,7 @@ public:
 	// rodas e molas (rodas.cpp)
 	Array rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up);
 	void esferas(PhysicsDirectSpaceState3D *space, Vector3 up);
+	void visual_rodas(double a_jogo);
 	// tremida das rodas + vibração (efeitos.cpp)
 	void tremida(double dt, double v_l, double v_f);
 };

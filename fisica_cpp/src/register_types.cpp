@@ -10,6 +10,7 @@
 #include "suspensao.h"
 #include "som.h"
 #include "linha_ia.h"
+#include "nuvens.h"
 
 using namespace godot;
 
@@ -23,6 +24,7 @@ void initialize_atv4_fisica(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(SomPneuCpp);
 	GDREGISTER_CLASS(MotorSomCpp);
 	GDREGISTER_CLASS(LinhaIA);
+	GDREGISTER_CLASS(NuvensCpp);
 }
 
 void uninitialize_atv4_fisica(ModuleInitializationLevel p_level) {

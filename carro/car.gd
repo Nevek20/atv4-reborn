@@ -556,6 +556,8 @@ func liga_cpp() -> void:
 		sfx.liga_cpp()
 	if som and som.has_method("liga_cpp"):
 		som.liga_cpp()
+	if poeira and poeira.has_method("liga_cpp"):
+		poeira.liga_cpp()
 
 
 ## Mola do jogo (0x248a80): F = k x curva(x normalizado) x x, em kN.

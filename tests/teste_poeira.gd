@@ -69,12 +69,13 @@ func _physics_process(dt: float) -> bool:
 		var tam := 0.0
 		var alfa := 0.0
 		var n: int = pq.vivas()
+		var d: Array = pq.dados()
 		for k in n:
-			var tg := clampf(pq.n_idade[k] / pq.n_max[k], 0.0, 1.0)
+			var tg := clampf(d[1][k] / d[3][k], 0.0, 1.0)
 			var f := 1.0 - pow(1.0 - tg, 4.0)
-			tam += pq.n_ini[k] * (1.0 - f) + pq.n_alvo[k] * f
-			var tt: float = pq.n_idade[k] / pq.n_vida[k]
-			alfa += pq.n_a0[k] * (1.0 - tt * tt)
+			tam += d[4][k] * (1.0 - f) + d[5][k] * f
+			var tt: float = d[1][k] / d[2][k]
+			alfa += d[6][k] * (1.0 - tt * tt)
 		var kmh: float = car.linear_velocity.length() * 3.6
 		print("%4.1f s  %5.1f km/h  força %.2f  nuvens %4d  tamanho médio %.2f m  alfa médio %.2f %s" % [
 			t, kmh, clampf((kmh / 3.6 - 0.5) / 35.0, 0.0, 1.0), n, tam / maxf(n, 1), alfa / maxf(n, 1), tipos])

@@ -102,6 +102,7 @@ func tocar(b: String, n: String) -> void:
 	parar()
 	if not existe(b, n):
 		return
+	set_process(true)
 	_som = banco().bancos[b]
 	nome = n
 	tocando = true
@@ -133,6 +134,10 @@ func _process(dt: float) -> void:
 	_soltas = _vivas(_soltas, dt * SPU_HZ)
 	if tocando and _cursores.is_empty() and _vozes.is_empty():
 		tocando = false
+	# CPU: parado e sem voz soltando, o quadro não faz nada: dorme até o
+	# próximo tocar() (eram ~32 tocadores rodando à toa todo quadro)
+	if not tocando and _vozes.is_empty() and _soltas.is_empty():
+		set_process(false)
 
 
 func _vivas(vozes: Array, ticks: float) -> Array:

@@ -138,6 +138,47 @@ var conjunto := "CamSubject"      # CamSubject (o jogador) ou Other (rivais)
 # quadro pra GPU. Mesmo desenho
 const CAP_INI := 64
 var cap := CAP_INI
+# nuvens guardadas e desenhadas em C++ (fisica_cpp/src/nuvens.cpp, a mesma
+# conta): null = nos arrays daqui. Segue o carro_base.usar_cpp (F3)
+var _cpp: RefCounted = null
+
+
+## (re)liga o C++ levando as nuvens que já estão no ar pro lado certo
+func liga_cpp() -> void:
+	var quer: bool = preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("NuvensCpp") and mm != null
+	if quer and _cpp == null:
+		_cpp = ClassDB.instantiate("NuvensCpp")
+		_cpp.configurar(mm, mm_agua, cap, max_nuvens)
+		for i in n_pos.size():
+			_cpp.add(n_pos[i], n_idade[i], n_vida[i], n_max[i], n_ini[i], n_alvo[i], n_a0[i], n_cor[i], n_cel[i], n_agua[i])
+		for a in [n_pos, n_idade, n_vida, n_max, n_ini, n_alvo, n_a0, n_cor, n_cel, n_agua]:
+			a.clear()
+	elif not quer and _cpp != null:
+		var d: Array = _cpp.exportar()
+		n_pos = d[0]
+		n_idade = d[1]
+		n_vida = d[2]
+		n_max = d[3]
+		n_ini = d[4]
+		n_alvo = d[5]
+		n_a0 = d[6]
+		n_cor = d[7]
+		n_cel = d[8]
+		n_agua = d[9]
+		_cpp = null
+
+
+## as nuvens vivas: [pos, idade, vida, max, ini, alvo, a0, cor, cel, agua]
+## (testes; vale com e sem C++)
+func dados() -> Array:
+	if _cpp:
+		return _cpp.exportar()
+	return [n_pos, n_idade, n_vida, n_max, n_ini, n_alvo, n_a0, n_cor, n_cel, n_agua]
+
+
+## 1 = nuvem de água, uma por nuvem viva (testes)
+func agua_vivas() -> PackedByteArray:
+	return _cpp.agua_vivas() if _cpp else n_agua
 
 
 func montar(c) -> bool:
@@ -166,6 +207,7 @@ func montar(c) -> bool:
 	if FileAccess.file_exists(TEXTURA_AGUA):
 		mm_agua = _multimesh(TEXTURA_AGUA, "Espirro")
 	mmi = get_node("Nuvens")
+	liga_cpp()
 	return true
 
 
@@ -325,26 +367,37 @@ func _emitir(e: Dictionary, p: Vector3, espaco: float, ini: float, forca: float,
 
 ## 0x3af170: uma nuvem nova
 func _nuvem(e: Dictionary, p: Vector3, idade: float, ini: float, alfa: float, cor: Color, tp: Dictionary) -> void:
-	if n_pos.size() >= max_nuvens:
+	if vivas() >= max_nuvens:
 		return
 	var idx: int = e.cont
 	e.cont = (idx + 1) % por_grupo
 	soltas += 1
+	var vida: float = tp.vidas[idx % tp.vidas.size()]
+	var ini2: float = ini + rnd.randf_range(-tp.ini_delta, tp.ini_delta)
+	var alvo2: float = tp.alvo + rnd.randf_range(-tp.alvo_delta, tp.alvo_delta)
+	var cel := float(idx % (COLUNAS * LINHAS))
+	var na := 1 if e.mat == -2 else 0
+	if _cpp:
+		_cpp.add(p, idade, vida, tp.idade_max, ini2, alvo2, clampf(alfa, 0.0, 1.0), cor, cel, na)
+		return
 	n_pos.append(p)
 	n_idade.append(idade)
-	n_vida.append(tp.vidas[idx % tp.vidas.size()])
+	n_vida.append(vida)
 	n_max.append(tp.idade_max)
-	n_ini.append(ini + rnd.randf_range(-tp.ini_delta, tp.ini_delta))
-	n_alvo.append(tp.alvo + rnd.randf_range(-tp.alvo_delta, tp.alvo_delta))
+	n_ini.append(ini2)
+	n_alvo.append(alvo2)
 	n_a0.append(clampf(alfa, 0.0, 1.0))
 	n_cor.append(cor)
-	n_cel.append(float(idx % (COLUNAS * LINHAS)))
-	n_agua.append(1 if e.mat == -2 else 0)
+	n_cel.append(cel)
+	n_agua.append(na)
 
 
 ## envelhece e desenha (0x3af590)
 func _process(delta: float) -> void:
 	if mm == null:
+		return
+	if _cpp:
+		cap = _cpp.quadro(delta, escala)
 		return
 	# envelhece e tira as mortas numa passada só (compacta e redimensiona 1
 	# vez; tirar uma por uma fazia 10 resize por nuvem). A ordem das vivas
@@ -440,7 +493,7 @@ func _process(delta: float) -> void:
 			mm_agua.buffer = buf_agua
 		mm_agua.visible_instance_count = na
 func vivas() -> int:
-	return n_pos.size()
+	return _cpp.vivas() if _cpp else n_pos.size()
 
 
 ## Setup/Dust.xml: Dust/Vehicle/<conjunto>/Rear/<tipo>, na ordem de TIPOS

@@ -1112,15 +1112,24 @@ func _vibracao(dt: float, v_l: float, v_f: float) -> void:
 const MPH_G := 0.44694445
 const DEG := 0.017453294
 
-func _update_visuals(dt: float, _v_f: float) -> void:
-	# o visual fica no frame do jogo (espelho): rotação em y troca de sinal
-	# (S Ry(a) S = Ry(-a)), em x não. a_jogo = ângulo das rodas no jogo
-	var a_jogo: float = -steer * P.vis_steer
+## posição e giros de cada roda (fisica_cpp rodas.cpp visual_rodas é o mesmo)
+func _visual_rodas_gd(a_jogo: float) -> void:
 	for w in wheels:
 		var x: float = clampf(w.x, w.min, w.max) + w.jit   # 0x222078: sem clamp depois
 		w.pivot.position = Vector3(w.px, w.y0 + x, w.pz) * ESPELHO
 		w.pivot.rotation.y = a_jogo if w.front else 0.0
 		w.spin_node.rotation.x = w.spin            # ângulo da roda (W+0x4c, _giro_rodas)
+
+
+func _update_visuals(dt: float, _v_f: float) -> void:
+	# o visual fica no frame do jogo (espelho): rotação em y troca de sinal
+	# (S Ry(a) S = Ry(-a)), em x não. a_jogo = ângulo das rodas no jogo
+	var a_jogo: float = -steer * P.vis_steer
+	var fc = get("cpp")                           # física em C++ (car.gd): as rodas lá
+	if fc:
+		fc.visual_rodas(a_jogo)
+	else:
+		_visual_rodas_gd(a_jogo)
 	# direção suavizada do piloto (0x187060: s += min(1/dt, 30)·(direção - s)·dt):
 	# é o que move os braços dele no jogo, então o volante anda junto
 	if dt > 0.0:

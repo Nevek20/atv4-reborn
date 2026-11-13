@@ -12,6 +12,10 @@
 #include <godot_cpp/classes/shape3d.hpp>
 #include <godot_cpp/classes/rigid_body3d.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/classes/node3d.hpp>
+
+#include <cmath>
 
 #include "mat.h"
 
@@ -95,6 +99,19 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 	Object *objetos = c->get(N.objetos);
 	Object *terrain = c->get(N.terrain);
 	Variant pneu = c->get(N.pneu);
+	PackedByteArray mapa;
+	int64_t lado = 0;
+	if (terrain != nullptr) {
+		static const StringName S_MAT_MAP("mat_map"), S_SIZE("size");
+		mapa = terrain->get(S_MAT_MAP);
+		lado = terrain->get(S_SIZE);
+		// cache do atrito/Damping vale pro mesmo terreno e o mesmo pneu
+		if (ObjectID(terrain->get_instance_id()) != chao_terreno || (String)pneu != chao_pneu) {
+			mat_chao.clear();
+			chao_terreno = ObjectID(terrain->get_instance_id());
+			chao_pneu = pneu;
+		}
+	}
 	TypedArray<RID> excluir;
 	excluir.push_back(b->get_rid());
 	if (objetos != nullptr) {
@@ -145,10 +162,25 @@ Array FisicaCarro::rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up
 		d[N.point] = hp;
 		d[N.normal] = hn;
 		if (terrain != nullptr) {
-			Variant mat = terrain->call(N.material_at, hp.x, hp.z);
-			d[N.mat] = mat;
-			d[N.mu] = terrain->call(N.atrito, mat, pneu);
-			d[N.amort] = terrain->call(N.amortecimento, mat);
+			// terrain.material_at / atrito / amortecimento: o mapa lido direto e
+			// o atrito e o Damping guardados por material (consultas puras)
+			int64_t m = -1;
+			if (!mapa.is_empty()) {
+				int64_t ix = (int64_t)std::floor((double)hp.x);
+				int64_t iz = (int64_t)std::floor((double)hp.z);
+				ix = ix < 0 ? 0 : (ix > lado - 1 ? lado - 1 : ix);
+				iz = iz < 0 ? 0 : (iz > lado - 1 ? lado - 1 : iz);
+				m = mapa[iz * lado + ix];
+			}
+			d[N.mat] = m;
+			auto it = mat_chao.find(m);
+			if (it == mat_chao.end()) {
+				double mu_m = terrain->call(N.atrito, m, pneu);
+				double am_m = terrain->call(N.amortecimento, m);
+				it = mat_chao.emplace(m, std::make_pair(mu_m, am_m)).first;
+			}
+			d[N.mu] = it->second.first;
+			d[N.amort] = it->second.second;
 		}
 		grounded += 1;
 		n_sum += hn;
@@ -275,4 +307,36 @@ Array FisicaCarro::contatos_esferas(Transform3D xa, PackedVector3Array ca, Packe
 		}
 	}
 	return cs;
+}
+
+// carro_montagem._update_visuals: posição e giros de cada roda (o resto do
+// visual continua no GDScript). Mesmas chamadas, na mesma ordem
+void FisicaCarro::visual_rodas(double a_jogo) {
+	Object *c = carro();
+	if (c == nullptr) {
+		return;
+	}
+	static const StringName S_PIVOT("pivot"), S_SPIN_NODE("spin_node"), S_JIT("jit");
+	const Nomes &N = nomes();
+	Array wd = c->get(N.wheels);
+	int64_t nw = wd.size() < (int64_t)rf.size() ? wd.size() : (int64_t)rf.size();
+	const Vector3 ESPELHO(-1, 1, 1);
+	for (int64_t i = 0; i < nw; i++) {
+		Dictionary d = wd[i];
+		const RodaFixa &w = rf[i];
+		double x = clampd((double)d[N.x], w.min, w.max) + (double)d[S_JIT];
+		Node3D *pivot = Object::cast_to<Node3D>((Object *)d[S_PIVOT]);
+		if (pivot != nullptr) {
+			pivot->set_position(Vector3((real_t)w.px, (real_t)(w.y0 + x), (real_t)w.pz) * ESPELHO);
+			Vector3 r = pivot->get_rotation();
+			r.y = (real_t)(w.front ? a_jogo : 0.0);
+			pivot->set_rotation(r);
+		}
+		Node3D *spin = Object::cast_to<Node3D>((Object *)d[S_SPIN_NODE]);
+		if (spin != nullptr) {
+			Vector3 r = spin->get_rotation();
+			r.x = (real_t)(double)d[N.spin];
+			spin->set_rotation(r);
+		}
+	}
 }
