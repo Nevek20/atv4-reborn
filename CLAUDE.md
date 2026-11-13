@@ -199,6 +199,7 @@ Pista RX01
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
   lido, calibrado em prints). Fumaça é melhoria nossa (o jogo não solta).
+  Poeira: o jogador usa o CamSubject do Dust.xml, os rivais o Other.
 - Som de pneu, suspensão, pouso e batida = do jogo (989snd). Mistura nossa
   por cima: SO_DERRAPANDO e GANHO_PNEU 0.6.
 

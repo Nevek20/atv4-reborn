@@ -132,13 +132,23 @@ var n_cor := PackedColorArray()
 var n_cel := PackedFloat32Array()
 var buf := PackedFloat32Array()   # buffer da MultiMesh (20 floats por nuvem)
 var soltas := 0                   # nuvens soltas desde o começo (testes)
+var conjunto := "CamSubject"      # CamSubject (o jogador) ou Other (rivais)
+# CPU: a MultiMesh cresce conforme as nuvens vivas (dobra a partir de
+# CAP_INI até max_nuvens) em vez de mandar 1024 x 20 floats por carro a cada
+# quadro pra GPU. Mesmo desenho
+const CAP_INI := 64
+var cap := CAP_INI
 
 
 func montar(c) -> bool:
 	car = c
 	if c.terrain == null or not FileAccess.file_exists(TEXTURA):
 		return false
-	tipos = _ler_tipos("res://data/dust.xml", "CamSubject")
+	# 0x3affb0: CamSubject = o carro da câmera (o jogador), Other = os outros
+	# (rivais: espaço 0.2/0.4 m e 2 m de longe, contra 0.15/0.1/0.1 do
+	# jogador, nuvens maiores). Até nov/2026 os rivais usavam o CamSubject
+	conjunto = "Other" if car.get("som_3d") else "CamSubject"
+	tipos = _ler_tipos("res://data/dust.xml", conjunto)
 	if tipos.is_empty():
 		return false
 	var cfg := _ler_config("res://data/dust_rx01.xml")
@@ -182,7 +192,7 @@ func _multimesh(arq: String, nome: String) -> MultiMesh:
 	m.use_colors = true
 	m.use_custom_data = true
 	m.mesh = q
-	m.instance_count = max_nuvens
+	m.instance_count = CAP_INI
 	m.visible_instance_count = 0
 	var mi := MultiMeshInstance3D.new()
 	mi.name = nome
@@ -370,9 +380,16 @@ func _process(delta: float) -> void:
 		n_cel.resize(w)
 		n_agua.resize(w)
 	var n := n_pos.size()
-	if buf.size() != max_nuvens * 20:
-		buf.resize(max_nuvens * 20)
-		buf_agua.resize(max_nuvens * 20)
+	if n > cap:
+		while cap < n:
+			cap *= 2
+		cap = mini(cap, max_nuvens)
+		mm.instance_count = cap
+		if mm_agua:
+			mm_agua.instance_count = cap
+	if buf.size() != cap * 20:
+		buf.resize(cap * 20)
+		buf_agua.resize(cap * 20)
 	var np := 0
 	var na := 0
 	# grava direto no buffer (escala nas 3 diagonais, posição, cor, célula):

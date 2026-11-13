@@ -510,6 +510,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 
 ## Efeitos (poeira, pedras, lascas, fumaça, sujeira)
 
+- Poeira dos rivais = conjunto Other do Dust.xml (nov/2026, "a terra subindo
+  do pneu deve estar comendo FPS", Matheus): o jogo (0x3affb0) tem um
+  conjunto pro carro da câmera (CamSubject) e outro pros outros (Other:
+  espaço 0.2 / 0.4 e 2.0 m de longe, contra 0.15 / 0.1 / 0.1; nuvens de 7 a
+  10 em vez de 3 a 6). O remake usava o CamSubject nos 8. Agora os rivais
+  usam o Other (mais fiel e bem mais leve: em 15 s de corrida os rivais
+  soltam 95..754 nuvens, o jogador 2392). E a MultiMesh de cada carro cresce
+  com as nuvens vivas (64 -> dobra até 1024) em vez de mandar 1024 x 20
+  floats pra GPU a cada quadro. _process da poeira dos 8: 1.4 -> 0.63 ms
+  por quadro. O jogador não muda (teste_poeira igual).
 - Poeira dos pneus (PORTA do jogo, nov/2026, car.gd POEIRA, poeira.gd;
   docs/engenharia_reversa.md, Poeira): o material do chão diz o tipo
   (DustType None/Light/Medium/Heavy) e a cor (DustColour); Setup/Dust.xml

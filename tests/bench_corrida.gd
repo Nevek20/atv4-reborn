@@ -39,5 +39,8 @@ func _physics_process(dt: float) -> bool:
 		n += 1
 		if n >= PASSOS:
 			print("bench: %d passos, jogador em %.0f m" % [n, ia.jogador.prog])
+			for car in [main.car] + ia.rivais.map(func(y): return y.car):
+				if car.poeira:
+					print("  poeira %-10s %-10s soltas %5d  vivas %4d  cap %d" % [car.name, car.poeira.conjunto, car.poeira.soltas, car.poeira.vivas(), car.poeira.cap])
 			return true
 	return false
