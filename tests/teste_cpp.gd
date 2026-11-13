@@ -262,6 +262,7 @@ func _linha_ia() -> void:
 		_falha("linha da IA sem C++")
 		return
 	var cpp = ia._cpp
+	var vigia = preload("res://pista/reposicao.gd").new(ia, 0.0)
 	var xf: Transform3D = main.car.global_transform
 	var n0 := contas
 	var s: float = -ia.comp - 3.3
@@ -280,6 +281,11 @@ func _linha_ia() -> void:
 		ia._direcao(xc, main.car)
 		var rc := {"prog": s - ia.s_linha + 7.5, "dist": 0.0}
 		ia.rastrear(rc, p)
+		# borda do AIT (reposicao.gd) com o mesmo ponto
+		var vg: Array = vigia._fora_gd(s - ia.s_linha, p)
+		var vc: PackedFloat64Array = cpp.fora(s - ia.s_linha, ia.s_linha, p)
+		if vg[0] != vc[0] or vg[1] != Vector3(vc[1], 0.0, vc[2]):
+			_falha("borda do AIT em s=%s: GD %s, C++ %s" % [s, vg, vc])
 		contas += 1
 		if var_to_bytes(g) != var_to_bytes(c) or xg.ang != xc.ang or rg.prog != rc.prog or rg.dist != rc.dist:
 			_falha("linha da IA em s=%s:\n GD  %s %s %s\n C++ %s %s %s" % [s, g, xg.ang, rg, c, xc.ang, rc])

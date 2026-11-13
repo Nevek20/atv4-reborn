@@ -110,13 +110,21 @@ func montar(c) -> bool:
 
 
 ## liga e desliga como a lâmpada do freio (Luzes.ACENDE / APAGA)
+static var _TEM_FAROL := OS.has_environment("FAROL")     # print_tela: 1 aceso, 0 apagado
+static var _FAROL_LIGADO := OS.get_environment("FAROL") == "1"
+var _aplicado = null            # último aceso mandado pro shader
+
+
 func atualizar(delta: float) -> void:
 	var alvo := 1.0 if ligado else 0.0
-	if OS.has_environment("FAROL"):              # print_tela: 1 aceso, 0 apagado
-		alvo = 1.0 if OS.get_environment("FAROL") == "1" else 0.0
+	if _TEM_FAROL:
+		alvo = 1.0 if _FAROL_LIGADO else 0.0
 	aceso = move_toward(aceso, alvo, delta / (Luzes.ACENDE if alvo > aceso else Luzes.APAGA))
-	for m in _mats:
-		m.set_shader_parameter("aceso", aceso)
+	# CPU: só manda pro shader quando muda
+	if _aplicado == null or aceso != _aplicado:
+		for m in _mats:
+			m.set_shader_parameter("aceso", aceso)
+		_aplicado = aceso
 
 
 ## faces com textura de farol, agrupadas pelas que se tocam (cada grupo é uma

@@ -107,6 +107,8 @@ func montar(c) -> bool:
 		meia.append((absf(ls[i].largura[0]) + absf(ls[i].largura[1])) * 0.5)
 		esq.append(float(ls[i].largura[0]))
 		dir.append(float(ls[i].largura[1]))
+	if _cpp:
+		_cpp.bordas(esq, dir)
 	batidas = preload("res://carro/batida_carros.gd").new()
 	batidas.name = "BatidaCarros"
 	batidas.carros = func(): return [main.car] + rivais.map(func(y): return y.car)
@@ -127,6 +129,8 @@ func liga_cpp() -> void:
 		_cpp = ClassDB.instantiate("LinhaIA")
 		if not _cpp.configurar(linha, acc, comp):
 			_cpp = null
+		elif not esq.is_empty():
+			_cpp.bordas(esq, dir)
 
 
 static func _plano(v: Vector3) -> Vector3:
@@ -398,31 +402,44 @@ func _physics_process(dt: float) -> void:
 	_carros_laco = null
 
 
-func _direcao(x: Dictionary, car) -> float:
-	var v: float = car.linear_velocity.length()
+## xf_ / v_: o transform e |v| do carro já lidos no passo (_dirigir); sem
+## eles, lê do carro (testes)
+func _direcao(x: Dictionary, car, xf_ = null, v_ := -1.0) -> float:
+	var v: float = v_ if v_ >= 0.0 else car.linear_velocity.length()
+	var xf: Transform3D = xf_ if xf_ != null else car.global_transform
 	var s: float = x.r.prog + s_linha + maxf(OLHA_MIN, v * OLHA_T)
 	if _cpp:
-		x.ang = _cpp.direcao_ang(s, x.get("lat", 0.0), car.global_transform)
+		x.ang = _cpp.direcao_ang(s, x.get("lat", 0.0), xf)
 	else:
 		var alvo := ponto(s)
 		var adiante := _plano(ponto(s + 2.0) - alvo).normalized()
 		alvo += Vector3(adiante.z, 0.0, -adiante.x) * x.get("lat", 0.0)
-		var loc: Vector3 = car.global_transform.affine_inverse() * alvo
+		var loc: Vector3 = xf.affine_inverse() * alvo
 		x.ang = atan2(loc.x, loc.z)
 	return roundf(clampf(x.ang * GANHO_VIRA, -1.0, 1.0) * 7.0) / 7.0   # sétimos (RAM)
 
 
+# CPU: lidos uma vez (antes: getenv e busca no dicionário por rival e passo)
+var _ia_trace := OS.get_environment("IA_TRACE")
+var _primeira_volta = null
+
+
 func _dirigir(x: Dictionary, car, dt: float) -> void:
-	var b: Basis = car.global_transform.basis
-	var vf: float = car.linear_velocity.dot(b.z)
-	var v: float = car.linear_velocity.length()
-	var st := _direcao(x, car)
+	# o carro lido uma vez no passo (transform, velocidade) e passado adiante
+	var xf: Transform3D = car.global_transform
+	var b: Basis = xf.basis
+	var lv: Vector3 = car.linear_velocity
+	var vf: float = lv.dot(b.z)
+	var v: float = lv.length()
+	var st := _direcao(x, car, xf, v)
 	# acelerador cheio; alivia/freia pelo ângulo até o alvo; Skill e catchup
 	# limitam o acelerador máximo
 	var frente: float = x.r.prog - jogador.prog
-	var esc: float = escala_catchup(frente, jogador.prog + corrida.dados.get("primeira_volta", 54.8))
+	if _primeira_volta == null:
+		_primeira_volta = corrida.dados.get("primeira_volta", 54.8)
+	var esc: float = escala_catchup(frente, jogador.prog + _primeira_volta)
 	var teto := clampf((1.0 - GANHO_SKILL * (1.0 - x.skill)) * (1.0 + GANHO_CATCHUP * esc), 0.3, 1.0)
-	var v_lim: float = _desviar(x, car, dt, INF)
+	var v_lim: float = _desviar(x, car, dt, INF, xf, lv)
 	var ang := absf(x.get("ang", 0.0))
 	var thr := teto
 	var brk := 0.0
@@ -489,7 +506,7 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	thr = roundf(thr * 7.0) / 7.0
 	brk = roundf(brk * 7.0) / 7.0
 	car.test_input = {"thr": thr, "brk": brk, "steer": st}
-	if OS.get_environment("IA_TRACE") == x.nome and Engine.get_physics_frames() % 5 == 0:
+	if _ia_trace == x.nome and Engine.get_physics_frames() % 5 == 0:
 		var alvo := v_lim
 		print("trace %5.2f  prog %5.0f  dist %4.1f  v %4.1f/%4.1f  st %5.2f thr %.1f brk %.1f  up %.2f  pos %s  linha %s  frente %s" % [
 			corrida.t, x.r.prog, x.r.dist, v, alvo, st, thr, brk, b.y.y, car.global_position,
@@ -516,16 +533,17 @@ func _v_curva(s: float) -> float:
 
 ## desvio dos outros carros: muda x.lat (lado em relação à linha) e devolve a
 ## velocidade-alvo (limitada à do carro da frente se não der pra passar)
-func _desviar(x: Dictionary, car, dt: float, alvo: float) -> float:
+func _desviar(x: Dictionary, car, dt: float, alvo: float, xf_ = null, lv_ = null) -> float:
 	var s: float = x.r.prog + s_linha
 	var f := clampf((x.r.prog - x.get("prog0", 0.0)) / JUNTA, 0.0, 1.0)
 	var base: float = lerpf(x.get("desvio0", 0.0), x.desvio, f)
 	var i := _seg(fposmod(s, comp))
 	var lo: float = maxf(centro_lat[i] - meia[i] + MARGEM, -DESVIO_MAX)
 	var hi: float = minf(centro_lat[i] + meia[i] - MARGEM, DESVIO_MAX)
-	var b: Basis = car.global_transform.basis
-	var p: Vector3 = car.global_position
-	var minha: float = car.linear_velocity.dot(b.z)
+	var xf: Transform3D = xf_ if xf_ != null else car.global_transform
+	var b: Basis = xf.basis
+	var p: Vector3 = xf.origin
+	var minha: float = (lv_ if lv_ != null else car.linear_velocity).dot(b.z)
 	var lat_alvo := base
 	var v_lim := INF
 	var perto := INF

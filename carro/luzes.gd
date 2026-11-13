@@ -384,17 +384,34 @@ static func _juntar(grupos: Array) -> Array:
 
 
 ## freio 0..1 (brake_in) e ré engatada; a lâmpada sobe em ACENDE e desce em APAGA
+# print_tela: FREIO / RE = 1 acesa, 0 apagada (lidos uma vez)
+static var _TEM_FREIO := OS.has_environment("FREIO")
+static var _FREIO_LIGADO := OS.get_environment("FREIO") == "1"
+static var _TEM_RE := OS.has_environment("RE")
+static var _RE_LIGADO := OS.get_environment("RE") == "1"
+var _aplicado := {}             # tipo -> último aceso mandado pro shader
+
+
 func atualizar(delta: float, freio: float, re := false) -> void:
-	var alvos := {"freio": 1.0 if freio > LIGA else 0.0, "re": 1.0 if re else 0.0}
-	if OS.has_environment("FREIO"):              # print_tela: 1 acesa, 0 apagada
-		alvos.freio = 1.0 if OS.get_environment("FREIO") == "1" else 0.0
-	if OS.has_environment("RE"):
-		alvos.re = 1.0 if OS.get_environment("RE") == "1" else 0.0
-	for tipo in alvos:
-		var vel := 1.0 / (ACENDE if alvos[tipo] > aceso[tipo] else APAGA)
-		aceso[tipo] = move_toward(aceso[tipo], alvos[tipo], delta * vel)
+	var a_freio := 1.0 if freio > LIGA else 0.0
+	var a_re := 1.0 if re else 0.0
+	if _TEM_FREIO:
+		a_freio = 1.0 if _FREIO_LIGADO else 0.0
+	if _TEM_RE:
+		a_re = 1.0 if _RE_LIGADO else 0.0
+	_anda("freio", a_freio, delta)
+	_anda("re", a_re, delta)
+
+
+## CPU: o shader só recebe o valor quando ele muda (aceso parado em 0 ou 1
+## regravava todos os materiais a cada quadro)
+func _anda(tipo: String, alvo: float, delta: float) -> void:
+	var vel := 1.0 / (ACENDE if alvo > aceso[tipo] else APAGA)
+	aceso[tipo] = move_toward(aceso[tipo], alvo, delta * vel)
+	if _aplicado.get(tipo) == null or aceso[tipo] != _aplicado[tipo]:
 		for m in _mats[tipo]:
 			m.set_shader_parameter("aceso", aceso[tipo])
+		_aplicado[tipo] = aceso[tipo]
 
 
 func _imagem(tex: Texture2D) -> Image:

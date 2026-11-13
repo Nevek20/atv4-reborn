@@ -77,22 +77,17 @@ func recomecar(prog: float) -> void:
 
 ## um passo; devolve true quando é pra repor (em aceito)
 func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
-	var s: float = fposmod(r.prog + ia.s_linha, ia.comp)
-	var i: int = ia._seg(s)
-	var n: int = ia.linha.size()
-	var pa: Vector3 = ia.linha[i]
-	var pb: Vector3 = ia.linha[(i + 1) % n]
-	var d := Vector3(pb.x - pa.x, 0.0, pb.z - pa.z)
-	var l := d.length()
-	d = d / maxf(l, 1e-6)
-	var p: Vector3 = car.global_position
-	var t := clampf(Vector3(p.x - pa.x, 0.0, p.z - pa.z).dot(d) / maxf(l, 1e-6), 0.0, 1.0)
-	# lado do jogo (x, z) = (d.z, -d.x) do link; no mundo (z - 1024, y, x):
-	# lat = dz_mundo * d.x - dx_mundo * d.z
-	var lat: float = (p.z - pa.z) * d.x - (p.x - pa.x) * d.z
-	var esq: float = lerpf(ia.esq[i], ia.esq[(i + 1) % n], t)
-	var dir_: float = lerpf(ia.dir[i], ia.dir[(i + 1) % n], t)
-	fora = esq - lat if lat < esq else (lat - dir_ if lat > dir_ else 0.0)
+	var d: Vector3
+	var cpp = ia.get("_cpp")
+	if cpp:
+		# a mesma geometria em C++ (fisica_cpp/src/linha_ia.cpp fora)
+		var g: PackedFloat64Array = cpp.fora(r.prog, ia.s_linha, car.global_position)
+		fora = g[0]
+		d = Vector3(g[1], 0.0, g[2])
+	else:
+		var g: Array = _fora_gd(r.prog, car.global_position)
+		fora = g[0]
+		d = g[1]
 	# trapaça e progresso aceito
 	var trapaca: bool = fora > _cheat_stray
 	var delta: float = r.prog - aceito
@@ -105,7 +100,8 @@ func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
 		aceito = r.prog
 	pulo = false
 	# pedido
-	var v := Vector3(car.linear_velocity.x, 0.0, car.linear_velocity.z)
+	var lv: Vector3 = car.linear_velocity
+	var v := Vector3(lv.x, 0.0, lv.z)
 	if v.length() > 1e-3 and d.dot(v.normalized()) < -0.5:
 		_pedir(1)
 	elif trapaca or fora > _warn_stray:
@@ -115,6 +111,26 @@ func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
 		fase = 0
 		tempo = 0.0
 	return _contar(dt)
+
+
+## quanto o ponto p passou da borda do AIT e a direção do trecho: [fora, d]
+## (o fora do linha_ia.cpp é o mesmo)
+func _fora_gd(prog: float, p: Vector3) -> Array:
+	var s: float = fposmod(prog + ia.s_linha, ia.comp)
+	var i: int = ia._seg(s)
+	var n: int = ia.linha.size()
+	var pa: Vector3 = ia.linha[i]
+	var pb: Vector3 = ia.linha[(i + 1) % n]
+	var d := Vector3(pb.x - pa.x, 0.0, pb.z - pa.z)
+	var l := d.length()
+	d = d / maxf(l, 1e-6)
+	var t := clampf(Vector3(p.x - pa.x, 0.0, p.z - pa.z).dot(d) / maxf(l, 1e-6), 0.0, 1.0)
+	# lado do jogo (x, z) = (d.z, -d.x) do link; no mundo (z - 1024, y, x):
+	# lat = dz_mundo * d.x - dx_mundo * d.z
+	var lat: float = (p.z - pa.z) * d.x - (p.x - pa.x) * d.z
+	var esq: float = lerpf(ia.esq[i], ia.esq[(i + 1) % n], t)
+	var dir_: float = lerpf(ia.dir[i], ia.dir[(i + 1) % n], t)
+	return [esq - lat if lat < esq else (lat - dir_ if lat > dir_ else 0.0), d]
 
 
 func _pedir(k: int) -> void:

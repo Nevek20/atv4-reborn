@@ -143,16 +143,22 @@ func _process(dt: float) -> void:
 
 
 func _vivas(vozes: Array, ticks: float) -> Array:
-	var out: Array = []
-	for v in vozes:
+	# CPU: a lista nova só é montada quando alguma voz morre (antes, uma lista
+	# nova por quadro por tocador, mesmo vazia)
+	var out = null
+	for i in vozes.size():
+		var v: Dictionary = vozes[i]
 		var p = v.p
 		_env_anda(v, ticks)
 		if not p.playing or v.fase == 4:
 			p.queue_free()
+			if out == null:
+				out = vozes.slice(0, i)
 			continue
-		out.append(v)
+		if out != null:
+			out.append(v)
 		_aplicar(v)
-	return out
+	return vozes if out == null else out
 
 
 func _aplicar(v: Dictionary) -> void:
@@ -175,8 +181,14 @@ func _aplicar(v: Dictionary) -> void:
 ## desce até PBLow
 static func _dobra(v: Dictionary) -> float:
 	var pb: int = v.cur.pb
+	# CPU: o pow só quando o pitch bend muda (guardado na voz)
+	if pb == v.get("pb_c", 0x7fffffff):
+		return v.dobra_c
 	var semi: float = v.pb[1] * pb / 32767.0 if pb >= 0 else v.pb[0] * pb / 32768.0
-	return pow(2.0, semi / 12.0)
+	var r := pow(2.0, semi / 12.0)
+	v.pb_c = pb
+	v.dobra_c = r
+	return r
 
 
 ## fase do envelope: [exponencial, sobe, shift, passo, alvo]. ADSR1: 15 ataque
@@ -202,7 +214,15 @@ static func _fase(a1: int, a2: int, fase: int) -> Array:
 ## 0x6000 vai 4x mais devagar, descendo anda proporcional ao nível
 static func _env_anda(v: Dictionary, n: float) -> void:
 	while n > 0.0 and v.fase < 4:
-		var f := _fase(v.a1, v.a2, v.fase)
+		# CPU: a fase do envelope depende só de a1, a2 e da fase (fixos na voz):
+		# montada uma vez por fase em vez de uma lista nova a cada volta
+		var f: Array
+		if v.get("fase_c", -1) == v.fase:
+			f = v.f_c
+		else:
+			f = _fase(v.a1, v.a2, v.fase)
+			v.fase_c = v.fase
+			v.f_c = f
 		var sh: int = f[2]
 		var ciclos := float(1 << maxi(0, sh - 11))
 		var passo := float(f[3]) * float(1 << maxi(0, 11 - sh))

@@ -16,6 +16,7 @@ class LinhaIA : public RefCounted {
 
 	std::vector<Vector3> linha;
 	std::vector<double> acc;
+	std::vector<double> esq, dir;    // largura do AIT a partir da linha (reposicao.gd)
 	double comp = 0.0;
 
 protected:
@@ -29,6 +30,8 @@ public:
 	double lateral(Vector3 p, double s) const;
 	double direcao_ang(double s, double lat, Transform3D xf) const;
 	PackedFloat64Array rastrear(double prog, double s_linha, Vector3 p) const;
+	void bordas(const Array &esq, const Array &dir);
+	PackedFloat64Array fora(double prog, double s_linha, Vector3 p) const;
 };
 
 } // namespace godot

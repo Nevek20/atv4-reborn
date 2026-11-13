@@ -30,6 +30,8 @@ void LinhaIA::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("lateral", "p", "s"), &LinhaIA::lateral);
 	ClassDB::bind_method(D_METHOD("direcao_ang", "s", "lat", "xf"), &LinhaIA::direcao_ang);
 	ClassDB::bind_method(D_METHOD("rastrear", "prog", "s_linha", "p"), &LinhaIA::rastrear);
+	ClassDB::bind_method(D_METHOD("bordas", "esq", "dir"), &LinhaIA::bordas);
+	ClassDB::bind_method(D_METHOD("fora", "prog", "s_linha", "p"), &LinhaIA::fora);
 }
 
 bool LinhaIA::configurar(const Array &linha_, const Array &acc_, double comp_) {
@@ -139,5 +141,44 @@ PackedFloat64Array LinhaIA::rastrear(double prog, double s_linha, Vector3 p) con
 	PackedFloat64Array out;
 	out.push_back(prog + (best_s - s0));
 	out.push_back(best);
+	return out;
+}
+
+void LinhaIA::bordas(const Array &esq_, const Array &dir_) {
+	esq.clear();
+	dir.clear();
+	for (int64_t i = 0; i < esq_.size(); i++) {
+		esq.push_back(esq_[i]);
+	}
+	for (int64_t i = 0; i < dir_.size(); i++) {
+		dir.push_back(dir_[i]);
+	}
+}
+
+// pista/reposicao.gd passo (a parte da geometria): [fora, d.x, d.z], d = a
+// direção do trecho (plano, normalizada). Mesmas contas, mesmos tipos
+PackedFloat64Array LinhaIA::fora(double prog, double s_linha, Vector3 p) const {
+	PackedFloat64Array out;
+	int64_t n = (int64_t)linha.size();
+	if (n == 0 || (int64_t)esq.size() < n || (int64_t)dir.size() < n) {
+		return out;
+	}
+	double s = fposmod(prog + s_linha, comp);
+	int64_t i = seg(s);
+	const Vector3 &pa = linha[i];
+	const Vector3 &pb = linha[(i + 1) % n];
+	// Vector3(pb.x - pa.x, ...) do GDScript: diferença em double, depois float
+	Vector3 d((real_t)((double)pb.x - (double)pa.x), 0.0f, (real_t)((double)pb.z - (double)pa.z));
+	double l = d.length();
+	d = d / (real_t)maxd(l, 1e-6);
+	Vector3 pp((real_t)((double)p.x - (double)pa.x), 0.0f, (real_t)((double)p.z - (double)pa.z));
+	double t = clampd((double)pp.dot(d) / maxd(l, 1e-6), 0.0, 1.0);
+	double lat = ((double)p.z - (double)pa.z) * (double)d.x - ((double)p.x - (double)pa.x) * (double)d.z;
+	double e = lerpd(esq[i], esq[(i + 1) % n], t);
+	double r = lerpd(dir[i], dir[(i + 1) % n], t);
+	double f = lat < e ? e - lat : (lat > r ? lat - r : 0.0);
+	out.push_back(f);
+	out.push_back(d.x);
+	out.push_back(d.z);
 	return out;
 }

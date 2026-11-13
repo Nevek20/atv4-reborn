@@ -98,13 +98,19 @@ static func uv_em(a: Dictionary, tt: float) -> Vector2:
 	var ks: Array = a.get("chaves", [])
 	if ks.is_empty():
 		return Vector2.ZERO
-	var ordem: Array = range(ks.size())
-	if a.get("ping_pong", false) and ks.size() > 2:
-		for i in range(ks.size() - 2, 0, -1):
-			ordem.append(i)
-	var total := 0.0
-	for i in ordem:
-		total += maxf(float(ks[i][0]), 0.001)
+	# CPU: a ordem dos quadros e a duração total montadas uma vez por animação
+	if not a.has("_ordem"):
+		var ord: Array = range(ks.size())
+		if a.get("ping_pong", false) and ks.size() > 2:
+			for i in range(ks.size() - 2, 0, -1):
+				ord.append(i)
+		var tot := 0.0
+		for i in ord:
+			tot += maxf(float(ks[i][0]), 0.001)
+		a["_ordem"] = ord
+		a["_total"] = tot
+	var ordem: Array = a["_ordem"]
+	var total: float = a["_total"]
 	var x := fmod(tt, total)
 	for i in ordem:
 		x -= maxf(float(ks[i][0]), 0.001)
@@ -118,8 +124,16 @@ func _process(dt: float) -> void:
 	_atualiza()
 
 
+var _uv_ult := {}                # chave -> último uv_off mandado pro shader
+
+
 func _atualiza() -> void:
 	for chave in mats:
 		var m: ShaderMaterial = mats[chave]
 		var nome: String = m.get_meta("anim", "")
-		m.set_shader_parameter("uv_off", uv_em(anims[nome], t) if anims.has(nome) else Vector2.ZERO)
+		var uv: Vector2 = uv_em(anims[nome], t) if anims.has(nome) else Vector2.ZERO
+		# CPU: o quadro da animação muda poucas vezes por segundo: só regrava
+		# o shader quando troca
+		if _uv_ult.get(chave) != uv:
+			m.set_shader_parameter("uv_off", uv)
+			_uv_ult[chave] = uv
