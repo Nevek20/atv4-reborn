@@ -620,6 +620,8 @@ func _troca_cpp() -> void:
 	for c in carros:
 		if is_instance_valid(c) and c.has_method("liga_cpp"):
 			c.liga_cpp()
+	if corrida and corrida.ia:
+		corrida.ia.liga_cpp()
 
 
 ## linha do C++ no F2

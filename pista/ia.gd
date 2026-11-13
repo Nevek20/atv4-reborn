@@ -100,6 +100,7 @@ func montar(c) -> bool:
 	for i in linha.size():
 		acc.append(comp)
 		comp += _plano(linha[(i + 1) % linha.size()] - linha[i]).length()
+	liga_cpp()
 	s_linha = _projetar(c._cp_pos)[0]
 	for i in ls.size():
 		centro_lat.append(_lateral(c.mundo(ls[i].centro), acc[i]))
@@ -113,6 +114,19 @@ func montar(c) -> bool:
 	var ev: Dictionary = dados.eventos.get("RALLYCROSS", {})
 	catchup = dados.catchup.get(ev.get("NORMAL", "STDH_04"), {})
 	return true
+
+
+## contas da linha em C++ (fisica_cpp/src/linha_ia.cpp, as mesmas): null =
+## GDScript. Segue o carro_base.usar_cpp (F3)
+var _cpp: RefCounted = null
+
+
+func liga_cpp() -> void:
+	_cpp = null
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("LinhaIA") and not linha.is_empty():
+		_cpp = ClassDB.instantiate("LinhaIA")
+		if not _cpp.configurar(linha, acc, comp):
+			_cpp = null
 
 
 static func _plano(v: Vector3) -> Vector3:
@@ -137,6 +151,8 @@ func _projetar(p: Vector3) -> Array:
 
 ## ponto da linha a s metros (s em qualquer volta)
 func ponto(s: float) -> Vector3:
+	if _cpp:
+		return _cpp.ponto(s)
 	s = fposmod(s, comp)
 	var i := _seg(s)
 	var a: Vector3 = linha[i]
@@ -153,6 +169,8 @@ func velocidade(s: float) -> float:
 
 
 func _seg(s: float) -> int:
+	if _cpp:
+		return _cpp.seg(s)
 	var lo := 0
 	var hi := acc.size() - 1
 	while lo < hi:
@@ -174,6 +192,11 @@ func novo_rastreio(p: Vector3) -> Dictionary:
 
 
 func rastrear(r: Dictionary, p: Vector3) -> void:
+	if _cpp:
+		var res: PackedFloat64Array = _cpp.rastrear(r.prog, s_linha, p)
+		r.prog = res[0]
+		r.dist = res[1]
+		return
 	# procura perto do s atual (±60 m), sem pular de trecho: projeta nos
 	# trechos da linha que caem na janela (até nov/2026 testava 121 pontos de
 	# 1 em 1 m: 2.4 ms por passo com 8 carros, tests/medir_cpu.gd)
@@ -347,6 +370,7 @@ func _physics_process(dt: float) -> void:
 	var est: int = corrida.estado
 	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
 		repor_jogador()
+	_carros_laco = _monta_carros()
 	for x in rivais:
 		var car = x.car
 		# LOD/sombra depois que o carro montou tudo (rodas, piloto, motor vêm depois)
@@ -371,16 +395,20 @@ func _physics_process(dt: float) -> void:
 			_repor(x)
 			continue
 		_dirigir(x, car, dt)
+	_carros_laco = null
 
 
 func _direcao(x: Dictionary, car) -> float:
 	var v: float = car.linear_velocity.length()
 	var s: float = x.r.prog + s_linha + maxf(OLHA_MIN, v * OLHA_T)
-	var alvo := ponto(s)
-	var adiante := _plano(ponto(s + 2.0) - alvo).normalized()
-	alvo += Vector3(adiante.z, 0.0, -adiante.x) * x.get("lat", 0.0)
-	var loc: Vector3 = car.global_transform.affine_inverse() * alvo
-	x.ang = atan2(loc.x, loc.z)
+	if _cpp:
+		x.ang = _cpp.direcao_ang(s, x.get("lat", 0.0), car.global_transform)
+	else:
+		var alvo := ponto(s)
+		var adiante := _plano(ponto(s + 2.0) - alvo).normalized()
+		alvo += Vector3(adiante.z, 0.0, -adiante.x) * x.get("lat", 0.0)
+		var loc: Vector3 = car.global_transform.affine_inverse() * alvo
+		x.ang = atan2(loc.x, loc.z)
 	return roundf(clampf(x.ang * GANHO_VIRA, -1.0, 1.0) * 7.0) / 7.0   # sétimos (RAM)
 
 
@@ -471,6 +499,8 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 ## velocidade máxima pelas curvas à frente: raio = 30 m / (quanto a linha
 ## vira em 30 m), v = sqrt(A_LAT x raio), mais o que dá pra frear até lá
 func _v_curva(s: float) -> float:
+	if _cpp:
+		return _cpp.v_curva(s)
 	var v_max := INF
 	var d := 5.0
 	while d <= 65.0:
@@ -499,20 +529,23 @@ func _desviar(x: Dictionary, car, dt: float, alvo: float) -> float:
 	var lat_alvo := base
 	var v_lim := INF
 	var perto := INF
-	for o in [main.car] + rivais.map(func(y): return y.car):
-		if o == car or not is_instance_valid(o):
+	var lista: Array = _carros_laco if _carros_laco != null else _monta_carros()
+	for e: Array in lista:
+		var o = e[0]
+		if o == car:
 			continue
-		var rel: Vector3 = o.global_position - p
+		var o_pos: Vector3 = e[1]
+		var rel: Vector3 = o_pos - p
 		var frente: float = rel.dot(b.z)
 		var lado: float = rel.dot(b.x)
-		var dele: float = o.linear_velocity.dot(b.z)
+		var dele: float = (e[2] as Vector3).dot(b.z)
 		if frente <= 0.0 or frente > OLHA_CARRO or absf(lado) > LADO or dele > minha - 0.5:
 			continue
 		if frente >= perto:
 			continue
 		perto = frente
 		# o lado do outro em relação à linha; passa pelo lado com mais espaço
-		var o_lat := _lateral(o.global_position, s + frente)
+		var o_lat := _lateral(o_pos, s + frente)
 		var por_dentro := o_lat - LADO
 		var por_fora := o_lat + LADO
 		var cabe_dentro := por_dentro >= lo
@@ -529,8 +562,23 @@ func _desviar(x: Dictionary, car, dt: float, alvo: float) -> float:
 	return minf(alvo, v_lim)
 
 
+## CPU: [carro, posição, velocidade] dos carros válidos, na ordem de sempre
+## (jogador e rivais). No laço dos rivais (_physics_process) a lista vale o
+## laço todo: lá ninguém anda (só o _repor teleporta, e ele refaz a lista);
+## fora dele (testes chamando _dirigir) é feita na hora
+var _carros_laco = null
+func _monta_carros() -> Array:
+	var out: Array = []
+	for o in [main.car] + rivais.map(func(y): return y.car):
+		if is_instance_valid(o):
+			out.append([o, o.global_position, o.linear_velocity])
+	return out
+
+
 ## distância com sinal da linha (+ = pro mesmo lado do desvio em _direcao)
 func _lateral(p: Vector3, s: float) -> float:
+	if _cpp:
+		return _cpp.lateral(p, s)
 	var q := ponto(s)
 	var adiante := _plano(ponto(s + 2.0) - q).normalized()
 	return _plano(p - q).dot(Vector3(adiante.z, 0.0, -adiante.x))
@@ -588,6 +636,8 @@ func repor_em(car: Node3D, s: float) -> void:
 	var p := ponto(escolhido)
 	var d := _plano(ponto(escolhido + 3.0) - p)
 	car.reset_to(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.0, p.z), atan2(d.x, d.z))
+	if _carros_laco != null:
+		_carros_laco = _monta_carros()      # alguém foi teleportado
 
 
 ## colocação: quem chegou (pelo tempo) e depois pela distância de corrida

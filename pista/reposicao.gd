@@ -50,9 +50,20 @@ var fora := 0.0                 # m além da borda (diagnóstico e testes)
 var repostos := 0
 
 
+# CPU: os limites do <Logic> lidos uma vez (antes: 4 buscas por carro e passo)
+var _cheat_stray := 8.0
+var _backward := 100.0
+var _cheat_prog := 30.0
+var _warn_stray := 4.0
+
+
 func _init(ia_, prog: float) -> void:
 	ia = ia_
 	logic = ia.corrida.dados.get("logic", {})
+	_cheat_stray = logic.get("mCheatingStray", 8.0)
+	_backward = logic.get("mBackwardLimit", 100.0)
+	_cheat_prog = logic.get("mCheatingProgress", 30.0)
+	_warn_stray = logic.get("mWarningStray", 4.0)
 	recomecar(prog)
 
 
@@ -83,12 +94,12 @@ func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
 	var dir_: float = lerpf(ia.dir[i], ia.dir[(i + 1) % n], t)
 	fora = esq - lat if lat < esq else (lat - dir_ if lat > dir_ else 0.0)
 	# trapaça e progresso aceito
-	var trapaca: bool = fora > logic.get("mCheatingStray", 8.0)
+	var trapaca: bool = fora > _cheat_stray
 	var delta: float = r.prog - aceito
 	if not pulo:
-		if delta < -logic.get("mBackwardLimit", 100.0):
+		if delta < -_backward:
 			trapaca = true
-		if delta > logic.get("mCheatingProgress", 30.0):
+		if delta > _cheat_prog:
 			trapaca = true
 	if delta > 0.0 and (pulo or not trapaca):
 		aceito = r.prog
@@ -97,7 +108,7 @@ func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
 	var v := Vector3(car.linear_velocity.x, 0.0, car.linear_velocity.z)
 	if v.length() > 1e-3 and d.dot(v.normalized()) < -0.5:
 		_pedir(1)
-	elif trapaca or fora > logic.get("mWarningStray", 4.0):
+	elif trapaca or fora > _warn_stray:
 		_pedir(2)
 	else:
 		tipo = 0

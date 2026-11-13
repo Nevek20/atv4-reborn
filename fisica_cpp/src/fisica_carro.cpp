@@ -13,6 +13,7 @@ void FisicaCarro::_bind_methods() {
 	ClassDB::bind_static_method("FisicaCarro", D_METHOD("curva_integrate", "c", "x"), &FisicaCarro::curva_integrate);
 	ClassDB::bind_static_method("FisicaCarro", D_METHOD("trio", "t", "mu"), &FisicaCarro::trio);
 	ClassDB::bind_static_method("FisicaCarro", D_METHOD("fcurvas", "c", "mu", "x"), &FisicaCarro::fcurvas);
+	ClassDB::bind_static_method("FisicaCarro", D_METHOD("contatos_esferas", "xa", "ca", "ra", "xb", "cb", "rb"), &FisicaCarro::contatos_esferas);
 	ClassDB::bind_method(D_METHOD("configurar", "car"), &FisicaCarro::configurar);
 	ClassDB::bind_method(D_METHOD("drivetrain", "dt", "v_f", "driven_on_ground", "forced_open"), &FisicaCarro::drivetrain);
 	ClassDB::bind_method(D_METHOD("razao_patinada", "v_f"), &FisicaCarro::razao_patinada);
@@ -25,7 +26,7 @@ void FisicaCarro::_bind_methods() {
 }
 
 String FisicaCarro::versao() {
-	return "atv4_fisica 0.6";
+	return "atv4_fisica 0.7";
 }
 
 double FisicaCarro::curva_sample(const Dictionary &c, double x) {

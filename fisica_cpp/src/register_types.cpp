@@ -9,6 +9,7 @@
 #include "piloto.h"
 #include "suspensao.h"
 #include "som.h"
+#include "linha_ia.h"
 
 using namespace godot;
 
@@ -21,6 +22,7 @@ void initialize_atv4_fisica(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(SuspensaoCpp);
 	GDREGISTER_CLASS(SomPneuCpp);
 	GDREGISTER_CLASS(MotorSomCpp);
+	GDREGISTER_CLASS(LinhaIA);
 }
 
 void uninitialize_atv4_fisica(ModuleInitializationLevel p_level) {

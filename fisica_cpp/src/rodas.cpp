@@ -235,3 +235,44 @@ void FisicaCarro::esferas(PhysicsDirectSpaceState3D *space, Vector3 up) {
 		}
 	}
 }
+
+// batida_carros.gd _par: contatos das esferas de A com as de B, na mesma
+// ordem do GDScript ([ponto, normal de B pra A, penetração]); a ordenação e o
+// resto continuam no GDScript
+Array FisicaCarro::contatos_esferas(Transform3D xa, PackedVector3Array ca, PackedFloat64Array ra,
+		Transform3D xb, PackedVector3Array cb, PackedFloat64Array rb) {
+	const double NORMAL_DE_CIMA = 0.7;   // batida_carros.gd
+	Array cs;
+	int64_t nb = cb.size();
+	std::vector<Vector3> pbs((size_t)nb);
+	for (int64_t j = 0; j < nb; j++) {
+		pbs[j] = xb.xform(cb[j]);
+	}
+	for (int64_t i = 0; i < ca.size(); i++) {
+		Vector3 pa = xa.xform(ca[i]);
+		double r_a = ra[i];
+		for (int64_t j = 0; j < nb; j++) {
+			const Vector3 &pb = pbs[j];
+			Vector3 d = pa - pb;
+			double dist = d.length();
+			double pen = r_a + rb[j] - dist;
+			if (pen <= 0.0 || dist < 1e-5) {
+				continue;
+			}
+			Vector3 n = d / (real_t)dist;
+			Vector3 pc = pb + n * (real_t)(rb[j] - pen * 0.5);
+			if (absd(n.y) < NORMAL_DE_CIMA) {
+				Vector3 h(n.x, 0.0f, n.z);
+				if ((double)h.length_squared() > 1e-6) {
+					n = h.normalized();
+				}
+			}
+			Array c;
+			c.push_back(pc);
+			c.push_back(n);
+			c.push_back(pen);
+			cs.push_back(c);
+		}
+	}
+	return cs;
+}

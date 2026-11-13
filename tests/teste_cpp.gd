@@ -9,6 +9,10 @@ extends SceneTree
 ##    compilação), numa grade de direção e tremida.
 ##  - tremida das rodas e vibração (efeitos.cpp): mesmo estado e mesma semente
 ##    nos dois, tudo igual com == (a vibração usa o sorteio global do Godot).
+##  - linha da IA (linha_ia.cpp): ponto, segmento, curva à frente, lateral,
+##    direção e rastreio iguais ao GDScript com == numa grade da volta toda.
+##  - contatos das esferas carro com carro (rodas.cpp contatos_esferas): a
+##    mesma lista, na mesma ordem, do batida_carros._contatos_gd (byte a byte).
 ##  - suspensão visual (suspensao.cpp): todas as peças e pivôs das rodas
 ##    iguais até TOL_POSE, com cursos e esterço variados (Mosquito: barras;
 ##    Storm: rally; Hammerhead: telescópio; Fireball: balança deslocada).
@@ -239,6 +243,61 @@ func _tremida(car) -> void:
 	_poe_tremida(car, orig)
 
 
+func _linha_ia() -> void:
+	var ia = main.corrida.ia if main.corrida else null
+	if ia == null or ia._cpp == null:
+		_falha("linha da IA sem C++")
+		return
+	var cpp = ia._cpp
+	var xf: Transform3D = main.car.global_transform
+	var n0 := contas
+	var s: float = -ia.comp - 3.3
+	while s < 2.0 * ia.comp + 5.0:
+		var p: Vector3 = ia.ponto(s) + Vector3(2.7, 0.4, -1.9)
+		ia._cpp = null
+		var g := [ia._seg(fposmod(s, ia.comp)), ia.ponto(s), ia._v_curva(s), ia._lateral(p, s)]
+		ia.ponto(s)
+		var xg := {"lat": 1.3, "r": {"prog": s - ia.s_linha}}
+		ia._direcao(xg, main.car)
+		var rg := {"prog": s - ia.s_linha + 7.5, "dist": 0.0}
+		ia.rastrear(rg, p)
+		ia._cpp = cpp
+		var c := [ia._seg(fposmod(s, ia.comp)), ia.ponto(s), ia._v_curva(s), ia._lateral(p, s)]
+		var xc := {"lat": 1.3, "r": {"prog": s - ia.s_linha}}
+		ia._direcao(xc, main.car)
+		var rc := {"prog": s - ia.s_linha + 7.5, "dist": 0.0}
+		ia.rastrear(rc, p)
+		contas += 1
+		if var_to_bytes(g) != var_to_bytes(c) or xg.ang != xc.ang or rg.prog != rc.prog or rg.dist != rc.dist:
+			_falha("linha da IA em s=%s:\n GD  %s %s %s\n C++ %s %s %s" % [s, g, xg.ang, rg, c, xc.ang, rc])
+		s += 3.71
+	print("  linha da IA: %d pontos conferidos" % (contas - n0))
+	var _x = xf
+
+
+func _contatos() -> void:
+	var bt = main.corrida.ia.batidas if main.corrida and main.corrida.ia else null
+	if bt == null:
+		_falha("sem batida_carros")
+		return
+	var car = main.car
+	bt.esferas(car)
+	var v: Array = bt._vetores[car]
+	var xa: Transform3D = car.global_transform
+	var n_cont := 0
+	for k in 60:
+		var giro := Basis(Vector3(0.3, 1.0, 0.2).normalized(), k * 0.37)
+		var desl := Vector3(sin(k * 1.3) * 2.2, cos(k * 0.7) * 0.6, cos(k * 1.1) * 3.1)
+		var xb := Transform3D(giro * xa.basis, xa.origin + desl)
+		var g: Array = bt._contatos_gd(car, car, xa, xb)
+		var c: Array = ClassDB.class_call_static("FisicaCarro", "contatos_esferas", xa, v[0], v[1], xb, v[0], v[1])
+		contas += 1
+		n_cont += g.size()
+		if var_to_bytes(g) != var_to_bytes(c):
+			_falha("contatos das esferas caso %d: GD %d contatos, C++ %d" % [k, g.size(), c.size()])
+	print("  contatos das esferas: 60 casos, %d contatos conferidos" % n_cont)
+
+
 func _physics_process(_dt: float) -> bool:
 	q += 1
 	if main.car == null:
@@ -264,6 +323,8 @@ func _physics_process(_dt: float) -> bool:
 		k += 1
 		espera = 3
 		return false
+	_linha_ia()
+	_contatos()
 	# F3: desliga e religa tudo na hora
 	var Base := preload("res://carro/carro_base.gd")
 	main._troca_cpp()

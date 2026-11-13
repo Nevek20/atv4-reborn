@@ -39,6 +39,8 @@ const PERTO := 9.0                # m entre as origens pra testar o par
 var carros: Callable              # () -> Array dos carros (jogador + rivais)
 var _esferas := {}                # carro -> [[centro no corpo, raio], ...]
 var contatos := 0                 # testes: contatos resolvidos desde o começo
+var _vetores := {}                # carro -> [centros, raios, raio que envolve] (esferas())
+var _cpp := false                 # contatos das esferas em C++ (segue o carro_base.usar_cpp, F3)
 
 
 ## as esferas do VehicleVehicle.hsc do carro, no frame do corpo
@@ -53,6 +55,16 @@ func esferas(car) -> Array:
 			for e in info.get("esferas_carro", info.get("esferas", [])):
 				out.append([car.corpo(Vector3(e[0], e[1], e[2])), float(e[3])])
 	_esferas[car] = out
+	# CPU: as mesmas esferas em vetores (pro C++) e o raio que envolve todas
+	# (|centro| + raio): dois carros mais longe que a soma não se tocam
+	var cs := PackedVector3Array()
+	var rs := PackedFloat64Array()
+	var envolve := 0.0
+	for e in out:
+		cs.append(e[0])
+		rs.append(e[1])
+		envolve = maxf(envolve, (e[0] as Vector3).length() + float(e[1]))
+	_vetores[car] = [cs, rs, envolve]
 	return out
 
 
@@ -73,40 +85,42 @@ func _physics_process(dt: float) -> void:
 	if not carros.is_valid():
 		return
 	var lista: Array = carros.call().filter(func(c): return c != null and is_instance_valid(c))
+	_cpp = preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("FisicaCarro")
+	# CPU: posição de cada carro lida uma vez (o _par que separa dois carros
+	# mexe na posição deles: aí relê) e o raio que envolve as esferas
+	var pos: Array[Vector3] = []
+	var env: Array[float] = []
+	for c in lista:
+		pos.append(c.global_position)
+		esferas(c)
+		env.append(_vetores[c][2])
 	for i in lista.size():
 		for j in range(i + 1, lista.size()):
-			_par(lista[i], lista[j], dt)
+			var d := pos[i].distance_to(pos[j])
+			if d > PERTO or d > env[i] + env[j] + 0.01:
+				continue            # longe: nenhuma esfera de um toca a do outro
+			if _par(lista[i], lista[j], dt):
+				pos[i] = lista[i].global_position
+				pos[j] = lista[j].global_position
 
 
-func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
+## true = mexeu na posição dos dois (separou)
+func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> bool:
 	if a.global_position.distance_to(b.global_position) > PERTO:
-		return
+		return false
 	var xa := a.global_transform
 	var xb := b.global_transform
 	var cs: Array = []
-	for ea in esferas(a):
-		var pa: Vector3 = xa * (ea[0] as Vector3)
-		for eb in esferas(b):
-			var pb: Vector3 = xb * (eb[0] as Vector3)
-			var d := pa - pb
-			var dist := d.length()
-			var pen: float = ea[1] + eb[1] - dist
-			if pen <= 0.0 or dist < 1e-5:
-				continue
-			var n := d / dist                      # de B pra A
-			var pc := pb + n * (float(eb[1]) - pen * 0.5)
-			# NOSSO: contato de lado empurra só na horizontal (a normal de
-			# esferas em alturas diferentes é inclinada e o nosso resolvedor
-			# fazia um carro subir no outro lado a lado, a cada passo um
-			# pouco; o resolvedor do jogo não foi portado). De cima (|n.y| >=
-			# NORMAL_DE_CIMA, cair em cima do outro) fica como está.
-			if absf(n.y) < NORMAL_DE_CIMA:
-				var h := Vector3(n.x, 0.0, n.z)
-				if h.length_squared() > 1e-6:
-					n = h.normalized()
-			cs.append([pc, n, pen])
+	if _cpp:
+		esferas(a)
+		esferas(b)
+		var va_: Array = _vetores[a]
+		var vb_: Array = _vetores[b]
+		cs = ClassDB.class_call_static("FisicaCarro", "contatos_esferas", xa, va_[0], va_[1], xb, vb_[0], vb_[1])
+	else:
+		cs = _contatos_gd(a, b, xa, xb)
 	if cs.is_empty():
-		return
+		return false
 	cs.sort_custom(func(x, y): return x[2] > y[2])
 	cs.resize(mini(cs.size(), MAX_CONTATOS))
 	var e: float = 0.5 * (_mat(a).bounce + _mat(b).bounce)
@@ -179,6 +193,7 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 	# penetração: separa mexendo a posição (o contato mais fundo), pela massa
 	var fundo: Array = cs[0]
 	var corr := minf(EMPURRA * maxf(float(fundo[2]) - FOLGA, 0.0), EMPURRA_MAX)
+	var mexeu := corr > 0.0
 	if corr > 0.0:
 		var nn: Vector3 = fundo[1]
 		var soma := ma_inv + mb_inv
@@ -192,7 +207,7 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 		a.global_position += da
 		b.global_position += db
 	if forte <= 0.0:
-		return
+		return mexeu
 	var pf: Vector3 = forte_c[0]
 	var nf: Vector3 = forte_c[1]
 	for par in [[a, pf - ca], [b, pf - cb]]:
@@ -204,6 +219,34 @@ func _par(a: RigidBody3D, b: RigidBody3D, dt: float) -> void:
 		_lascas(a, pf, nf, va - vb)
 	else:
 		_lascas(b, pf, -nf, vb - va)
+	return mexeu
+
+
+## contatos das esferas de A com as de B (o mesmo do contatos_esferas em C++)
+func _contatos_gd(a: RigidBody3D, b: RigidBody3D, xa: Transform3D, xb: Transform3D) -> Array:
+	var cs: Array = []
+	for ea in esferas(a):
+		var pa: Vector3 = xa * (ea[0] as Vector3)
+		for eb in esferas(b):
+			var pb: Vector3 = xb * (eb[0] as Vector3)
+			var d := pa - pb
+			var dist := d.length()
+			var pen: float = ea[1] + eb[1] - dist
+			if pen <= 0.0 or dist < 1e-5:
+				continue
+			var n := d / dist                      # de B pra A
+			var pc := pb + n * (float(eb[1]) - pen * 0.5)
+			# NOSSO: contato de lado empurra só na horizontal (a normal de
+			# esferas em alturas diferentes é inclinada e o nosso resolvedor
+			# fazia um carro subir no outro lado a lado, a cada passo um
+			# pouco; o resolvedor do jogo não foi portado). De cima (|n.y| >=
+			# NORMAL_DE_CIMA, cair em cima do outro) fica como está.
+			if absf(n.y) < NORMAL_DE_CIMA:
+				var h := Vector3(n.x, 0.0, n.z)
+				if h.length_squared() > 1e-6:
+					n = h.normalized()
+			cs.append([pc, n, pen])
+	return cs
 
 
 static func _vrel(a: RigidBody3D, b: RigidBody3D, p: Vector3, ca: Vector3, cb: Vector3) -> Vector3:
