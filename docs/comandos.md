@@ -189,4 +189,5 @@ scons platform=windows target=template_release     :: Windows, jogo exportado
 A 1ª compilação leva uns 3 min por alvo (o godot-cpp); depois só o que mudou.
 Paridade do que já foi portado (motor, câmbio, pneus, rodas e molas): `set ATV4_CPP=0` volta pro
 GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
-no fim, e com 0 e 1 tem que sair igual (e o rodar_testes idêntico).
+no fim (e a soma do som), e com 0 e 1 tem que sair igual (e o rodar_testes
+idêntico). Visual, tremida e som do piloto/suspensão: tests/teste_cpp.gd.

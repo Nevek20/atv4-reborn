@@ -8,6 +8,7 @@
 #include "fisica_carro.h"
 #include "piloto.h"
 #include "suspensao.h"
+#include "som.h"
 
 using namespace godot;
 
@@ -18,6 +19,8 @@ void initialize_atv4_fisica(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(FisicaCarro);
 	GDREGISTER_CLASS(PilotoCpp);
 	GDREGISTER_CLASS(SuspensaoCpp);
+	GDREGISTER_CLASS(SomPneuCpp);
+	GDREGISTER_CLASS(MotorSomCpp);
 }
 
 void uninitialize_atv4_fisica(ModuleInitializationLevel p_level) {

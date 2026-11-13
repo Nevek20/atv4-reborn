@@ -45,6 +45,7 @@ var pasta := ""
 var _carga := 0.0
 var _rpm := -1.0               # rpm do jogo filtrado
 var r_real := 0.0              # conferência: rpm real tocando agora
+var _cpp: RefCounted = null    # atualizar em C++ (fisica_cpp/src/som.cpp, a mesma conta)
 
 
 ## pasta dos loops do carro pelo id do vehicles.xml: som/loops/NN_* nos
@@ -113,6 +114,10 @@ func carregar(dir: String) -> bool:
 	var alvo_le := maxf(K_RPM * (float(o0.nivel_cru_db) - ref) + K_OFF * (float(le.nivel_cru_db) - float(o0.nivel_cru_db)), PISO_DB)
 	_off.append(_tocador("lenta.wav", le, alvo_le, arq_ref))
 	_off.sort_custom(func(a, b): return a.rpm < b.rpm)
+	if ClassDB.class_exists("MotorSomCpp") and OS.get_environment("ATV4_CPP") != "0":
+		_cpp = ClassDB.instantiate("MotorSomCpp")
+		if not _cpp.configurar(self):
+			_cpp = null
 	return true
 
 
@@ -148,6 +153,8 @@ static func _carregar_wav(caminho: String) -> AudioStream:
 
 ## rpm do jogo e carga (0..1) do motor a cada quadro
 func atualizar(rpm_jogo: float, carga: float, dt: float) -> void:
+	if _cpp and _cpp.atualizar(rpm_jogo, carga, dt):
+		return
 	_carga += (clampf(carga, 0.0, 1.0) - _carga) * (1.0 - exp(-dt / SUAVE))
 	if _rpm < 0.0:
 		_rpm = rpm_jogo

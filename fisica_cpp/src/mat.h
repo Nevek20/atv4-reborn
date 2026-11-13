@@ -17,6 +17,16 @@ const double GIRO_LIVRE = PI_;
 const double TRAVA_MPH = 2.0;
 const double TRAVA_INI = -0.25;
 const double TRAVA_FIM = -1.0;
+// tremida e vibração (carro_base.gd)
+const double JIT_K = 0.06392613;
+const double SUSP_ESCALA = 3.4375;
+const double SUSP_PEQUENA = 0.4945;
+const double SUSP_GRANDE = 0.6563;
+const double SUSP_VEL = 8.938889;
+const double PANCADA_SOLTA = 0.15;
+const double TREME_TERRA = 60.0;
+const double TREME_GRAUS = 2.5;
+const double TREME_PANCADA_GRAUS = 6.0;
 
 inline double absd(double x) { return x < 0.0 ? -x : x; }
 inline double maxd(double a, double b) { return a > b ? a : b; }

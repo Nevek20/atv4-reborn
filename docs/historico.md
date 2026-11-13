@@ -1519,6 +1519,22 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   a pose do esqueleto (_globais_agora), não o _lp/_lr. Medido (por carro):
   piloto 0.063 -> 0.013 ms, suspensão 0.044 -> 0.016, esferas 0.049 ->
   0.041 (o resto é a consulta de forma do Godot).
+  Parte 5 (nov/2026), som e efeitos: som dos pneus (som.cpp SomPneuCpp: o
+  laço das rodas do sfx_carro.passo, 0.060 dos 0.076 ms; os números do
+  sound_database.xml lidos uma vez), som do motor (MotorSomCpp: atualizar e
+  _camada dos loops), tremida das rodas + vibração (efeitos.cpp tremida:
+  _wheel_jitter e _vibracao, o sorteio global do Godot na mesma ordem).
+  Conferido: bench_corrida soma volume e tom das rodas de som e dos loops do
+  motor em todo passo, igual com 0 e 1; a tremida não dá pra comparar pela
+  corrida (o randf global é disputado fora de ordem, muda até entre 2
+  rodadas de GDScript), então o teste_cpp põe o mesmo estado e a mesma
+  semente nos dois e compara byte a byte (210 casos; semente diferente só no
+  C++ dá FALHA, conferido). Fumaça: só regrava amount_ratio e o material
+  quando muda (custo é do motor, ficou igual). Medido (por carro): som pneu
+  0.080 -> 0.033 ms, som motor 0.034 -> 0.021, tremida 0.016 -> 0.011;
+  car.gd inteiro 0.69 -> 0.38 ms por carro com tudo em C++. Poeira (0.019)
+  e pedras (0.014) ficaram: o que sobra é guardar as nuvens nos arrays do
+  GDScript; portar exige levar as partículas inteiras pro C++.
 - LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
   a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
   agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).

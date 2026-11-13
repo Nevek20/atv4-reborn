@@ -979,8 +979,11 @@ func _physics_process(dt: float) -> void:
 	jit_acc += dt
 	while jit_acc >= 1.0 / JIT_HZ:
 		jit_acc -= 1.0 / JIT_HZ
-		_wheel_jitter()
-		_vibracao(1.0 / JIT_HZ, v.dot(left), v_f)
+		if cpp:
+			cpp.tremida(1.0 / JIT_HZ, v.dot(left), v_f)
+		else:
+			_wheel_jitter()
+			_vibracao(1.0 / JIT_HZ, v.dot(left), v_f)
 		if perf_on: _t = _pf("ef: tremida e vibração", _t)
 		_sujeira_passo()
 		_roda_suja_passo(1.0 / JIT_HZ)

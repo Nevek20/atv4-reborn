@@ -21,10 +21,11 @@ void FisicaCarro::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("arrasto", "spd", "dt"), &FisicaCarro::arrasto);
 	ClassDB::bind_method(D_METHOD("rodas", "dt", "space", "up"), &FisicaCarro::rodas);
 	ClassDB::bind_method(D_METHOD("esferas", "space", "up"), &FisicaCarro::esferas);
+	ClassDB::bind_method(D_METHOD("tremida", "dt", "v_l", "v_f"), &FisicaCarro::tremida);
 }
 
 String FisicaCarro::versao() {
-	return "atv4_fisica 0.5";
+	return "atv4_fisica 0.6";
 }
 
 double FisicaCarro::curva_sample(const Dictionary &c, double x) {

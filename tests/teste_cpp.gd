@@ -7,6 +7,8 @@ extends SceneTree
 ##  - pose do piloto (piloto.cpp): ossos iguais ao GDScript até TOL_POSE
 ##    (só desenho; o Godot do C++ é o godot-cpp, conta igual mas outra
 ##    compilação), numa grade de direção e tremida.
+##  - tremida das rodas e vibração (efeitos.cpp): mesmo estado e mesma semente
+##    nos dois, tudo igual com == (a vibração usa o sorteio global do Godot).
 ##  - suspensão visual (suspensao.cpp): todas as peças e pivôs das rodas
 ##    iguais até TOL_POSE, com cursos e esterço variados (Mosquito: barras;
 ##    Storm: rally; Hammerhead: telescópio; Fireball: balança deslocada).
@@ -168,6 +170,75 @@ func _suspensao(car) -> void:
 		car.wheels[i].jit = guarda[i][1]
 
 
+const TREMIDA_VARS := ["jit_seed", "jitter_chao", "vibracao", "pouso", "ar_som", "susp_taxa", "pancada",
+	"_treme_alvo", "spd_ground", "grounded"]
+
+
+func _foto_tremida(car) -> Array:
+	var out := []
+	for k in TREMIDA_VARS:
+		out.append(car.get(k))
+	out.append((car._susp_ant as Array).duplicate())
+	out.append((car._susp_acima as Array).duplicate())
+	for w in car.wheels:
+		out.append([w.jit, w.hit, w.sr, w.omega, w.x, w.mat])
+	return out
+
+
+func _poe_tremida(car, f: Array) -> void:
+	for i in TREMIDA_VARS.size():
+		car.set(TREMIDA_VARS[i], f[i])
+	car._susp_ant = (f[TREMIDA_VARS.size()] as Array).duplicate()
+	car._susp_acima = (f[TREMIDA_VARS.size() + 1] as Array).duplicate()
+	for i in car.wheels.size():
+		var w: Dictionary = car.wheels[i]
+		var r: Array = f[TREMIDA_VARS.size() + 2 + i]
+		w.jit = r[0]
+		w.hit = r[1]
+		w.sr = r[2]
+		w.omega = r[3]
+		w.x = r[4]
+		w.mat = r[5]
+
+
+func _tremida(car) -> void:
+	if car.cpp == null:
+		return
+	var orig := _foto_tremida(car)
+	# casos: rodando no chão, travando, patinando, pousando, no ar
+	var casos := [[3, 0.2, 0.1, 0.0, 12.0], [3, -1.0, 0.0, 0.3, 4.0], [2, 0.5, 9.0, 0.0, 22.0],
+		[0, 0.0, 0.0, 0.5, 15.0], [4, -0.97, 2.0, 0.05, 30.0]]
+	for c in casos:
+		for passo in 6:
+			var base := _foto_tremida(car)
+			car.grounded = c[0]
+			car.spd_ground = c[4]
+			car.ar_som = c[3] if passo == 0 else car.ar_som
+			for i in car.wheels.size():
+				var w: Dictionary = car.wheels[i]
+				w.hit = i < c[0]
+				w.sr = c[1] * (1.0 + 0.1 * i)
+				w.omega = c[2] + i
+				w.x = 0.02 * passo - 0.01 * i
+				w.mat = i % 3
+			var ini := _foto_tremida(car)
+			var vl: float = 0.7 * passo - 1.0
+			var vf: float = c[4]
+			seed(1000 + passo)
+			car._wheel_jitter()
+			car._vibracao(1.0 / car.JIT_HZ, vl, vf)
+			var gd := _foto_tremida(car)
+			_poe_tremida(car, ini)
+			seed(1000 + passo)
+			car.cpp.tremida(1.0 / car.JIT_HZ, vl, vf)
+			var cc := _foto_tremida(car)
+			contas += 1
+			if var_to_bytes(gd) != var_to_bytes(cc):
+				_falha("%s tremida caso %s passo %d:\n GD  %s\n C++ %s" % [car.vehicle_name, c, passo, gd, cc])
+			_poe_tremida(car, gd)
+	_poe_tremida(car, orig)
+
+
 func _physics_process(_dt: float) -> bool:
 	q += 1
 	if main.car == null:
@@ -181,6 +252,7 @@ func _physics_process(_dt: float) -> bool:
 			_curvas(main.car.P)
 			_piloto(main.car)
 			_suspensao(main.car)
+			_tremida(main.car)
 			print("  %s: curvas conferidas" % main.car.vehicle_name)
 		return false
 	if k < carros.size():

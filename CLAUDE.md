@@ -68,7 +68,8 @@ data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmera
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
                      truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
 fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
-                     pneus.cpp, rodas.cpp, curvas.cpp; visual: piloto.cpp, suspensao.cpp), SConstruct
+                     pneus.cpp, rodas.cpp, curvas.cpp, efeitos.cpp; visual e som: piloto.cpp,
+                     suspensao.cpp, som.cpp), SConstruct
 bin/                 as bibliotecas compiladas (.dll Windows, .so Linux) + atv4_fisica.gdextension (vão no git)
 tests/               testes sem tela (rodar_tudo.py roda todos), prints e gravações
 tools/               scripts Python de extração (pingu2obj, pintura, savestate, efeitos, sons)
@@ -161,8 +162,10 @@ Física
   tem que dar os MESMOS números do GDScript (o _drivetrain/_tires/_rodas_gd
   ficam como reserva): mudou a conta num, muda no outro e confere com
   ATV4_CPP=0 x 1 (bench_corrida). O C++ guarda o P no _ready: mexeu no P
-  depois, car.p_mudou(). Visual em C++ também (piloto.cpp, suspensao.cpp):
-  mudou piloto.gd ou suspension_visual.gd, muda o .cpp (teste_cpp compara).
+  depois, car.p_mudou(). Visual e som em C++ também (piloto.cpp,
+  suspensao.cpp, som.cpp, efeitos.cpp): mudou piloto.gd, suspension_visual,
+  sfx_carro, motor_som ou a tremida/vibração, muda o .cpp (teste_cpp e
+  bench_corrida comparam).
 - apply_impulse do Godot só entra no passo seguinte (linear_velocity não
   muda na hora): resolvedor próprio conta com velocidades locais e grava no
   fim. Correção de posição nunca afunda corpo no chão (bomba de energia).

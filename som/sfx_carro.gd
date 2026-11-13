@@ -72,6 +72,7 @@ var spd := 0.0
 var side := 0.0
 var ws := 0.0
 var derrapa := 0.0              # 0..1 (SO_DERRAPANDO)
+var _cpp: RefCounted = null     # laço das rodas em C++ (fisica_cpp/src/som.cpp, a mesma conta)
 
 
 func carregar(c) -> bool:
@@ -138,6 +139,10 @@ func carregar(c) -> bool:
 	raspa.ganho = GANHO
 	raspa.ancora = _ancora()
 	add_child(raspa)
+	if ClassDB.class_exists("SomPneuCpp") and OS.get_environment("ATV4_CPP") != "0":
+		_cpp = ClassDB.instantiate("SomPneuCpp")
+		if not _cpp.configurar(self):
+			_cpp = null
 	return not patches.is_empty()
 
 
@@ -168,8 +173,9 @@ func passo(dt: float, v_l: float, v_f: float) -> void:
 	ws = minf(ws, 1.0)
 	var alvo := clampf(maxf(maxf(side * DERRAPA_SIDE, ws), 1.0 if trava else 0.0), 0.0, 1.0)
 	derrapa += (alvo - derrapa) * (1.0 - exp(-dt / (DERRAPA_SOBE if alvo > derrapa else DERRAPA_DESCE)))
-	for o in rodas:
-		_roda(o, dt, v)
+	if not (_cpp and _cpp.rodas_passo(dt, v, spd, side, ws, derrapa)):
+		for o in rodas:
+			_roda(o, dt, v)
 	_suspensao(dt, v_f)
 	_pouso()
 

@@ -17,6 +17,7 @@
 #include <godot_cpp/variant/string_name.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 
+#include <map>
 #include <vector>
 
 namespace godot {
@@ -101,6 +102,8 @@ private:
 	std::vector<RodaFixa> rf;
 	Ref<PhysicsRayQueryParameters3D> query;
 	Ref<PhysicsShapeQueryParameters3D> query_esfera;
+	std::map<int64_t, double> jitter_mat;   // WheelJitter por material do terreno
+
 	Params p;
 	std::vector<float> gears;
 	atv4::Curva drive_curve, fric_curve, steer_curve, ps_rate, ps_scale, rtc_th, rtc_max, rtc_cut;
@@ -137,6 +140,8 @@ public:
 	// rodas e molas (rodas.cpp)
 	Array rodas(double dt, PhysicsDirectSpaceState3D *space, Vector3 up);
 	void esferas(PhysicsDirectSpaceState3D *space, Vector3 up);
+	// tremida das rodas + vibração (efeitos.cpp)
+	void tremida(double dt, double v_l, double v_f);
 };
 
 } // namespace godot
