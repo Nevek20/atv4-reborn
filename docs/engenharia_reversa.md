@@ -1557,6 +1557,11 @@ de profundidade), sem luz e sem névoa. Não portado: SunHalo, rotationSpeed
   (composite = DIV255(fundo x (255 - m) + cor x m), alpha_composite de 7
   bits), igual à pintura.png pixel a pixel nos 24 carros
   (tests/teste_pintura_jogo.gd). C++: FisicaCarro.compor_pintura.
+  Logos: camadas/logos.json = lugares (chave, área, nº), folhas (nomes da
+  .bed na ordem), padrão (DefaultDecals casado com a .bed sem diferenciar
+  maiúscula/espaço) e peças na ordem do XML (número: png e canto; logo:
+  atlas da caixa com [x, y, largura, altura, canto x, canto y] por logo).
+  Rotação dos Sprite no jogo: 0..355 graus (não só 90 em 90).
 - Textura "white" gerada em tempo real pelas camadas do XML 150xx
   (Buggy_NN_Base/Primary/Secondary/Detail + cores + decalques + número).
   tools/gerar_pintura.py faz igual.

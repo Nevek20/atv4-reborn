@@ -158,11 +158,12 @@ def recorte(atlas, r):
     return atlas.crop((round(r[0] * w), round(r[1] * h), round(r[2] * w), round(r[3] * h)))
 
 
-def colar(img, peca, w, h, graus, centro):
-    """peça redimensionada pra w x h px, girada (anti-horário) e colada com o
-    centro em centro (px). Alfa pré-multiplicado pra borda não escurecer."""
+def colar_peca(peca, w, h, graus, centro):
+    """peça redimensionada pra w x h px, girada (anti-horário), com o centro
+    em centro (px): (imagem RGBA, canto) ou None. Alfa pré-multiplicado pra
+    borda não escurecer."""
     if w < 1 or h < 1:
-        return
+        return None
     pm = peca.convert("RGBa").resize((max(1, round(w)), max(1, round(h))), Image.LANCZOS)
     g = round(graus) % 360
     if g in (90, 180, 270):
@@ -170,7 +171,14 @@ def colar(img, peca, w, h, graus, centro):
     elif g:
         pm = pm.rotate(graus, Image.BICUBIC, expand=True)
     pm = pm.convert("RGBA")
-    img.alpha_composite(pm, (round(centro[0] - pm.width / 2), round(centro[1] - pm.height / 2)))
+    return pm, (round(centro[0] - pm.width / 2), round(centro[1] - pm.height / 2))
+
+
+def colar(img, peca, w, h, graus, centro):
+    r = colar_peca(peca, w, h, graus, centro)
+    if r:
+        img.alpha_composite(r[0], r[1])
+    return r
 
 
 def caixa_px(caixa, size):
@@ -180,6 +188,13 @@ def caixa_px(caixa, size):
 
 
 def texto(img, arq, caixa, lay, numero):
+    r = texto_peca(arq, caixa, lay, numero, img.size)
+    if r:
+        img.alpha_composite(r[0], r[1])
+    return r
+
+
+def texto_peca(arq, caixa, lay, numero, size):
     """camada Text (0x2fffd8): cada letra = o glifo do .bed da fonte (nome =
     código ASCII), proporção natural; Fit 1 "Vertical" = altura da caixa,
     2 "Horizontal" = largura, 3 "Both" = o menor; vezes Scale"""
@@ -201,7 +216,7 @@ def texto(img, arq, caixa, lay, numero):
     r, g, b, a = linha.split()
     tinta = [c.point(lambda v, m=m: v * m // 255) for c, m in zip((r, g, b, a), cor)]
     linha = Image.merge("RGBA", tinta)
-    centro, cw, ch = caixa_px(caixa, img.size)
+    centro, cw, ch = caixa_px(caixa, size)
     fit = lay.get("Fit", "No")
     e = 1.0
     if fit == "Vertical":
@@ -211,13 +226,20 @@ def texto(img, arq, caixa, lay, numero):
     elif fit == "Both":
         e = min(ch / linha.height, cw / linha.width)
     e *= float(lay.get("Scale", 1.0))
-    colar(img, linha, linha.width * e, linha.height * e, float(lay.get("Rotation", 0)), centro)
+    return colar_peca(linha, linha.width * e, linha.height * e, float(lay.get("Rotation", 0)), centro)
 
 
 def sprite(img, logo, caixa, lay):
+    r = sprite_peca(logo, caixa, lay, img.size)
+    if r:
+        img.alpha_composite(r[0], r[1])
+    return r
+
+
+def sprite_peca(logo, caixa, lay, size):
     """Sprite (0x2fedf8) com o logo: KeepAspect encaixa dentro da caixa sem
     girar (largura/altura da caixa x do logo), depois gira no centro"""
-    centro, w, h = caixa_px(caixa, img.size)
+    centro, w, h = caixa_px(caixa, size)
     if lay.get("KeepAspect", "0") not in ("0", ""):
         a_caixa = (w / h) / float(lay.get("Aspect", 1.0))
         a_logo = logo.width / logo.height
@@ -225,7 +247,7 @@ def sprite(img, logo, caixa, lay):
             h *= a_caixa / a_logo
         else:
             w *= a_logo / a_caixa
-    colar(img, logo, w, h, float(lay.get("Rotation", 0)), centro)
+    return colar_peca(logo, w, h, float(lay.get("Rotation", 0)), centro)
 
 
 def decalques(img, s, src, veh, numero, log=print):
@@ -268,6 +290,87 @@ def decalques(img, s, src, veh, numero, log=print):
                     sprite(img, logo, bed[b.get("Box")], sp)
                     caixas.append(b.get("Box"))
             log(f"    {chave:12s} {nome:24s} {' '.join(caixas)}")
+
+
+def pecas_logos(s, src, veh, numero, size, pasta, log=print):
+    """oficina (Logos, carro/pintura.gd): cada lugar de logo do carro (a
+    k-ésima camada Decal de uma área, chave HOOD1, SIDE3...) com TODOS os logos
+    da folha (<Classe>Logos.bed) já desenhados em cada caixa dele, do jeito do
+    decalques() (KeepAspect, giro, LANCZOS), num atlas por caixa; o número
+    também vira peça. camadas/logos.json guarda a ordem do XML: o Godot cola
+    as peças na mesma ordem com a mesma conta do alpha_composite. Devolve a
+    camada com os logos de fábrica (tem que sair igual ao decalques())."""
+    arq = Arquivos(src)
+    padrao_xml = {k.upper(): v for k, v in decalques_padrao(veh).items()}
+    igual = lambda a: " ".join(a.split()).upper()
+    conta = {}
+    pecas, padrao, lugares, folhas = [], {}, [], {}
+    camada = Image.new("RGBA", size, (0, 0, 0, 0))
+    for lay in ET.fromstring(s).findall("LAYER"):
+        tipo = lay.get("Type")
+        if tipo == "Box":
+            t = lay.find("LAYER[@Type='Text']")
+            bed = arq.bed(lay.get("BedFile"))
+            if t is None or not bed or lay.get("Box") not in bed:
+                continue
+            r = texto_peca(arq, bed[lay.get("Box")], t, numero, size)
+            if r:
+                nome = "numero_%d.png" % len(pecas)
+                r[0].save(os.path.join(pasta, nome))
+                pecas.append({"chave": "", "png": nome, "x": r[1][0], "y": r[1][1]})
+                camada.alpha_composite(r[0], r[1])
+        elif tipo == "Decal":
+            area = lay.get("DecalArea", "")
+            conta[area] = conta.get(area, 0) + 1
+            chave = area.replace(" ", "").upper() + str(conta[area])
+            tex = lay.find("LAYER[@Type='Texture']")
+            path = tex.get("Path") if tex is not None else "BuggyLogos"
+            logos, atlas = arq.bed(path), arq.textura(path)
+            if not logos or atlas is None:
+                log(f"[!] {chave}: sem a folha {path}")
+                continue
+            nomes = list(logos.keys())
+            folhas[path] = nomes
+            pedido = padrao_xml.get(chave, "")
+            escolhido = next((k for k in nomes if pedido and igual(k) == igual(pedido)), "")
+            padrao[chave] = escolhido
+            lugares.append({"chave": chave, "area": area, "lugar": conta[area]})
+            recortes = [recorte(atlas, logos[k]) for k in nomes]
+            for b in lay.findall("LAYER[@Type='Box']"):
+                bed = arq.bed(b.get("BedFile"))
+                sp = b.find("LAYER[@Type='Sprite']")
+                if not (bed and b.get("Box") in bed and sp is not None):
+                    continue
+                todas = [sprite_peca(rc, bed[b.get("Box")], sp, size) for rc in recortes]
+                # atlas em prateleiras de até 1024 px
+                itens, x, y, alt, larg = [], 0, 0, 0, 1
+                for r in todas:
+                    if r is None:
+                        itens.append(None)
+                        continue
+                    w, h = r[0].size
+                    if x + w > 1024:
+                        x, y, alt = 0, y + alt, 0
+                    itens.append([x, y, w, h, r[1][0], r[1][1]])
+                    x += w
+                    alt = max(alt, h)
+                    larg = max(larg, x)
+                img = Image.new("RGBA", (larg, max(1, y + alt)), (0, 0, 0, 0))
+                for r, it in zip(todas, itens):
+                    if it:
+                        img.paste(r[0], (it[0], it[1]))
+                nome = "logo_%s_%s.png" % (chave, b.get("Box"))
+                img.save(os.path.join(pasta, nome))
+                pecas.append({"chave": chave, "folha": path, "atlas": nome, "itens": itens})
+                if escolhido:
+                    r = todas[nomes.index(escolhido)]
+                    if r:
+                        camada.alpha_composite(r[0], r[1])
+    import json
+    with open(os.path.join(pasta, "logos.json"), "w", encoding="utf-8") as f:
+        json.dump({"tamanho": list(size), "folhas": folhas, "lugares": lugares,
+                   "padrao": padrao, "pecas": pecas}, f)
+    return camada
 
 
 # cores da última pintura montada (main grava em <nome>.json: as lasquinhas
@@ -325,11 +428,18 @@ def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, 
         decalques(logos, s, src, veh, numero, log)
     if camadas_out:
         os.makedirs(camadas_out, exist_ok=True)
+        for f in os.listdir(camadas_out):          # peças de logo de uma geração anterior
+            if f.startswith(("logo_", "numero_")):
+                os.remove(os.path.join(camadas_out, f))
         open(os.path.join(camadas_out, ".gdignore"), "w").close()   # o Godot lê cru, sem importar
         Image.merge("RGB", (mascara["Primary"], mascara["Secondary"], vazio)).save(
             os.path.join(camadas_out, "mascaras.png"))
         detalhe.save(os.path.join(camadas_out, "detalhe.png"))
         logos.save(os.path.join(camadas_out, "logos.png"))
+        if com_decalques:
+            pc = pecas_logos(s, src, veh, numero, (w, h), camadas_out, log=lambda *a: None)
+            if pc.tobytes() != logos.tobytes():
+                log("[!] logos.json: as peças com os logos de fábrica não deram a mesma camada")
     return juntar(cores, mascara["Primary"], mascara["Secondary"], detalhe, logos)
 
 

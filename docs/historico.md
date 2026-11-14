@@ -63,6 +63,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   4 dumps (BASE na RAM = a do XML 150xx de cada carro; Inferno, Sphinx e
   Mosquito repetidos com a mesma pintura). Fiel = como já estava: nada
   mudou no código (docs/engenharia_reversa.md, Pintura).
+  O Matheus: "deve ser algo somente do modo carreira, pode deixar como
+  está"; ideia pra depois: opção "modo time" na corrida normal (NOSSO).
+- Oficina, ciclo 2: logos (nov/2026, prints e logo.p2s do Matheus: no jogo
+  são lugares pré-definidos por área, "não dá pra colocar um adesivo em
+  qualquer lugar"). Os lugares saem das camadas Decal do XML de pintura (a
+  k-ésima de uma área = HOOD1, SIDE3...; um lugar pode ter mais de uma caixa,
+  ex. a lateral direita e a esquerda), a lista = a folha <Classe>Logos.bed
+  inteira (67) + "sem logo", e o de fábrica = DefaultDecals. Como o
+  LANCZOS/giro do PIL não dá pra repetir igual no Godot, o gerar_pintura já
+  desenha TODOS os logos em cada caixa (atlas por caixa, camadas/logos.json,
+  ~2 MB e 1.7 s por carro) e o número vira peça; o Godot só cola na ordem do
+  XML com a conta do alpha_composite do PIL. Com os de fábrica a camada sai
+  igual ao logos.png nos 24 carros (teste_pintura_jogo); trocar um logo leva
+  ~55 ms (GDScript, só as peças). NOSSO: a tela (aba Logos da oficina: área,
+  lugar com setas, "Sem logos" e "De fábrica"), salvar junto das cores.
 
 - Cor do vértice (car.gd COR_VERTICE, material_do_jogo): o .pingu tem RGBA
   por vértice (0x80 = 1.0, até 2.0) e o PS2 multiplica a textura por ela:

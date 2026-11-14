@@ -2,7 +2,8 @@ extends SceneTree
 ## Pintura montada em tempo real (carro/pintura.gd, oficina): com as cores de
 ## fábrica tem que sair IGUAL à pintura.png do gerar_pintura.py (pixel a
 ## pixel), e o C++ (FisicaCarro.compor_pintura) igual ao GDScript com cores
-## da paleta do jogo. Precisa das camadas (gerar_pintura.py salva em
+## da paleta do jogo. Logos: as peças do logos.json com os de fábrica = o
+## logos.png, e trocar um logo muda a camada. Precisa das camadas (gerar_pintura.py salva em
 ## assets/carros/<id>/camadas/). Uso:
 ##   godot --headless --path . -s res://tests/teste_pintura_jogo.gd
 
@@ -14,6 +15,8 @@ func _initialize() -> void:
 	var carros := 0
 	var t_gd := 0.0
 	var t_cpp := 0.0
+	var t_logos := 0.0
+	var n_logos := 0
 	var cpp := ClassDB.class_exists("FisicaCarro") and ClassDB.class_has_method("FisicaCarro", "compor_pintura")
 	if pal.size() != 128:
 		print("  paleta: %d cores (esperado 128; rode o gerar_pintura.py)" % pal.size())
@@ -48,6 +51,31 @@ func _initialize() -> void:
 		if dif != 0:
 			print("  %s: C++ x pintura.png, %d pixels diferentes" % [nome, dif])
 			falhas += 1
+		# logos: as peças com os de fábrica = o logos.png; trocar um muda a camada
+		if not p.info_logos.is_empty():
+			n_logos += 1
+			t0 = Time.get_ticks_usec()
+			var cam: PackedByteArray = p.camada_logos({})
+			t_logos += (Time.get_ticks_usec() - t0) / 1000.0
+			if cam != p.logos:
+				var n := 0
+				for i in range(0, cam.size(), 4):
+					if cam[i] != p.logos[i] or cam[i + 1] != p.logos[i + 1] or cam[i + 2] != p.logos[i + 2] or cam[i + 3] != p.logos[i + 3]:
+						n += 1
+				print("  %s: logos de fábrica pelas peças x logos.png, %d pixels diferentes" % [nome, n])
+				falhas += 1
+			var lug: Array = p.lugares()
+			if not lug.is_empty():
+				var ch: String = lug[0].chave
+				var nomes: Array = p.nomes_logos(ch)
+				var outro := ""
+				for nm in nomes:
+					if nm != p.logo_padrao(ch):
+						outro = nm
+						break
+				if outro != "" and p.camada_logos({ch: outro}) == p.logos:
+					print("  %s: trocar o logo de %s não mudou nada" % [nome, ch])
+					falhas += 1
 		# cores da paleta (as do save state: base 80, primária e secundária)
 		var cores := {"base": pal[79] if pal.size() > 79 else Color.RED,
 			"primary": pal[86] if pal.size() > 86 else Color.GREEN,
@@ -60,8 +88,8 @@ func _initialize() -> void:
 		print("  nenhum carro com camadas (rode o gerar_pintura.py)")
 		falhas += 1
 	else:
-		print("  %d carros; montar: GDScript %.0f ms, C++ %s por carro" % [carros, t_gd / carros,
-			"%.1f ms" % (t_cpp / carros) if cpp else "sem a biblioteca"])
+		print("  %d carros; montar: GDScript %.0f ms, C++ %s por carro; logos (%d carros): %.0f ms" % [carros, t_gd / carros,
+			"%.1f ms" % (t_cpp / carros) if cpp else "sem a biblioteca", n_logos, t_logos / maxi(n_logos, 1)])
 	print("teste_pintura_jogo: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 	quit()
 

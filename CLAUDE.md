@@ -60,7 +60,7 @@ carro/               o carro
   batida_carros.gd     carro com carro (esferas do VehicleVehicle.hsc, lasquinha e som)
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
-menu/                oficina.gd (pintura do carro, tecla O até ter a Garagem; a tela é nossa)
+menu/                oficina.gd (pintura e logos do carro, tecla O até ter a Garagem; a tela é nossa)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida)
@@ -151,6 +151,9 @@ Arquivos, modelos e pintura
   A pintura montada no Godot (carro/pintura.gd, C++ compor_pintura) tem que
   sair igual à pintura.png (teste_pintura_jogo): mudou a conta no
   gerar_pintura.juntar, muda nos dois. Cores salvas só no carro do jogador.
+  Logos: o gerar_pintura desenha todos os logos em cada caixa (atlas,
+  camadas/logos.json) e o Godot só cola (alpha_composite do PIL, exato).
+  Rivais no RX01 offline = pintura de fábrica (AIPlayerColours é de outro modo).
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.
