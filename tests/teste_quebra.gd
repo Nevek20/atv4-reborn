@@ -1,8 +1,8 @@
 extends SceneTree
 ## Cercas e fardos do RX01 (porta: InstanceDatabase.xml + 0x141640/0x141908):
 ##  1. o Renegade a 60 km/h de frente numa cerca de plástico: ela quebra
-##     (impulso 1.2 t x 16.7 m/s = 20 > ShatterImpulse 2), as 2 peças nascem
-##     e o carro passa sem parar;
+##     (impulso 1.2 t x 16.7 m/s = 20 > ShatterImpulse 2), as 2 peças nascem,
+##     saem voando com a batida e o carro passa sem parar;
 ##  2. a 4 km/h (1.2 x 1.1 = 1.3 < 2) a cerca segura;
 ##  3. o fardo (0.1 t, solto) sai empurrado a 30 km/h e volta pro lugar
 ##     depois do ActiveResetTimeout (10 s) com o carro longe.
@@ -133,6 +133,13 @@ func _physics_process(dt: float) -> bool:
 		print("  60 km/h na cerca: quebrou %s, %d peças, carro a %.0f km/h depois de 2 s" % [alvo.quebrada, n_pecas, vk])
 		_checa(alvo.quebrada and n_pecas == 2, "cerca quebra e solta as 2 peças")
 		_checa(vk > 35.0, "carro passa (não para na cerca)")
+		# as peças saem com a batida (nov/2026: "não existe física, fica parada caída no lugar")
+		var longe := 0.0
+		for k in objetos.pecas:
+			for rb in objetos.pecas[k]:
+				longe = maxf(longe, (rb as Node3D).global_position.distance_to((alvo.xf as Transform3D).origin))
+		print("  peças: a mais longe a %.1f m da cerca depois de 2 s" % longe)
+		_checa(longe > 3.0, "peças saem voando com a batida (> 3 m)")
 		var bat: Array = car.sfx.batidas if car.sfx and is_instance_valid(car.sfx) else []
 		print("  sons de batida: %s" % [bat])
 		_checa(not bat.is_empty() and bat[0][1] == "FencePlastic" and absf(bat[0][2] - 0.8) < 0.01,

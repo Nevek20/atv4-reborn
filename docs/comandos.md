@@ -72,6 +72,8 @@ set GIRO_DEBUG=1 & %GODOT% --headless --path . -s res://tests/teste_luzes.gd   :
 %GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
 %GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
 set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quanto o carro perde na cerca e no fardo (0/30/60°), com x sem o objeto
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cerca_batida.gd   :: batidas nas cercas (ângulo, ponta, emenda, 40/70 km/h) x o mesmo caminho sem a cerca; VELS ANGS DESL GUINADA THR N_CERCAS TUDO=1
+:: SEM_PREVISAO=1 desliga a previsão da quebra das cercas (sobra só a rede dos contatos)
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 %GODOT% --headless --path . -s res://tests/teste_pedras.gd        :: pedrinhas: larga na terra, vira (VIRA=7): parado não, ~80 vivas, pro lado derrapando
 %GODOT% --path . --fixed-fps 60 -s res://tests/gravar_pedras.gd -- 0 pedras   :: prints da largada na terra (QUANDO=0.6,1.0,1.4; SEM_PEDRAS=1, PEDRAS_COR=1, VIRA=1)

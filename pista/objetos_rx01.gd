@@ -650,6 +650,53 @@ func _cercas(dt: float) -> void:
 	var tem_carro := carro != null and is_instance_valid(carro)
 	if not tem_carro or cercas.is_empty():
 		return
+	_rede_cercas()
+	if not _sem_previsao:
+		_previsao_cercas(dt)
+	# velocidade que entra no passo (a rede do próximo quadro conta com ela)
+	_vel_ant[carro.get_instance_id()] = [carro.linear_velocity, carro.angular_velocity]
+
+
+## rede (NOSSA, nov/2026: "às vezes fica indestrutível... fui jogado longe"):
+## a quebra é decidida antes do passo por uma previsão (cast_motion das
+## esferas da cerca); quando ela erra, a cerca inteira vira parede e o motor
+## devolve o carro. No jogo o 0x153390 olha os contatos DE VERDADE de cada
+## passo. Aqui: contato do passo anterior com cerca inteira e impulso (com a
+## velocidade de antes do passo) > ShatterImpulse = quebra e o carro volta à
+## velocidade de antes + o empurrão de no máximo 0.25 t·m/s
+var _vel_ant := {}                       # id do carro -> [v, w] antes do último passo
+var _sem_previsao := OS.get_environment("SEM_PREVISAO") == "1"   # teste: só a rede
+func _rede_cercas() -> void:
+	var ant = _vel_ant.get(carro.get_instance_id())
+	if ant == null:
+		return
+	var st := PhysicsServer3D.body_get_direct_state(carro.get_rid())
+	if st == null:
+		return
+	for i in st.get_contact_count():
+		var col := st.get_contact_collider_object(i)
+		if col == null:
+			continue
+		var idx: int = _cerca_do_corpo.get(col.get_instance_id(), -1)
+		if idx < 0 or cercas[idx].quebrada:
+			continue
+		var ponto := st.get_contact_local_position(i)
+		var n := st.get_contact_local_normal(i).normalized()
+		var j := impulso_contato(n, ponto, ant[0], ant[1])
+		if j <= 0.0:
+			n = -n
+			j = impulso_contato(n, ponto, ant[0], ant[1])
+		if _dbg:
+			print("    rede: contato com a cerca %d, j %.2f (v antes %.1f km/h)" % [idx, j, (ant[0] as Vector3).length() * 3.6])
+		var lim := float(cercas[idx].q.get("quebra", 0.0))
+		if lim > 0.0 and j > lim:
+			# desfaz a parede: volta pra velocidade de antes do passo
+			carro.linear_velocity = ant[0]
+			carro.angular_velocity = ant[1]
+			_bate_cerca(cercas[idx], j, n, ponto)
+
+
+func _previsao_cercas(dt: float) -> void:
 	var v: Vector3 = carro.linear_velocity
 	var pc: Vector3 = carro.global_position
 	var raio := 8.0 + v.length() * dt
@@ -705,6 +752,7 @@ func _resto(dt: float) -> void:
 		for pr in _separando:
 			if is_instance_valid(pr):
 				(pr as RigidBody3D).add_collision_exception_with(carro)
+	_empurrar_pecas()
 	_dormir_pecas(dt)
 	if _fardos_assentar > 0:
 		_fardos_assentar -= 1
@@ -791,10 +839,12 @@ func _bloco_parado(b: Dictionary, rb: RigidBody3D) -> bool:
 ## t·m/s: j = -(1 + e) vn / (1/m + n . ((I^-1 (r x n)) x r)), vn = velocidade
 ## do ponto na normal (n aponta pra fora da cerca, pro carro), e = a
 ## Restitution do carro (+0xbc)
-func impulso_contato(n: Vector3, ponto: Vector3) -> float:
+func impulso_contato(n: Vector3, ponto: Vector3, v = null, w = null) -> float:
 	var com: Vector3 = carro.global_transform * carro.center_of_mass
 	var r := ponto - com
-	var vn := (carro.linear_velocity + carro.angular_velocity.cross(r)).dot(n)
+	var lv: Vector3 = carro.linear_velocity if v == null else v
+	var av: Vector3 = carro.angular_velocity if w == null else w
+	var vn := (lv + av.cross(r)).dot(n)
 	if vn >= 0.0:
 		return 0.0
 	var e := 0.0
@@ -813,7 +863,7 @@ func _bate_cerca(c: Dictionary, imp: float, n: Vector3, ponto: Vector3) -> bool:
 	var lim := float(c.q.get("quebra", 0.0))
 	if c.quebrada or lim <= 0.0 or imp <= lim:
 		return false
-	quebrar(c)
+	quebrar(c, n, ponto)
 	var com: Vector3 = carro.global_transform * carro.center_of_mass
 	var dj := n * minf(imp, EMPURRAO_MAX) * 1000.0                  # kg·m/s
 	carro.apply_central_impulse(dj)
@@ -904,8 +954,14 @@ func ignorar_roda() -> Array:
 	return r
 
 
-## 0x141908: a cerca sai do mundo e as peças nascem na pose dela, paradas
-func quebrar(c: Dictionary) -> void:
+## 0x141908: a cerca sai do mundo e as peças nascem na pose dela, paradas.
+## No jogo o carro que vem atrás bate nelas (contato normal, 10x mais leve
+## que ele) e elas saem voando; aqui as peças não batem no carro (o Godot
+## travava o carro nelas, ver abaixo), então o chute é NOSSO: na quebra cada
+## peça sai com a velocidade do carro no ponto da batida, x (1 + dureza) na
+## normal (batida de um corpo leve contra um pesado), um pouco pra cima e
+## girando; depois o _empurrar_pecas faz o carro empurrar as que ele alcança
+func quebrar(c: Dictionary, n := Vector3.ZERO, ponto := Vector3.ZERO) -> void:
 	c.quebrada = true
 	quebradas += 1
 	for cs in c.forma:
@@ -945,6 +1001,11 @@ func quebrar(c: Dictionary) -> void:
 		rb.global_transform = cx
 		rb.linear_velocity = Vector3.ZERO
 		rb.angular_velocity = Vector3.ZERO
+		if n != Vector3.ZERO and carro and is_instance_valid(carro):
+			var com: Vector3 = carro.global_transform * carro.center_of_mass
+			var vp: Vector3 = carro.linear_velocity + carro.angular_velocity.cross(ponto - com)
+			_chutar(rb, vp, n, float(c.q.get("dureza", 0.2)))
+		rb.sleeping = false
 		# a peça não bate no carro (nossa): nascendo dentro dele (na pose da
 		# cerca) freava de 61 pra 13 km/h, e solta no chão logo depois da
 		# batida em ângulo tirava mais 4 a 12 km/h. Rola e cai só no chão
@@ -955,6 +1016,71 @@ func quebrar(c: Dictionary) -> void:
 				rb.add_collision_exception_with(k)
 		lista.append(rb)
 		pecas[p.modelo] = lista
+
+
+## peça empurrada pelo carro: n aponta da peça pro carro (fora da cerca), vp =
+## velocidade do carro no ponto. Na normal ela sai (1 + e) x mais rápida que o
+## carro chega (corpo leve x pesado); do resto leva ATRITO_PECA; um pouco pra
+## cima e girando (sorteio NOSSO, pra não saírem todas iguais)
+const ATRITO_PECA := 0.3
+const SOBE_PECA := 0.25          # fração da velocidade da batida pra cima
+# sorteio próprio: o randf global é o mesmo da poeira e mudava a corrida do
+# bench_corrida entre C++ e GDScript (a poeira do GDScript sorteia nele)
+var _rng := RandomNumberGenerator.new()
+func _chutar(rb: RigidBody3D, vp: Vector3, n: Vector3, e: float) -> float:
+	var rel := vp - rb.linear_velocity
+	var vn := -rel.dot(n)             # quanto o carro entra na peça
+	if vn <= 0.0:
+		return 0.0
+	var dv := -n * vn * (1.0 + e) + (rel + n * vn) * ATRITO_PECA
+	dv += Vector3.UP * vn * SOBE_PECA * _rng.randf_range(0.5, 1.0)
+	dv += n.cross(Vector3.UP).normalized() * vn * _rng.randf_range(-0.15, 0.15)
+	rb.linear_velocity += dv
+	rb.angular_velocity += Vector3(_rng.randf_range(-1, 1), _rng.randf_range(-1, 1), _rng.randf_range(-1, 1)).normalized() * vn * _rng.randf_range(0.3, 0.8)
+	rb.sleeping = false
+	_parada.erase(rb.get_instance_id())
+	return rb.mass * dv.length()      # kg·m/s que a peça levou
+
+
+## o carro empurra as peças que ele alcança (só um lado: a peça leva a batida,
+## o carro leva a reação de no máximo EMPURRAO_MAX, como a cerca quebrada no
+## 0x153390; contato de verdade travava o carro, ver quebrar). NOSSO
+const RAIO_PECAS := 4.0
+func _empurrar_pecas() -> void:
+	var carros: Array = []
+	for k in [carro] + rivais:
+		if k and is_instance_valid(k):
+			carros.append(k)
+	if carros.is_empty() or _separando.is_empty():
+		return
+	var espaco := get_world_3d().direct_space_state
+	for k in carros:
+		var pk: Vector3 = (k as Node3D).global_position
+		k.collision_layer |= BIT_CARRO
+		var com: Vector3 = k.global_transform * k.center_of_mass
+		for pr in _separando:
+			if not is_instance_valid(pr):
+				continue
+			var rb: RigidBody3D = pr
+			if rb.freeze or rb.global_position.distance_squared_to(pk) > RAIO_PECAS * RAIO_PECAS:
+				continue
+			var cs := rb.get_child(0) as CollisionShape3D
+			if cs == null or cs.shape == null:
+				continue
+			var qp := PhysicsShapeQueryParameters3D.new()
+			qp.shape = cs.shape
+			qp.transform = rb.global_transform * cs.transform
+			qp.collision_mask = BIT_CARRO
+			var info: Dictionary = espaco.get_rest_info(qp)
+			if info.is_empty() or info.collider_id != k.get_instance_id():
+				continue
+			# normal da superfície do carro (aponta pra peça): n da peça pro carro = -ela
+			var n := -(info.normal as Vector3).normalized()
+			var vp: Vector3 = k.linear_velocity + k.angular_velocity.cross((info.point as Vector3) - com)
+			var levou := _chutar(rb, vp, n, 0.2)
+			if levou > 0.0:
+				var dj := n * minf(levou, EMPURRAO_MAX * 1000.0)
+				k.apply_central_impulse(dj)
 
 
 ## CPU (nov/2026): peça de cerca quase parada por DORME_T s dorme (o Godot

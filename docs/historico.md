@@ -432,6 +432,32 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   mexido (> 0.5 m), com o carro a > 4 m; AngResistance -> angular_damp.
   teste_quebra: a 60 km/h a cerca quebra e o carro segue a 63; a 4 km/h
   (impulso 1.3) segura; fardo sai 13 m e volta.
+  Cercas, 2ª rodada (nov/2026, Matheus: "às vezes ficam indestrutíveis,
+  bati de frente um pouco de lado e fui jogado longe" e "quando quebra não
+  tem física nenhuma, fica parada caída no lugar"):
+  - Indestrutível: a quebra era decidida só ANTES do passo, por uma previsão
+    (cast_motion das esferas da cerca contra o carro). Quando a previsão
+    errava (esfera da ponta, carro girando, contato fora do varrido), a
+    cerca inteira virava parede e o motor devolvia o carro. Agora tem a rede
+    (objetos_rx01._rede_cercas, NOSSA): como o 0x153390 do jogo, olha os
+    contatos DE VERDADE do passo anterior; cerca inteira com impulso (pela
+    velocidade de antes do passo) > ShatterImpulse quebra e o carro volta pra
+    velocidade de antes + o empurrão de 0.25 t·m/s. Conferido só com a rede
+    (SEM_PREVISAO=1): a 60 km/h quebra e o carro segue a 62. Varredura
+    tests/medir_cerca_batida.gd (ângulos 0..60°, pontas, emenda de 2 cercas,
+    40 e 70 km/h, cada batida contra o mesmo caminho sem a cerca): o caso que
+    segurava e jogava o carro (60°, 40 km/h, ponta) sumiu; as 2 marcas que
+    sobram param igual sem a cerca (outro objeto no caminho).
+  - Peças: o exe põe as peças paradas na pose da cerca (0x141908/0x140cf0) e
+    no jogo o carro que vem atrás bate nelas (contato normal; a peça é ~100x
+    mais leve). Aqui as peças não batem no carro (o Godot travava o carro
+    nelas, de 61 pra 13 km/h), então o chute é NOSSO: na quebra cada peça
+    sai com a velocidade do carro no ponto, x (1 + dureza 0.2) na normal,
+    30% do resto, um pouco pra cima e girando (sorteio com RNG próprio, pra
+    não mexer na poeira do bench); depois o carro empurra as que alcança
+    (_empurrar_pecas: a peça leva a batida, o carro a reação de no máximo
+    0.25 t·m/s). teste_quebra: a 60 km/h a peça mais longe fica a ~25 m em 2
+    s; medir_perda: o carro perde 0.6 a 1.2 km/h na cerca (antes 0.1 a 0.8).
   Som da batida (PORTA, 0x36b998, chamado pelo 0x153390 em cada contato):
   CollisionSample do objeto -> SoundDatabase Collisions/InteractiveObjects
   (PLASTIC_FENCE = FencePlastic, HAY = Hay, do Collide.bnk), volume Volume x

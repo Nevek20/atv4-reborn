@@ -209,6 +209,10 @@ Pista RX01
   são do editor (o exe não tem as classes): não portar.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
+  Além da previsão antes do passo, a rede (_rede_cercas) olha os contatos de
+  verdade e quebra a cerca que segurou com impulso alto (senão vira parede e
+  joga o carro). Peças: não batem no carro; chute na quebra e o carro
+  empurra as que alcança (só um lado, reação <= 0.25 t·m/s; NOSSO).
   Fardo fica dormindo até alguém bater (o 1º passo do motor acorda corpo
   novo: objetos_rx01 põe pra dormir de novo) e dorme quase parado (NOSSO).
 - IA: o zero da rota é o CENTRO +0x5c do link e a borda é a do bloco extra
