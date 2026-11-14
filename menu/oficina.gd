@@ -121,7 +121,7 @@ func _montar_pintura() -> void:
 func _montar_logos() -> void:
 	var botoes := HBoxContainer.new()
 	_pag_logos.add_child(botoes)
-	for par in [["Sem logos", _sem_logos], ["De fábrica", _padrao_logos]]:
+	for par in [["Nenhum em todos", _sem_logos], ["De fábrica", _padrao_logos]]:
 		var b := Button.new()
 		b.text = par[0]
 		b.focus_mode = Control.FOCUS_NONE
@@ -208,7 +208,7 @@ func _padrao_cores() -> void:
 
 
 ## ---------------------------------------------------------------- logos
-## uma linha por lugar: "Capô 1º  ◀ nome ▶", agrupado pela área
+## uma linha por lugar: "1º  ◀ nome ▶  Nenhum", agrupado pela área
 func _refazer_logos() -> void:
 	for c in _lista_logos.get_children():
 		c.queue_free()
@@ -251,6 +251,12 @@ func _refazer_logos() -> void:
 		mais.focus_mode = Control.FOCUS_NONE
 		mais.pressed.connect(_passo_logo.bind(lg.chave, 1))
 		linha.add_child(mais)
+		# nenhum direto (o No_Logo do jogo), sem dar a volta na lista
+		var nenhum := Button.new()
+		nenhum.text = "Nenhum"
+		nenhum.focus_mode = Control.FOCUS_NONE
+		nenhum.pressed.connect(_nenhum_logo.bind(lg.chave))
+		linha.add_child(nenhum)
 		_nomes_lugar[lg.chave] = nome
 	_mostrar_logos()
 
@@ -265,10 +271,10 @@ func _logo_atual(chave: String) -> String:
 func _mostrar_logos() -> void:
 	for chave in _nomes_lugar:
 		var nm := _logo_atual(chave)
-		_nomes_lugar[chave].text = nm if nm != "" else "(sem logo)"
+		_nomes_lugar[chave].text = nm if nm != "" else "(nenhum)"
 
 
-## anda na lista da folha (o "sem logo" fica antes do 1º)
+## anda na lista da folha (o "nenhum" fica antes do 1º)
 func _passo_logo(chave: String, d: int) -> void:
 	var p = main.car._pintura
 	var opcoes: Array = [""] + p.nomes_logos(chave)
@@ -277,6 +283,15 @@ func _passo_logo(chave: String, d: int) -> void:
 	var estado: Dictionary = main.car.cores_pintura.duplicate(true)
 	var escolhas: Dictionary = estado.get("logos", {}).duplicate()
 	escolhas[chave] = opcoes[i]
+	estado["logos"] = escolhas
+	_aplicar(estado)
+	_mostrar_logos()
+
+
+func _nenhum_logo(chave: String) -> void:
+	var estado: Dictionary = main.car.cores_pintura.duplicate(true)
+	var escolhas: Dictionary = estado.get("logos", {}).duplicate()
+	escolhas[chave] = ""
 	estado["logos"] = escolhas
 	_aplicar(estado)
 	_mostrar_logos()
