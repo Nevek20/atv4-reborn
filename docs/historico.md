@@ -681,6 +681,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   contínua: 35% na marcha lenta até 100% com o motor cheio, e o alfa x 0.7
   -> 1 junto (variação sutil). Movimento igual. Conferido no lavapipe só a
   fumaça (sem carro), antes x agora, parado e a 72 km/h.
+  APROVADO e FECHADO pelo Matheus (nov/2026): "agora sim ficou perfeito".
   Direção dos canos (mesmo pedido: "a do Renegade ta meio torta e a do
   Chimera pros lados"): tests/medir_escapes.gd acha a peça do cano ligada ao
   ponto e mede os anéis. Renegade: o EXHAUST do jogo fica 33 cm à frente e 11
