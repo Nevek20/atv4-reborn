@@ -1126,9 +1126,14 @@ vazios). Tudo vem do evento:
   tentando_passar_2, andando_em_linha_reta): lista fixa de 8 comportamentos
   (cada um +0x18 piloto, +0x1c cérebro; vtable em +0x14): #0 esperar
   (0x364960, vt 0x5af0c0), #1 largada em movimento (0x364720, vt 0x5af160),
-  #2 preso -> repõe (0x3645e0, vt 0x5af1c8: 0x364640 ativo com o tempo
-  preso > 10 s, ou > 3 s no outro modo; 0x3646d0 chama a reposição
-  0x15bd28), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
+  #2 preso -> repõe (0x3645e0, vt 0x5af1c8: 0x364640 lê o rastreador do
+  vizinhos +0x80 por 0x3570c8 ([1] modo, [2] tempo): modo 1 (parado) > 3 s
+  ou modo 0 (fora da rota, objeto +0xc4 slot +0x44 = 0) > 10 s vale 1;
+  0x3646d0 chama a reposição 0x15bd28(-1, veículo+0x9d0->+0xfc, 1, 1, 0)
+  e acaba. Rastreador 0x356e38 a cada passo: veículo +0xa78 = 0 zera;
+  modo 2 vira 0 (fora da rota) ou 1 (perto); perto (0x356fe8) = velocidade-
+  alvo do piloto +0x40 > 1e-6 e |posição (objeto +0x30, altura +0x50) -
+  âncora|² < 4; longe: âncora = posição), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
   ultrapassar (0x360aa8, vt 0x5af228), #6 0x35ec48 (vt 0x5af638), #7 corrida
   na linha (0x360358, vt 0x5af4e8: update 0x3603d0, começo 0x360550).
   Seletor 0x35e8a0: o atual (cérebro +4) continua se o estado dele é 1 ou 3

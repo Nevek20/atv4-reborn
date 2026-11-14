@@ -210,8 +210,10 @@ Pista RX01
   do jogo (0x34cea8) vai na física do rival: potência x (1 + s), subesterço
   x (2 - 2s) (car.gd mult_pot / mult_sub, o C++ lê; 1 no jogador; s = 0 na
   sua chegada). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
-  freio, +0xa4 acel, +0xa8 dir). NOSSO: ré/preso/capotado, a caixa da IA
-  (metade do AABB do casco), o corte de curva do 0x359730.
+  freio, +0xa4 acel, +0xa8 dir). Preso = o #2 do jogo: parado a < 2 m da
+  âncora querendo andar por > 3 s, repõe (sem ré, sem regra de capotado).
+  NOSSO: a caixa da IA (metade do AABB do casco), o corte de curva do
+  0x359730.
 - Cérebro da IA (pista/ia_ultrapassar.gd): o #7 (linha) não segura a vez; o
   #5 ultrapassar (prioridade 1) entra com alvo (batida prevista < 20 s, ou o
   da frente chegando por > 10 quadros) e segura até as fases acabarem.
@@ -287,6 +289,6 @@ Frota
 
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
-- IA: os outros comportamentos do cérebro (#2 preso, #3, #4, #6), LOD com
+- IA: os outros comportamentos do cérebro (#3, #4, #6), LOD com
   os modelos 2K/1K/500 do jogo.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

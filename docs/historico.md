@@ -1550,6 +1550,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     anterior; sem os modelos dos carros).
   - APROVADO pelo Matheus (nov/2026): "ficou perfeito, igualzinho do jogo",
     sem perder FPS no PC dele (a percepção em C++ não é necessária).
+- IA, #2 preso portado (nov/2026, pista/ia.gd _preso). No exe (0x356e38,
+  a cada passo, no objeto de vizinhos +0x80): âncora na posição do carro; a
+  menos de 2 m dela (3D) e com velocidade-alvo > 0 o tempo conta, longe ela
+  muda e zera. Prioridade do #2 (0x364640): > 3 s assim (ou > 10 s fora da
+  rota, que no RX01 não acontece) vale 1; ganha do #5 no empate (vem antes
+  na lista) e repõe na hora (0x3646d0 -> 0x15bd28). Trocou o NOSSO: ré de
+  1.5 s depois de 2 s parado, 3 rés = repor, "menos de 15 m em 5 s" =
+  repor e capotado 2 s = repor (capotado parado agora cai nos 3 s do #2).
+  teste_ia, 8 sementes: 1 reposição (Russell, preso aos 22 s), fim médio
+  58.2 s (antes 0 e 58.4 s). bench_corrida C++ x GDScript igual.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da

@@ -36,15 +36,17 @@ extends Node
 ##    #5 ultrapassar (seguir colado, sair pro lado, passar, desviar de batida
 ##    prevista) no lugar do #7 enquanto roda;
 ##  - a lateral pedida fica dentro das bordas menos a meia largura do carro
-##    (0x359730, objeto +0xf4).
+##    (0x359730, objeto +0xf4);
+##  - #2 preso (0x356e38 / 0x364640): parado a menos de 2 m da âncora
+##    querendo andar por mais de 3 s, repõe (até nov/2026 era NOSSO: ré,
+##    repor lento e capotado). Fora da pista e contramão: a regra do jogo,
+##    pista/reposicao.gd, igual à do jogador.
 ##
 ## NOSSO (docs/historico.md, Corrida):
 ##  - os outros comportamentos do cérebro (#3, #4, #6), os modos 15 (x1.2) e
 ##    rota tipo 4 (x0.5), o limite da rota (-1 no RX01), a demora na largada
 ##    pela posição (0x352c98) e o corte de curva do 0x359730 (ponto da
 ##    direção que cruza a borda volta pra perto);
-##  - preso: dá ré; capotado ou lento: volta pra linha (fora da pista e
-##    contramão: a regra do jogo, pista/reposicao.gd, igual à do jogador);
 ##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe).
 
 const ARQ := "res://data/ia.json"
@@ -83,9 +85,10 @@ const DEG := 0.017453294
 # só pro _v_curva antigo (NOSSO, fora do uso; teste_cpp compara o C++)
 const A_LAT := 14.0
 const A_FRENA := 8.0
-const PRESO_T := 2.0             # s parado correndo -> ré
-const RE_T := 1.5
-const CAPOTADO_T := 2.0
+# #2 preso (0x356e38 / 0x364640): a menos de 2 m (3D) da âncora querendo
+# andar por mais de 3 s -> repõe (0x3646d0 -> 0x15bd28)
+const PRESO_T := 3.0
+const PRESO_R2 := 4.0            # m², 2 m
 const DEG_10 := 0.17453295        # 0x359730: modo 1 mistura a lateral acima de 10° (0x3e32b8c4)
 const COS_10 := 0.98480775
 # CPU (nov/2026, tests/medir_cpu.gd): rival além disso da câmera não mexe
@@ -442,7 +445,7 @@ func criar() -> void:
 		if main.objetos:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
-			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "capotado": 0.0,
+			"carro": v.name, "r": {}, "preso": 0.0,
 			"desvio": desvio_skill(float(pl.skill)), "repostos": 0, "res": 0, "lod": 0, "lat": 0.0,
 			"bonus": maxf(float(pl.skill) - 0.5, 0.0) * BONUS_SKILL, "cu": 0.0})
 	posicionar()
@@ -519,8 +522,7 @@ func posicionar() -> void:
 		x.comp = 0
 		x.viz = {}
 		x.preso = 0.0
-		x.re = 0.0
-		x.capotado = 0.0
+		x.erase("ancora")
 		x.vigia = Reposicao.new(self, x.r.prog)
 	jogador = novo_rastreio(main.car.global_position)
 	vigia_jogador = Reposicao.new(self, jogador.prog)
@@ -628,7 +630,8 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	var lv: Vector3 = car.linear_velocity
 	var vf: float = lv.dot(b.z)
 	var v: float = lv.length()
-	_pensar(x, car, dt)
+	if _pensar(x, car, dt):
+		return                          # #2: repôs
 	_lateral_pedida(x, car, v)
 	var st := _direcao(x, car, xf, v)
 	# acelerador e freio do jogo (0x34ed10): k = (v_alvo - v) x 0.2, v no plano
@@ -650,51 +653,6 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 		thr = 0.0
 	elif absf(st) > 0.95:
 		thr = minf(thr, 0.5)
-	# preso: ré virando pro outro lado
-	if x.re > 0.0:
-		x.re -= dt
-		car.test_input = {"thr": 0.0, "brk": 1.0, "steer": -st}
-		return
-	x.preso = x.preso + dt if absf(vf) < 1.0 else 0.0
-	if x.preso > PRESO_T:
-		x.preso = 0.0
-		x.re = RE_T
-		x.res += 1
-		# 3 rés sem andar 20 m: volta pra linha
-		if x.r.prog - x.get("prog_re", -INF) < 20.0:
-			x.n_re = x.get("n_re", 0) + 1
-		else:
-			x.n_re = 1
-		x.prog_re = x.r.prog
-		if x.n_re >= 3:
-			x.n_re = 0
-			x.re = 0.0
-			if OS.has_environment("IA_LOG"):
-				print("IA repõe %s em %.0f m (preso)" % [x.nome, x.r.prog])
-			_repor(x)
-			return
-		if OS.has_environment("IA_LOG"):
-			print("IA ré %s em %.0f m (%.1f m da linha, t %.1f)" % [x.nome, x.r.prog, x.r.dist, corrida.t])
-	# vigia: menos de 15 m em 5 s correndo -> volta pra linha
-	x.vigia_t = x.get("vigia_t", 0.0) + dt
-	if x.vigia_t >= 5.0:
-		var andou: float = x.r.prog - x.get("vigia_prog", x.r.prog)
-		x.vigia_t = 0.0
-		x.vigia_prog = x.r.prog
-		if andou < 15.0 and x.has("vigia_ok"):
-			if OS.has_environment("IA_LOG"):
-				print("IA repõe %s em %.0f m (lento: %.0f m em 5 s)" % [x.nome, x.r.prog, andou])
-			_repor(x)
-			return
-		x.vigia_ok = true
-	# capotado: volta pra linha (NOSSO; fora da pista é a regra do jogo)
-	x.capotado = x.capotado + dt if b.y.y < 0.3 else 0.0
-	if x.capotado > CAPOTADO_T:
-		if OS.has_environment("IA_LOG"):
-			print("IA repõe %s em %.0f m (capotado, %.1f m da linha, t %.1f)" % [x.nome, x.r.prog,
-				x.r.dist, corrida.t])
-		_repor(x)
-		return
 	# acelerador e freio em sétimos, como a direção (save state freiando.p2s,
 	# nov/2026: 5/7, 2/7, 1/7, 0 e freio 1/7; o valor antes de arredondar fica
 	# no piloto +0xa0 freio, +0xa4 acelerador, +0xa8 direção)
@@ -810,20 +768,27 @@ func _v_curva(s: float) -> float:
 ## último passo e o próximo escolhe de novo. O #7 (corrida na linha, 0x3603d0)
 ## não segura: todo passo o #5 pode tomar a vez (prioridade 1 contra 0.1).
 ## Recomeçar o #7 sorteia o desvio da Skill de novo (0x360550)
-func _pensar(x: Dictionary, car, dt: float) -> void:
+func _pensar(x: Dictionary, car, dt: float) -> bool:
 	var lista: Array = _carros_laco if _carros_laco != null else _monta_carros()
 	Ultrapassar.percepcao(self, x, car, dt, lista)
+	var preso := _preso(x, dt)
 	var comp: int = x.get("comp", 0)
 	if comp == 5:
 		if not Ultrapassar.atualizar(self, x, dt):
 			x.comp = 0
 		_conta5(x, dt)
-		return
+		return false
+	# #2 (prioridade 1, antes do #5 na lista: no empate ganha ele)
+	if preso:
+		if OS.has_environment("IA_LOG"):
+			print("IA repõe %s em %.0f m (preso, #2 do jogo, t %.1f)" % [x.get("nome", "?"), x.r.prog, corrida.t])
+		_repor(x)
+		return true
 	if Ultrapassar.prioridade(x):
 		x.comp = 5 if Ultrapassar.comecar(self, x) else 0
 		x.n5 = int(x.get("n5", 0)) + 1
 		_conta5(x, dt)
-		return
+		return false
 	if comp != 7:
 		x.comp = 7
 		x.desvio = desvio_skill(float(x.get("skill", 1.0)))
@@ -835,6 +800,28 @@ func _pensar(x: Dictionary, car, dt: float) -> void:
 	x.olha = Ultrapassar.OLHA
 	x.v_max = INF
 	x.v_min = 0.0
+	return false
+
+
+## #2 preso (0x356e38, a cada passo): âncora no CoM (objeto +0x30 com a altura
+## +0x50); a menos de 2 m dela (3D) e querendo andar (velocidade-alvo do passo
+## anterior, piloto +0x40, > 0) o tempo conta (o 1º passo perto só marca);
+## longe, âncora nova e zera. Preso com mais de 3 s (0x364640) = repor.
+## O modo "fora da rota" (10 s) não acontece no RX01 (a rota cobre tudo).
+## Capotado e parado cai aqui também
+func _preso(x: Dictionary, dt: float) -> bool:
+	var p: Vector3 = x.me.cm
+	var perto: bool = x.has("ancora") and float(x.get("v_alvo", 0.0)) > 1e-6 \
+		and p.distance_squared_to(x.ancora) < PRESO_R2
+	if perto:
+		if x.get("preso_conta", false):
+			x.preso += dt
+		x.preso_conta = true
+	else:
+		x.preso = 0.0
+		x.preso_conta = false
+		x.ancora = p
+	return x.preso > PRESO_T
 
 
 ## estatística do #5 (testes): segundos em cada fase (5 = acabou no passo)
@@ -921,8 +908,8 @@ func _repor(x: Dictionary) -> void:
 	x.r.prog = x.vigia.aceito
 	repor_em(x.car, x.r.prog + s_linha)
 	x.vigia.recomecar(x.r.prog)
-	x.capotado = 0.0
 	x.preso = 0.0
+	x.erase("ancora")
 	x.lat = x.desvio
 	x.repostos += 1
 	# NOSSO: reposto, o cérebro recomeça (vizinhos e comportamento)
