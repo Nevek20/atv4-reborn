@@ -212,11 +212,11 @@ Pista RX01
   sua chegada). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
   freio, +0xa4 acel, +0xa8 dir). NOSSO: desvio pra ultrapassar, ré/preso/
   capotado, o sorteio da Skill 1 vez por corrida.
-- Largada da IA: no jogo (offline) o rival sai no Go! sem demora nenhuma e
-  fica parado na contagem ("esperar", alvo 0). O contador por posição do
-  0x352c98 é da chegada, em outros tipos de evento. Ronco no último segundo
-  da contagem = NOSSO até ter o comportamento de seguir (sem ele o bolo
-  engaveta no grampo: 6 x 3 reposições em 8 sementes).
+- Largada da IA: no jogo (offline) o rival fica parado ("esperar", alvo 0)
+  até faltarem 2 s pro Go! (0x364b08, save idle_antes_do_Go) e aí pisa com o
+  carro travado: o ronco (o Matheus confirmou no jogo). Sai no Go! sem
+  demora. O contador por posição do 0x352c98 é da chegada, em outros tipos
+  de evento; o #1 de 7.5 mph é da largada em movimento.
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
   depois; você larga em 8º.
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;

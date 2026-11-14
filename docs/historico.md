@@ -1473,6 +1473,30 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     ronco NOSSO até portar o seguir, aí refazer a conta.
   - Portado: bordas do bloco no desvio, catchup desligado na sua chegada
     (s = 0: potência x1, subesterço x2). bench igual com ATV4_CPP=0 e 1.
+- IA, ronco antes do Go! (nov/2026; save idle_antes_do_Go do Matheus, a ~3
+  s do Go!: os 7 no estado 1 e no "esperar", 1000 rpm, acelerador 0). O
+  Matheus confirmou que no jogo eles roncam antes do Go!. No exe: o relógio
+  da largada parada fica no estado 6 por 4.595 s e o "esperar" só segura o
+  rival enquanto faltam mais de 2 s; depois o de corrida pisa com o carro
+  travado. Era NOSSO o último 1 s; agora são os 2 s do jogo (ESPERA_T).
+  - teste_ia com a pista completa, 16 sementes: 2 s = 12 reposições, 1 s =
+    6. Aos 10 s de corrida as posições são as mesmas nas duas (numa
+    semente, idênticas): a largada sai igual e a diferença são engavetamentos
+    no grampo que mudam de semente pra semente (falta o comportamento de
+    ultrapassar, #5).
+  - Container novo da nuvem vem sem os assets gerados: sem os .obj do RX01 a
+    pista fica sem cercas, fardos e arquibancadas (objetos_rx01 só cria o
+    que tem modelo) e o teste_ia muda de cara. Gerar com tools/rx01_objetos.py
+    (2 s) antes de medir. Sem os carros, efeitos e sons, teste_batida_carros,
+    teste_quebra, teste_volante, teste_mao e os de efeito/som falham
+    igual no commit anterior (ambiente, não código).
+- IA, ultrapassar (nov/2026; saves tentando_ultrapassar, tentando_passar_2,
+  andando_em_linha_reta): o cérebro tem 8 comportamentos numa lista fixa
+  (docs/engenharia_reversa.md, Cérebro da IA). Andando, 5 rivais estão no #7
+  (corrida na linha, o portado) e 2 no #5: ultrapassar, uma máquina de 5
+  fases com um carro-alvo (num dos saves, o carro do jogador). Pré-requisito
+  (0x361238) vale pra todos; quem decide é a busca do alvo (0x360e30). Falta
+  ler a busca, o plano (0x3612b0) e as 5 fases pra portar.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da

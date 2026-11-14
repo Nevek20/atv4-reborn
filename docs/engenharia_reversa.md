@@ -1101,8 +1101,19 @@ vazios). Tudo vem do evento:
   chegada (0x4d10b0) e desliga o catchup: gerente +0x10 = 0, 0x34cea8 põe s =
   0 em todo rival, sem bônus). "Esperar" (comportamento 0x364960, prioridade
   0x364b08, update 0x3649d0 = alvo 0 em frente do carro): ativo no estado 0,
-  no 4 em modo 15, com corredor+0x150 > relógio (DAT_007f4820+0x24) ou com o
-  carro travado (veículo+0xa78 = 0, a contagem). Demora da largada: ao entrar
+  no 4 em modo 15, no estado 1 enquanto faltam mais de 2 s pro Go! (0x17aff0
+  = relógio +0x30 - +0x10 no estado 6; gerente +0x44 = 0), com corredor+0x150
+  > relógio da corrida (DAT_007f4820+0x24) ou com veículo+0xa78 = 0 (1 em
+  todos nos saves, parado e correndo). Relógio da largada (0x17b118): 1
+  monta (0x17b320) -> ... -> 5 (0x17b588: corredores no estado 1) -> 6
+  largada parada, dura +0x30 = 4.595 s (0x17b760) -> 9 (0x17b8f0: estado 3,
+  o Go!) -> 10 correndo (+0x24 conta); com 0x171770 vai 5 -> 7 (0x17b848:
+  estado 2) -> 8 -> 10: largada em movimento, onde o comportamento #1
+  (0x364720, só no estado 2) anda a 7.5 mph (0x364938: DAT_007f5334 +0xc
+  +0x28, em mph) até a linha. Save idle_antes_do_Go (nov/2026): relógio no
+  estado 6 com 1.6 de 4.595 s, os 7 no estado 1 e no "esperar", 1000 rpm.
+  Nos 2 s finais o de corrida (#7) pisa com o carro travado (a lei parada dá
+  1): é o ronco antes do Go! que o Matheus confirmou no jogo. Demora da largada: ao entrar
   no estado 1 o 0x353750 grava +0x150 = DAT_00553dd4 + 1.2 / 4 + sorteio [-0.15,
   0.15] s (DAT_00553dd4 do 0x543740: sorteio [0, 2) ou 2.0), mas só com
   DAT_00553dd0 >= 1, o número de objetos da classe 0x5fffc8 (0x542f10,
@@ -1111,6 +1122,28 @@ vazios). Tudo vem do evento:
   posição - 1) x 0.05 s, até 0.5) é do estado 4 e só com 0x1717c0 (tipo de
   evento +8 = 5..8, 13 ou 15, 0x4b1b50); no Rallycross o tipo é 1 (RAM): na
   chegada os rivais seguem correndo.
+- Cérebro da IA (0x34f2d8, nov/2026; saves tentando_ultrapassar,
+  tentando_passar_2, andando_em_linha_reta): lista fixa de 8 comportamentos
+  (cada um +0x18 piloto, +0x1c cérebro; vtable em +0x14): #0 esperar
+  (0x364960, vt 0x5af0c0), #1 largada em movimento (0x364720, vt 0x5af160),
+  #2 preso -> repõe (0x3645e0, vt 0x5af1c8: 0x364640 ativo com o tempo
+  preso > 10 s, ou > 3 s no outro modo; 0x3646d0 chama a reposição
+  0x15bd28), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
+  ultrapassar (0x360aa8, vt 0x5af228), #6 0x35ec48 (vt 0x5af638), #7 corrida
+  na linha (0x360358, vt 0x5af4e8: update 0x3603d0, começo 0x360550).
+  Seletor 0x35e758 (+0xc n, +0x10 lista): o atual (cérebro +4) continua
+  enquanto o slot +0x14 dele deixar (estado 1 ou 3); senão 0x35e950 escolhe
+  pela prioridade (slot +0x54 nos do tipo do #0, ex. 0x364b08). Nos 3 saves
+  andando: 5 rivais no #7 e 2 no #5; nenhum no #3, #4 ou #6.
+  - #5 ultrapassar: prioridade 0x360c10 = corredor no estado > 1, 0x361238
+    e um alvo achado por 0x360e30 (veículo em +0x20; +0x24 conta quantas
+    vezes seguidas o alvo tinha +0xb0 = -1, ativa com > 10); começo
+    0x360d00 (plano 0x3612b0, 0x367298 com o relógio do gerente +0x28);
+    update 0x360dd8 (0x3673e0) até a fase passar de 0xfd -> estado 2. Dentro,
+    máquina de 5 fases em +0x28 (vtables 0x5af360, 0x5af330, 0x5af300,
+    0x5af2d0, 0x5af2a0; fase atual no byte +0x40): nos saves as fases 3 e 4,
+    e no tentando_passar_2 um rival no #5 com o alvo = o carro do jogador.
+    Falta ler: 0x361238, 0x360e30, 0x3612b0, 0x3672xx/0x3673xx e as 5 fases.
 - Catchup e Skill aplicados (nov/2026, RAM corrida_no_normal). Gerente em
   0x14efc80: [0] linha da tabela 0x5ada80, [1] n corredores, [2] lista dos
   structs (0x30 cada; jogador 1º), [3] desligado, [4] ligado, [5] modo, +0x18

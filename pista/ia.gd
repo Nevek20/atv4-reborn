@@ -65,6 +65,7 @@ const BONUS_SKILL := 0.4         # (Skill - 0.5) x 2 x 0.2
 # de 0 a 10 m, lado sorteado; nos primeiros 5 s do relógio fica no zero
 const SKILL_DESVIO := 10.0
 const SKILL_T := 5.0
+const ESPERA_T := 2.0            # 0x364b08: o "esperar" solta a 2 s do Go! (save idle_antes_do_Go)
 const FATOR_ATRAS := [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0]
 # acelerador e freio do jogo (0x34ed10) e velocidade-alvo (0x359eb8 / 0x214328)
 const GANHO_VEL := 0.2           # (v_alvo - v) x isso = acelerador (+) ou freio (-)
@@ -537,13 +538,13 @@ func _physics_process(dt: float) -> void:
 				_lod(car)
 		rastrear(x.r, car.global_position)
 		if est == corrida.INTRO or est == corrida.CONTANDO:
-			# no jogo o rival fica no "esperar" (0x364b08 / 0x3649d0) com o carro
-			# travado (veículo+0xa78 = 0): alvo 0, pedais 0, e sai no Go! sem demora
-			# (offline: 0x353750 deixa +0x150 = 0). NOSSO: acelera no último
-			# segundo, até ter o comportamento de seguir do jogo; saindo todos da
-			# marcha lenta o bolo engavetava no grampo (teste_ia, 8 sementes: 6
-			# reposições x 3 com o ronco; docs/historico.md)
-			var thr := 1.0 if est == corrida.CONTANDO and corrida.t_conta < 1.0 else 0.0
+			# largada parada (relógio 0x17b118 no estado 6, corredor no estado 1):
+			# o "esperar" (0x364b08 / 0x3649d0: alvo 0, pedais 0) segura o rival
+			# enquanto faltam mais de ESPERA_T pro Go! (0x17aff0); depois o de
+			# corrida pisa com o carro travado (lei 0x34ed10 parado = 1): o ronco.
+			# Sai no Go! junto com todos (offline o 0x353750 deixa +0x150 = 0)
+			var thr := 1.0 if est == corrida.CONTANDO and corrida.t_desce <= 0.0 \
+				and corrida.t_conta <= ESPERA_T else 0.0
 			car.test_input = {"thr": thr, "brk": 0.0, "steer": 0.0}
 			continue
 		if x.r.fim < 0.0 and x.r.prog >= corrida.voltas * comp:
