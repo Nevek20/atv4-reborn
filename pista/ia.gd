@@ -36,7 +36,8 @@ extends Node
 ##    #5 ultrapassar (seguir colado, sair pro lado, passar, desviar de batida
 ##    prevista) no lugar do #7 enquanto roda;
 ##  - a lateral pedida fica dentro das bordas menos a meia largura do carro
-##    (0x359730, objeto +0xf4);
+##    (0x359730, objeto +0xf4), e a reta até o ponto da direção que cruza a
+##    borda puxa o ponto pra perto, na borda (corte de curva, modos 1 e 2);
 ##  - #2 preso (0x356e38 / 0x364640): parado a menos de 2 m da âncora
 ##    querendo andar por mais de 3 s, repõe (até nov/2026 era NOSSO: ré,
 ##    repor lento e capotado). Fora da pista e contramão: a regra do jogo,
@@ -45,8 +46,7 @@ extends Node
 ## NOSSO (docs/historico.md, Corrida):
 ##  - os outros comportamentos do cérebro (#3, #4, #6), os modos 15 (x1.2) e
 ##    rota tipo 4 (x0.5), o limite da rota (-1 no RX01), a demora na largada
-##    pela posição (0x352c98) e o corte de curva do 0x359730 (ponto da
-##    direção que cruza a borda volta pra perto);
+##    pela posição (0x352c98);
 ##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe).
 
 const ARQ := "res://data/ia.json"
@@ -604,7 +604,8 @@ func _direcao(x: Dictionary, car, xf_ = null, v_ := -1.0) -> float:
 	# alcance do comportamento (0x359730: clamp(esc x v, mín, máx); o #7 e as
 	# fases 0/3/4 do #5 usam 0.5, 15, 50)
 	var o: Vector3 = x.get("olha", Ultrapassar.OLHA)
-	var s: float = x.r.prog + s_linha + clampf(v * o.x, o.y, o.z)
+	# _lateral_pedida grava o alcance do passo (o corte de curva encurta)
+	var s: float = x.r.prog + s_linha + float(x.get("olha_d", clampf(v * o.x, o.y, o.z)))
 	x.s_alvo = s
 	var lat: float = lat_zero(s) + x.get("lat", 0.0)     # desvio conta do zero da IA
 	if _cpp:
@@ -838,10 +839,9 @@ func _conta5(x: Dictionary, dt: float) -> void:
 ##  1: a pedida; com o bico torto (o ponto pedido a mais de 10° dele e o da
 ##     lateral do carro mais alinhado, mas também a mais de 10°) mistura com a
 ##     do carro: peso (ângulo - 10°) / 10°;
-##  2: a pedida (as fases do #5; o corte de curva dos modos 1 e 2 é NOSSO:
-##     não portado).
+##  2: a pedida (as fases do #5).
 ## Modos 1 e 2: dentro das bordas menos a meia largura do carro (objeto
-## +0xf4), pelo lado do sinal dela, como no jogo
+## +0xf4), pelo lado do sinal dela, e o corte de curva (abaixo), como no jogo
 func _lateral_pedida(x: Dictionary, car, v: float) -> void:
 	var o: Vector3 = x.get("olha", Ultrapassar.OLHA)
 	var s_me: float = x.r.prog + s_linha
@@ -855,6 +855,7 @@ func _lateral_pedida(x: Dictionary, car, v: float) -> void:
 		l_carro = bj.x + fr * (bj.y - bj.x)
 		if modo == 0:
 			x.lat = -l_carro
+			x.olha_d = s - s_me
 			return
 	var lg: float = -float(x.get("pede_lat", 0.0))
 	if modo == 1:
@@ -873,6 +874,31 @@ func _lateral_pedida(x: Dictionary, car, v: float) -> void:
 		lg = maxf(lg, bj.x + hw)
 	else:
 		lg = minf(lg, bj.y - hw)
+	x.olha_d = s - s_me
+	# corte de curva (modos 1 e 2): se a reta do carro até o ponto passa por
+	# fora da borda recuada da meia largura (0x32a4f8 esquerda + meia largura,
+	# 0x32a5e0 direita - meia largura, no ponto), o ponto volta pra alcance/4
+	# à frente, encostado nessa borda (no exe alcance/4 + o raio: sem o raio
+	# como o alcance todo, ver _direcao). Teste da esquerda primeiro, como lá.
+	# Produto vetorial no plano: o nosso (x, z) = (z, x) do jogo, sinal trocado
+	var cm2 := Vector2(x.me.cm.x, x.me.cm.z)
+	var pp := ponto_lat(s, -lg)
+	var d := Vector2(pp.x, pp.z) - cm2
+	var pe := ponto_lat(s, -(bj.x + hw))
+	var e := Vector2(pe.x, pe.z) - cm2
+	var lado := 0
+	if d.cross(e) > 0.0:               # jogo: d x esquerda < 0
+		lado = -1
+	else:
+		var pd := ponto_lat(s, -(bj.y - hw))
+		var r := Vector2(pd.x, pd.z) - cm2
+		if d.cross(r) < 0.0:           # jogo: d x direita > 0
+			lado = 1
+	if lado != 0:
+		x.olha_d = clampf(v * o.x, o.y, o.z) * 0.25
+		var bn := bordas_jogo(s_me + x.olha_d)
+		lg = bn.x + hw if lado < 0 else bn.y - hw
+		x.cortes = int(x.get("cortes", 0)) + 1
 	x.lat = -lg
 
 

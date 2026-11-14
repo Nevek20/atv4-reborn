@@ -1560,6 +1560,17 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   repor e capotado 2 s = repor (capotado parado agora cai nos 3 s do #2).
   teste_ia, 8 sementes: 1 reposição (Russell, preso aos 22 s), fim médio
   58.2 s (antes 0 e 58.4 s). bench_corrida C++ x GDScript igual.
+- IA, corte de curva do 0x359730 portado (nov/2026, _lateral_pedida). No
+  exe, fora do modo 0 e do 3: D = ponto da direção - carro; os pontos das
+  bordas no ponto, recuados da meia largura (0x32a4f8 esquerda + +0xf4,
+  0x32a5e0 direita - +0xf4, com a largura do bloco extra); se D x esquerda <
+  0 (ou D x direita > 0, estritos) o ponto volta pra alcance/4 + raio à
+  frente (aqui alcance/4: o alcance todo já vai sem o raio) com a lateral na
+  borda + (ou -) a meia largura. O nosso (x, z) é o (z, x) do jogo: o sinal
+  do produto vetorial troca. Conferido: 22412 quadros com o ponto entre as
+  bordas, 81 com ele em cima da borda (produto 0: não corta, como no exe) e
+  16 cortes de verdade, todos do carro do jogador pilotado pela IA. teste_ia,
+  8 sementes: igual ao de antes (1 reposição, 58.2 s); C++ x GDScript igual.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
@@ -1937,8 +1948,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
 - IA: os outros comportamentos do cérebro (#2 preso -> repõe, #3, #4, #6),
-  a percepção em C++ se o FPS cair, o corte de curva do 0x359730, a caixa da
-  IA de verdade (de onde o objeto +0x08..+0x20 sai) e a flag
+  a percepção em C++ se o FPS cair, a caixa da IA de verdade (de onde o objeto +0x08..+0x20 sai) e a flag
   +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.

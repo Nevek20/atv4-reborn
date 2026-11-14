@@ -212,8 +212,9 @@ Pista RX01
   sua chegada). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
   freio, +0xa4 acel, +0xa8 dir). Preso = o #2 do jogo: parado a < 2 m da
   âncora querendo andar por > 3 s, repõe (sem ré, sem regra de capotado).
-  NOSSO: a caixa da IA (metade do AABB do casco), o corte de curva do
-  0x359730.
+  Corte de curva (0x359730, modos 1 e 2): a reta até o ponto passando por
+  fora da borda recuada (meia largura) traz o ponto pra alcance/4, na
+  borda (raro no RX01). NOSSO: a caixa da IA (metade do AABB do casco).
 - Cérebro da IA (pista/ia_ultrapassar.gd): o #7 (linha) não segura a vez; o
   #5 ultrapassar (prioridade 1) entra com alvo (batida prevista < 20 s, ou o
   da frente chegando por > 10 quadros) e segura até as fases acabarem.

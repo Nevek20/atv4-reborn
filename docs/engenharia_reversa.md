@@ -1161,7 +1161,9 @@ vazios). Tudo vem do evento:
     a lateral do carro, peso (ângulo - 10°) / 10°. Depois limita na borda
     menos a meia largura (pelo lado do sinal) e, fora do modo 3, se a linha
     do carro ao ponto cruza a borda (corte de curva) volta o ponto pra
-    alcance/4 + raio na borda. Nos saves o ponto da direção fica a alcance +
+    alcance/4 + raio na borda (bordas recuadas: 0x32a4f8 = 0x32a338 com a
+    lateral + meia largura, 0x32a5e0 = 0x32a418 - meia largura; teste D x
+    esquerda < 0, senão D x direita > 0, estritos; portado em ia.gd). Nos saves o ponto da direção fica a alcance +
     0.8 +- 1.6 m de rota do carro (15 rivais no #7), não alcance + raio: a
     posição de rota do carro deve ficar atrás do CoM (não conferido).
   - 0x359eb8 com o pedido: arco 1 (0x35a040) do CoM no rumo do bico até o
