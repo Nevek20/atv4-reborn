@@ -1159,7 +1159,17 @@ vazios). Tudo vem do evento:
     0x354d20 (a cada quadro): +0xb0 = folga de 0x34e0c0 (meu objeto, forma
     do outro, posição dele - a minha) se < 20, senão -1; guarda o de menor
     folga por vaga; contato novo (> 1 s) aplica a Skill slot 4 (0x3552f8).
-    Quem põe a vaga (+0x24) e a lateral: 0x353d60 / 0x3547f0 (falta ler).
+    Quem põe a vaga (+0x24) e a lateral: 0x353d60 (junta os candidatos) /
+    0x3547f0 (ficha: +0x18 = 1, +0xc visto em, +0x10 vence em, vaga do
+    0x3550d8, +0x28/+0x2c e as taxas +0x30/+0x34 = variação / dt, +0x38,
+    +0x3c, +0x40.., forma +0x50). Conferido nos 3 saves contra a posição
+    real (re: scratch val/vizinhos.py): a tabela de vizinhos (vizinhos +0xc,
+    n em +8) guarda VEÍCULOS; +0x28 = distância longitudinal e +0x2c =
+    lateral (sem sinal); vaga 0/1 = à frente (um lado / outro), 2/3 = atrás;
+    alcance ~45 m. +0xb0 = -1 em todos os vizinhos dos 3 saves (distâncias
+    de 7 a 45 m): não é distância, deve ser tempo até colidir (só < 20), e
+    as 4 vagas ficam vazias. Os 2 rivais no #5 estavam nas fases 3 e 4,
+    que seguram sem replanejar.
   - Máquina de fases (0x367298 começa, 0x3673e0 roda, 0x3671a8 troca):
     fase = vtable com +0x14 entrar, +0x1c atualizar, +0x24 sair; cada uma
     devolve a próxima (0xfe acabou bem, 0xff abortou). Contexto em sm+8:
