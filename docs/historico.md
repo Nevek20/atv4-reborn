@@ -1452,6 +1452,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     rival sem catchup; com o subesterço x2 o volante 0.6 do teste não segura
     o rival no jogador e ele decola num barranco a 17..21 m (sem contato).
     O teste é do resolvedor: roda com os rivais sem catchup.
+  - Aprovado pelo Matheus jogando (nov/2026: "ficou muito bom").
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
