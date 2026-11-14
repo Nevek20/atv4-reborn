@@ -1145,6 +1145,20 @@ vazios). Tudo vem do evento:
   sai o velho, começa o novo (slot +0x34) no mesmo quadro; o mesmo: slot
   +0x4c (update). Nos 3 saves andando: 5 rivais no #7 e 2 no #5; nenhum no
   #3, #4 ou #6.
+  - #3, #4 e #6 nunca entram no RX01 offline (nov/2026): a prioridade do #4
+    (0x35fab8) é o Skill slot 1 e a do #3 (0x3606c8) precisa do slot 4; os
+    slots 1, 3 e 4 só valem (1, 1, 0.1) com rivalidade (0x35b1b0) e offline
+    são 0 (RAM). O #6 (prioridade 0x35ed38: pré-condição 0x35f0e8, alvo
+    0x35eea0) só aceita vizinho (slots 0/1) cujo objeto de IA (+0xc4, vtable
+    +0x14) é do tipo 2 ou 1; os corredores são tipo 0 (vt 0x5af920). Os tipos
+    1 (vt 0x5af8b8, construtor 0x365d98) e 2 (vt 0x5af850, 0x365c50) vêm de
+    pools do gerente da IA (0x3659a8, chamado em 0x352270: +0xc tipo 0 com 8,
+    +0x10 tipo 1 com 8, +0x14 tipo 2 com 64; pool: +0x4 lista em uso, +0xc
+    quantos, +0x14 lista livre, +0x1c quantos, +0x20 total). Nos 4 dumps da
+    corrida (idle_antes_do_Go, andando_em_linha_reta, tentando_ultrapassar,
+    tentando_passar_2) os dois pools estão com 0 em uso (8/8 e 64/64
+    livres): o #6 nunca acha alvo. O tipo 3 (vt 0x5af988) nem existe na RAM.
+    O que são os tipos 1 e 2 (outros modos?) não foi atrás.
   - #7: começo 0x360550 sorteia o desvio TODA vez que o #7 começa (Skill slot
     0 x [0, 10) m, lado sorteado); saída 0x3603d0: com o relógio
     (DAT_007f4820+0x24, 0 até o Go!) < 5 s o 0x359660 vai com desvio 0 e modo

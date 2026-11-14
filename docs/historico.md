@@ -1571,6 +1571,14 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   bordas, 81 com ele em cima da borda (produto 0: não corta, como no exe) e
   16 cortes de verdade, todos do carro do jogador pilotado pela IA. teste_ia,
   8 sementes: igual ao de antes (1 reposição, 58.2 s); C++ x GDScript igual.
+- IA, cérebro fechado pro RX01 offline (nov/2026): #3, #4 e #6 lidos no exe
+  e NÃO portados, porque nunca entram. #3 e #4: prioridade pelos Skill
+  slots 4 e 1, que offline são 0 (só valem com rivalidade). #6: só mira
+  objeto de IA do tipo 1 ou 2 (não corredor; pools de 8 e 64 no gerente) e
+  nos 4 dumps da corrida os dois pools estão vazios (nada em uso). Detalhe
+  em docs/engenharia_reversa.md (Cérebro da IA). Portados: #0 esperar, #2
+  preso, #5 ultrapassar, #7 linha; o #1 é da largada em movimento (o RX01
+  larga parado). Só reabrir com outro modo de jogo ou com rivalidade.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
@@ -1947,8 +1955,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- IA: os outros comportamentos do cérebro (#2 preso -> repõe, #3, #4, #6),
-  a percepção em C++ se o FPS cair, a caixa da IA de verdade (de onde o objeto +0x08..+0x20 sai) e a flag
+- IA: a percepção em C++ se o FPS cair, a caixa da IA de verdade (de onde o objeto +0x08..+0x20 sai) e a flag
   +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.

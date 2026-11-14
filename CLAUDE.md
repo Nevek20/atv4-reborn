@@ -221,6 +221,9 @@ Pista RX01
   Recomeçar o #7 sorteia o desvio da Skill de novo (0x360550). Nos 5 s
   depois do Go! o #7 segue a faixa do grid (modo 0). Lateral do jogo =
   -(a nossa): mundo espelhado; a conta 0x3614a0 bate com a RAM a 0.01 m.
+  #3, #4 e #6 não entram no RX01 offline (Skill slots 1 e 4 = 0 sem
+  rivalidade; o #6 só mira objetos de IA tipo 1/2, pools vazios na RAM):
+  não portados de propósito.
 - Largada da IA: no jogo (offline) o rival fica parado ("esperar", alvo 0)
   até faltarem 2 s pro Go! (0x364b08, save idle_antes_do_Go) e aí pisa com o
   carro travado: o ronco (o Matheus confirmou no jogo). Sai no Go! sem
@@ -295,6 +298,5 @@ Frota
 
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
-- IA: os outros comportamentos do cérebro (#3, #4, #6), LOD com
-  os modelos 2K/1K/500 do jogo.
+- IA: LOD com os modelos 2K/1K/500 do jogo.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.
