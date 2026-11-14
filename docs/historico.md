@@ -650,6 +650,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   rastro visível (alfa >= 0.05) de 2.6 m a 18 km/h, 5.6 m a 54 e ~7 m a 100,
   mais deitado. Shader compilado no lavapipe (Forward+); no PC é o Matheus
   quem julga.
+  REPROVADO na 1ª versão ("CARALHO Q FUMACEIRA É ESSA", print do Matheus:
+  duas bolas opacas de ~1 m atrás do carro): vida 1.2 s x 144 partículas x
+  alfa 0.3 x até 1 m. Medido numa simulação vista de trás (grade de 2 cm,
+  opacidade 1 - prod(1 - alfa)): tapava 3.4x a área da antiga. Agora VIDA 0.8
+  s, 40 partículas (50/s), alfa 0.18 e cresce 0.5 m/s: acelerando parado a
+  área com opacidade > 0.3 = a da antiga (0.12 m² por cano), miolo mais
+  leve; o movimento (jato, subida, rastro) ficou igual.
   Direção dos canos (mesmo pedido: "a do Renegade ta meio torta e a do
   Chimera pros lados"): tests/medir_escapes.gd acha a peça do cano ligada ao
   ponto e mede os anéis. Renegade: o EXHAUST do jogo fica 33 cm à frente e 11
