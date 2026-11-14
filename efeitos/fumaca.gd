@@ -26,23 +26,25 @@ extends Node3D
 ##   - cresce o do XML; CRESCE_VENTO (m/s a mais por m/s de vento) e DILUI
 ##     (alfa x (tamanho inicial / tamanho)^DILUI) ficam em 0: ligados, a
 ##     fumaça engrossava andando.
-## Tamanho: a fumaça antiga (aprovada, "fininha") ficava SEMPRE em 0.2 m: o
-## billboard das partículas do Godot jogava fora a escala (falta o
-## billboard_keep_scale), então o ExpandRate do XML nunca valeu. Aqui a
-## escala vale e cresce pouco (CRESCE). Transparência, vida e taxa = XML.
+## Tamanho: o billboard das partículas do Godot só respeita a escala com
+## billboard_keep_scale (a fumaça antiga ficava sempre em 0.2 m por isso).
 ## Movimento (simulado, média de 40 partículas): parado o jato anda ~0.4 m
-## pra trás e sobe ~0.15 m; andando o rastro tem ~80% do comprimento do
-## antigo (o gás sai com a velocidade do carro e o ar freia em ~0.1 s).
+## pra trás e sobe; andando o rastro tem ~80% do comprimento do antigo (o gás
+## sai com a velocidade do carro e o ar freia em ~0.1 s).
 
 const TEXTURA := "res://assets/efeitos/fumaca.png"
-const VIDA := 0.5
-const MAX := 60                     # MaxParticles
-const TAMANHO := 0.2
-const CRESCE := 0.2                 # m/s (NOSSO: o ExpandRate do XML é 0.6..0.8, mas a antiga
-                                    # aprovada nunca cresceu, ficava 0.2 m; 0.2 -> 0.3 m em 0.5 s)
-const COR := Color(0.35, 0.35, 0.35, 0.3)
-const SOME := 0.3                   # FadeOutTime x Life
-const TAXA_LENTA := 0.15            # fração do máximo (120/s) parado
+# aparência (nov/2026, pedido do Matheus: "mais sutil e realista... gás
+# sendo expelido por um escapamento de buggy, e não fumaça de máquina ou
+# vapor"): bem transparente, cinza claro, menos partículas, nasce do tamanho
+# da boca, cresce e vai sumindo aos poucos (dilui + some na 2ª metade da vida)
+const VIDA := 0.7                   # NOSSO (XML 0.5): tempo pra dispersar devagar
+const MAX := 35                     # 50/s no máximo (NOSSO; XML 120/s)
+const TAMANHO := 0.15               # NOSSO (XML 0.2): a boca do cano
+const CRESCE := 0.45                # m/s (NOSSO; XML 0.6..0.8): 0.15 -> 0.47 m na vida
+const COR := Color(0.45, 0.45, 0.46, 0.09)   # cinza claro quase transparente (NOSSO; XML 0.35 com alfa 0.3)
+const SOME := 0.6                   # some nos últimos 60% da vida (NOSSO; XML 0.3)
+const TAXA_LENTA := 0.35            # fração do máximo na marcha lenta (emissão contínua)
+const INTENSIDADE_LENTA := 0.7      # alfa x 0.7 na lenta até x 1 com o motor cheio
 # física do gás (NOSSA, ver acima)
 const JATO := 5.0                   # m/s pra fora do cano
 const ABERTURA := 0.14              # tan(8°): cone do jato
@@ -54,7 +56,7 @@ const EMPUXO := 6.0                 # m/s² pra cima, gás quente
 const ESFRIA := 0.8                 # s (o empuxo cai 1/e)
 const TURBULENCIA := 1.2            # m/s² (x (1 + vento/10))
 const CRESCE_VENTO := 0.0           # m/s a mais de crescimento por m/s de vento
-const DILUI := 0.0                  # alfa x (tamanho inicial / tamanho)^DILUI
+const DILUI := 1.0                  # alfa x (tamanho inicial / tamanho)^DILUI: some ao espalhar
 
 var canos: Array = []
 var bases: Array = []               # boca de cada cano no frame do corpo (+Z = saída)
@@ -162,11 +164,15 @@ var _taxa := -1.0
 func atualizar(carga: float, rpm: float) -> void:
 	var r := clampf((rpm - 1000.0) / 7000.0, 0.0, 1.0)
 	var t := clampf(TAXA_LENTA + (1.0 - TAXA_LENTA) * carga * (0.4 + 0.6 * r), 0.0, 1.0)
-	if t == _taxa:                       # CPU: só regrava quando muda
+	t = snappedf(t, 0.02)                # CPU: só regrava quando muda de verdade
+	if t == _taxa:
 		return
 	_taxa = t
+	# variação sutil: mais partículas e um pouco mais densa acelerando
+	var k := INTENSIDADE_LENTA + (1.0 - INTENSIDADE_LENTA) * (t - TAXA_LENTA) / (1.0 - TAXA_LENTA)
 	for e in canos:
 		e.amount_ratio = t
+		(e.process_material as ShaderMaterial).set_shader_parameter("intensidade", k)
 
 
 static var _shader: Shader = null
@@ -213,6 +219,7 @@ uniform float cresce;
 uniform float cresce_vento;
 uniform float dilui;
 uniform float alfa;
+uniform float intensidade = 1.0;  // carga do motor (atualizar)
 uniform float some;
 uniform vec3 cor;
 
@@ -257,7 +264,7 @@ void start() {
 	CUSTOM = vec4(r4 * 3.14159, 0.0, r5, tamanho);    // giro, idade, fase, tamanho
 	TRANSFORM = mat4(vec4(tamanho, 0.0, 0.0, 0.0), vec4(0.0, tamanho, 0.0, 0.0),
 		vec4(0.0, 0.0, tamanho, 0.0), vec4(p, 1.0));
-	COLOR = vec4(cor, alfa);
+	COLOR = vec4(cor, alfa * intensidade);
 }
 
 void process() {
@@ -290,7 +297,7 @@ void process() {
 	TRANSFORM[1] = vec4(0.0, tam, 0.0, 0.0);
 	TRANSFORM[2] = vec4(0.0, 0.0, tam, 0.0);
 	float fim = clamp((1.0 - idade / LIFETIME) / some, 0.0, 1.0);
-	COLOR = vec4(cor, alfa * pow(tamanho / tam, dilui) * fim);
+	COLOR = vec4(cor, alfa * intensidade * pow(tamanho / tam, dilui) * fim);
 }
 """
 

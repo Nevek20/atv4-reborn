@@ -672,6 +672,15 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   partícula saía com 1 m. Agora keep_scale ligado e CRESCE 0.2 m/s (0.2 ->
   0.3 m na vida); simulações de densidade de antes estavam certas na conta
   mas erradas no tamanho desenhado.
+  Mais sutil (pedido do Matheus com print da largada: "muito visível e
+  artificial... gás de escapamento de buggy, não fumaça de máquina ou
+  vapor"; não mexer na poeira nem nos outros efeitos): cinza claro 0.45 com
+  alfa 0.09 (era 0.35 com 0.3), nasce com 0.15 m (a boca) e cresce 0.45 m/s,
+  dilui com o tamanho (alfa x 0.15 / tamanho) e some nos últimos 60% da vida
+  (vida 0.7 s), no máximo 50 partículas/s por cano (era 120). Emissão
+  contínua: 35% na marcha lenta até 100% com o motor cheio, e o alfa x 0.7
+  -> 1 junto (variação sutil). Movimento igual. Conferido no lavapipe só a
+  fumaça (sem carro), antes x agora, parado e a 72 km/h.
   Direção dos canos (mesmo pedido: "a do Renegade ta meio torta e a do
   Chimera pros lados"): tests/medir_escapes.gd acha a peça do cano ligada ao
   ponto e mede os anéis. Renegade: o EXHAUST do jogo fica 33 cm à frente e 11
