@@ -1143,7 +1143,37 @@ vazios). Tudo vem do evento:
     máquina de 5 fases em +0x28 (vtables 0x5af360, 0x5af330, 0x5af300,
     0x5af2d0, 0x5af2a0; fase atual no byte +0x40): nos saves as fases 3 e 4,
     e no tentando_passar_2 um rival no #5 com o alvo = o carro do jogador.
-    Falta ler: 0x361238, 0x360e30, 0x3612b0, 0x3672xx/0x3673xx e as 5 fases.
+  - Saída de todo comportamento = struct do piloto em +0x30 (0x35ec38): +0x30
+    ponto-alvo, +0x40 velocidade-alvo, +0x44 flag (o #7 grava pelo slot +0x5c
+    = 0x3603d0, chamado pelo +0x4c = 0x360270). Cérebro (0x34c368, vt
+    0x5ae1e8): +0xc percepção (0x3573b8, update 0x3574b8), +0x10 vizinhos
+    (0x356958, update 0x356aa0), depois 0x3668d0 = seletor + o atual.
+  - Pré-requisito 0x361238: objeto do rival (piloto+0x18, vt 0x5af920) +0xe8
+    != 0 e +0xf0 <= 2 (nos 3 saves: 1 e 0 em todos; +0xf4 = 1.04..1.19 por
+    carro). Busca do alvo 0x360e30: as 4 vagas de vizinho (vizinhos +0x44 +
+    8i, par corredor/ficha) e pega a de menor ficha +0xb0 (sem a ficha
+    válida +0x18 = 9e30); na vaga 2 só se a distância lateral +0x28 menos as
+    2 meias-larguras (+0xc0 do objeto de cada um) <= 0. Ficha (0x355130,
+    0xb8 bytes): +0x18 válida, +0x20 última vez em contato, +0x24 vaga
+    (padrão 5), +0x28 lateral, +0x30/+0x38, +0x50 forma, +0xb0 folga.
+    0x354d20 (a cada quadro): +0xb0 = folga de 0x34e0c0 (meu objeto, forma
+    do outro, posição dele - a minha) se < 20, senão -1; guarda o de menor
+    folga por vaga; contato novo (> 1 s) aplica a Skill slot 4 (0x3552f8).
+    Quem põe a vaga (+0x24) e a lateral: 0x353d60 / 0x3547f0 (falta ler).
+  - Máquina de fases (0x367298 começa, 0x3673e0 roda, 0x3671a8 troca):
+    fase = vtable com +0x14 entrar, +0x1c atualizar, +0x24 sair; cada uma
+    devolve a próxima (0xfe acabou bem, 0xff abortou). Contexto em sm+8:
+    [0] veículo-alvo, [3] = alvo sem +0x28 no +0x9d0->+0xc4 (não é o
+    jogador?). Plano 0x3612b0 (fase inicial): 0x3614a0 falso -> se
+    [3] e Skill slot 3 > 0.5: 0 (seguir); senão pela folga lateral (lado
+    +0x24 em 2..3 tira, senão soma a +0x28; menos as meias-larguras): 4, ou
+    1 se a folga >= 2... (conta exata no 0x3612b0); 0x3614a0 verdadeiro -> 0
+    se [3] e 0x361aa8, senão 2 (folga +0xb0 >= 0) ou 3.
+  - Fase 0 "seguir" (0x361c18 / 0x361d20 / 0x361eb8): anda na rota com o
+    desvio do contexto (0x359660 modo 2, 0x359730 0.5/15/50, alvo de
+    velocidade = 0x359eb8, a do #7), replaneja todo quadro: alvo sumiu ou
+    mudou -> 0xfe; plano != 0 -> troca de fase. Fases 1..4: 0x362040..,
+    0x3624c8.., 0x362b00.., 0x362f88.. (falta ler).
 - Catchup e Skill aplicados (nov/2026, RAM corrida_no_normal). Gerente em
   0x14efc80: [0] linha da tabela 0x5ada80, [1] n corredores, [2] lista dos
   structs (0x30 cada; jogador 1º), [3] desligado, [4] ligado, [5] modo, +0x18
