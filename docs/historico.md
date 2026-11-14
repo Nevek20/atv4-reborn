@@ -1548,6 +1548,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   - C++ x GDScript: bench_corrida igual (os 8 carros na mesma posição, rpm e
     marcha). teste_cpp: as 4 falhas do F3 são de ambiente (iguais no commit
     anterior; sem os modelos dos carros).
+  - APROVADO pelo Matheus (nov/2026): "ficou perfeito, igualzinho do jogo",
+    sem perder FPS no PC dele (a percepção em C++ não é necessária).
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
