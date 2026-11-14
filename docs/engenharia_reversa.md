@@ -1182,8 +1182,16 @@ vazios). Tudo vem do evento:
   - Fase 0 "seguir" (0x361c18 / 0x361d20 / 0x361eb8): anda na rota com o
     desvio do contexto (0x359660 modo 2, 0x359730 0.5/15/50, alvo de
     velocidade = 0x359eb8, a do #7), replaneja todo quadro: alvo sumiu ou
-    mudou -> 0xfe; plano != 0 -> troca de fase. Fases 1..4: 0x362040..,
-    0x3624c8.., 0x362b00.., 0x362f88.. (falta ler).
+    mudou -> 0xfe; plano != 0 -> troca de fase.
+  - Fase 1 "seguir colado" (0x362040 / 0x362100, anda com 0x3622d0): aborta
+    com o alvo abaixo de 10 mph (4.4694 m/s, objeto +0xa0); folga para-choque
+    = ficha +0x28 - (+0xc0 meu + +0xc0 dele, o "nariz" ~3 m), mínimo 0;
+    replaneja todo passo (fica enquanto o plano der 1). Anda na rota com o
+    desvio do contexto [2], alcance = a distância até o alvo (0x359730 com
+    mín = máx = ficha +0x28) e velocidade = min(0x359eb8, 0.95 x a
+    velocidade do alvo). Fases 2..4 (0x3624c8 / 0x362590 / 0x3626c8,
+    0x362b00 / 0x362bc0 / 0x362df8, 0x362f88 / 0x363048 / 0x363160) e o
+    0x3614a0 do plano: falta ler. re/ia_vizinhos_ram.py lê a percepção.
 - Catchup e Skill aplicados (nov/2026, RAM corrida_no_normal). Gerente em
   0x14efc80: [0] linha da tabela 0x5ada80, [1] n corredores, [2] lista dos
   structs (0x30 cada; jogador 1º), [3] desligado, [4] ligado, [5] modo, +0x18
