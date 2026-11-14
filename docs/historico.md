@@ -463,6 +463,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     do resto, sobe 10%, gira menos, linear/angular_damp 1.5 e no máximo um
     chute a cada 25 passos (o carro mais rápido que ela encostava de novo a
     cada passo e levava a peça junto). A 60 km/h a mais longe para a ~6 m.
+    APROVADO pelo Matheus (nov/2026): "agora sim, ta mt bom!!".
   Som da batida (PORTA, 0x36b998, chamado pelo 0x153390 em cada contato):
   CollisionSample do objeto -> SoundDatabase Collisions/InteractiveObjects
   (PLASTIC_FENCE = FencePlastic, HAY = Hay, do Collide.bnk), volume Volume x
