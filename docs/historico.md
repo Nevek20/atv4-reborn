@@ -55,7 +55,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   antes). GDScript 187 ms por carro, C++ (FisicaCarro.compor_pintura) ~1 ms.
   NOSSO: a tela (menu/oficina.gd, tecla O até ter a Garagem), salvar por
   carro em user://oficina.json (o jogo guarda no perfil) e só o jogador usar
-  as cores salvas (rivais: AIPlayerColours.xml, próximo ciclo).
+  as cores salvas (rivais: AIPlayerColours.xml, próximo ciclo). APROVADO pelo
+  Matheus no PC: "funcionou e lindamente".
 
 - Cor do vértice (car.gd COR_VERTICE, material_do_jogo): o .pingu tem RGBA
   por vértice (0x80 = 1.0, até 2.0) e o PS2 multiplica a textura por ela:
@@ -634,6 +635,29 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Kraken, McKenzies, Viper, Hurricane e Storm no "motor"; Sphinx, Mosquito e
   Bulldog a boca não treme). tests/gravar_fumaca.gd (só no Forward+: no
   Compatibility do xvfb as partículas não aparecem).
+  Gás com física (nov/2026, pedido do Matheus: "leve força inicial de
+  expulsão... o vento relativo deve influenciar... a transição deve ser
+  gradual e física"): o ParticleProcessMaterial (saída fixa de 1 m/s, rastro
+  parado no mundo) virou um shader de partícula NOSSO (fumaca.gd SHADER). Sai
+  com a velocidade da boca (carro + giro) mais um jato de 3 m/s no cone de 8°
+  do cano; o ar parado freia a diferença por exp(-6 t) (nada muda na hora),
+  atrás do carro o ar é puxado junto (esteira: 50% da velocidade, some em 1.5
+  m atrás e 0.6 m pro lado); empuxo de 5 m/s² que esfria em 0.8 s;
+  turbulência que cresce com o vento relativo; cresce o do XML + 0.06 m/s por
+  m/s de vento e dilui com o tamanho (alfa x (0.2 / tamanho)^1.4). VIDA 1.2 s
+  (o XML diz 0.5: curta pro gás subir). Afinado numa simulação em Python antes
+  (40 partículas): parado o jato anda ~0.5 m e o gás sobe ~0.3 m em 0.6 s;
+  rastro visível (alfa >= 0.05) de 2.6 m a 18 km/h, 5.6 m a 54 e ~7 m a 100,
+  mais deitado. Shader compilado no lavapipe (Forward+); no PC é o Matheus
+  quem julga.
+  Direção dos canos (mesmo pedido: "a do Renegade ta meio torta e a do
+  Chimera pros lados"): tests/medir_escapes.gd acha a peça do cano ligada ao
+  ponto e mede os anéis. Renegade: o EXHAUST do jogo fica 33 cm à frente e 11
+  cm acima da boca (a fumaça nascia fora do cano), o cano sobe 4.3°; Chimera:
+  cano reto pra trás (a matriz do jogo apontava pro lado, pela curva do
+  abafador). Os dois no car.gd ESCAPE_NOSSO. O motor_treme continua separando
+  as peças pelos pontos do jogo (car.escape_jogo): com a boca no fim do cano o
+  cofre crescia e o escape do Renegade virava motor.
 
 - Sujeira (car.gd SUJEIRA, _sujeira_passo; sujeira.gd; docs Sujeira): o
   nível sobe min(v, 15)·WheelDirtRate·5e-5 a cada passo de 50 Hz com roda

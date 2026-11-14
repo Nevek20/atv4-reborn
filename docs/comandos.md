@@ -137,6 +137,7 @@ python tools/gerar_pintura.py <unpacked> BUGGY_10 assets/carros/buggy_10
 python tests/teste_pintura.py <unpacked>      :: caixas do .bed x quadros do número (12 carros) e logos do DefaultDecals
 :: o gerar_pintura também salva <carro>/camadas/ (pro Godot trocar a cor ao vivo) e assets/pintura/paleta.json
 %GODOT% --headless --path . -s res://tests/teste_pintura_jogo.gd   :: pintura montada no Godot = pintura.png (24 carros), C++ = GDScript
+%GODOT% --headless --path . -s res://tests/medir_escapes.gd -- BUGGY_10 TRUCK_12   :: direção do cano no modelo x ponto EXHAUST (RAIO=0.5, VERTICES=1)
 
 :: motores do Engine Simulator (12 .mr) e dinamômetro sem tela (Linux)
 python tools/gerar_motores.py

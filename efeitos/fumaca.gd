@@ -11,18 +11,46 @@ extends Node3D
 ##   caixa Dust0 (tools/fx_jogo.py -> assets/efeitos/fumaca.png).
 ## O que o XML não tem (era do código que não existe) é escolha nossa: a taxa
 ## (TAXA_LENTA na marcha lenta até 120/s com o motor cheio, pela carga e pelo
-## rpm) e uma saída de SAIDA m/s na direção do cano (linha 2 da matriz do
-## ponto).
+## rpm) e o movimento do gás (nov/2026, pedido do Matheus: "uma leve força
+## inicial de expulsão... o vento relativo deve influenciar... nada de mudar
+## de direção na hora"). Física NOSSA, num shader de partícula (ar parado no
+## mundo, sem vento):
+##   - sai com a velocidade da boca (carro + giro) mais um JATO na direção do
+##     cano (cone de 8°);
+##   - o ar freia o gás: a diferença pra velocidade do ar cai exp(-ARRASTO t)
+##     (nada muda na hora). Atrás do carro o ar é puxado junto (ESTEIRA:
+##     fração da velocidade do carro, some em ESTEIRA_COMP atrás da boca e
+##     ESTEIRA_LARG pro lado);
+##   - gás quente sobe (EMPUXO, esfria em ESFRIA s) e mexe (TURBULENCIA, mais
+##     forte com o vento relativo);
+##   - cresce o do XML + CRESCE_VENTO por m/s de vento e fica mais
+##     transparente quanto mais cresce (DILUI): em alta o rastro estica e
+##     dilui mais rápido.
+## Simulado antes (média de 40 partículas, a 50 Hz não muda): parado o jato
+## anda ~0.5 m pra trás e o gás sobe ~0.3 m em 0.6 s; o rastro visível (alfa
+## >= 0.05) tem 2.6 m a 18 km/h, 5.6 m a 54 e ~7 m a 100 km/h, deitado.
+## VIDA 1.2 s (o XML diz 0.5: curta demais pro gás subir e espalhar).
 
 const TEXTURA := "res://assets/efeitos/fumaca.png"
-const VIDA := 0.5
-const MAX := 60                     # MaxParticles
+const VIDA := 1.2                   # NOSSO (XML 0.5)
+const MAX := 144                    # 120/s x VIDA (o XML: 60 em 0.5 s = 120/s)
 const TAMANHO := 0.2
 const CRESCE := 0.7                 # média do ExpandRate 0.6..0.8 (m/s)
 const COR := Color(0.35, 0.35, 0.35, 0.3)
 const SOME := 0.3                   # FadeOutTime x Life
 const TAXA_LENTA := 0.15            # fração do máximo (120/s) parado
-const SAIDA := 1.0                  # m/s pra fora do cano (nosso)
+# física do gás (NOSSA, ver acima)
+const JATO := 3.0                   # m/s pra fora do cano
+const ABERTURA := 0.14              # tan(8°): cone do jato
+const ARRASTO := 6.0                # 1/s
+const ESTEIRA := 0.5                # fração da velocidade do carro no ar logo atrás
+const ESTEIRA_COMP := 1.5           # m atrás da boca (cai 1/e)
+const ESTEIRA_LARG := 0.6           # m pro lado
+const EMPUXO := 5.0                 # m/s² pra cima, gás quente
+const ESFRIA := 0.8                 # s (o empuxo cai 1/e)
+const TURBULENCIA := 1.2            # m/s² (x (1 + vento/10))
+const CRESCE_VENTO := 0.06          # m/s a mais de crescimento por m/s de vento
+const DILUI := 1.4                  # alfa x (tamanho inicial / tamanho)^DILUI
 
 var canos: Array = []
 var bases: Array = []               # boca de cada cano no frame do corpo (+Z = saída)
@@ -91,6 +119,9 @@ func seguir() -> void:
 	var pai := Transform3D()
 	if mt and mt.is_inside_tree():
 		pai = car.global_transform.affine_inverse() * mt.global_transform
+	var vc: Vector3 = car.linear_velocity
+	var com: Vector3 = car.global_transform * car.center_of_mass
+	var frente: Vector3 = xf.basis.z.normalized()      # +Z do corpo = frente do carro
 	for i in canos.size():
 		var d := Transform3D()
 		if mt and mt.is_inside_tree():
@@ -103,21 +134,23 @@ func seguir() -> void:
 			seg = Vector3.ZERO
 		antes[i] = boca.origin
 		var e: GPUParticles3D = canos[i]
-		var pm: ParticleProcessMaterial = e.process_material
+		var pm: ShaderMaterial = e.process_material
+		# o gás sai com a velocidade da boca (carro andando e girando)
+		var vb: Vector3 = vc + car.angular_velocity.cross(boca.origin - com)
+		pm.set_shader_parameter("v_boca", vb)
+		pm.set_shader_parameter("dir_saida", boca.basis.z.normalized())
+		pm.set_shader_parameter("v_carro", vc)
+		pm.set_shader_parameter("boca", boca.origin)
+		pm.set_shader_parameter("frente", frente)
 		if seg.length() < 0.002:
 			e.global_transform = boca
-			# CPU: só regrava o material quando muda (parado fica igual)
-			if pm.emission_box_extents != Vector3.ZERO:
-				pm.emission_box_extents = Vector3.ZERO
-			if pm.direction != Vector3(0, 0, 1):
-				pm.direction = Vector3(0, 0, 1)
+			pm.set_shader_parameter("meio_trecho", 0.0)
 			continue
 		var z := seg.normalized()
 		var up := Vector3.UP if absf(z.y) < 0.95 else Vector3.RIGHT
 		var b := Basis.looking_at(-z, up)          # +Z local = o trecho andado
 		e.global_transform = Transform3D(b, boca.origin - seg * 0.5)
-		pm.emission_box_extents = Vector3(0, 0, seg.length() * 0.5)
-		pm.direction = b.inverse() * boca.basis.z  # saída do cano no frame do emissor
+		pm.set_shader_parameter("meio_trecho", seg.length() * 0.5)
 
 
 ## taxa pela carga do motor (car.som_carga) e pelo rpm
@@ -132,39 +165,135 @@ func atualizar(carga: float, rpm: float) -> void:
 		e.amount_ratio = t
 
 
-func _processo() -> ParticleProcessMaterial:
-	var m := ParticleProcessMaterial.new()
-	m.direction = Vector3(0, 0, 1)
-	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX   # trecho andado no quadro (seguir)
-	m.emission_box_extents = Vector3.ZERO
-	m.spread = 8.0
-	m.initial_velocity_min = SAIDA * 0.8
-	m.initial_velocity_max = SAIDA * 1.2
-	m.gravity = Vector3.ZERO
-	m.angle_min = 0.0
-	m.angle_max = 180.0
-	m.color = COR if OS.get_environment("FUMACA_COR").strip_edges() != "1" else Color(1, 0, 0, 1)   # conferência: vermelha
-	var g := Gradient.new()
-	g.set_color(0, Color(1, 1, 1, 1))
-	g.set_color(1, Color(1, 1, 1, 0))
-	g.add_point(1.0 - SOME, Color(1, 1, 1, 1))
-	var gt := GradientTexture1D.new()
-	gt.gradient = g
-	m.color_ramp = gt
-	# 0.2 m crescendo CRESCE m/s: no fim da vida (0.2 + 0.7·0.5) / 0.2 = 2.75x
-	var c := Curve.new()
-	c.max_value = 3.0
-	c.add_point(Vector2(0, 1))
-	c.add_point(Vector2(1, (TAMANHO + CRESCE * VIDA) / TAMANHO))
-	var ct := CurveTexture.new()
-	ct.curve = c
-	m.scale_curve = ct
+static var _shader: Shader = null
+
+
+## o gás (shader de partícula, NOSSO; a conta está no cabeçalho)
+func _processo() -> ShaderMaterial:
+	if _shader == null:
+		_shader = Shader.new()
+		_shader.code = SHADER
+	var m := ShaderMaterial.new()
+	m.shader = _shader
+	var cor := COR if OS.get_environment("FUMACA_COR").strip_edges() != "1" else Color(1, 0, 0, 1)   # conferência: vermelha
+	var pars := {"jato": JATO, "abertura": ABERTURA, "arrasto": ARRASTO, "esteira": ESTEIRA,
+		"esteira_comp": ESTEIRA_COMP, "esteira_larg": ESTEIRA_LARG, "empuxo": EMPUXO,
+		"esfria": ESFRIA, "turbulencia": TURBULENCIA, "tamanho": TAMANHO, "cresce": CRESCE,
+		"cresce_vento": CRESCE_VENTO, "dilui": DILUI, "alfa": cor.a, "some": SOME}
+	for k in pars:
+		m.set_shader_parameter(k, pars[k])
+	m.set_shader_parameter("cor", Vector3(cor.r, cor.g, cor.b))
 	return m
+
+
+const SHADER := """
+shader_type particles;
+
+uniform vec3 v_boca;          // velocidade da boca no mundo (m/s)
+uniform vec3 dir_saida;       // direção do cano no mundo
+uniform vec3 v_carro;         // velocidade do carro
+uniform vec3 boca;            // boca agora (mundo)
+uniform vec3 frente;          // frente do carro (mundo)
+uniform float meio_trecho;    // metade do trecho que a boca andou no quadro
+uniform float jato;
+uniform float abertura;
+uniform float arrasto;
+uniform float esteira;
+uniform float esteira_comp;
+uniform float esteira_larg;
+uniform float empuxo;
+uniform float esfria;
+uniform float turbulencia;
+uniform float tamanho;
+uniform float cresce;
+uniform float cresce_vento;
+uniform float dilui;
+uniform float alfa;
+uniform float some;
+uniform vec3 cor;
+
+// os mesmos sorteios do ParticleProcessMaterial
+float rand_from_seed(inout uint seed) {
+	int k;
+	int s = int(seed);
+	if (s == 0) {
+		s = 305420679;
+	}
+	k = s / 127773;
+	s = 16807 * (s - k * 127773) - 2836 * k;
+	if (s < 0) {
+		s += 2147483647;
+	}
+	seed = uint(s);
+	return float(seed % uint(65536)) / 65535.0;
+}
+
+uint hash(uint x) {
+	x = ((x >> uint(16)) ^ x) * uint(73244475);
+	x = ((x >> uint(16)) ^ x) * uint(73244475);
+	x = (x >> uint(16)) ^ x;
+	return x;
+}
+
+void start() {
+	uint s = hash(NUMBER + uint(1) + RANDOM_SEED);
+	float r0 = rand_from_seed(s);
+	float r1 = rand_from_seed(s);
+	float r2 = rand_from_seed(s);
+	float r3 = rand_from_seed(s);
+	float r4 = rand_from_seed(s);
+	float r5 = rand_from_seed(s);
+	// nasce num ponto do trecho que a boca andou no quadro (rastro contínuo)
+	vec3 p = EMISSION_TRANSFORM[3].xyz + normalize(EMISSION_TRANSFORM[2].xyz) * (r0 * 2.0 - 1.0) * meio_trecho;
+	vec3 d = normalize(dir_saida);
+	vec3 a = normalize(cross(d, abs(d.y) < 0.95 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+	vec3 b = cross(d, a);
+	vec3 dd = normalize(d + (a * (r1 * 2.0 - 1.0) + b * (r2 * 2.0 - 1.0)) * abertura);
+	VELOCITY = v_boca + dd * jato * (0.8 + 0.4 * r3);
+	CUSTOM = vec4(r4 * 3.14159, 0.0, r5, tamanho);    // giro, idade, fase, tamanho
+	TRANSFORM = mat4(vec4(tamanho, 0.0, 0.0, 0.0), vec4(0.0, tamanho, 0.0, 0.0),
+		vec4(0.0, 0.0, tamanho, 0.0), vec4(p, 1.0));
+	COLOR = vec4(cor, alfa);
+}
+
+void process() {
+	float idade = CUSTOM.y + DELTA;
+	CUSTOM.y = idade;
+	if (idade >= LIFETIME) {
+		ACTIVE = false;
+	}
+	vec3 p = TRANSFORM[3].xyz;
+	// ar: parado, menos atrás do carro (esteira puxada junto)
+	vec3 rel = p - boca;
+	float atras = -dot(rel, frente);
+	vec3 lat = rel + frente * atras;
+	float w = esteira * exp(-max(atras, 0.0) / esteira_comp) * exp(-dot(lat, lat) / (esteira_larg * esteira_larg));
+	vec3 ar = v_carro * w;
+	vec3 vr = VELOCITY - ar;
+	float vento = length(vr);
+	// arrasto exato (estável em qualquer FPS) + empuxo + turbulência
+	float fase = CUSTOM.z * 6.2832;
+	vec3 ruido = vec3(sin(p.y * 1.7 + TIME * 2.3 + fase), sin(p.z * 1.3 + TIME * 1.9 + fase * 1.3),
+		sin(p.x * 1.5 + TIME * 2.1 + fase * 0.7));
+	float turb = turbulencia * min(idade / 0.3, 1.0) * (1.0 + vento / 10.0);
+	VELOCITY = ar + vr * exp(-arrasto * DELTA)
+		+ (vec3(0.0, empuxo * exp(-idade / esfria), 0.0) + ruido * turb) * DELTA;
+	// cresce (mais com vento) e dilui
+	float tam = CUSTOM.w + (cresce + cresce_vento * vento) * DELTA;
+	CUSTOM.w = tam;
+	CUSTOM.x += (CUSTOM.z - 0.5) * DELTA;       // giro lento
+	TRANSFORM[0] = vec4(tam, 0.0, 0.0, 0.0);
+	TRANSFORM[1] = vec4(0.0, tam, 0.0, 0.0);
+	TRANSFORM[2] = vec4(0.0, 0.0, tam, 0.0);
+	float fim = clamp((1.0 - idade / LIFETIME) / some, 0.0, 1.0);
+	COLOR = vec4(cor, alfa * pow(tamanho / tam, dilui) * fim);
+}
+"""
 
 
 func _malha(tex: Texture2D) -> QuadMesh:
 	var q := QuadMesh.new()
-	q.size = Vector2(TAMANHO, TAMANHO)
+	q.size = Vector2.ONE                # o shader põe o tamanho (m) na escala da partícula
 	var mat := StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

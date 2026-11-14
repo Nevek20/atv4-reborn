@@ -175,7 +175,9 @@ func _load_motor_treme() -> void:
 	motor_treme = preload("res://carro/motor_treme.gd").new()
 	motor_treme.name = "MotorTreme"
 	# trucks e extras: só o escape; extra (200 mil triângulos): só busca a 1 m da boca
-	if motor_treme.separar(body_mi, points, vehicle_id, vehicle_id.begins_with("TRUCK") or motor_escondido,
+	# os pontos do jogo (escape_jogo): mover a boca da fumaça pro fim do cano
+	# (ESCAPE_NOSSO, Renegade) aumentava o cofre e o escape virava motor
+	if motor_treme.separar(body_mi, points.merged(escape_jogo, true), vehicle_id, vehicle_id.begins_with("TRUCK") or motor_escondido,
 			1.0 if _cena_glb else 0.0):
 		model_root.add_child(motor_treme)
 	else:

@@ -186,14 +186,21 @@ var _mats_pintura: Array[StandardMaterial3D] = []   # materiais com a pintura ("
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas
-# 27° pra fora. Chimera (TRUCK_12): pontos do jogo, mas o EXHAUST2 (esquerda)
-# tem a matriz copiada do da direita e soltava fumaça pra dentro do carro:
-# espelhado. Só a fumaça e o escape tremendo usam (frame do jogo: [ponto, direção])
+# 27° pra fora. Só a fumaça e o escape tremendo usam (frame do jogo: [ponto, direção])
+# (nov/2026, Matheus: "a do Renegade ta meio torta e a do Chimera pros lados")
+# medidos no modelo com o tests/medir_escapes.gd (a peça do cano ligada ao
+# ponto, centro do anel da ponta e eixo entre os anéis): Renegade, o ponto do
+# jogo fica 33 cm à frente e 11 cm acima da boca, o cano sobe 4.3°; Chimera,
+# o cano é reto pra trás (a matriz do jogo apontava pro lado, pela curva que
+# liga o abafador), boca no anel de trás
+var escape_jogo := {}              # os EXHAUST do _points.bin trocados pelo ESCAPE_NOSSO (o motor_treme separa as peças por eles, como antes)
 const ESCAPE_NOSSO := {
+	"BUGGY_10": [[Vector3(-0.605, 0.759, -3.053), Vector3(0.0, 0.0754, -0.997)],
+		[Vector3(0.605, 0.759, -3.053), Vector3(0.0, 0.0754, -0.997)]],
 	"BUGGY_12": [[Vector3(0.569, 0.644, -2.489), Vector3(0.45, 0.0, -0.89)],
 		[Vector3(-0.580, 0.644, -2.489), Vector3(-0.45, 0.0, -0.89)]],
-	"TRUCK_12": [[Vector3(0.5535, 0.6811, -2.1867), Vector3(1.0, 0.0, 0.0)],
-		[Vector3(-0.5531, 0.6811, -2.1867), Vector3(-1.0, 0.0, 0.0)]],
+	"TRUCK_12": [[Vector3(0.559, 0.690, -2.190), Vector3(0.0, 0.0, -1.0)],
+		[Vector3(-0.546, 0.695, -2.192), Vector3(0.0, 0.0, -1.0)]],
 }
 # melhoria nossa: pontos de luz no lugar dos do jogo (frame do jogo; troca
 # todos os pontos que começam com o nome). Pedidos do Matheus (out/2026), lentes

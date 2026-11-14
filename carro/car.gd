@@ -425,9 +425,11 @@ func _load_physics() -> void:
 	# do Godot por corpo(): a esquerda do jogo (x < 0) vira +X. Sem ele, no chute.
 	wheels.clear()
 	var pts := _load_points(points_file)
+	escape_jogo.clear()
 	if ESCAPE_NOSSO.has(vehicle_id):
 		for k in pts.keys():
 			if String(k).begins_with("EXHAUST"):
+				escape_jogo[k] = pts[k]
 				pts.erase(k)
 				points_rot.erase(k)
 		var e: Array = ESCAPE_NOSSO[vehicle_id]
