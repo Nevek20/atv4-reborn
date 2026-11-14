@@ -15,10 +15,11 @@ freiando.p2s): corredor k (1..7) em 0x14eee80 + (k - 1) x 0x200 (+0xc
 veículo, +0x14 piloto vtable 0x5ae0d0); piloto+0x18 -> objeto com +0x30
 posição (y = 0), +0xa0 |v|; veículo+0x9d4 = corpo; corpo+0x364 = P.
 
-A rota: zero da IA = centro +0x5c do link (DAT_0055155c = 0: a pista vai de
--largura/2 a +largura/2 (+0x24) em volta do ponto +0x00, no eixo normal x
-direção; o zero fica em |centro - borda| / largura, 0x32a8d0). Sem bloco
-extra (+0x48 = 0), o próprio ponto.
+A rota: zero da IA = centro +0x5c do link. Durante o update dos pilotos
+(0x3525f8) DAT_0055155c = 1 (no save state aparece 0): a borda esquerda é o
+ponto +0x00 + eixo (normal x direção) x largura esquerda do bloco (+0x68) e
+o zero fica em |centro - borda| / largura (0x32a8d0). Sem bloco extra (+0x48
+= 0), o próprio ponto.
 """
 
 import json
@@ -62,7 +63,7 @@ def main():
             return l["p"]
         x = cross(l["n"], l["dir"])
         x = mul(x, 1.0 / norm(x))
-        borda = sub(l["p"], mul(x, l["largura_total"] * 0.5))
+        borda = add(l["p"], mul(x, l["largura"][0]))
         return add(borda, mul(x, norm(sub(l["centro"], borda))))
 
     pts = [zero(links[k]) for k in ordem]

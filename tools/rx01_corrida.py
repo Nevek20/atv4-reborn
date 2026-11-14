@@ -12,10 +12,10 @@ Fontes (Levels/RX_01/Event/Rallycross, data/arquivos.tsv):
     pra um lado e +0x38 4 pro outro (-1 = nenhuma; +0x28 = "prox"), +0x48 tem
     bloco extra (68 de 75), +0x4c bloco (0x32a990): limite de velocidade em
     mph (-1 em todos = nenhum; vale 1..150 mph), +0x5c centro, +0x68 / +0x6c
-    largura à esquerda (negativa) / direita. Com DAT_0055155c = 0 (RAM do
-    RX01) o jogo NÃO usa as larguras do bloco: a pista vai de -largura/2 a
-    +largura/2 em volta do ponto e o zero da IA (0x32a8d0) é o centro +0x5c
-    (sem bloco: o meio, o próprio ponto). Depois, 24 bytes por link (todos
+    largura à esquerda (negativa) / direita. Pra IA (o 0x3525f8 liga
+    DAT_0055155c = 1) a pista vai dessas larguras do bloco e o zero
+    (0x32a8d0) é o centro +0x5c; sem bloco, -+largura/2 em volta do ponto e
+    o zero no meio (o próprio ponto). Depois, 24 bytes por link (todos
     iguais no RX01: 1, 1.0, -1, -1, -1, 0).
   #7c14cf48 (raw/12289+366) XML dos checkpoints: 1 CP (Type 2) na linha de
     chegada, AILink 50.

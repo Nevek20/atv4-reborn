@@ -1436,9 +1436,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     jogo (0x34cea8) também é outro: a mesma escala pra todos os rivais da
     frente (de trás), pela distância do jogador pro carro LOGO à frente
     (atrás), e o bônus da Skill acima de 0.5. (2) O zero da IA é o CENTRO
-    +0x5c do link, não a volta gravada: com DAT_0055155c = 0 a pista é
-    +-largura/2 (+0x24, que é LARGURA e não velocidade) em volta do ponto e o
-    zero fica no centro. Na RAM o alvo da direção de 4 dos 7 rivais está a
+    +0x5c do link, não a volta gravada: a pista vai das bordas do bloco
+    extra (o +0x24 é LARGURA e não velocidade; conta pros links sem bloco) e
+    o zero fica no centro. Na RAM o alvo da direção de 4 dos 7 rivais está a
     0.0 m dele. Com o centro, a velocidade-alvo bate 0..5% em 11 de 14
     rivais (corrida_no_normal + freiando) e a lei dá os pedais crus da RAM.
   - O espalhamento NOSSO (-4.8..4.8 m por rival) virou o do jogo: só Skill <
@@ -1453,6 +1453,26 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     o rival no jogador e ele decola num barranco a 17..21 m (sem contato).
     O teste é do resolvedor: roda com os rivais sem catchup.
   - Aprovado pelo Matheus jogando (nov/2026: "ficou muito bom").
+- IA, largada (nov/2026, item 1 do Matheus; docs/engenharia_reversa.md,
+  Estados do corredor): a "demora na largada pela posição" que eu tinha
+  achado (0x352c98) NÃO é da largada: é do estado 4 (sua chegada) e só em
+  outros tipos de evento. A demora de verdade (0x353750, base + 0.3 +- 0.15
+  s) só existe com um contador que é 0 offline: no jogo o rival sai no Go!
+  junto com todos. Na contagem ele fica "esperando" (alvo 0, pedais 0); o
+  nosso acelera no último segundo (NOSSO).
+  - Achado no caminho: o update dos pilotos (0x3525f8) liga DAT_0055155c =
+    1 enquanto roda a IA; o save state mostra 0 porque é tirado fora dele.
+    Então a borda da pista pra IA é a do bloco extra (+0x68/+0x6c), não
+    -+largura/2 (diferem até 2.7 m à esquerda e 5 m à direita). O zero
+    muda no máximo 1 cm (a validação da RAM continua igual).
+  - teste_ia, 8 sementes (56 voltas de rival), reposições:
+      borda do bloco + largada fiel 6; -+largura/2 + largada fiel 9;
+      borda do bloco + ronco NOSSO 3; -+largura/2 + ronco (o de ontem) 6.
+    A borda do jogo é melhor nas duas. A largada fiel engaveta o bolo no
+    grampo (~500 m) porque falta o comportamento de seguir do jogo: fica o
+    ronco NOSSO até portar o seguir, aí refazer a conta.
+  - Portado: bordas do bloco no desvio, catchup desligado na sua chegada
+    (s = 0: potência x1, subesterço x2). bench igual com ATV4_CPP=0 e 1.
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
@@ -1796,9 +1816,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
 - IA: os outros 7 comportamentos do cérebro (seguir, ultrapassar... 0x35e758;
-  o desvio pra passar é NOSSO), quando o 0x360550 sorteia de novo, a demora
-  da largada pela posição (0x352c98 +0x158) e a flag +0xc do catchup (0
-  nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
+  o desvio pra passar é NOSSO; com o seguir, tirar o ronco NOSSO da
+  contagem e medir de novo), quando o 0x360550 sorteia de novo e a flag
+  +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
 - Reposição: falta o efeito na tela/câmera na hora de repor, o pedido

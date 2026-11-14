@@ -202,15 +202,21 @@ Pista RX01
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
   Fardo fica dormindo até alguém bater (o 1º passo do motor acorda corpo
   novo: objetos_rx01 põe pra dormir de novo) e dorme quase parado (NOSSO).
-- IA: o zero da rota é o CENTRO +0x5c do link (DAT_0055155c = 0; a pista é
-  +-largura/2 em volta do ponto +0x00, e o +0x24 é a LARGURA, não
-  velocidade). Pedais = (v_alvo - v) x 0.2 (0x34ed10), v_alvo = arcos de
-  bicicleta até o zero (0x359eb8 / 0x214328); re/ia_alvo_ram.py confere com
-  a RAM. Catchup do jogo (0x34cea8) vai na física do rival: potência x
-  (1 + s), subesterço x (2 - 2s) (car.gd mult_pot / mult_sub, o C++ lê; 1
-  no jogador). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
+- IA: o zero da rota é o CENTRO +0x5c do link e a borda é a do bloco extra
+  (+0x68/+0x6c: o update dos pilotos 0x3525f8 liga DAT_0055155c = 1, o save
+  state mostra 0); o +0x24 é a LARGURA (link sem bloco), não velocidade.
+  Pedais = (v_alvo - v) x 0.2 (0x34ed10), v_alvo = arcos de bicicleta até o
+  zero (0x359eb8 / 0x214328); re/ia_alvo_ram.py confere com a RAM. Catchup
+  do jogo (0x34cea8) vai na física do rival: potência x (1 + s), subesterço
+  x (2 - 2s) (car.gd mult_pot / mult_sub, o C++ lê; 1 no jogador; s = 0 na
+  sua chegada). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
   freio, +0xa4 acel, +0xa8 dir). NOSSO: desvio pra ultrapassar, ré/preso/
   capotado, o sorteio da Skill 1 vez por corrida.
+- Largada da IA: no jogo (offline) o rival sai no Go! sem demora nenhuma e
+  fica parado na contagem ("esperar", alvo 0). O contador por posição do
+  0x352c98 é da chegada, em outros tipos de evento. Ronco no último segundo
+  da contagem = NOSSO até ter o comportamento de seguir (sem ele o bolo
+  engaveta no grampo: 6 x 3 reposições em 8 sementes).
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
   depois; você larga em 8º.
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;

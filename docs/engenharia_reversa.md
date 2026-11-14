@@ -1080,15 +1080,37 @@ vazios). Tudo vem do evento:
     girado pelo quatérnio do link = normal x direção; largura: com
     DAT_0055155c = 1, as do bloco extra (+0x20/+0x24 = arquivo +0x68/+0x6c);
     senão -+ link+0x40 / 2 (arquivo +0x24: a LARGURA, 25..34 m, não é
-    velocidade). Na RAM DAT_0055155c = 0. Desvio 0 (0x32ab40 + 0x32a8d0) =
+    velocidade). O 0x3525f8 (update dos pilotos) liga DAT_0055155c = 1 antes
+    de rodar os rivais e desliga no fim (por isso o save state mostra 0):
+    pra IA valem as do bloco. Desvio 0 (0x32ab40 + 0x32a8d0) =
     fração |centro +0x5c - borda esquerda| / largura (sem bloco: 0.5). Ou
-    seja: o ZERO da IA é o centro +0x5c, não a volta gravada. Conferido: o
+    seja: o ZERO da IA é o centro +0x5c, não a volta gravada (com as bordas
+    do bloco ou com -+largura/2 o zero muda no máximo 1 cm). Conferido: o
     alvo da direção de 4 dos 7 rivais fica a 0.0..0.3 m dele nas 2 RAMs; a
     velocidade-alvo bate 0..5% em 11 dos 14 (2 "retas" exatas; os 2 fora são
     lateral perto dos 4 m, onde a nossa posição na rota decide).
   - O desvio de 0.25/0.75 do alcance e o +0xc0 do objeto (~3 m, frente do
     carro) que o 0x359730 soma: com a nossa posição na rota (projeção do CoM)
     a RAM bate melhor sem ele (o alvo da direção cai a 0.5 x |v| do carro).
+- Estados do corredor e largada da IA (nov/2026). O +0 do corredor (objeto
+  0x160 de 0x352ac8, um por carro; +4 o corredor do jogo, +0x14 o piloto,
+  +0x144 catchup) é um ESTADO, gravado por 0x352ef0 pra todos de uma vez via
+  0x352790(gerente, estado): 0 ao montar (0x3522b0), 1 preparando a corrida
+  (0x17b588), 2 contagem (0x17b848), 3 correndo (0x17b8f0; é o que as 2 RAMs
+  mostram), 4 chegada do jogador (0x4ced48 / 0x4cf310: grava o tempo de
+  chegada (0x4d10b0) e desliga o catchup: gerente +0x10 = 0, 0x34cea8 põe s =
+  0 em todo rival, sem bônus). "Esperar" (comportamento 0x364960, prioridade
+  0x364b08, update 0x3649d0 = alvo 0 em frente do carro): ativo no estado 0,
+  no 4 em modo 15, com corredor+0x150 > relógio (DAT_007f4820+0x24) ou com o
+  carro travado (veículo+0xa78 = 0, a contagem). Demora da largada: ao entrar
+  no estado 1 o 0x353750 grava +0x150 = DAT_00553dd4 + 1.2 / 4 + sorteio [-0.15,
+  0.15] s (DAT_00553dd4 do 0x543740: sorteio [0, 2) ou 2.0), mas só com
+  DAT_00553dd0 >= 1, o número de objetos da classe 0x5fffc8 (0x542f10,
+  região 0x54xxxx, deve ser rede); offline é 0 (as 2 RAMs): o rival sai no
+  Go! sem demora. O contador por posição do 0x352c98 (+0x154 / +0x158 = (n -
+  posição - 1) x 0.05 s, até 0.5) é do estado 4 e só com 0x1717c0 (tipo de
+  evento +8 = 5..8, 13 ou 15, 0x4b1b50); no Rallycross o tipo é 1 (RAM): na
+  chegada os rivais seguem correndo.
 - Catchup e Skill aplicados (nov/2026, RAM corrida_no_normal). Gerente em
   0x14efc80: [0] linha da tabela 0x5ada80, [1] n corredores, [2] lista dos
   structs (0x30 cada; jogador 1º), [3] desligado, [4] ligado, [5] modo, +0x18

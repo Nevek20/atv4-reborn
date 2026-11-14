@@ -6,7 +6,8 @@ extends Node
 ##    (por onde um carro passou, até 12 m fora do centro), a LARGURA da pista
 ##    (+0x24) e o centro (+0x5c, no bloco extra). O progresso da corrida conta
 ##    pelos pontos (volta = 1810.4 m, igual ao jogo); a IA pilota pelo ZERO da
-##    rota, que no jogo é o centro (DAT_0055155c = 0, 0x32a8d0; lat_zero).
+##    rota, que no jogo é o centro (0x32a8d0; lat_zero), dentro das bordas do
+##    bloco extra (+0x68/+0x6c; DAT_0055155c = 1 durante a IA, 0x3525f8).
 ##  - Pilotos: Setup/AIPlayers.xml (nome, Skill, classes; Rivalry POTENTIAL).
 ##  - Catchup: o evento Rallycross usa o perfil STDH_04 no Normal
 ##    (Setup/Ai/ctchup_RALLYCROSS.xml + CatchupDatabase.xml).
@@ -40,8 +41,8 @@ extends Node
 ##    contramão: a regra do jogo, pista/reposicao.gd, igual à do jogador);
 ##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe);
 ##  - desvio: carro até OLHA_CARRO m à frente e mais lento -> vai pro lado
-##    com mais espaço (dentro de +-largura/2 da linha, a borda do jogo,
-##    menos a MARGEM); sem espaço, acompanha a velocidade dele.
+##    com mais espaço (dentro das bordas do bloco extra, as do jogo, menos a
+##    MARGEM); sem espaço, acompanha a velocidade dele.
 
 const ARQ := "res://data/ia.json"
 const Reposicao := preload("res://pista/reposicao.gd")
@@ -104,7 +105,8 @@ var main
 var corrida
 var dados := {}
 var linha: Array = []            # pontos da linha (mundo), na ordem da corrida
-var larg: Array = []             # largura da pista em cada link (+0x24, m; a que o jogo usa)
+var b_lo: Array = []             # bordas da pista no link, m pro lado da linha (o sinal do
+var b_hi: Array = []             # _lateral): as do bloco extra, as que a IA usa (0x3525f8)
 var lat0: Array = []             # zero da IA (0x32a8d0: o centro +0x5c) pro lado da linha, m
 var acc: Array = []              # distância acumulada até cada ponto (m, plano)
 var esq: Array = []              # largura do AIT a partir do ponto da linha: esquerda (-) e
@@ -129,7 +131,6 @@ func montar(c) -> bool:
 		ls.reverse()
 	for l in ls:
 		linha.append(c.mundo(l.p))
-		larg.append(float(l.get("largura_total", 30.0)))
 	comp = 0.0
 	for i in linha.size():
 		acc.append(comp)
@@ -141,6 +142,11 @@ func montar(c) -> bool:
 		dir.append(float(ls[i].largura[1]))
 		var z := _zero_jogo(ls[i])
 		lat0.append(_lateral(c.mundo([z.x, z.y, z.z]), acc[i]))
+		var bb: Array = _bordas_jogo(ls[i])
+		var e1 := _lateral(c.mundo([bb[0].x, bb[0].y, bb[0].z]), acc[i])
+		var e2 := _lateral(c.mundo([bb[1].x, bb[1].y, bb[1].z]), acc[i])
+		b_lo.append(minf(e1, e2))
+		b_hi.append(maxf(e1, e2))
 	if _cpp:
 		_cpp.bordas(esq, dir)
 	batidas = preload("res://carro/batida_carros.gd").new()
@@ -199,21 +205,32 @@ func ponto(s: float) -> Vector3:
 	return a.lerp(b, (s - acc[i]) / maxf(l, 1e-6))
 
 
-## zero da IA no link (coordenadas do jogo). Com DAT_0055155c = 0 (RAM) a
-## pista vai de -largura/2 a +largura/2 (+0x24) em volta do ponto, no eixo X
-## do link (normal x direção, 0x32a338 / 0x32a418), e o zero fica na fração
-## |centro +0x5c - borda| / largura (0x32a8d0); sem bloco extra, no meio (o
-## ponto). Conferido no save state com rivais: o alvo da direção de 4 dos 7
-## fica a 0.0 m dessa linha (o resto tem desvio próprio)
+## bordas do link (coordenadas do jogo): o 0x3525f8 liga DAT_0055155c = 1
+## enquanto roda os pilotos, então pra IA a borda é o ponto + eixo X do link
+## (normal x direção, 0x32a338 / 0x32a418) x largura do bloco extra (+0x68
+## esquerda, negativa / +0x6c direita); sem bloco, -+ largura (+0x24) / 2
+static func _bordas_jogo(l: Dictionary) -> Array:
+	var p := Vector3(l.p[0], l.p[1], l.p[2])
+	var d := Vector3(l.dir[0], l.dir[1], l.dir[2])
+	var nn: Array = l.get("n", [0.0, 1.0, 0.0])
+	var x := Vector3(nn[0], nn[1], nn[2]).cross(d).normalized()
+	if l.get("bloco", false):
+		return [p + x * float(l.largura[0]), p + x * float(l.largura[1])]
+	var w: float = l.get("largura_total", 30.0)
+	return [p - x * (w * 0.5), p + x * (w * 0.5)]
+
+
+## zero da IA no link (coordenadas do jogo): a fração |centro +0x5c - borda
+## esquerda| / largura (0x32a8d0); sem bloco extra, no meio (o ponto).
+## Conferido nos save states com rivais: o alvo da direção de 4 dos 7 fica a
+## 0.0 m dessa linha (o resto tem desvio próprio)
 static func _zero_jogo(l: Dictionary) -> Vector3:
 	var p := Vector3(l.p[0], l.p[1], l.p[2])
 	if not l.get("bloco", false):
 		return p
-	var d := Vector3(l.dir[0], l.dir[1], l.dir[2])
-	var nn: Array = l.get("n", [0.0, 1.0, 0.0])
-	var x := Vector3(nn[0], nn[1], nn[2]).cross(d).normalized()
-	var w: float = l.largura_total
-	var borda := p - x * (w * 0.5)
+	var bb: Array = _bordas_jogo(l)
+	var borda: Vector3 = bb[0]
+	var x: Vector3 = (bb[1] - bb[0]).normalized()
 	return borda + x * (Vector3(l.centro[0], l.centro[1], l.centro[2]) - borda).length()
 
 
@@ -233,13 +250,13 @@ func ponto_zero(s: float) -> Vector3:
 	return q + Vector3(adiante.z, 0.0, -adiante.x) * lat_zero(s)
 
 
-## largura da pista em s (+0x24 entre os links)
-func largura(s: float) -> float:
+## bordas da pista em s (m pro lado da linha), entre os links
+func bordas(s: float) -> Vector2:
 	s = fposmod(s, comp)
 	var i := _seg(s)
 	var j := (i + 1) % linha.size()
-	var l := _plano(linha[j] - linha[i]).length()
-	return lerpf(larg[i], larg[j], (s - acc[i]) / maxf(l, 1e-6))
+	var t: float = (s - acc[i]) / maxf(_plano(linha[j] - linha[i]).length(), 1e-6)
+	return Vector2(lerpf(b_lo[i], b_lo[j], t), lerpf(b_hi[i], b_hi[j], t))
 
 
 func _seg(s: float) -> int:
@@ -310,6 +327,13 @@ func rastrear(r: Dictionary, p: Vector3) -> void:
 ## jogo (o gerente roda a cada quadro e o rival aplica quando muda).
 func _catchup() -> void:
 	if catchup.is_empty():
+		return
+	# sua chegada põe os corredores no estado 4 (0x4ced48 -> 0x352790): o
+	# catchup desliga e todo rival fica em s = 0, sem bônus (0x34cea8)
+	if corrida.estado == corrida.CHEGOU:
+		for x in rivais:
+			x.cu = 0.0
+			aplicar_catchup(x.car, 0.0)
 		return
 	var d0: float = catchup.DefaultScale
 	for x in rivais:
@@ -513,7 +537,12 @@ func _physics_process(dt: float) -> void:
 				_lod(car)
 		rastrear(x.r, car.global_position)
 		if est == corrida.INTRO or est == corrida.CONTANDO:
-			# na contagem: acelera no último segundo (preso, o motor sobe)
+			# no jogo o rival fica no "esperar" (0x364b08 / 0x3649d0) com o carro
+			# travado (veículo+0xa78 = 0): alvo 0, pedais 0, e sai no Go! sem demora
+			# (offline: 0x353750 deixa +0x150 = 0). NOSSO: acelera no último
+			# segundo, até ter o comportamento de seguir do jogo; saindo todos da
+			# marcha lenta o bolo engavetava no grampo (teste_ia, 8 sementes: 6
+			# reposições x 3 com o ronco; docs/historico.md)
 			var thr := 1.0 if est == corrida.CONTANDO and corrida.t_conta < 1.0 else 0.0
 			car.test_input = {"thr": thr, "brk": 0.0, "steer": 0.0}
 			continue
@@ -733,12 +762,12 @@ func _desviar(x: Dictionary, car, dt: float, alvo: float, xf_ = null, lv_ = null
 	var f := clampf((x.r.prog - x.get("prog0", 0.0)) / JUNTA, 0.0, 1.0)
 	var d_skill: float = x.desvio if corrida.t >= SKILL_T else 0.0      # 0x3603d0
 	var base: float = lerpf(x.get("desvio0", 0.0), d_skill, f)
-	# bordas do jogo (DAT_0055155c = 0): +-largura/2 em volta da linha, contadas
-	# do zero da IA, menos a MARGEM (NOSSA; no jogo é do carro, 0x359660 +0xe)
+	# bordas do jogo (as do bloco extra, _bordas_jogo), contadas do zero da IA,
+	# menos a MARGEM (NOSSA; no jogo é do carro, 0x359660 +0xe)
 	var lz := lat_zero(s)
-	var mw := largura(s) * 0.5
-	var lo: float = maxf(-mw - lz + MARGEM, -DESVIO_MAX)
-	var hi: float = minf(mw - lz - MARGEM, DESVIO_MAX)
+	var bs := bordas(s)
+	var lo: float = maxf(bs.x - lz + MARGEM, -DESVIO_MAX)
+	var hi: float = minf(bs.y - lz - MARGEM, DESVIO_MAX)
 	var xf: Transform3D = xf_ if xf_ != null else car.global_transform
 	var b: Basis = xf.basis
 	var p: Vector3 = xf.origin
