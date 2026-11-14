@@ -365,6 +365,37 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
+## F4 (diagnóstico, NOSSO): poeira e água piscando (Matheus, nov/2026).
+## 0 normal; 1 sem o apagamento no chão (o shader não lê a profundidade da
+## tela); 2 normal com o MSAA desligado. Vale pros carros que já estão na pista
+var _diag_modo := 0
+var _diag_msaa := -1
+var _diag_label: Label = null
+func _diag_poeira() -> void:
+	_diag_modo = (_diag_modo + 1) % 3
+	var vp := get_viewport()
+	if _diag_msaa < 0:
+		_diag_msaa = vp.msaa_3d
+	vp.msaa_3d = Viewport.MSAA_DISABLED if _diag_modo == 2 else _diag_msaa
+	var carros: Array = [car]
+	if corrida and corrida.ia:
+		carros += corrida.ia.rivais.map(func(y): return y.car)
+	for c in carros:
+		if not is_instance_valid(c) or c.poeira == null:
+			continue
+		for nome in ["Nuvens", "Espirro"]:
+			var mi = c.poeira.get_node_or_null(nome)
+			if mi and mi.multimesh and mi.multimesh.mesh:
+				var mat: ShaderMaterial = mi.multimesh.mesh.material
+				mat.set_shader_parameter("chao", 0.0 if _diag_modo == 1 else c.poeira.CHAO_SUAVE)
+	if _diag_label == null:
+		_diag_label = Label.new()
+		_diag_label.position = Vector2(20, 300)
+		_diag_label.add_theme_font_size_override("font_size", 28)
+		fps_label.get_parent().add_child(_diag_label)
+	_diag_label.text = ["F4: poeira normal", "F4: poeira SEM apagar no chão (sem profundidade)", "F4: MSAA DESLIGADO"][_diag_modo]
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
@@ -376,6 +407,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 			KEY_F3:
 				_troca_cpp()
+			KEY_F4:
+				_diag_poeira()
 			KEY_C:
 				_troca_camera()
 			KEY_G:
