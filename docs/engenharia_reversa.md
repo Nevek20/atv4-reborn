@@ -1525,6 +1525,27 @@ de profundidade), sem luz e sem névoa. Não portado: SunHalo, rotationSpeed
 
 ## Pintura
 
+- Oficina de pintura (nov/2026; saves pintura.p2s e logo.p2s do Matheus, um
+  buggy): estados cPaintShopState e cLogosVehicleState (strings 0x4bdaf0,
+  0x4bdb00). Paleta = cDOFEXColourPicker com /Setup/Palette/Palette (string
+  0x498218): a Palette.bog é uma textura 8x8 de 8 bits e o que vale é o CLUT
+  de 256 (desfeito o swizzle), as 128 primeiras na ordem da tela, 16 colunas
+  x 8 linhas (o resto preto). Na RAM a paleta aparece copiada em float RGBA
+  (alfa 0.992) em 0x11942d0 / 0x1194c00 / 0x11a0980 / 0x11a12b0; a cor marcada
+  no print (coluna 16, linha 5) = 35, 188, 153 = a 80ª. Abas: BASE, PRIMARY,
+  SECONDARY, "usar cores do piloto", "padrão". Logos: as áreas do carro
+  (DecalArea das camadas Decal do XML da pintura), cada uma com os lugares 1º,
+  2º... (a k-ésima Decal), e a lista = os itens da <Classe>Logos.bed (67 no
+  buggy e no truck; na RAM do logo.p2s os nomes da BuggyLogos.bed em
+  0x1426f60..), mais "sem logo" (No_Logo) e "padrão" (Default_Custom_Logos).
+  Logos pintados na textura Detail não mudam. ATV e moto usam
+  /Setup/VehicleDecals.xml (FRONT/REAR/NOSE).
+- Remake (carro/pintura.gd, nov/2026): o gerar_pintura salva as camadas
+  (camadas/mascaras.png R = Primary, G = Secondary; detalhe.png; logos.png com
+  logos e número) e o Godot junta com as 3 cores pela conta inteira do PIL
+  (composite = DIV255(fundo x (255 - m) + cor x m), alpha_composite de 7
+  bits), igual à pintura.png pixel a pixel nos 24 carros
+  (tests/teste_pintura_jogo.gd). C++: FisicaCarro.compor_pintura.
 - Textura "white" gerada em tempo real pelas camadas do XML 150xx
   (Buggy_NN_Base/Primary/Secondary/Detail + cores + decalques + número).
   tools/gerar_pintura.py faz igual.

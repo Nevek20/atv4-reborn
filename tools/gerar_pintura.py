@@ -275,8 +275,12 @@ def decalques(img, s, src, veh, numero, log=print):
 ULTIMAS_CORES = {}
 
 
-def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, chassis_=None):
-    """pintura do veículo (Image RGB) ou None; trocar = {"BASE": (r, g, b)...}"""
+def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, chassis_=None,
+           camadas_out=None):
+    """pintura do veículo (Image RGB) ou None; trocar = {"BASE": (r, g, b)...}.
+    camadas_out: pasta onde salvar as camadas pro Godot montar a pintura em
+    tempo real (carro/pintura.gd, oficina): mascaras.png (R = primária, G =
+    secundária), detalhe.png (RGBA) e logos.png (logos e número, RGBA)."""
     prefixo = re.sub(r"^BUGGY", "Buggy", veh, flags=re.I)
     if prefixo == "Buggy_12":
         prefixo = "Lancia"          # o Storm usa as texturas Lancia_*
@@ -309,20 +313,55 @@ def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, 
     if "Base" not in camadas:
         return None
     w, h = camadas["Base"].size
-    base = cores["BASE"] or (255, 255, 255)
-    img = Image.new("RGB", (w, h), base)
-    for k, c in (("Primary", cores["PRIMARY"]), ("Secondary", cores["SECONDARY"])):
-        if k in camadas and c:
-            cam = camadas[k].resize((w, h))
-            img = Image.composite(Image.new("RGB", (w, h), c), img, cam.getchannel("A"))
-    if "Detail" in camadas:
-        cam = camadas["Detail"].resize((w, h))
-        img = Image.composite(cam.convert("RGB"), img, cam.getchannel("A"))
+    vazio = Image.new("L", (w, h), 0)
+    mascara = {k: camadas[k].resize((w, h)).getchannel("A") if k in camadas else vazio
+               for k in ("Primary", "Secondary")}
+    detalhe = camadas["Detail"].resize((w, h)) if "Detail" in camadas else Image.new("RGBA", (w, h))
+    # logos e número numa camada só (transparente fora deles), por cima do
+    # resto: a mesma conta de antes (cada um colado em cima da pintura), só
+    # que agora dá pra trocar as cores sem desenhar os logos de novo
+    logos = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     if com_decalques:
-        img = img.convert("RGBA")
-        decalques(img, s, src, veh, numero, log)
-        img = img.convert("RGB")
-    return img
+        decalques(logos, s, src, veh, numero, log)
+    if camadas_out:
+        os.makedirs(camadas_out, exist_ok=True)
+        open(os.path.join(camadas_out, ".gdignore"), "w").close()   # o Godot lê cru, sem importar
+        Image.merge("RGB", (mascara["Primary"], mascara["Secondary"], vazio)).save(
+            os.path.join(camadas_out, "mascaras.png"))
+        detalhe.save(os.path.join(camadas_out, "detalhe.png"))
+        logos.save(os.path.join(camadas_out, "logos.png"))
+    return juntar(cores, mascara["Primary"], mascara["Secondary"], detalhe, logos)
+
+
+def juntar(cores, m_prim, m_sec, detalhe, logos):
+    """base -> primária (máscara) -> secundária -> detalhe -> logos. O
+    carro/pintura.gd (e o FisicaCarro.compor_pintura) faz a MESMA conta
+    inteira do PIL (composite = DIV255, alpha_composite), pixel a pixel."""
+    w, h = detalhe.size
+    img = Image.new("RGB", (w, h), cores["BASE"] or (255, 255, 255))
+    for m, c in ((m_prim, cores["PRIMARY"]), (m_sec, cores["SECONDARY"])):
+        if c:
+            img = Image.composite(Image.new("RGB", (w, h), c), img, m)
+    img = Image.composite(detalhe.convert("RGB"), img, detalhe.getchannel("A"))
+    img = img.convert("RGBA")
+    img.alpha_composite(logos)
+    return img.convert("RGB")
+
+
+def paleta(src):
+    """as 128 cores da oficina de pintura do jogo (cDOFEXColourPicker lê
+    /Setup/Palette/Palette): o CLUT de 256 da Palette.bog, na ordem da tela
+    (16 colunas x 8 linhas; o resto é preto). Conferido com o save state
+    pintura.p2s: a cor marcada (coluna 16, linha 5) = 35, 188, 153."""
+    arqs = ler_arquivos()
+    d = ler_bloco(src, arqs, "Setup/Palette/Palette.bog")
+    import gob_tex2png as g
+    for up in g.find_uploads(d):
+        if up["dpsm"] == 0 and up["w"] * up["h"] == 256 and "tag" in up:
+            s = up["tag"] + 16
+            pal = [g.rgba32(d[s + 4 * i:s + 4 * i + 4]) for i in range(256)]
+            return [list(c[:3]) for c in g.unswizzle_clut256(pal)[:128]]
+    return None
 
 
 def main():
@@ -341,10 +380,20 @@ def main():
     a = ap.parse_args()
     trocar = {k.upper(): tuple(int(x) for x in getattr(a, k).split(","))
               for k in ("base", "primary", "secondary") if getattr(a, k)}
-    img = montar(a.src, a.veh, trocar, a.numero, not a.sem_decalques, chassis_=a.chassis)
+    img = montar(a.src, a.veh, trocar, a.numero, not a.sem_decalques, chassis_=a.chassis,
+                 camadas_out=None if trocar or a.nome != "pintura.png" else os.path.join(a.out, "camadas"))
     if img is None:
         return
     os.makedirs(a.out, exist_ok=True)
+    pp = os.path.join(PROJ, "assets", "pintura", "paleta.json")
+    if not os.path.exists(pp):
+        pal = paleta(a.src)
+        if pal:
+            os.makedirs(os.path.dirname(pp), exist_ok=True)
+            import json
+            with open(pp, "w", encoding="utf-8") as f:
+                json.dump(pal, f)
+            print(f"[+] paleta da oficina ({len(pal)} cores) em {pp}")
     dst = os.path.join(a.out, a.nome)
     img.save(dst)
     print(f"[+] salvo {dst} ({img.width}x{img.height})")

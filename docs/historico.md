@@ -42,6 +42,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   tem chaves de moto). Depois de gerar, o Godot precisa reimportar a
   pintura.png (abrir o editor ou `--headless --import`), senão usa a velha.
 
+- Oficina de pintura (nov/2026, ciclo 1: as cores). No jogo: Garage ->
+  Vehicle -> Paint Shop (base, primária, secundária, "usar cores do piloto",
+  "padrão") e Logos (áreas com lugares 1º, 2º..., logo da lista ou nenhum).
+  Rider -> Paint Shop fica pra depois (o Matheus: "primeiro o carro precisa
+  mudar de cor"). Fontes: saves pintura.p2s e logo.p2s + prints do Matheus
+  (docs/engenharia_reversa.md, Pintura). Paleta = 128 cores fixas do jogo
+  (Palette.bog, 16 x 8), não RGB livre. O gerar_pintura salva as camadas e o
+  carro/pintura.gd junta no Godot com a mesma conta inteira do PIL: com as
+  cores de fábrica sai igual à pintura.png nos 24 carros (0 pixel diferente;
+  o próprio gerar_pintura passou a montar pelas camadas e deu idêntico ao de
+  antes). GDScript 187 ms por carro, C++ (FisicaCarro.compor_pintura) ~1 ms.
+  NOSSO: a tela (menu/oficina.gd, tecla O até ter a Garagem), salvar por
+  carro em user://oficina.json (o jogo guarda no perfil) e só o jogador usar
+  as cores salvas (rivais: AIPlayerColours.xml, próximo ciclo).
+
 - Cor do vértice (car.gd COR_VERTICE, material_do_jogo): o .pingu tem RGBA
   por vértice (0x80 = 1.0, até 2.0) e o PS2 multiplica a textura por ela:
   sombra "assada" do modelo e a cor das lanternas. Até out/2026 o remake

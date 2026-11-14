@@ -125,6 +125,10 @@ func _load_model() -> void:
 	var lp := model_path.get_base_dir().path_join(livery_file)
 	if ResourceLoader.exists(lp):
 		livery = load(lp)
+	if not cores_pintura.is_empty():
+		var t := _textura_pintura(cores_pintura)
+		if t:
+			livery = t
 	for i in mesh.get_surface_count():
 		var m := mesh.surface_get_material(i)
 		if glb:
@@ -137,6 +141,7 @@ func _load_model() -> void:
 			m2.albedo_color = Color(0.85, 0.85, 0.85)
 		if livery and m and m.resource_name.ends_with("_white"):
 			m2.albedo_texture = livery
+			_mats_pintura.append(m2)
 		# textura com furo no jogo (redes das janelas, treliça do Trident):
 		# tools/alfa_texturas.py devolve o alfa e aqui vira recorte
 		if m2.albedo_texture and _tem_alfa(m2.albedo_texture):
@@ -667,6 +672,35 @@ func _load_pedras() -> void:
 	if not pedras.montar(self):
 		pedras.queue_free()
 		pedras = null
+
+
+## oficina: pinta o carro com estas cores ({} = de fábrica) na hora, sem
+## recarregar o modelo. false = carro sem as camadas (rodar o gerar_pintura)
+func pintar(cores: Dictionary) -> bool:
+	var t := _textura_pintura(cores)
+	if t == null or _mats_pintura.is_empty():
+		return false
+	cores_pintura = cores.duplicate()
+	for m in _mats_pintura:
+		m.albedo_texture = t
+	if lascas:
+		lascas.cor = preload("res://efeitos/lascas.gd").cor_base(self)
+	return true
+
+
+## a pintura deste carro dá pra trocar (camadas do gerar_pintura e malha com "white")
+func tem_camadas() -> bool:
+	if _pintura == null:
+		_pintura = preload("res://carro/pintura.gd").carregar(model_path.get_base_dir(), livery_file)
+	return _pintura != null and not _mats_pintura.is_empty()
+
+
+func _textura_pintura(cores: Dictionary) -> ImageTexture:
+	if _pintura == null:
+		_pintura = preload("res://carro/pintura.gd").carregar(model_path.get_base_dir(), livery_file)
+	if _pintura == null:
+		return null
+	return ImageTexture.create_from_image(_pintura.montar(cores))
 
 
 func _load_lascas() -> void:

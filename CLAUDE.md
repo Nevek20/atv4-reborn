@@ -56,9 +56,11 @@ carro/               o carro
   motor_anima.gd       ventoinhas, polias e correia girando (melhoria nossa)
   luzes.gd, farol.gd   lanterna de freio, ré e farol acesos (melhoria nossa)
   sujeira.gd           sujeira do jogo na pintura e lama nas rodas
+  pintura.gd           pintura montada em tempo real (camadas do gerar_pintura + 3 cores; oficina)
   batida_carros.gd     carro com carro (esferas do VehicleVehicle.hsc, lasquinha e som)
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
+menu/                oficina.gd (pintura do carro, tecla O até ter a Garagem; a tela é nossa)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida)
@@ -145,6 +147,10 @@ Arquivos, modelos e pintura
 - Cor do vértice do .pingu (0x80 = 1.0, até 2.0) multiplica a textura.
   Alfa: só mesh_grey, Buggy_05_framework e driver têm furo.
 - Texturas .gob com mipmap: o nível 0 começa no 0x15c.
+- Oficina: paleta = as 128 cores fixas do jogo (CLUT da Palette.bog, 16 x 8).
+  A pintura montada no Godot (carro/pintura.gd, C++ compor_pintura) tem que
+  sair igual à pintura.png (teste_pintura_jogo): mudou a conta no
+  gerar_pintura.juntar, muda nos dois. Cores salvas só no carro do jogador.
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.

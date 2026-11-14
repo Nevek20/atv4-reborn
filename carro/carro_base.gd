@@ -178,6 +178,11 @@ var pedras: Node3D = null
 # base da pintura; lascas.gd): o casco batendo no chão ou parede a >= 30 mph
 const LASCAS := true
 var lascas: Node3D = null
+# oficina de pintura (carro/pintura.gd): base, primária e secundária. {} = as
+# de fábrica (pintura.png); o main põe as salvas do jogador antes do _ready
+var cores_pintura := {}
+var _pintura = null               # camadas (carro/pintura.gd), na 1ª vez que precisa
+var _mats_pintura: Array[StandardMaterial3D] = []   # materiais com a pintura ("white")
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas

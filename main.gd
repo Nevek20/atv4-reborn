@@ -198,6 +198,8 @@ func _ready() -> void:
 	layer.add_child(fps_label)
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 	_make_menu(layer)
+	oficina = preload("res://menu/oficina.gd").new(self)   # O: pintura (provisório até ter a Garagem)
+	layer.add_child(oficina)
 	cam_piloto = CameraPiloto.new()
 	cam_piloto.name = "CameraPiloto"
 	add_child(cam_piloto)
@@ -245,6 +247,7 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	var v: Dictionary = frota()[i]
 	car = Car.new()
 	configurar(car, v)
+	car.cores_pintura = preload("res://carro/pintura.gd").salvas(car.chave())   # oficina (só o jogador)
 	car.terrain = terrain
 	car.objetos = objetos
 	if objetos:
@@ -380,6 +383,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_troca_camera()
 			KEY_G:
 				cam_piloto.ligado = not cam_piloto.ligado
+			KEY_O:
+				oficina.abrir()
 			KEY_R:
 				if corrida and corrida.botao_repor():
 					return              # na corrida: o botão de reposição do jogo
@@ -442,6 +447,7 @@ func _troca_camera() -> void:
 
 
 # ------------------------------------------------------------ menu de carros
+var oficina                              # menu/oficina.gd (pintura do carro)
 var menu: ItemList
 var menu_idx := []                       # linha do menu -> índice em frota()
 
@@ -541,7 +547,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   O: pintura   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]

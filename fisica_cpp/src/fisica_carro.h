@@ -19,6 +19,8 @@
 #include <godot_cpp/variant/transform3d.hpp>
 #include <godot_cpp/variant/packed_vector3_array.hpp>
 #include <godot_cpp/variant/packed_float64_array.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/variant/packed_int32_array.hpp>
 
 #include <map>
 #include <vector>
@@ -145,6 +147,9 @@ public:
 	// contatos das esferas de dois carros (batida_carros.gd)
 	static Array contatos_esferas(Transform3D xa, PackedVector3Array ca, PackedFloat64Array ra,
 			Transform3D xb, PackedVector3Array cb, PackedFloat64Array rb);
+	// pintura do carro (pintura.cpp; carro/pintura.gd tem a mesma conta)
+	static PackedByteArray compor_pintura(const PackedByteArray &masc, const PackedByteArray &det,
+			const PackedByteArray &logos, const PackedInt32Array &cores);
 
 	void configurar(Object *car);
 	// motor e câmbio (motor.cpp)
