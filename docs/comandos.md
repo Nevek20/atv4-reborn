@@ -209,5 +209,3 @@ GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
 no fim (e a soma do som), e com 0 e 1 tem que sair igual (e o rodar_testes
 idêntico). Visual, tremida, som do piloto/suspensão e vozes do som do jogo:
 tests/teste_cpp.gd.
-
-Teclas de diagnóstico no jogo: F4 alterna a poeira/água entre normal, sem o apagamento no chão (o shader não lê a profundidade) e com o MSAA desligado (main.gd _diag_poeira).

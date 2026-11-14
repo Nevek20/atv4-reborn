@@ -1825,6 +1825,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   mão por cima. Correção: physics_interpolation_mode OFF nas MultiMesh da
   poeira, espirro, pedras, lascas e palha (a fumaça já era OFF e não
   piscava).
+  APROVADO pelo Matheus (nov/2026): "FOIIIII", não pisca mais. O F4 de
+  diagnóstico saiu.
 - Otimização, 4ª rodada (nov/2026, Matheus já cravado em 240 FPS; o alvo é
   o quadro com passo de física, que no PC dele ficava em cima dos 4.17 ms):
   - Som 3D: 219 tocadores 3D na corrida, até ~110 tocando juntos. Cada um
