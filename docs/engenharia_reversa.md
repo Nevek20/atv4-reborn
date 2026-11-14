@@ -1540,6 +1540,17 @@ de profundidade), sem luz e sem névoa. Não portado: SunHalo, rotationSpeed
   0x1426f60..), mais "sem logo" (No_Logo) e "padrão" (Default_Custom_Logos).
   Logos pintados na textura Detail não mudam. ATV e moto usam
   /Setup/VehicleDecals.xml (FRONT/REAR/NOSE).
+- Cores dos rivais (nov/2026): o gerente dos pilotos da IA (DAT_007f5a90,
+  construtor 0x35a8d0) carrega o /Setup/AIPlayerColours.xml (0x35a500 ->
+  0x35a668: objeto +0x104 quantos, +0x110 os conjuntos de 0x30 = base,
+  primária, secundária em float RGBA; "Found %d AI Player Colour Sets").
+  27 conjuntos x 86 pilotos no AIPlayers.xml (não tem ligação fixa). NO
+  RX01 OFFLINE NÃO USA: nos 4 dumps da corrida a BASE da pintura de cada
+  carro (veículo+0x9d0 -> +0xc4 -> +0x78 -> +0xb0, a mesma das lasquinhas)
+  é a de fábrica do XML 150xx nos 8 (BUGGY_11, 01, 02, 04, 03, 02, 04, 01),
+  nenhuma bate com um conjunto, e nada na RAM aponta pra tabela (0xbf0580).
+  Carro repetido sai com a mesma pintura. Quem chama os conjuntos não foi
+  achado (outros modos: carreira, ATV/moto?).
 - Remake (carro/pintura.gd, nov/2026): o gerar_pintura salva as camadas
   (camadas/mascaras.png R = Primary, G = Secondary; detalhe.png; logos.png com
   logos e número) e o Godot junta com as 3 cores pela conta inteira do PIL

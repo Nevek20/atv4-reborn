@@ -57,6 +57,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   carro em user://oficina.json (o jogo guarda no perfil) e só o jogador usar
   as cores salvas (rivais: AIPlayerColours.xml, próximo ciclo). APROVADO pelo
   Matheus no PC: "funcionou e lindamente".
+  Cores dos rivais (pedido: "tem times no jogo e suas respectivas cores"):
+  o jogo carrega os 27 conjuntos do AIPlayerColours.xml, mas na corrida do
+  RX01 offline os 7 rivais (e o jogador) estão com a pintura de FÁBRICA nos
+  4 dumps (BASE na RAM = a do XML 150xx de cada carro; Inferno, Sphinx e
+  Mosquito repetidos com a mesma pintura). Fiel = como já estava: nada
+  mudou no código (docs/engenharia_reversa.md, Pintura).
 
 - Cor do vértice (car.gd COR_VERTICE, material_do_jogo): o .pingu tem RGBA
   por vértice (0x80 = 1.0, até 2.0) e o PS2 multiplica a textura por ela:
