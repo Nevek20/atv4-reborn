@@ -82,6 +82,21 @@ var paredes := {}                 # car.gd _paredes_do_piloto (frame do esquelet
 # a solução (giro da mão e cotovelo) é tabelada em TAB_N direções do volante
 const TAB_N := 41
 const SUAVIZA := 6          # passadas de [1 2 1]/4 na tabela (~1.7 casa)
+# pose em C++ (fisica_cpp/src/piloto.cpp, a mesma conta): null = GDScript
+var _cpp: RefCounted = null
+var _cpp_vol := false          # o C++ foi configurado já com o volante (a tabela)
+
+
+## (re)copia tudo pro C++ depois de montar (carregar, prender_no_volante)
+func _liga_cpp() -> void:
+	_cpp = null
+	_cpp_vol = false
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("PilotoCpp"):
+		_cpp = ClassDB.instantiate("PilotoCpp")
+		if not _cpp.configurar(self):
+			_cpp = null
+		else:
+			_cpp_vol = _vol
 
 
 ## monta tudo a partir de dir/piloto.json; false se o asset não existe
@@ -208,6 +223,7 @@ func carregar(dir: String, cull: int) -> bool:
 		if cnt > 0:
 			_punho[mao] = g0[mao].affine_inverse() * (soma / cnt)
 	pose(0.0)
+	_liga_cpp()
 	return true
 
 
@@ -304,6 +320,7 @@ func prender_no_volante(centro: Vector3, eixo: Vector3, raio: float) -> void:
 		_giro.append(soma / _maos.size())
 	_vol = true
 	_montar_tabela()
+	_liga_cpp()
 
 
 func no_volante() -> bool:
@@ -313,6 +330,8 @@ func no_volante() -> bool:
 ## giro do volante (rad, em volta do eixo do aro) pra direção suavizada s do
 ## remake, o mesmo que as mãos fazem no STEER_LEFT (espelhado: sinal trocado)
 func giro_volante(s: float) -> float:
+	if _cpp and _cpp_vol:
+		return _cpp.giro_volante(s)
 	var kf := _quadro(absf(s) * _dur)
 	var g := lerpf(_giro[int(kf.x)], _giro[int(kf.x) + 1], kf.y)
 	return -g if -s > 0.0 else g
@@ -338,6 +357,8 @@ func _textura(caminho: String) -> Texture2D:
 ## acompanham
 func pose(s: float, extra := 0.0) -> void:
 	if skel == null:
+		return
+	if _cpp and _cpp.pose(s, extra):
 		return
 	_anima(s)
 	if _vol:
@@ -632,14 +653,21 @@ func _cotovelo_ang(a: Vector3, w: Vector3, l1: float, l2: float, th: float, fora
 	return a + dir * x + polo * sqrt(maxf(l1 * l1 - x * x, 0.0))
 
 
-## conferência (tests/teste_volante.gd): distância de cada punho até o seu
-## ponto no aro e do cotovelo até o da animação, na pose de agora (m)
-func erro_maos(s: float, extra := 0.0) -> Array:
+## transforms globais da pose de agora, lidos do esqueleto (o pose() grava
+## lá o _lp/_lr, no GDScript ou no C++)
+func _globais_agora() -> Array:
 	var g: Array = []
 	g.resize(_pais.size())
 	for b in _pais.size():
-		var t := Transform3D(Basis(_lr[b]), _lp[b])
+		var t := Transform3D(Basis(skel.get_bone_pose_rotation(b)), skel.get_bone_pose_position(b))
 		g[b] = t if _pais[b] < 0 else g[_pais[b]] * t
+	return g
+
+
+## conferência (tests/teste_volante.gd): distância de cada punho até o seu
+## ponto no aro e do cotovelo até o da animação, na pose de agora (m)
+func erro_maos(s: float, extra := 0.0) -> Array:
+	var g := _globais_agora()
 	# o ponto de cada mão no aro girado com o volante (giro + tremida): a mão
 	# não pode escorregar (nov/2026 testamos a mão de fora parando a 40° do
 	# topo com o volante girando por baixo: no teclado, volante todo quase
@@ -658,11 +686,7 @@ func erro_maos(s: float, extra := 0.0) -> Array:
 ## pulso em relação à animação do jogo (quadro 0, graus) e pra onde o cotovelo
 ## aponta (0 = pra baixo, + = pra fora do corpo, - = pra dentro, 180 = pra cima)
 func medidas_bracos() -> Array:
-	var g: Array = []
-	g.resize(_pais.size())
-	for b in _pais.size():
-		var t := Transform3D(Basis(_lr[b]), _lp[b])
-		g[b] = t if _pais[b] < 0 else g[_pais[b]] * t
+	var g := _globais_agora()
 	var g0 := _globais_quadro(0)
 	var meio: Vector3 = g[skel.find_bone("upper_back")].origin
 	var out: Array = []
@@ -689,11 +713,7 @@ func medidas_bracos() -> Array:
 ## conferência: cotovelo e mão de cada braço na pose de agora (frame do
 ## esqueleto), pra medir pulos de um quadro pro outro
 func juntas_bracos() -> Array:
-	var g: Array = []
-	g.resize(_pais.size())
-	for b in _pais.size():
-		var t := Transform3D(Basis(_lr[b]), _lp[b])
-		g[b] = t if _pais[b] < 0 else g[_pais[b]] * t
+	var g := _globais_agora()
 	var out: Array = []
 	for m in _maos:
 		out.append([g[m.inf].origin, g[m.mao].basis.get_rotation_quaternion()])

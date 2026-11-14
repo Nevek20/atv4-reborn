@@ -39,6 +39,10 @@ static var _db: Dictionary = {}
 static var _cache: Dictionary = {}
 static var _anterior: Dictionary = {}     # RAND_PLAY: última opção de cada grão
 static var _regs_globais: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+## vozes em C++ (fisica_cpp/src/som_jogo.cpp, a mesma conta do _vivas): um
+## só pra todos os tocadores; segue o carro_base.usar_cpp (F3)
+static var _cpp: Object = ClassDB.instantiate("SomJogoCpp") if ClassDB.class_exists("SomJogoCpp") else null
+const _CB := preload("res://carro/carro_base.gd")
 
 var volume := 1.0
 var tom := 1.0
@@ -50,6 +54,13 @@ var _vozes: Array = []            # {p, amp, loop, a1, a2, fase, nivel, vol, tom
 var _soltas: Array = []           # vozes no release (depois do parar)
 var _acum := 0.0                  # tempo que sobrou do relógio de 240 Hz
 var tocando := false
+## CPU: o som anda no máximo ~75 vezes por segundo. O PS2 atualizava o som
+## uma vez por quadro (50/60 Hz) e a mistura do Godot anda em blocos de ~10 ms:
+## a 240 FPS eram 3-4 atualizações por bloco sem diferença no que se ouve.
+## Até 75 FPS (e nos testes, a 50) é a mesma conta de antes (motor_som.gd usa
+## o mesmo passo)
+const PASSO_SOM := 1.0 / 75.0
+var _dt_som := 0.0
 
 
 static func banco() -> Dictionary:
@@ -75,15 +86,71 @@ static func existe(b: String, n: String) -> bool:
 	return not d.is_empty() and d.bancos.has(b) and d.bancos[b].has(n)
 
 
+# rival da IA (pista/ia.gd): as vozes viram AudioStreamPlayer3D presas no carro
+# (NOSSO: o jogo não foi lido; volume cheio até UNIDADE_3D m, cai com 1/d)
+var ancora: Node3D = null
+const UNIDADE_3D := 8.0
+const MAX_3D := 150.0
+
+
+## player de som: 2D (o jogador) ou 3D preso na ancora (rival). O 3D fica
+## fora do dono e some junto com ele: liga_saida = false quando o dono cuida
+## disso (as vozes do SomJogo, no _exit_tree: uma ligação por voz acumulava
+## milhares no sinal do dono numa corrida, e cada uma dava erro na saída)
+static func novo_player(dono: Node, ancora_3d: Node3D, liga_saida := true) -> Node:
+	if ancora_3d == null:
+		var p := AudioStreamPlayer.new()
+		dono.add_child(p)
+		return p
+	var q := AudioStreamPlayer3D.new()
+	q.unit_size = UNIDADE_3D
+	q.max_distance = MAX_3D
+	q.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+	# CPU: o projeto não tem Area3D (reverb, troca de bus): sem a máscara o
+	# tocador não procura área a cada atualização (era uma consulta de física
+	# por tocador tocando por passo, ~110 tocando na corrida)
+	q.area_mask = 0
+	ancora_3d.add_child(q)
+	if liga_saida:
+		dono.tree_exiting.connect(func(): if is_instance_valid(q): q.queue_free())
+	return q
+
+
+## as vozes 3D (rival) ficam na âncora, fora deste nó: somem junto com ele
+func _exit_tree() -> void:
+	if ancora == null:
+		return
+	for l in [_vozes, _soltas]:
+		for v in l:
+			if is_instance_valid(v.p):
+				v.p.queue_free()
+		l.clear()
+
+
 func tocar(b: String, n: String) -> void:
 	parar()
 	if not existe(b, n):
 		return
+	set_process(true)
 	_som = banco().bancos[b]
 	nome = n
 	tocando = true
 	_acum = 0.0
 	_novo_cursor(n, 1.0, [0, 0, 0, 0], 0)
+
+
+## silencia na hora, sem release (rival além do alcance do som 3D, onde já
+## é inaudível): os players somem e o próximo tocar() recomeça (CPU)
+func calar() -> void:
+	for l in [_vozes, _soltas]:
+		for v in l:
+			if is_instance_valid(v.p):
+				v.p.queue_free()
+		l.clear()
+	_cursores.clear()
+	tocando = false
+	nome = ""
+	set_process(false)
 
 
 ## key-off: as vozes vão pro release com o volume e o tom de agora
@@ -101,44 +168,79 @@ func parar() -> void:
 
 
 func _process(dt: float) -> void:
-	if tocando:
+	_dt_som += dt
+	if _dt_som < PASSO_SOM:
+		return
+	dt = _dt_som
+	_dt_som = 0.0
+	# CPU: sem programa andando (só os loops tocando) os ticks não fazem nada;
+	# programa novo só nasce no tocar(), que zera o _acum
+	if tocando and not _cursores.is_empty():
 		_acum += dt
 		while _acum >= 1.0 / TICK_HZ:
 			_acum -= 1.0 / TICK_HZ
 			_tick()
-	_vozes = _vivas(_vozes, dt * SPU_HZ)
-	_soltas = _vivas(_soltas, dt * SPU_HZ)
+	if _cpp and _CB.usar_cpp:
+		_vozes = _cpp.vivas(_vozes, dt * SPU_HZ, volume, ganho, tom)
+		_soltas = _cpp.vivas(_soltas, dt * SPU_HZ, volume, ganho, tom)
+	else:
+		_vozes = _vivas(_vozes, dt * SPU_HZ)
+		_soltas = _vivas(_soltas, dt * SPU_HZ)
 	if tocando and _cursores.is_empty() and _vozes.is_empty():
 		tocando = false
+	# CPU: parado e sem voz soltando, o quadro não faz nada: dorme até o
+	# próximo tocar() (eram ~32 tocadores rodando à toa todo quadro)
+	if not tocando and _vozes.is_empty() and _soltas.is_empty():
+		set_process(false)
 
 
 func _vivas(vozes: Array, ticks: float) -> Array:
-	var out: Array = []
-	for v in vozes:
-		var p: AudioStreamPlayer = v.p
+	# CPU: a lista nova só é montada quando alguma voz morre (antes, uma lista
+	# nova por quadro por tocador, mesmo vazia)
+	var out = null
+	for i in vozes.size():
+		var v: Dictionary = vozes[i]
+		var p = v.p
 		_env_anda(v, ticks)
 		if not p.playing or v.fase == 4:
 			p.queue_free()
+			if out == null:
+				out = vozes.slice(0, i)
 			continue
-		out.append(v)
+		if out != null:
+			out.append(v)
 		_aplicar(v)
-	return out
+	return vozes if out == null else out
 
 
 func _aplicar(v: Dictionary) -> void:
-	var p: AudioStreamPlayer = v.p
+	var p = v.p
 	var solta: bool = v.fase >= 3
 	var vol: float = v.vol if solta else volume * ganho * v.amp
-	p.volume_db = linear_to_db(maxf(vol * v.nivel / 32767.0, 1e-5))
-	p.pitch_scale = clampf(v.tom if solta else tom * _dobra(v), 0.05, 8.0)
+	# CPU: só regrava no player quando muda (loop parado no mesmo volume e tom
+	# regravava as 2 propriedades em todo quadro)
+	var db := linear_to_db(maxf(vol * v.nivel / 32767.0, 1e-5))
+	if db != v.get("db_ult", INF):
+		p.volume_db = db
+		v.db_ult = db
+	var pt := clampf(v.tom if solta else tom * _dobra(v), 0.05, 8.0)
+	if pt != v.get("pt_ult", INF):
+		p.pitch_scale = pt
+		v.pt_ult = pt
 
 
 ## pitch bend do 989snd (PitchBend): pb >= 0 sobe até PBHigh semitons, < 0
 ## desce até PBLow
 static func _dobra(v: Dictionary) -> float:
 	var pb: int = v.cur.pb
+	# CPU: o pow só quando o pitch bend muda (guardado na voz)
+	if pb == v.get("pb_c", 0x7fffffff):
+		return v.dobra_c
 	var semi: float = v.pb[1] * pb / 32767.0 if pb >= 0 else v.pb[0] * pb / 32768.0
-	return pow(2.0, semi / 12.0)
+	var r := pow(2.0, semi / 12.0)
+	v.pb_c = pb
+	v.dobra_c = r
+	return r
 
 
 ## fase do envelope: [exponencial, sobe, shift, passo, alvo]. ADSR1: 15 ataque
@@ -164,7 +266,15 @@ static func _fase(a1: int, a2: int, fase: int) -> Array:
 ## 0x6000 vai 4x mais devagar, descendo anda proporcional ao nível
 static func _env_anda(v: Dictionary, n: float) -> void:
 	while n > 0.0 and v.fase < 4:
-		var f := _fase(v.a1, v.a2, v.fase)
+		# CPU: a fase do envelope depende só de a1, a2 e da fase (fixos na voz):
+		# montada uma vez por fase em vez de uma lista nova a cada volta
+		var f: Array
+		if v.get("fase_c", -1) == v.fase:
+			f = v.f_c
+		else:
+			f = _fase(v.a1, v.a2, v.fase)
+			v.fase_c = v.fase
+			v.f_c = f
 		var sh: int = f[2]
 		var ciclos := float(1 << maxi(0, sh - 11))
 		var passo := float(f[3]) * float(1 << maxi(0, 11 - sh))
@@ -340,9 +450,8 @@ func _voz(t: Dictionary, c: Dictionary) -> void:
 			return
 		_vozes[k].p.queue_free()
 		_vozes.remove_at(k)
-	var p := AudioStreamPlayer.new()
+	var p = novo_player(self, ancora, false)
 	p.stream = _wav(t)
-	add_child(p)
 	var adsr: Array = t.get("adsr", ADSR_SECO)
 	var v := {"p": p, "amp": c.amp * tv / 127.0, "loop": bool(t.loop), "cur": c,
 		"pb": t.get("pb", [0, 0]), "a1": int(adsr[0]), "a2": int(adsr[1]),

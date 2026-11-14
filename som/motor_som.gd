@@ -23,12 +23,14 @@ extends Node
 ## info.csv, parte que não repete a cada ciclo do motor) ficam de fora: o
 ## off_4000 do Phantom tem 53% (o motor fica irregular ali, toda vez).
 
+const PASSO_SOM := preload("res://som/som_jogo.gd").PASSO_SOM
 const JOGO_LENTA := 1000.0
 const JOGO_CORTE := 8000.0
 const K_RPM := 0.5
 const K_OFF := 0.5
 const PISO_DB := -12.0        # nenhum loop abaixo disso (lenta ainda se ouve)
 const VOLUME_DB := -4.0        # volume geral
+var ancora: Node3D = null      # rival da IA: loops 3D presos no carro (som_jogo.novo_player)
 const SUAVE := 0.03            # s, constante de tempo da carga (sem estalo)
 const RPM_SUAVE := 0.08        # s, constante de tempo do rpm do som
 const RUIDO_MAX := 20.0        # % de ruído acima disso o loop fica de fora
@@ -44,6 +46,7 @@ var pasta := ""
 var _carga := 0.0
 var _rpm := -1.0               # rpm do jogo filtrado
 var r_real := 0.0              # conferência: rpm real tocando agora
+var _cpp: RefCounted = null    # atualizar em C++ (fisica_cpp/src/som.cpp, a mesma conta)
 
 
 ## pasta dos loops do carro pelo id do vehicles.xml: som/loops/NN_* nos
@@ -112,16 +115,25 @@ func carregar(dir: String) -> bool:
 	var alvo_le := maxf(K_RPM * (float(o0.nivel_cru_db) - ref) + K_OFF * (float(le.nivel_cru_db) - float(o0.nivel_cru_db)), PISO_DB)
 	_off.append(_tocador("lenta.wav", le, alvo_le, arq_ref))
 	_off.sort_custom(func(a, b): return a.rpm < b.rpm)
+	liga_cpp()
 	return true
+
+
+## (re)liga o atualizar em C++ conforme o carro_base.usar_cpp (F3)
+func liga_cpp() -> void:
+	_cpp = null
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("MotorSomCpp"):
+		_cpp = ClassDB.instantiate("MotorSomCpp")
+		if not _cpp.configurar(self):
+			_cpp = null
 
 
 ## um AudioStreamPlayer parado por loop; volume final = alvo - (nível do
 ## arquivo - nível do arquivo de referência)
 func _tocador(arq: String, i: Dictionary, alvo: float, arq_ref: float) -> Dictionary:
-	var p := AudioStreamPlayer.new()
+	var p = preload("res://som/som_jogo.gd").novo_player(self, ancora)
 	p.stream = _carregar_wav(pasta.path_join(arq))
 	p.name = arq.get_basename()
-	add_child(p)
 	var nivel := float(i.nivel_cru_db) + _db(i.ganho) - arq_ref
 	return {"rpm": float(i.rpm_medido), "db": minf(alvo - nivel, 6.0), "p": p, "arq": arq}
 
@@ -147,7 +159,26 @@ static func _carregar_wav(caminho: String) -> AudioStream:
 
 
 ## rpm do jogo e carga (0..1) do motor a cada quadro
+## rival além do alcance do som 3D (ia.gd): os loops param (inaudíveis); o
+## atualizar (GDScript e C++) religa os que pesam quando ele volta
+func calar() -> void:
+	for lista in [_on, _off]:
+		for s in lista:
+			if s.p.playing:
+				s.p.stop()
+
+
+var _dt_som := 0.0
 func atualizar(rpm_jogo: float, carga: float, dt: float) -> void:
+	# CPU: no máximo ~75 vezes por segundo (som_jogo.gd PASSO_SOM): até 75 FPS
+	# igual a antes; acima, o tempo acumulado entra de uma vez
+	_dt_som += dt
+	if _dt_som < PASSO_SOM:
+		return
+	dt = _dt_som
+	_dt_som = 0.0
+	if _cpp and _cpp.atualizar(rpm_jogo, carga, dt):
+		return
 	_carga += (clampf(carga, 0.0, 1.0) - _carga) * (1.0 - exp(-dt / SUAVE))
 	if _rpm < 0.0:
 		_rpm = rpm_jogo
@@ -172,7 +203,7 @@ func _camada(lista: Array, r: float, ganho: float) -> void:
 				break
 	for k in lista.size():
 		var s: Dictionary = lista[k]
-		var p: AudioStreamPlayer = s.p
+		var p = s.p
 		var w: float = pesos.get(k, 0.0) * ganho
 		if w < 0.003:
 			if p.playing:
@@ -188,7 +219,7 @@ func _camada(lista: Array, r: float, ganho: float) -> void:
 func tocando() -> Array:
 	var out: Array = []
 	for s in _on + _off:
-		var p: AudioStreamPlayer = s.p
+		var p = s.p
 		if p.playing:
 			out.append([s.arq, db_to_linear(p.volume_db - VOLUME_DB - s.db), p.pitch_scale])
 	return out

@@ -132,13 +132,64 @@ var n_cor := PackedColorArray()
 var n_cel := PackedFloat32Array()
 var buf := PackedFloat32Array()   # buffer da MultiMesh (20 floats por nuvem)
 var soltas := 0                   # nuvens soltas desde o começo (testes)
+var conjunto := "CamSubject"      # CamSubject (o jogador) ou Other (rivais)
+# CPU: a MultiMesh cresce conforme as nuvens vivas (dobra a partir de
+# CAP_INI até max_nuvens) em vez de mandar 1024 x 20 floats por carro a cada
+# quadro pra GPU. Mesmo desenho
+const CAP_INI := 64
+var cap := CAP_INI
+# nuvens guardadas e desenhadas em C++ (fisica_cpp/src/nuvens.cpp, a mesma
+# conta): null = nos arrays daqui. Segue o carro_base.usar_cpp (F3)
+var _cpp: RefCounted = null
+
+
+## (re)liga o C++ levando as nuvens que já estão no ar pro lado certo
+func liga_cpp() -> void:
+	var quer: bool = preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("NuvensCpp") and mm != null
+	if quer and _cpp == null:
+		_cpp = ClassDB.instantiate("NuvensCpp")
+		_cpp.configurar(mm, mm_agua, cap, max_nuvens)
+		for i in n_pos.size():
+			_cpp.add(n_pos[i], n_idade[i], n_vida[i], n_max[i], n_ini[i], n_alvo[i], n_a0[i], n_cor[i], n_cel[i], n_agua[i])
+		for a in [n_pos, n_idade, n_vida, n_max, n_ini, n_alvo, n_a0, n_cor, n_cel, n_agua]:
+			a.clear()
+	elif not quer and _cpp != null:
+		var d: Array = _cpp.exportar()
+		n_pos = d[0]
+		n_idade = d[1]
+		n_vida = d[2]
+		n_max = d[3]
+		n_ini = d[4]
+		n_alvo = d[5]
+		n_a0 = d[6]
+		n_cor = d[7]
+		n_cel = d[8]
+		n_agua = d[9]
+		_cpp = null
+
+
+## as nuvens vivas: [pos, idade, vida, max, ini, alvo, a0, cor, cel, agua]
+## (testes; vale com e sem C++)
+func dados() -> Array:
+	if _cpp:
+		return _cpp.exportar()
+	return [n_pos, n_idade, n_vida, n_max, n_ini, n_alvo, n_a0, n_cor, n_cel, n_agua]
+
+
+## 1 = nuvem de água, uma por nuvem viva (testes)
+func agua_vivas() -> PackedByteArray:
+	return _cpp.agua_vivas() if _cpp else n_agua
 
 
 func montar(c) -> bool:
 	car = c
 	if c.terrain == null or not FileAccess.file_exists(TEXTURA):
 		return false
-	tipos = _ler_tipos("res://data/dust.xml", "CamSubject")
+	# 0x3affb0: CamSubject = o carro da câmera (o jogador), Other = os outros
+	# (rivais: espaço 0.2/0.4 m e 2 m de longe, contra 0.15/0.1/0.1 do
+	# jogador, nuvens maiores). Até nov/2026 os rivais usavam o CamSubject
+	conjunto = "Other" if car.get("som_3d") else "CamSubject"
+	tipos = _ler_tipos("res://data/dust.xml", conjunto)
 	if tipos.is_empty():
 		return false
 	var cfg := _ler_config("res://data/dust_rx01.xml")
@@ -156,6 +207,7 @@ func montar(c) -> bool:
 	if FileAccess.file_exists(TEXTURA_AGUA):
 		mm_agua = _multimesh(TEXTURA_AGUA, "Espirro")
 	mmi = get_node("Nuvens")
+	liga_cpp()
 	return true
 
 
@@ -182,7 +234,7 @@ func _multimesh(arq: String, nome: String) -> MultiMesh:
 	m.use_colors = true
 	m.use_custom_data = true
 	m.mesh = q
-	m.instance_count = max_nuvens
+	m.instance_count = CAP_INI
 	m.visible_instance_count = 0
 	var mi := MultiMeshInstance3D.new()
 	mi.name = nome
@@ -193,6 +245,9 @@ func _multimesh(arq: String, nome: String) -> MultiMesh:
 	add_child(mi)
 	mi.global_transform = Transform3D.IDENTITY
 	return m
+
+
+var _q_folga: PhysicsRayQueryParameters3D = null   # consulta do _folga (reaproveitada)
 
 
 ## um quadro do jogo (0x225108): v = velocidade do carro (mundo)
@@ -262,9 +317,14 @@ func passo(dt: float, v: Vector3) -> void:
 ## folga da roda no ar até o chão embaixo dela (o raio da física só alcança
 ## 5 cm abaixo da roda esticada; aqui até 0.3 m, além da regra dos 0.25)
 func _folga(centro: Vector3, up: Vector3, r: float) -> float:
-	var q := PhysicsRayQueryParameters3D.create(centro, centro - up * (r + 0.3))
-	q.exclude = [car.get_rid()]
-	var hit: Dictionary = car.get_world_3d().direct_space_state.intersect_ray(q)
+	# CPU: a mesma consulta reaproveitada (era um objeto e uma lista novos por
+	# roda no ar a cada passo)
+	if _q_folga == null:
+		_q_folga = PhysicsRayQueryParameters3D.new()
+		_q_folga.exclude = [car.get_rid()]
+	_q_folga.from = centro
+	_q_folga.to = centro - up * (r + 0.3)
+	var hit: Dictionary = car.get_world_3d().direct_space_state.intersect_ray(_q_folga)
 	if hit.is_empty():
 		return 1.0
 	return maxf(centro.distance_to(hit.position) - r, 0.0)
@@ -315,105 +375,149 @@ func _emitir(e: Dictionary, p: Vector3, espaco: float, ini: float, forca: float,
 
 ## 0x3af170: uma nuvem nova
 func _nuvem(e: Dictionary, p: Vector3, idade: float, ini: float, alfa: float, cor: Color, tp: Dictionary) -> void:
-	if n_pos.size() >= max_nuvens:
+	if vivas() >= max_nuvens:
 		return
 	var idx: int = e.cont
 	e.cont = (idx + 1) % por_grupo
 	soltas += 1
+	var vida: float = tp.vidas[idx % tp.vidas.size()]
+	var ini2: float = ini + rnd.randf_range(-tp.ini_delta, tp.ini_delta)
+	var alvo2: float = tp.alvo + rnd.randf_range(-tp.alvo_delta, tp.alvo_delta)
+	var cel := float(idx % (COLUNAS * LINHAS))
+	var na := 1 if e.mat == -2 else 0
+	if _cpp:
+		_cpp.add(p, idade, vida, tp.idade_max, ini2, alvo2, clampf(alfa, 0.0, 1.0), cor, cel, na)
+		return
 	n_pos.append(p)
 	n_idade.append(idade)
-	n_vida.append(tp.vidas[idx % tp.vidas.size()])
+	n_vida.append(vida)
 	n_max.append(tp.idade_max)
-	n_ini.append(ini + rnd.randf_range(-tp.ini_delta, tp.ini_delta))
-	n_alvo.append(tp.alvo + rnd.randf_range(-tp.alvo_delta, tp.alvo_delta))
+	n_ini.append(ini2)
+	n_alvo.append(alvo2)
 	n_a0.append(clampf(alfa, 0.0, 1.0))
 	n_cor.append(cor)
-	n_cel.append(float(idx % (COLUNAS * LINHAS)))
-	n_agua.append(1 if e.mat == -2 else 0)
+	n_cel.append(cel)
+	n_agua.append(na)
 
 
 ## envelhece e desenha (0x3af590)
 func _process(delta: float) -> void:
 	if mm == null:
 		return
-	var i := 0
-	while i < n_pos.size():
-		n_idade[i] += delta
-		if n_idade[i] >= n_vida[i]:
-			_tira(i)
-		else:
-			i += 1
+	if _cpp:
+		cap = _cpp.quadro(delta, escala)
+		return
+	# envelhece e tira as mortas numa passada só (compacta e redimensiona 1
+	# vez; tirar uma por uma fazia 10 resize por nuvem). A ordem das vivas
+	# muda em relação ao jeito antigo (troca com a última): só a ordem de
+	# desenho, nuvens transparentes iguais
+	var w := 0
+	var total := n_pos.size()
+	for i in total:
+		var idade := n_idade[i] + delta
+		if idade >= n_vida[i]:
+			continue
+		if w != i:
+			n_pos[w] = n_pos[i]
+			n_vida[w] = n_vida[i]
+			n_max[w] = n_max[i]
+			n_ini[w] = n_ini[i]
+			n_alvo[w] = n_alvo[i]
+			n_a0[w] = n_a0[i]
+			n_cor[w] = n_cor[i]
+			n_cel[w] = n_cel[i]
+			n_agua[w] = n_agua[i]
+		n_idade[w] = idade
+		w += 1
+	if w != total:
+		n_pos.resize(w)
+		n_idade.resize(w)
+		n_vida.resize(w)
+		n_max.resize(w)
+		n_ini.resize(w)
+		n_alvo.resize(w)
+		n_a0.resize(w)
+		n_cor.resize(w)
+		n_cel.resize(w)
+		n_agua.resize(w)
 	var n := n_pos.size()
-	if buf.size() != max_nuvens * 20:
-		buf.resize(max_nuvens * 20)
-		buf_agua.resize(max_nuvens * 20)
+	if n > cap:
+		while cap < n:
+			cap *= 2
+		cap = mini(cap, max_nuvens)
+		mm.instance_count = cap
+		if mm_agua:
+			mm_agua.instance_count = cap
+	if buf.size() != cap * 20:
+		buf.resize(cap * 20)
+		buf_agua.resize(cap * 20)
 	var np := 0
 	var na := 0
+	# caixa das nuvens vivas (custom_aabb, como no nuvens.cpp): sem ela o
+	# Forward+ mede a MultiMesh com os espaços vazios (na origem do mundo)
+	var lo_p := Vector3.ZERO
+	var hi_p := Vector3.ZERO
+	var lo_a := Vector3.ZERO
+	var hi_a := Vector3.ZERO
+	var r_p := 0.0
+	var r_a := 0.0
+	# grava direto no buffer (escala nas 3 diagonais, posição, cor, célula):
+	# até nov/2026 montava 3 arrays por nuvem por quadro e a poeira dos 8
+	# carros custava ~3.9 ms por quadro (tests/medir_cpu.gd)
 	for k in n:
 		var tg := clampf(n_idade[k] / n_max[k], 0.0, 1.0)
-		var f := 1.0 - pow(1.0 - tg, 4.0)
+		var u := 1.0 - tg
+		var f := 1.0 - u * u * u * u
 		var tam := (n_ini[k] * (1.0 - f) + n_alvo[k] * f) * escala
 		var t := n_idade[k] / n_vida[k]
 		var a := n_a0[k] * (1.0 - t * t)
 		var p := n_pos[k]
-		var agua_k := n_agua[k] == 1 and mm_agua != null
 		var c := n_cor[k]
-		var val := [tam, p.x, p.y, p.z, c.r, c.g, c.b, a, n_cel[k]]
-		if agua_k:
-			_grava(true, na * 20, val)
+		if n_agua[k] == 1 and mm_agua != null:
+			var o := na * 20
+			buf_agua[o] = tam
+			buf_agua[o + 5] = tam
+			buf_agua[o + 10] = tam
+			buf_agua[o + 3] = p.x
+			buf_agua[o + 7] = p.y
+			buf_agua[o + 11] = p.z
+			buf_agua[o + 12] = c.r
+			buf_agua[o + 13] = c.g
+			buf_agua[o + 14] = c.b
+			buf_agua[o + 15] = a
+			buf_agua[o + 16] = n_cel[k]
+			lo_a = p if na == 0 else lo_a.min(p)
+			hi_a = p if na == 0 else hi_a.max(p)
+			r_a = maxf(r_a, tam)
 			na += 1
 		else:
-			_grava(false, np * 20, val)
+			var o := np * 20
+			buf[o] = tam
+			buf[o + 5] = tam
+			buf[o + 10] = tam
+			buf[o + 3] = p.x
+			buf[o + 7] = p.y
+			buf[o + 11] = p.z
+			buf[o + 12] = c.r
+			buf[o + 13] = c.g
+			buf[o + 14] = c.b
+			buf[o + 15] = a
+			buf[o + 16] = n_cel[k]
+			lo_p = p if np == 0 else lo_p.min(p)
+			hi_p = p if np == 0 else hi_p.max(p)
+			r_p = maxf(r_p, tam)
 			np += 1
 	if np > 0:
+		mm.custom_aabb = AABB(lo_p - Vector3(r_p, r_p, r_p), hi_p - lo_p + Vector3(r_p, r_p, r_p) * 2.0)
 		mm.buffer = buf
 	mm.visible_instance_count = np
 	if mm_agua:
 		if na > 0:
+			mm_agua.custom_aabb = AABB(lo_a - Vector3(r_a, r_a, r_a), hi_a - lo_a + Vector3(r_a, r_a, r_a) * 2.0)
 			mm_agua.buffer = buf_agua
 		mm_agua.visible_instance_count = na
-
-
-## uma nuvem no buffer da MultiMesh (escala, posição, cor, célula do atlas),
-## gravada direto no membro (um Packed*Array passado como parâmetro copia)
-func _grava(agua_b: bool, o: int, val: Array) -> void:
-	var idx := [o, o + 5, o + 10, o + 3, o + 7, o + 11, o + 12, o + 13, o + 14, o + 15, o + 16]
-	var vs := [val[0], val[0], val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7], val[8]]
-	if agua_b:
-		for j in idx.size():
-			buf_agua[idx[j]] = vs[j]
-	else:
-		for j in idx.size():
-			buf[idx[j]] = vs[j]
-
-
-func _tira(i: int) -> void:
-	var u := n_pos.size() - 1
-	n_pos[i] = n_pos[u]
-	n_idade[i] = n_idade[u]
-	n_vida[i] = n_vida[u]
-	n_max[i] = n_max[u]
-	n_ini[i] = n_ini[u]
-	n_alvo[i] = n_alvo[u]
-	n_a0[i] = n_a0[u]
-	n_cor[i] = n_cor[u]
-	n_cel[i] = n_cel[u]
-	n_agua[i] = n_agua[u]
-	n_agua.resize(u)
-	n_pos.resize(u)
-	n_idade.resize(u)
-	n_vida.resize(u)
-	n_max.resize(u)
-	n_ini.resize(u)
-	n_alvo.resize(u)
-	n_a0.resize(u)
-	n_cor.resize(u)
-	n_cel.resize(u)
-
-
-## quantas nuvens vivas (testes)
 func vivas() -> int:
-	return n_pos.size()
+	return _cpp.vivas() if _cpp else n_pos.size()
 
 
 ## Setup/Dust.xml: Dust/Vehicle/<conjunto>/Rear/<tipo>, na ordem de TIPOS

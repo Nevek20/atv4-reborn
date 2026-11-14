@@ -15,6 +15,8 @@ python tests/rodar_testes.py accel --veh 0 --hz 60                 :: passo NTSC
 :: save state do PCSX2 -> valores reais do jogo
 python tools/ler_savestate.py arquivo.p2s
 python tools/ler_savestate.py arquivo.p2s --json estado.json   :: estado do carro pro remake
+python re/ia_alvo_ram.py arquivo.p2s     :: save com rivais: velocidade-alvo e pedais do jogo x a nossa conta (coluna exe = arco 2 do 0x35a150)
+python re/ia_vizinhos_ram.py arquivo.p2s :: save com rivais: a percepção de cada um (vizinhos, setor, distâncias, tempo até bater)
 
 :: print do carro parado (na nuvem: xvfb-run -a ... --rendering-driver opengl3)
 %GODOT% --path . -s res://tests/print_tela.gd -- print.png lado
@@ -94,7 +96,17 @@ python tools/extrair_material.py <dados>/stream/RX01.000 assets/pista/terreno --
 :: objetos e céu do RX01 (posições + colisão -> data/rx01_objetos.json, Environment.xml -> data/environment_rx01.xml;
 :: modelos, texturas e cúpulas do céu -> assets/pista/rx01)
 python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois abrir o editor (importa os .obj)
-%GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: contagem, 5 voltas pelo traçado, atalho pela linha não conta
+%GODOT% --path . --write-movie corrida.avi --fixed-fps 30 -s res://tests/gravar_corrida.gd  :: vídeo da largada: intro, acelerando preso, VAI (DEPOIS=6 s, PULAR=1 pula a intro, CHECA_NAN=1 acha nó com NaN)
+%GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
+%GODOT% --headless --path . -s res://tests/teste_batida_carros.gd   :: rival a VEL km/h (50) na traseira do jogador: cascos do VehicleVehicle, empurrão, lasquinhas, som Vehicle
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro), quadro real e cada nó
+  (PERF_CARRO=1 antes: também o car.gd por parte do passo: rodas, pneus, efeitos, piloto, suspensão...)
+bash: TIMEFORMAT=%U; time $GODOT --headless --path . --fixed-fps 50 -s res://tests/bench_corrida.gd   :: CPU de uma corrida fixa de 15 s (comparar versões; PASSOS=1 = só o carregamento)
+%GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph)
+%GODOT% --headless --path . -s res://tests/teste_reposicao.gd   :: as 14 caixas de reposição do RX01: cada uma repõe na linha, chão plano, longe dos rivais
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> a cada 5 passos com o comportamento e a fase do ultrapassar, IA_TRACE_TUDO=1 todo passo); no fim, por rival, quantas vezes o ultrapassar (#5) entrou e os segundos em cada fase
+%GODOT% --path . --fixed-fps 50 -s res://tests/print_ia.gd -- ia   :: prints da corrida com rivais (QUANDO=-1,2,25: -1 = no grid)
+python tools/ia_dados.py <unpacked>             :: pilotos (AIPlayers) e catchup -> data/ia.json
 python tools/rx01_corrida.py <unpacked>          :: traçado da IA, checkpoint e voltas do RX01 -> data/rx01_corrida.json
 
 :: checar um script sem abrir o editor
@@ -157,3 +169,41 @@ funções que contêm o endereço ou referenciam a string.
 Arquivos do jogo ficam fora do repo, na pasta de engenharia reversa do
 Matheus: `C:\Users\Guida\Desktop\Estudo de programação\ATV 4 Engenharia reversa`
 (`unpacked\` com other/raw/gob/xml, o exe, os scripts antigos).
+
+No jogo: F2 = FPS + onde vai o tempo (quadro, física por passo, desenho CPU/GPU,
+chamadas de desenho, rivais), média de 0.5 s. "process" e "física" são o
+PIOR quadro/passo do último segundo (monitores do Godot), não a média.
+
+Teste de FPS com a renderização em thread separada (o desenho roda junto
+com os scripts em vez de depois deles): Projeto > Configurações do Projeto
+> Editor > Run > Main Run Args = `--render-thread separate`, F5 e comparar
+o F2 no mesmo lugar com e sem. Ou direto: `%GODOT% --path . --render-thread
+separate`. Se ficar melhor e sem defeito na tela, vai pro project.godot
+(rendering/driver/threads/thread_model).
+
+## Física em C++ (fisica_cpp/, GDExtension)
+
+As bibliotecas prontas ficam em bin/ (no git): o jogo roda sem compilar. Sem
+a biblioteca do sistema o carro usa o GDScript. Pra recompilar:
+
+```
+git submodule update --init          :: baixa o godot-cpp (1ª vez)
+pip install scons
+cd fisica_cpp
+scons platform=windows target=template_debug       :: Windows com Visual Studio (editor/F5)
+scons platform=windows target=template_release     :: Windows, jogo exportado
+:: na nuvem/Linux: scons platform=linux target=template_debug
+::                 scons platform=windows use_mingw=yes target=template_debug   (DLL do Windows via mingw)
+%GODOT% --headless --path . -s res://tests/teste_cpp.gd   :: a extensão carrega e as contas batem com o GDScript
+```
+A 1ª compilação leva uns 3 min por alvo (o godot-cpp); depois só o que mudou.
+No jogo: o F2 mostra se a biblioteca carregou ("C++: ligado/DESLIGADO/NÃO
+CARREGOU") e o F3 liga e desliga o C++ em todos os carros na hora (comparar o
+F2 no mesmo lugar). NÃO CARREGOU: veja o Output do Godot (erro do
+GDExtension) e reabra o editor depois do pull (ele registra o
+bin/atv4_fisica.gdextension na .godot/extension_list.cfg).
+Paridade do que já foi portado (motor, câmbio, pneus, rodas e molas): `set ATV4_CPP=0` volta pro
+GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
+no fim (e a soma do som), e com 0 e 1 tem que sair igual (e o rodar_testes
+idêntico). Visual, tremida, som do piloto/suspensão e vozes do som do jogo:
+tests/teste_cpp.gd.

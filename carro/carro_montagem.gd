@@ -725,6 +725,8 @@ func _load_som() -> void:
 		return
 	som = preload("res://som/motor_som.gd").new()
 	som.name = "SomMotor"
+	if som_3d:
+		som.ancora = self
 	if som.carregar(dir):
 		add_child(som)
 	else:
@@ -732,25 +734,47 @@ func _load_som() -> void:
 		som = null
 
 
-func _process(delta: float) -> void:
+## rival passou do alcance do som 3D (ia.gd, longe_som): motor e pneus param
+## na hora em vez de seguir tocando sem volume (CPU, NOSSO: no fim da 1ª
+## volta eram ~40 tocadores 3D tocando à toa). Voltando, religam sozinhos
+func calar_som() -> void:
 	if som:
+		som.calar()
+	if sfx:
+		sfx.calar()
+
+
+func _process(delta: float) -> void:
+	var _t := Time.get_ticks_usec() if perf_on else 0
+	# CPU (NOSSO, nov/2026): rival além do som 3D (150 m) não atualiza os loops
+	# do motor (não se ouve); a mais de 50 m da câmera (longe_vis, como o piloto
+	# e a suspensão) motor tremendo, ventoinhas e ponteiros do painel param
+	# (menores que um pixel). Luzes, farol, fumaça e sujeira continuam
+	if som and not longe_som:
 		som.atualizar(rpm, som_carga, delta)
+	if perf_on: _t = _pf("q: som do motor", _t)
 	if fumaca:
 		fumaca.atualizar(som_carga, rpm)
-	if motor_treme:
+	if motor_treme and not longe_vis:
 		motor_treme.atualizar(rpm, som_carga, delta)
+	if perf_on: _t = _pf("q: motor treme", _t)
 	if fumaca:
 		fumaca.seguir()             # depois do motor_treme: o cano já tremeu neste quadro
-	if motor_anima:
+	if perf_on: _t = _pf("q: fumaça", _t)
+	if motor_anima and not longe_vis:
 		motor_anima.atualizar(delta, rpm)
+	if perf_on: _t = _pf("q: motor anima", _t)
 	if luzes:
 		luzes.atualizar(delta, brake_in, gear == -1)
 	if farol:
 		farol.atualizar(delta)
+	if perf_on: _t = _pf("q: luzes e farol", _t)
 	if sujeira:
 		sujeira.atualizar(sujeira_nivel, roda_cor)
-	if painel:
+	if perf_on: _t = _pf("q: sujeira", _t)
+	if painel and not longe_vis:
 		painel.atualizar(delta)
+	if perf_on: _t = _pf("q: painel", _t)
 
 
 func _load_steering_wheel() -> void:
@@ -1102,15 +1126,24 @@ func _vibracao(dt: float, v_l: float, v_f: float) -> void:
 const MPH_G := 0.44694445
 const DEG := 0.017453294
 
-func _update_visuals(dt: float, _v_f: float) -> void:
-	# o visual fica no frame do jogo (espelho): rotação em y troca de sinal
-	# (S Ry(a) S = Ry(-a)), em x não. a_jogo = ângulo das rodas no jogo
-	var a_jogo: float = -steer * P.vis_steer
+## posição e giros de cada roda (fisica_cpp rodas.cpp visual_rodas é o mesmo)
+func _visual_rodas_gd(a_jogo: float) -> void:
 	for w in wheels:
 		var x: float = clampf(w.x, w.min, w.max) + w.jit   # 0x222078: sem clamp depois
 		w.pivot.position = Vector3(w.px, w.y0 + x, w.pz) * ESPELHO
 		w.pivot.rotation.y = a_jogo if w.front else 0.0
 		w.spin_node.rotation.x = w.spin            # ângulo da roda (W+0x4c, _giro_rodas)
+
+
+func _update_visuals(dt: float, _v_f: float) -> void:
+	# o visual fica no frame do jogo (espelho): rotação em y troca de sinal
+	# (S Ry(a) S = Ry(-a)), em x não. a_jogo = ângulo das rodas no jogo
+	var a_jogo: float = -steer * P.vis_steer
+	var fc = get("cpp")                           # física em C++ (car.gd): as rodas lá
+	if fc:
+		fc.visual_rodas(a_jogo)
+	else:
+		_visual_rodas_gd(a_jogo)
 	# direção suavizada do piloto (0x187060: s += min(1/dt, 30)·(direção - s)·dt):
 	# é o que move os braços dele no jogo, então o volante anda junto
 	if dt > 0.0:
@@ -1122,7 +1155,10 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 		if piloto and piloto.no_volante():
 			giro = piloto.giro_volante(rider_s)
 		sw_pivot.basis = Basis(SW_AXIS.normalized(), giro + treme)
-	if piloto:
+	var _t := Time.get_ticks_usec() if perf_on else 0
+	if piloto and not longe_vis:
 		piloto.pose(rider_s, treme if VOLANTE_GIRA else 0.0)
-	if susp_vis:
+	if perf_on: _t = _pf("vis: piloto (braços IK)", _t)
+	if susp_vis and not longe_vis:
 		susp_vis.update(a_jogo)
+	if perf_on: _t = _pf("vis: suspensão", _t)

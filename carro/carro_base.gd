@@ -351,6 +351,13 @@ var rtc_max: Dictionary       # onde corta tudo e quanto corta, pela velocidade
 var rtc_cut: Dictionary
 var mu_t := 1.0               # 0 = atrito mínimo do XML, 1 = máximo
 var gears := PackedFloat32Array()
+## física em C++ (fisica_cpp/, bin/atv4_fisica.gdextension): motor e câmbio
+## por enquanto. null = sem a biblioteca ou ATV4_CPP=0 (tudo no GDScript).
+var cpp: RefCounted = null
+static var usar_cpp := ClassDB.class_exists("FisicaCarro") and OS.get_environment("ATV4_CPP") != "0"
+## a biblioteca carregou? (F2 mostra; F3 liga/desliga o usar_cpp na hora)
+static func cpp_carregou() -> bool:
+	return ClassDB.class_exists("FisicaCarro")
 
 # ---- estado ----
 var steer := 0.0              # direção (-1..1), + = esquerda
@@ -408,6 +415,17 @@ var grounded := 0
 # cada roda (W+0x140, terrain.gd): 0.3 na terra/cascalho do RX_01, 0 no asfalto.
 # No ar a roda fica com o último material (o jogo não mexe no W+0x140).
 const JIT_K := 0.06392613     # 2.2374146 / 35: amplitude cheia a 35 mph com WheelJitter 1
+# medidor de CPU por parte do passo (PERF_CARRO=1; tests/medir_cpu.gd imprime)
+static var perf_on: bool = OS.has_environment("PERF_CARRO")
+static var perf := {}
+
+
+static func _pf(nome: String, t0: int) -> int:
+	var t := Time.get_ticks_usec()
+	perf[nome] = perf.get(nome, 0) + (t - t0)
+	return t
+
+
 const JIT_HZ := 50.0          # passo de física do PAL (FUN_00172778)
 var surface_jitter := 0.3     # sem terreno (teste no plano): terra (Material_1 DIRT/COMMON)
 var terrain = null            # terrain.gd (main.gd põe): material do chão por roda
@@ -424,6 +442,10 @@ const AGUA_REG := {"DustColour": Color(0, 0, 0, 0), "DustType": "Water",
 var jit_seed := 0
 var jit_acc := 0.0
 var spd_ground := 0.0         # corpo+0x440: velocidade no plano do chão (m/s)
+var n_chao := Vector3.UP      # corpo+0x3f0: normal do chão (rodas no chão; no ar a de cima), pra IA
+# catchup aplicado na física (0x353408; só os rivais, o jogador fica em 1 na RAM)
+var mult_pot := 1.0          # corpo+0x720: x torque do motor (0x2113e0 rodas, 0x20c7a8 embreagem)
+var mult_sub := 1.0          # corpo+0x724: x subesterço (0x20ede8 direção, 0x214328 IA)
 var jit_order := []           # índices das rodas na ordem do jogo: FL, RL, FR, RR
 var jitter_chao := 0.0        # veículo+0xac0: média do WheelJitter embaixo de FL, RL, FR no chão (câmera)
 # batida (0x215140): a cada passo o jogo guarda os contatos do casco por
@@ -493,6 +515,25 @@ const TRAVA_MPH := 2.0
 const TRAVA_INI := -0.25
 const TRAVA_FIM := -1.0
 var test_input = null         # {thr, brk, steer} pra testes automáticos
+var som_3d := false           # rival da IA (pista/ia.gd): motor e pneus em som 3D preso no carro
+# rival longe da câmera (pista/ia.gd põe a cada passo; NOSSO, só CPU): sem
+# braços do piloto nem suspensão visual (longe_vis) e sem o som de pneu e
+# suspensão (longe_som: além do alcance do som 3D). A física não muda.
+var longe_vis := false
+var longe_som := false
+var direcao_direta := false   # rival da IA: a direção vai direto (na RAM os rivais têm cru = suavizado)
+var _contato_carro := {}      # batida com outro carro neste passo (carro/batida_carros.gd)
+var outros_carros: Array = []  # RIDs dos outros carros: as rodas não pisam neles (batida_carros.separar)
+
+
+## batida com outro carro: entra no som (patch Vehicle) e na tremida da
+## câmera do próximo _batida_passo
+func contato_carro(vn: float, r: Vector3) -> void:
+	if _contato_carro.is_empty() or vn > _contato_carro.vn:
+		_contato_carro = {"vn": vn, "r": r, "mat": false}
+# largada da corrida (pista/corrida.gd): o jogador acelera com o carro preso
+# (embreagem aberta, freio ignorado: segurar o freio parado engataria a ré)
+var largada_presa := false
 # false desliga as melhorias nossas (volante girando e gerado, mãos na IK,
 # som do Engine Simulator, fumaça, painel, motor tremendo e animado, luzes,
 # farol, volante tremendo): fica só o que o jogo faz

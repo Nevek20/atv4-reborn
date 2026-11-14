@@ -106,6 +106,9 @@ func _faixa(s: Dictionary, k: String, padrao: float) -> float:
 
 
 func passo(dt: float) -> void:
+	# CPU: nada vivo e o multimesh já vazio: não tem o que andar nem desenhar
+	if vivas.is_empty() and multimesh.visible_instance_count == 0:
+		return
 	var s: Dictionary = q.get("sistema", {})
 	var g: Array = s.get("gravidade", [0, -9.8, 0])
 	var grav := Vector3(g[0], g[1], g[2])

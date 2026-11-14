@@ -986,7 +986,300 @@ vazios). Tudo vem do evento:
   TrackSetup/RALLYCROSS.xml: Logic (mWarningStray 4, mCheatingStray 8,
   mCheatingProgress 30, mLinkReadAhead 10, mRespotSpeed 40,
   mBackwardLimit 100), RollingStart. Eventos (xml 14840): Rallycross
-  Amateur buggy/truck = Laps 5, NumRankings 8.
+  Amateur buggy/truck = Laps 5, NumRankings 8. IntroCameras.XML
+  (raw/12287): splines Intro1 (câmera, 7 nós) e Introlookat1 (alvo, 5 nós),
+  Speed 35 nas duas. cPreRaceState no exe é do menu, não da contagem;
+  mCountdown, Start_Countdown_ e WaitForLaunch sem referência no código.
+- IA (nov/2026): o loader do AIT é 0x329e00 -> 0x329f98 (rotas de 0x48 bytes,
+  0x326a50/0x326c90): na memória cada link vira 0x50 bytes, as ligações
+  entre links viram segmentos de 0xc0 (0x328370) e as rotas 0x3c. O link
+  do arquivo: +0x24 = LARGURA da pista (m; ver Acelerador e freio). Pilotos
+  (AIPlayers.xml) lidos em 0x35b530 (Skill, Number, classes). Catchup
+  (8 chaves StartDelay..AIbehindMaxScale) lido em 0x34cb50 / 0x34d9f0.
+  Veículo: Setup do vehicles.xml tem AIRoute e AIControl (0x1f3670), mas
+  não achamos arquivo com esse nome. A vtable do veículo do jogador é
+  0x580958 (pedais 0x202df0 no slot +0xe8/+0xec) e só ele usa: os rivais
+  devem ter outra classe. "AI wasn't able to complete a lap!" em 0x33d1b0.
+- Save state com rivais (corrida_no_normal.p2s, RX01 buggy Normal, nov/2026):
+  os 8 veículos têm a MESMA classe (vtable 0x580958 em veh+4), em
+  0xc7eb00 + k x 0xba0 (k = 0 é o jogador), lista em 0xc7ea90 (+0xc cada);
+  corredores de 0x1d0 bytes em 0xd87f70 + k x 0x1d0 (+0xf0 = veh). Ou seja:
+  a IA usa a física inteira, igual ao jogador. Nos rivais o pedal cru é
+  igual ao suavizado (direção -0.86/-0.86...): a IA escreve direto, sem
+  InputRates. Acelerador 1.0 em 6 dos 7, a 123..139 km/h, 1.15..1.40 x a
+  "velocidade" +0x24 do AIT (então +0x24 NÃO é o alvo da IA) e 3.5..6.8 m
+  fora da linha. Classes só dos rivais: vtables 0x5aea98 (+0x20 -> veh;
+  funções 0x356220..0x359700), 0x5aeaf0 (+0x20 -> veh, lista de vizinhos
+  com veh + nó) e 0x5af920 (+0x44 -> veh; funções 0x364db0..0x368a00).
+  0x359730 = seguir a rota: ponto à frente no segmento (+0x18 = nó),
+  desvio lateral próprio (param[0xd]) preso nas bordas do segmento
+  (0x32a788/0x32a828 nas pontas +0x20/+0x24, margem param[0xe]); quando o
+  ângulo passa de 10° mistura com outro desvio (fator (ang - 0.1745) x
+  5.73). Acelerador, freio, catchup e Skill: item Acelerador e freio.
+- O PILOTO da IA (nov/2026): objeto com vtable 0x5ae0d0 em +8 (métodos
+  0x34f200..0x34fe78; construtor 0x34f190, sub-objeto em +0x20 por 0x34ec68),
+  um por rival, só nos rivais (achado pelo único ponteiro extra pro corpo
+  do rival, num bloco do heap cujo dono é ele). +0x18 -> objeto 0x5af920
+  (+0x40), cujo +4 é o veículo. +0x30 = ponto-alvo (mundo), +0xa0 = struct
+  de controle (iniciado por 0x395310): +0xa8 = direção ANTES de arredondar
+  pros sétimos que vão pro corpo (-0.893 -> -6/7, 0.077 -> 1/7, -0.587 ->
+  -4/7); +0xa4 = 1.0 em todos, inclusive num rival de acelerador cru 0
+  (então não é o acelerador). Medido nos 7: direção crua = ângulo até o
+  alvo / 20°; alvo 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s).
+  +0x160 = 0.12, 0.10 ... 0.00 (cai 0.02 por rival; uso não achado); +0x40
+  não é a distância pro jogador.
+- Save state freiando.p2s (nov/2026, um rival freando): a struct de controle
+  do piloto (+0xa0, mesmo layout do controle do jogador lido em 0x3957f0:
+  [1] acelerador, [2] direção) tem os valores ANTES de arredondar: +0xa0
+  freio, +0xa4 acelerador, +0xa8 direção; no corpo vão round(x x 7) / 7 nos
+  TRÊS (acelerador 0.176 -> 1/7, 0.298 -> 2/7, 0.681 -> 5/7; freio 0.14 ->
+  1/7). Os 7 rivais: 133 km/h dir -0.47 acel 0.68; 124 km/h dir 1.0 acel 0
+  freio 0.14; 131 km/h dir 0.83 acel 0.30; 114 km/h dir 0.67 acel 0.18; 3
+  retos de acelerador cheio. O acelerador cai com a curva mas não só pela
+  direção (114 km/h e dir 0.67 tem MENOS acelerador que 131 km/h e dir
+  0.83): tem alvo de velocidade. Quem escreve a struct não foi achado (não
+  é o piloto 0x34f100..0x350000 nem as classes 0x35a000..0x369000 por
+  offset fixo; 0x15bab8(..., +0xa0) é a reposição, não o controle). O 7.0
+  em 0x348708 é de outra coisa.
+- Acelerador e freio da IA (nov/2026; re/ia_alvo_ram.py refaz as contas da
+  RAM dos 2 save states com rivais). Quem escreve: o corredor (0x158a18)
+  chama o gerente 0x394ff0(dt, corredor+0x108, struct), que escolhe o
+  controle (0x395148) e chama o slot +0x1c; o do rival é o piloto 0x5ae0d0
+  (slot +0x2c = 0x34f9e8: +0x160 += dt, cérebro (8 comportamentos, 0x34f2d8,
+  seletor 0x35e758), 0x34faf8 e a lei 0x34ed10); 0x3954b8 arredonda os
+  campos 0..4 pra round(x x 7) / 7.
+  - Lei 0x34ed10 (sub-objeto piloto+0x20): direção = sinal x acos(alvo .
+    frente) x 2.8647885 (= ângulo / 20°) presa em +-1 (sub+0x24 = batente);
+    k = (alvo - v) x 0.2 preso em +-1, v = corpo+0x440 (0 até 0.01; negativa
+    com corpo+0x418 <= 0); k > 0 acelerador = k, freio 0; k < 0 freio = -k.
+    Nos 2 save states a lei com o alvo da RAM dá os pedais crus da RAM
+    (0.684 / 0.681, 0.307 / 0.298, 0.194 / 0.176; freio 0.11 / 0.14).
+  - Velocidade-alvo 0x359eb8: peso w do limite da rota (0x35a3b0: link+0x44
+    -> objeto do bloco extra, 1º float em mph, vale 1..150 mph,
+    DAT_00837c20/24 em 0x35e098; no RX01 todos -1, w = 0); alvo = min(arco 2,
+    arco 1) x (1 - w) + limite x w; x 1.2 com 0x170b60 (modo 15), x 0.5 na
+    rota tipo 4. O flag +0x30 (arco 1 abaixo da velocidade) vai pro controle
+    e só copia vetores (não mexe nos pedais).
+  - Arco 1 (0x35a040): ponto da rota com desvio 0 a clamp(|v| x 1, 15, 100) m
+    (0x359730 modo 3; |v| = objeto piloto+0x18 +0xa0); 0x214240 sai do CoM
+    (corpo+0x70) no rumo do bico (corpo+0xd0) no plano do chão (corpo+0x3f0);
+    0 -> 4.916389 (11 mph). Arco 2 (0x35a150), só com o alvo da direção a
+    mais de 15 m (0x358d60): sai do alvo da direção com y = 0, rumo (ponto do
+    carro - alvo) com y = 0, até clamp(|v|, 15, 100) além dele (esse ponto
+    fica com y: o arco 2 quase nunca limita); 0 -> 8.938889 (20 mph).
+  - 0x214328: 446.4975 sem roda no chão (int corpo+0x8a8), com corpo+0x418 <
+    0 ou lateral < 4 m (0x5506c8); R = |d|² / (2 x lateral); K = U (P+0x53c,
+    P = corpo+0x364) x corpo+0x724 x 0.001; num = |R| x corpo+0x3b4 -
+    (corpo+0x3ac - corpo+0x3b0); 0 com K <= 1e-6 ou num < 0; sqrt(num / K). É
+    o modelo de bicicleta da direção (0x20ede8). corpo+0x3b4 =
+    Angle_vs_speed(mph de corpo+0xe0) em rad (0x20ee5c): 60° nos buggies.
+  - A rota: 0x356250 / 0x3562d0 dão as bordas esquerda/direita do trecho
+    (links +0x20/+0x24 do segmento, fração +0xc) e o ponto = esquerda +
+    (direita - esquerda) x fração lateral (+8). Borda do link (0x32a338 /
+    0x32a418) = posição (+0x10 = arquivo +0x00) + X x largura, X = (1,0,0)
+    girado pelo quatérnio do link = normal x direção; largura: com
+    DAT_0055155c = 1, as do bloco extra (+0x20/+0x24 = arquivo +0x68/+0x6c);
+    senão -+ link+0x40 / 2 (arquivo +0x24: a LARGURA, 25..34 m, não é
+    velocidade). O 0x3525f8 (update dos pilotos) liga DAT_0055155c = 1 antes
+    de rodar os rivais e desliga no fim (por isso o save state mostra 0):
+    pra IA valem as do bloco. Desvio 0 (0x32ab40 + 0x32a8d0) =
+    fração |centro +0x5c - borda esquerda| / largura (sem bloco: 0.5). Ou
+    seja: o ZERO da IA é o centro +0x5c, não a volta gravada (com as bordas
+    do bloco ou com -+largura/2 o zero muda no máximo 1 cm). Conferido: o
+    alvo da direção de 4 dos 7 rivais fica a 0.0..0.3 m dele nas 2 RAMs; a
+    velocidade-alvo bate 0..5% em 11 dos 14 (2 "retas" exatas; os 2 fora são
+    lateral perto dos 4 m, onde a nossa posição na rota decide).
+  - O desvio de 0.25/0.75 do alcance e o +0xc0 do objeto (~3 m, frente do
+    carro) que o 0x359730 soma: com a nossa posição na rota (projeção do CoM)
+    a RAM bate melhor sem ele (o alvo da direção cai a 0.5 x |v| do carro).
+- Estados do corredor e largada da IA (nov/2026). O +0 do corredor (objeto
+  0x160 de 0x352ac8, um por carro; +4 o corredor do jogo, +0x14 o piloto,
+  +0x144 catchup) é um ESTADO, gravado por 0x352ef0 pra todos de uma vez via
+  0x352790(gerente, estado): 0 ao montar (0x3522b0), 1 preparando a corrida
+  (0x17b588), 2 contagem (0x17b848), 3 correndo (0x17b8f0; é o que as 2 RAMs
+  mostram), 4 chegada do jogador (0x4ced48 / 0x4cf310: grava o tempo de
+  chegada (0x4d10b0) e desliga o catchup: gerente +0x10 = 0, 0x34cea8 põe s =
+  0 em todo rival, sem bônus). "Esperar" (comportamento 0x364960, prioridade
+  0x364b08, update 0x3649d0 = alvo 0 em frente do carro): ativo no estado 0,
+  no 4 em modo 15, no estado 1 enquanto faltam mais de 2 s pro Go! (0x17aff0
+  = relógio +0x30 - +0x10 no estado 6; gerente +0x44 = 0), com corredor+0x150
+  > relógio da corrida (DAT_007f4820+0x24) ou com veículo+0xa78 = 0 (1 em
+  todos nos saves, parado e correndo). Relógio da largada (0x17b118): 1
+  monta (0x17b320) -> ... -> 5 (0x17b588: corredores no estado 1) -> 6
+  largada parada, dura +0x30 = 4.595 s (0x17b760) -> 9 (0x17b8f0: estado 3,
+  o Go!) -> 10 correndo (+0x24 conta); com 0x171770 vai 5 -> 7 (0x17b848:
+  estado 2) -> 8 -> 10: largada em movimento, onde o comportamento #1
+  (0x364720, só no estado 2) anda a 7.5 mph (0x364938: DAT_007f5334 +0xc
+  +0x28, em mph) até a linha. Save idle_antes_do_Go (nov/2026): relógio no
+  estado 6 com 1.6 de 4.595 s, os 7 no estado 1 e no "esperar", 1000 rpm.
+  Nos 2 s finais o de corrida (#7) pisa com o carro travado (a lei parada dá
+  1): é o ronco antes do Go! que o Matheus confirmou no jogo. Demora da largada: ao entrar
+  no estado 1 o 0x353750 grava +0x150 = DAT_00553dd4 + 1.2 / 4 + sorteio [-0.15,
+  0.15] s (DAT_00553dd4 do 0x543740: sorteio [0, 2) ou 2.0), mas só com
+  DAT_00553dd0 >= 1, o número de objetos da classe 0x5fffc8 (0x542f10,
+  região 0x54xxxx, deve ser rede); offline é 0 (as 2 RAMs): o rival sai no
+  Go! sem demora. O contador por posição do 0x352c98 (+0x154 / +0x158 = (n -
+  posição - 1) x 0.05 s, até 0.5) é do estado 4 e só com 0x1717c0 (tipo de
+  evento +8 = 5..8, 13 ou 15, 0x4b1b50); no Rallycross o tipo é 1 (RAM): na
+  chegada os rivais seguem correndo.
+- Cérebro da IA (0x34f2d8, nov/2026; saves tentando_ultrapassar,
+  tentando_passar_2, andando_em_linha_reta): lista fixa de 8 comportamentos
+  (cada um +0x18 piloto, +0x1c cérebro; vtable em +0x14): #0 esperar
+  (0x364960, vt 0x5af0c0), #1 largada em movimento (0x364720, vt 0x5af160),
+  #2 preso -> repõe (0x3645e0, vt 0x5af1c8: 0x364640 ativo com o tempo
+  preso > 10 s, ou > 3 s no outro modo; 0x3646d0 chama a reposição
+  0x15bd28), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
+  ultrapassar (0x360aa8, vt 0x5af228), #6 0x35ec48 (vt 0x5af638), #7 corrida
+  na linha (0x360358, vt 0x5af4e8: update 0x3603d0, começo 0x360550).
+  Seletor 0x35e8a0: o atual (cérebro +4) continua se o estado dele é 1 ou 3
+  E o slot +0x14 deixar; senão 0x35e950 pega a maior prioridade (slot
+  +0x54; empate fica o 1º da lista). O #7 e o #0 não seguram a vez (+0x14 =
+  0x368a18, devolve 0): com o #7 rodando, todo quadro as prioridades são
+  olhadas de novo; o #5 segura enquanto roda (0x368bf0: estado 1 ou 3).
+  Prioridade do #7 = 0.1 (0x3603b8); do #5 = 1 ou 0. Escolhido um novo:
+  sai o velho, começa o novo (slot +0x34) no mesmo quadro; o mesmo: slot
+  +0x4c (update). Nos 3 saves andando: 5 rivais no #7 e 2 no #5; nenhum no
+  #3, #4 ou #6.
+  - #7: começo 0x360550 sorteia o desvio TODA vez que o #7 começa (Skill slot
+    0 x [0, 10) m, lado sorteado); saída 0x3603d0: com o relógio
+    (DAT_007f4820+0x24, 0 até o Go!) < 5 s o 0x359660 vai com desvio 0 e modo
+    0, depois com o desvio e modo 1; alcance 0x359730(0.5, 15, 50);
+    velocidade 0x359eb8.
+  - Pedido de rota (0x359660: [0] piloto, [1..5] a posição de rota do carro,
+    [6..10] a do ponto, [0xb] modo, [0xd] lateral, [0xe] = objeto +0xf4, a
+    meia largura do carro) e o alcance 0x359730(esc, mín, máx): alcance =
+    clamp(esc x |v|, mín, máx); o ponto anda alcance + o raio (+0xc0) na rota
+    (no modo 1/2 em 2 pedaços). Modo 0: o ponto fica na fração lateral do
+    próprio carro (posição de rota dele), sem mais nada. Modos 1 e 2: a
+    lateral pedida; no 1, se o ponto pedido está a mais de 10° do bico e o da
+    lateral do carro está mais alinhado mas também a mais de 10°, mistura com
+    a lateral do carro, peso (ângulo - 10°) / 10°. Depois limita na borda
+    menos a meia largura (pelo lado do sinal) e, fora do modo 3, se a linha
+    do carro ao ponto cruza a borda (corte de curva) volta o ponto pra
+    alcance/4 + raio na borda. Nos saves o ponto da direção fica a alcance +
+    0.8 +- 1.6 m de rota do carro (15 rivais no #7), não alcance + raio: a
+    posição de rota do carro deve ficar atrás do CoM (não conferido).
+  - 0x359eb8 com o pedido: arco 1 (0x35a040) do CoM no rumo do bico até o
+    zero clamp(|v|, 15, 100) além da posição do carro; arco 2 (0x35a150, só
+    com o ponto a mais de 15 m de rota): de A = o ponto da direção (com a
+    lateral pedida) no rumo de C = o carro (posição de rota com a lateral
+    dele) até B = o zero clamp(|v|, 15, 100) além de A. Nos 3 saves de nov
+    (re/ia_alvo_ram.py, coluna exe) isso acerta 3 dos 4 casos em que o zero
+    em A e C errava; sobra 1 (45 m/s no jogo, sem limite nas duas contas).
+  - Saída de todo comportamento = struct do piloto em +0x30 (0x35ec38): +0x30
+    ponto-alvo, +0x40 velocidade-alvo, +0x44 flag (o #7 grava pelo slot +0x5c
+    = 0x3603d0, chamado pelo +0x4c = 0x360270). Quem acaba sem dirigir deixa
+    a do quadro anterior. Cérebro (0x34c368, vt 0x5ae1e8): +0xc percepção
+    (0x3573b8, update 0x3574b8; +0x40 = posição de rota do carro), +0x10
+    vizinhos (0x356958, update 0x356aa0), depois 0x3668d0 = seletor + o atual.
+  - Objeto da IA (piloto+0x18, vt 0x5af920): +0x00 forma (pegada no chão:
+    +0x40 n, +0x44 cantos locais, +0x48 no mundo), +0x08..+0x20 caixa
+    (RAM: meia largura 1.04..1.19, meio comprimento 2.51..2.90), +0x30
+    posição (o CoM no plano), +0x40 velocidade no plano, +0x90 bico no plano,
+    +0xa0 |v|, +0xc0 raio (meia diagonal 3D da caixa, 2.93..3.22), +0xf4
+    meia largura. Slots: +0x14 = 0 (corredor comum: ficha vence em 5 s),
+    +0x3c rota (+0xe0), +0x44 +0xe8 != 0, +0x4c +0xf0, +0x54 +0xf4.
+  - Skill do piloto (*piloto+0x100, 0x3535f0): slot 0 = (0.5 - Skill) x 2
+    abaixo de 0.5 (o desvio); slots 1, 3, 4 = 1, 1, 0.5 x 0.2 só se o
+    0x35b1b0 (rivalidade) der 1, senão 0; slot 2 = 1. RAM: 1/3/4 = 0 nos 7.
+  - Percepção (0x353b68 a cada quadro): config *piloto+0x118 (RAM: +8 = 45 m
+    à frente, +0xc = 45 m atrás, +0x1c = 5 s, +0x20 = 0.5 s). 0x353d60 junta
+    os corredores (até 8): na mesma rota, |s dele - s meu| < 45 vira
+    candidato com +4 = |ds|, +8 = |fração x largura dele - a minha| (lateral
+    da borda esquerda), +0xc = 1, +0x10 = 1 e a posição de rota dele (fora da
+    rota: distância reta < 45 + os 2 raios). 0x3547f0 enche a ficha (0x355130,
+    0xb8 bytes): +0x18 válida, +0xc visto, +0x10 vence (visto + 5 s), +0x24
+    setor (0x3591f0: rel = dele - meu no plano; à frente pelo bico 0/1, atrás
+    2/3; (bico x rel).y > 0 = 1/3, que é o lado da lateral maior), +0x28 =
+    |ds|, +0x2c = |dlat|, +0x30 / +0x34 = variação / dt (trocou de frente
+    pra trás: o valor novo / dt; ficha nova: 0), +0x38, +0x3c, +0x40 posição
+    de rota dele, +0x50 pegada dele. Não visto no quadro: +0x18 = 0; vencido:
+    sai. 0x354d20: +0xb0 = tempo até as pegadas se tocarem (0x34e0c0, SAT com
+    velocidade relativa no plano, 0 se já se tocam) se < 20 s, senão -1; vaga
+    do setor = o de menor tempo; +0x64/+0x68 (recuo) = o da frente (setor <
+    2, +0x38 = 1) com a menor taxa +0x30 abaixo de 0 (o que mais se aproxima).
+    Contato novo (> 1 s) aplica a Skill slot 4 (0x3552f8; 0 offline).
+  - #5 ultrapassar: prioridade 0x360c10 (corredor no estado > 1, 0x361238
+    ok): alvo da busca 0x360e30 (vagas 0..3 = vizinhos +0x44 + 8i: a vaga 0
+    sempre conta, as outras só com tempo menor; atrás só lado a lado, +0x28 -
+    os 2 raios <= 0; sem nenhuma, o recuo +0x64). Tempo != -1: ativa na hora;
+    -1 (o recuo): +0x24 conta as vezes seguidas com o mesmo alvo (+0x20),
+    ativa com > 10 (RAM: 12..62). Começo 0x360d00: contexto [0] alvo, [1]
+    [2] do 0x3614a0, [3] = alvo com +0x9d0->+0xc4->+0x28 == 0 (1 no jogador);
+    plano, 0x367298. Update 0x360dd8 até a fase passar de 0xfd -> estado 2.
+    Máquina (0x367298 começa, 0x3673e0 roda, 0x3671a8 troca: sai da atual,
+    entra na nova, em cadeia): vtables 0x5af360, 0x5af330, 0x5af300,
+    0x5af2d0, 0x5af2a0 (+0x14 entrar, +0x1c atualizar, +0x24 sair); 0xfe
+    acabou bem, 0xff abortou. Toda entrada/atualização começa por 0x361238
+    + 0x3611d8 (alvo vivo, ficha válida com +0x3c), senão 0xff.
+  - 0x3614a0 (lateral pra passar): folga = minha meia largura + 1 + a dele
+    ((+0x18 - +0x08)/2); lateral minha e dele = 0x32ac40 (fração - fração do
+    zero) x largura (zero = centro, 0x32a8d0). Com tempo em 0..10 s: lado =
+    longe dele em relação a mim (dele < minha -> +); sem: longe dele em
+    relação ao zero (dele < 0 -> +). Passa = dele + folga x lado, ou a minha
+    se já estou além; com o relógio > 5 s, se passa ficou do outro lado do
+    zero, passa = 0; limitada à borda (0x32a788 / 0x32a828 na posição dele)
+    -+ (meia largura + 1). Livre se |dele - passa| > folga (c.olt.s; o FPU do
+    PS2 corta o arredondamento, então dele + folga exata NÃO é livre: só
+    quem já está além, o zero ou a borda longe) e, com tempo 0..10, 0x361ba8
+    (minha pegada indo pro ponto da borda na rota dele com velocidade (ponto
+    - eu) x |v|, sem normalizar: um raio) não bate. Senão tenta o outro lado.
+    Grava [1] = passa, [2] = a borda do lado (do lado que deu, ou do 1º).
+    RAM tentando_ultrapassar, rival 6 na fase 4 (replaneja todo quadro):
+    [1] -2.812 e [2] -10.372; a conta com a pista dá -2.82 e -10.37.
+  - Plano 0x3612b0: 0x3614a0 falso -> ([3] e Skill 3 > 0.5: 0) 1 se o
+    para-choque (+0x28 - os 2 raios, mín 0) < 2 m e eu não estou atrás
+    demais (meu raio <= raio dele +- +0x28), senão 4. Verdadeiro -> ([3] e
+    0x361aa8: lado a lado, |dv| < lerp(0, 10 mph, Skill 3) e bicos a menos
+    de 20°, DAT_00837e40/44/48: 0) 2 com tempo >= 0, senão 3.
+  - Fases (entrar / atualizar / dirigir; dirigir = 0x359660 modo 2 +
+    0x359730 + ponto + 0x359eb8): 0 seguir (0x361c18 / 0x361d20 / 0x361eb8):
+    lateral [1], alcance 0.5/15/50, replaneja (só com rivalidade). 1 colado
+    (0x362040 / 0x362100 / 0x3622d0): aborta com o alvo < 10 mph; lateral
+    [2] (a borda!), alcance = +0x28, velocidade min(linha, 0.95 x a dele);
+    replaneja. 2 desviar (0x3624c8 / 0x362590 / 0x3626c8; relógio zera ao
+    entrar): f = relógio / tempo (tempo <= 0: 1; > 1 s: 0); lateral [1] +
+    f([2] - [1]); alvo atrás: alcance padrão; à frente: o vão de para-choques
+    (mín 5) ou, sobrepostos, padrão com vão lateral (+0x2c - os 2 raios > 0)
+    ou 5 m; com f > 0 e à frente, velocidade min(linha, (1 - f) x a dele),
+    mín 20 mph. Sem alvo na busca -> 3; outro -> 0xfe; replaneja. 3 passar
+    (0x362b00 / 0x362bc0 / 0x362df8): lateral [1], alcance padrão; não
+    replaneja: tempo de novo != -1 -> 2 (mesmo alvo) ou 0xff; atrás e com vão
+    -> 0xfe; à frente se afastando (+0x30 > 1 m/s) por mais de 1 s -> 0xfe. 4
+    sair pro lado (0x362f88 / 0x363048 / 0x363160): lateral [1], alcance
+    padrão; replaneja (4 continua). Fases 0, 1, 2, 4: alvo some ou muda na
+    busca -> 0xfe. RAM: as transições vistas são 4 -> 3 e 2 -> 3.
+    re/ia_vizinhos_ram.py lê a percepção; porta em pista/ia_ultrapassar.gd.
+- Catchup e Skill aplicados (nov/2026, RAM corrida_no_normal). Gerente em
+  0x14efc80: [0] linha da tabela 0x5ada80, [1] n corredores, [2] lista dos
+  structs (0x30 cada; jogador 1º), [3] desligado, [4] ligado, [5] modo, +0x18
+  StartDelay .. +0x34 AIbehindMaxScale (STDH_04). 0x34cea8 a cada quadro:
+  todo rival s = DefaultScale + bônus (0x356880); se o rival da frente andou
+  >= StartDelay (distância = objeto de progresso +4, desde a linha; RAM: =
+  voltas x 1810.4 + arco pelos pontos do AIT a partir do link 51, +-3 m) e
+  modo 0..1: 0x34d0a0 (jogador não é 1º: distância pro carro logo à frente
+  > AIinfrontThreshold -> todo rival com distância >= a dele recebe
+  DefaultScale + min((dist - limiar) / Interval, 1) x (AIinfrontMaxScale -
+  DefaultScale)) e 0x34d250 (jogador não é o último: o mesmo com o carro
+  logo atrás e AIbehind*, pros rivais com distância <= a dele, x o fator
+  da posição atrás dele na tabela 0x5ada80: 1, 1, 1, 1, 1, 1, 0, 0). Struct
+  do corredor: +0 s, +4 humano, +8 progresso, +0xc flag (0 nos 7 rivais, 1
+  no jogador), +0x14 bônus = (Skill - 0.5) x 2 x 0.2 acima de 0.5 (0x3535f0;
+  Skill da tabela DAT_007f5a90+8 + índice x 0x50 + 0xc, o AIPlayers.xml).
+  0x353408 (pelo 0x352c98 quando muda) grava no corpo (veículo+0x9d4):
+  +0x720 = 1 + s (s >= 0) ou 1 / (1 - s); +0x724 = 1 - 2s' (s' <= 0) ou
+  1 / (0.25 s' + 1), mínimo 1e-5, com s' = s - 0.5 a não ser que 0x356890
+  (+0xc e s > 0.1); +0x728 = 0x356890. RAM: rivais 0x720 = 0.95..1.11, 0x724
+  = 1.77..2.10 (= 2 - 2s), jogador 1 / 1. Quem lê: 0x720 x torque do motor
+  na roda (0x2113e0) e na embreagem (0x20c7a8, câmbio+0x38); 0x724 x U na
+  direção (0x20ef08) e no arco (0x2144e0); 0x728 no 0x2102d8 / 0x21210c
+  (0 em todos). Skill baixa (0x3535f0): objeto corredor+0x100 [0] = (0.5 -
+  Skill) x 2 (RAM 0.48 / 0.46), [1] e [3] = 1 se 0x35b1b0, [4] =
+  DAT_005aef54 x 0.2; o comportamento 0x360358 (update 0x3603d0, começo
+  0x360550) anda desviado [0] x sorteio [0, 10) m pra um lado sorteado,
+  em 0 enquanto o relógio DAT_007f4820+0x24 (88.9 s na RAM) < 5. Largada:
+  0x352c98 conta corredor+0x158 = (n - posição de largada) x 0.05 s (até 0.5)
+  quando a corrida começa (uso não achado).
 - .pingu = o dos carros (pingu2obj). Texturas: o .pfn (nomes por linha,
   o "raw" antes do bloco). As texturas da pista vêm DEPOIS dos modelos no
   archive (gob 12324..12402), então o find_png do pingu2obj (o maior índice
@@ -1031,7 +1324,20 @@ vazios). Tudo vem do evento:
   bantams no #def5772a. 2 das 6 correntes não têm peça gravada e não
   aparecem no jogo (conferido pelo Matheus).
 - Não portado: LOD (TREE_*_LOD1), cor de luz por instância, cIntroCamera,
-  cInstantRespotBox (reposição), cGenTrigger, cCrowdEffectBox, as 2 luzes.
+  cGenTrigger, cCrowdEffectBox (cIntroCamera e cInstantRespotBox: feitos,
+  seção Corrida).
+- As 2 cLightDirectional (nov/2026): só do EDITOR, como as cercas. Toda
+  entidade que o jogo usa tem o nome no exe (cIntroCamera, cStartPosition,
+  cInstantRespotBox, cCrowdEffectBox, cGenTrigger); "cLightDirectional" e
+  até "Directional" não aparecem nenhuma vez, e o hash do tipo (9bcf9905)
+  também não (o carregador acha a classe pelo nome; nenhum tipo tem o hash
+  no exe). Dados: pos (40.3, 247.4, 1455.7) e (999.3, 242.1, 1494.7), nas
+  2 pontas do mapa, dir quase horizontal (+x e -x, y ~0.02), tamanho 10,
+  bloco 9be2d228 com 4 x 1.0 (cor branca) e b52636d6 = 1.0; ebdb6098 /
+  0d69da5d / 6fe6fb71 são ids do editor (toda entidade tem). Provável luz
+  do editor pra assar a luz no chão e nas cores dos objetos. O
+  cLightManagerATV (0x330b50, global 0x800d38) é do menu (garagem), não da
+  pista. A luz da corrida é só o Environment.xml (seção Luz e névoa).
 
 - Camada do lote de pingu (2ª textura pelo 2º UV), como o GS desenha:
   - O registro do lote (0x50 bytes em 0xD0 + i·0x50) passa pelo 0x289228:
@@ -1058,6 +1364,53 @@ vazios). Tudo vem do evento:
     ferrugem ~0.4 em média, celeiro/cabana idem, Crowd_ColourChange ~0.8.
     O import de .obj do Godot não lê o alfa do vértice (v x y z r g b a):
     o rx01_objetos.py manda a malha da camada no modelos.json ("tris").
+
+## Reposição automática (objeto de progresso do corredor)
+
+- Logic do TrackSetup (0x1bf6d8, dentro do 0x1bf220; struct apontada pelo
+  TrackSetup+0x14, na RAM 0xe85860): +0 mWarningStray, +4 mCheatingStray, +8
+  mCheatingProgress, +0xc mLinkReadAhead (int), +0x10 mRespotSpeed, +0x14
+  mBackwardLimit. Respotting é o +0x18 (0x1bfb68).
+- Corredor (vtable 0x562ea0, 8 na RAM a partir de 0xd87f70, passo 0x1d0;
+  lista em 0xd87f40): +0xf0 veículo, +0xfc, +0x120 objeto com os
+  componentes (o de progresso em +0x6c dele), +0x148 PEDIDO de reposição
+  (6 palavras: tempo, tipo, a, b, c, fase), +0x160 "rápido demais" (HUD).
+- Objeto de progresso: base 0x4d2cc0 (vtable 0x5eb940 em +0xac), o da
+  corrida 0x4d4b18 (vtable 0x5eb8f8). +0x10 reposição ligada (1 nos 8),
+  +0x14 timer, +0x30 estado, +0x34 corredor, +0x38 Logic, +0x40..0x50 último
+  aceito (link, distância, ...), +0x70 rastreio (link, t, t x comprimento,
+  +0x7c FORA = metros além da borda), +0xa0 dt acumulado.
+- Update 0x4d3658 (vtable +0xc), em ordem: fora > CheatingStray, progresso
+  < aceito - BackwardLimit e avanço > CheatingProgress (vtable +0x24 =
+  0x4e0b68) = trapaça (não aceita o avanço); flags +0x24/+0x28 do
+  corredor+0x120 -> tipo 2; estado != 0 -> tipo 3; contramão (0x4d58e0:
+  linha 0 do link . velocidade do corpo no plano, normalizada, < -0.5;
+  corpo = veículo+0x60, velocidade em +0x20, |v| em +0x70) -> tipo 1;
+  trapaça ou fora > WarningStray -> tipo 2; senão apaga o pedido.
+- Parâmetros por tipo (vtable +0x34 = 0x4d4808): (a, b, c) = 1: 0.2, 2, 3;
+  2: 0.2, 0, 3; 3: 0.2, 1, 3. 0x4d4ef0 só grava se não tem pedido (o 3
+  passa por cima). 0x4d4f60 conta: fase 1 até a, fase 2 até b (tipo 1 vira
+  2; vai pra 3 só com reposição ligada, 0x4d2d88), fase 3 até c -> devolve 4.
+  0x4d35d0 com 4 chama 0x4d3538: se [0x7f4744]+0x3c == 0, 0x15bd28 repõe e o
+  rastreio volta pro último aceito.
+- Fora da pista (0x4d57e0): t = projeção no link (0..1), lateral =
+  (posição - nó +0x20).linha 0 da matriz do link (quatérnio em +0x30;
+  0x326910), limites = largura esquerda/direita dos 2 nós interpoladas por t
+  (0x329620 / 0x329680 -> 0x32a6c8 / 0x32a708: nó+0x44 = o registro do AIT,
+  +0x20 / +0x24; sem ele, -+ nó+0x40 / 2). O link vai do nó do AIT i pro i-1
+  (o sentido da corrida, = a direção +0x0c do AIT).
+- HUD 0x47bb58 (fases 2 e 3): tipo 1 WRONG_WAY (texto 0xa39), 2
+  Off_Track_Go_Back (0x617), 3 MISSED_CHECKPOINT (0x526) e na fase 3 " - %d"
+  com int(c - tempo) + 1. Índice do texto = posição na tabela de nomes
+  0x54d838 (text/15205_en.txt).
+- Botão (update do corredor, 0x158f..): |v| do corpo < 17.88 m/s (40 mph)
+  repõe (0x15bd28), senão +0x160 = 1 e o HUD 0x4796c0 mostra
+  Too_Fast_For_Respot (0x968) depois de 0.05 s apertado. O 0x4613a0 mostra
+  "Respot" na barra de botões.
+- Não achados: quem liga corredor+0x120 +0x24/+0x28 (zeradas na RAM); as
+  caixas do 0x543b88 ([0x7f5f5c], lista vazia no RX01, limites +0xc0/+0xc4).
+  Na RAM (corrida_no_normal) o pedido do jogador tem a = 0.2, c = 3.0 de uma
+  reposição tipo 2 que já tinha acontecido.
 
 ## Luz e névoa (Environment.xml)
 

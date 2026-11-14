@@ -72,6 +72,7 @@ var spd := 0.0
 var side := 0.0
 var ws := 0.0
 var derrapa := 0.0              # 0..1 (SO_DERRAPANDO)
+var _cpp: RefCounted = null     # laço das rodas em C++ (fisica_cpp/src/som.cpp, a mesma conta)
 
 
 func carregar(c) -> bool:
@@ -129,14 +130,27 @@ func carregar(c) -> bool:
 		var o := SomJogo.new()
 		o.name = ["RodaFL", "RodaRL", "RodaFL2"][k]
 		o.ganho = GANHO_PNEU
+		o.ancora = _ancora()
 		add_child(o)
 		rodas.append({"som": o, "idx": 0 if k != 1 else 1, "sec": k == 2, "trava": 0.0,
 			"mat": -2, "s": 0.0, "vol": 0.0})
 	raspa = SomJogo.new()
 	raspa.name = "Raspao"
 	raspa.ganho = GANHO
+	raspa.ancora = _ancora()
 	add_child(raspa)
+	_prepara()
+	liga_cpp()
 	return not patches.is_empty()
+
+
+## (re)liga o laço das rodas em C++ conforme o carro_base.usar_cpp (F3)
+func liga_cpp() -> void:
+	_cpp = null
+	if preload("res://carro/carro_base.gd").usar_cpp and ClassDB.class_exists("SomPneuCpp"):
+		_cpp = ClassDB.instantiate("SomPneuCpp")
+		if not _cpp.configurar(self):
+			_cpp = null
 
 
 func _f(d: Dictionary, k: String, padrao := 0.0) -> float:
@@ -166,8 +180,9 @@ func passo(dt: float, v_l: float, v_f: float) -> void:
 	ws = minf(ws, 1.0)
 	var alvo := clampf(maxf(maxf(side * DERRAPA_SIDE, ws), 1.0 if trava else 0.0), 0.0, 1.0)
 	derrapa += (alvo - derrapa) * (1.0 - exp(-dt / (DERRAPA_SOBE if alvo > derrapa else DERRAPA_DESCE)))
-	for o in rodas:
-		_roda(o, dt, v)
+	if not (_cpp and _cpp.rodas_passo(dt, v, spd, side, ws, derrapa)):
+		for o in rodas:
+			_roda(o, dt, v)
 	_suspensao(dt, v_f)
 	_pouso()
 
@@ -242,26 +257,41 @@ func _roda(o: Dictionary, dt: float, v: float) -> void:
 	som.volume = o.vol * (ROLAGEM + (1.0 - ROLAGEM) * derrapa if SO_DERRAPANDO else 1.0)
 
 
+## CPU: os números do XML (texto) convertidos uma vez (antes: float("...")
+## de cada atributo a cada passo). _prepara() no fim do carregar()
+var _m_coll := 0.8                # master CollisionVolume
+var _m_sfx := 1.0                 # master SFXVolume
+var _susp_n := {}                 # Small/Large -> [Volume, Threshold, Probability, VolumeSpeed, MinRetriggerTime, FirstSample]
+
+
+func _prepara() -> void:
+	_m_coll = _f(master, "CollisionVolume", 0.8)
+	_m_sfx = _f(master, "SFXVolume", 1.0)
+	for k in ["Small", "Large"]:
+		var a: Dictionary = susp.get(k, {})
+		_susp_n[k] = [_f(a, "Volume"), _f(a, "Threshold"), _f(a, "Probability"), _f(a, "VolumeSpeed"),
+			_f(a, "MinRetriggerTime", 0.25), a.get("FirstSample", "")]
+
+
 func _suspensao(dt: float, v_f: float) -> void:
 	if absf(v_f) < car.SUSP_VEL:                # 0x418: velocidade pra frente
 		return
 	for k in ["Small", "Large"]:
-		var a: Dictionary = susp.get(k, {})
-		if _f(a, "Volume") < 0.05:
+		var a: Array = _susp_n[k]
+		if a[0] < 0.05:
 			continue
 		if _susp_ret[k] > 0.0:
 			_susp_ret[k] -= dt
 			if _susp_ret[k] > 0.0:
 				continue
-		var acima: bool = car.susp_taxa > _f(a, "Threshold")
+		var acima: bool = car.susp_taxa > a[1]
 		if not acima:
 			_susp_flag[k] = false
 		elif not _susp_flag[k]:
-			if randf() < _f(a, "Probability"):
-				var vol := (1.0 - _f(a, "VolumeSpeed") * (1.0 - spd)) * _f(master, "CollisionVolume", 0.8) \
-					* _f(master, "SFXVolume", 1.0) * _f(a, "Volume")
-				_tocar_uma("Coll_Big", a.get("FirstSample", ""), vol, 1.0)
-				_susp_ret[k] = _f(a, "MinRetriggerTime", 0.25)
+			if randf() < a[2]:
+				var vol: float = (1.0 - a[3] * (1.0 - spd)) * _m_coll * _m_sfx * a[0]
+				_tocar_uma("Coll_Big", a[5], vol, 1.0)
+				_susp_ret[k] = a[4]
 			_susp_flag[k] = true
 
 
@@ -310,7 +340,7 @@ func batida_objeto(amostra: String) -> void:
 ##  - |r̂ . v̂| > 0.7 (o contato na direção do movimento): raspão por
 ##    MinScrapeTime (0.25 s).
 ## Objetos interativos (outro tipo 9) são o batida_objeto; carro x carro (tipo
-## 2, patch Vehicle) não existe no remake.
+## 2, patch Vehicle) chega pelo car.contato_carro (carro/batida_carros.gd).
 func batida_passo(dt: float, c: Dictionary, v: Vector3) -> void:
 	var livre := true
 	if _bat_ret > 0.0:
@@ -318,7 +348,7 @@ func batida_passo(dt: float, c: Dictionary, v: Vector3) -> void:
 		livre = _bat_ret < 0.0
 		if livre:
 			_bat_ret = 0.0
-	var vol_bat := clampf(_f(master, "CollisionVolume", 0.8) * _f(master, "SFXVolume", 1.0), 0.0, 1.0)
+	var vol_bat := clampf(_m_coll * _m_sfx, 0.0, 1.0)
 	if _raspa_t == 0.0:
 		if raspa.tocando:
 			raspa.parar()
@@ -365,14 +395,34 @@ func _tocar_uma(b: String, n: String, vol: float, tom: float) -> void:
 	s.ganho = GANHO
 	s.volume = vol
 	s.tom = tom
+	s.ancora = _ancora()
 	add_child(s)
 	s.tocar(b, n)
 	_uma_vez.append(s)
 
 
 ## conferência (tests/teste_sfx.gd): [nome, volume, tom] de cada roda
+## rival além do alcance do som 3D (ia.gd): pneus, raspão e sons curtos param
+## na hora (inaudíveis, mas seguiam tocando e sendo calculados). Voltando pra
+## perto, o passo religa (tocar() no _roda / rodas_passo do C++)
+func calar() -> void:
+	for o in rodas:
+		o.som.calar()
+	if raspa:
+		raspa.calar()
+	for s in _uma_vez:
+		if is_instance_valid(s):
+			s.queue_free()
+	_uma_vez.clear()
+
+
 func estado() -> Array:
 	var out: Array = []
 	for o in rodas:
 		out.append([o.som.nome, o.vol, o.som.tom])
 	return out
+
+
+## rival da IA: o som sai do carro (3D); o jogador: 2D como sempre
+func _ancora() -> Node3D:
+	return car if car and car.get("som_3d") else null

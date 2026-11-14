@@ -510,6 +510,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 
 ## Efeitos (poeira, pedras, lascas, fumaça, sujeira)
 
+- Poeira dos rivais = conjunto Other do Dust.xml (nov/2026, "a terra subindo
+  do pneu deve estar comendo FPS", Matheus): o jogo (0x3affb0) tem um
+  conjunto pro carro da câmera (CamSubject) e outro pros outros (Other:
+  espaço 0.2 / 0.4 e 2.0 m de longe, contra 0.15 / 0.1 / 0.1; nuvens de 7 a
+  10 em vez de 3 a 6). O remake usava o CamSubject nos 8. Agora os rivais
+  usam o Other (mais fiel e bem mais leve: em 15 s de corrida os rivais
+  soltam 95..754 nuvens, o jogador 2392). E a MultiMesh de cada carro cresce
+  com as nuvens vivas (64 -> dobra até 1024) em vez de mandar 1024 x 20
+  floats pra GPU a cada quadro. _process da poeira dos 8: 1.4 -> 0.63 ms
+  por quadro. O jogador não muda (teste_poeira igual).
 - Poeira dos pneus (PORTA do jogo, nov/2026, car.gd POEIRA, poeira.gd;
   docs/engenharia_reversa.md, Poeira): o material do chão diz o tipo
   (DustType None/Light/Medium/Heavy) e a cor (DustColour); Setup/Dust.xml
@@ -576,7 +586,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   exe também lê o material do chão), a >= 1 m do anterior e >= 30 mph:
   int((2 + 4 t) x de frente) lascas (mínimo 1), 12..35 mph pra fora e pra
   cima da parede + 70% do deslize; vivem 4 s, quicam com 0.5, giram; no
-  máximo 8 de uma vez. Carro com carro (25..45 mph) fica pra quando tiver IA.
+  máximo 8 de uma vez. Carro com carro (25..45 mph): feito em nov/2026,
+  seção Batida carro com carro (Corrida).
   Conferido no crash_Storm (5 vivas, tamanhos, giro). teste_lascas.
   FECHADO (Matheus: "ficou perfeito").
 
@@ -1298,6 +1309,564 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   foi lido). Os links do AIT vêm ao contrário da corrida (a direção de cada
   um aponta pro índice menor): a lista é invertida. Volta só conta com 60
   dos 75 links andados (atalho e ida e volta pela linha não contam).
+- Largada como no jogo (pedido do Matheus): câmera de introdução e carro
+  preso que dá pra acelerar.
+  - Introdução: IntroCameras.XML do RX01 (raw/12287), caminho Intro1 (7 nós)
+    olhando pro Introlookat1 (5 nós), os 2 a 35 m/s, ~14.3 s. Enter de novo
+    ou o A do controle pulam (no jogo pula, com o X do PS2: Matheus). NOSSO: a curva entre os nós (Catmull-Rom; o jogo não foi lido).
+  - Espera (introdução + contagem): car.largada_presa = embreagem aberta
+    (o motor sobe, chega a 8000 rpm) e freio nas rodas DEPOIS da lógica dos
+    pedais. Bug que o Matheus achou: o carro largava de ré. Causa: a
+    contagem segurava o freio parado e o jogo engata a ré com freio parado
+    (0x202df0). Por isso o freio do jogador é ignorado na espera.
+  - No exe, cPreRaceState é estado de menu, e mCountdown/WaitForLaunch não
+    têm uso achado: a contagem de 3 s continua NOSSA.
+  - teste_corrida: introdução >= 10 s, carro parado (0.15 m, só assentando)
+    com acelerador e freio no fundo, rpm >= 3000, sai pra frente no VAI
+    (47.6 km/h em 2 s).
+- Erro antigo "Condition !v.is_finite()" (instance_set_transform) RESOLVIDO
+  na gravação da largada (tests/gravar_corrida.gd, CHECA_NAN=1 acha o nó):
+  era o MotorTreme/Motor. A mola do coxim (7 Hz, motor_treme.gd) era
+  integrada com o passo do quadro inteiro e explode abaixo de ~37 FPS
+  (com tela lenta, xvfb ou gravando a 30). Agora em passos de 1/120 s.
+- Passo 3, IA (pista/ia.gd, teste_ia, print_ia; 1ª versão, nov/2026):
+  - Do jogo: o AIT do RX01 é uma VOLTA GRAVADA ("ExportedTrack"): o ponto
+    +0x00 do link é por onde o carro passou (até 12 m fora do centro, os dois
+    lados) e +0x24 a velocidade ali (25..34 m/s, não segue o raio: R 12 m a
+    32 m/s, então não é calculada; ENGANO, é a largura da pista: ver IA,
+    acelerador e freio do exe). Pilotos: AIPlayers.xml (86, Skill
+    0.20..1.0, classes, Rivalry). Catchup do Rallycross: STDH_04 (Normal).
+    tools/ia_dados.py -> data/ia.json.
+  - Procurado no exe e NÃO achado: o "piloto" (quem preenche o struct de
+    controle que os pedais 0x202df0 recebem) e onde a escala do catchup
+    entra. Os save states que temos não têm rivais (só 1 jogador na lista
+    0x7f48d4+0x10). Ficou NOSSO: direção por perseguição de ponto (7 m +
+    0.55 s à frente, ganho 2.2), velocidade = gravada x (1 - 0.25 (1 -
+    Skill)) x (1 + 0.12 x escala do catchup), preso 2 s -> ré 1.5 s,
+    capotado 2 s ou a 18 m da linha -> volta pra linha (recuando até ter 6 m
+    livres de outro carro), desvio do grid sumindo em 150 m, rivais
+    sorteados da classe do jogador.
+  - Derrapando: a física do jogo não endireita sozinha (RecoveryTorqueCutting)
+    e a IA ficava no acelerador com a direção no batente, 2.5 s indo reto
+    pra fora (trace no teste). Agora: direção > 0.8 e o carro girando pro
+    outro lado -> acelerador 0; direção > 0.95 -> no máximo 0.5 (NOSSO).
+  - Cercas e fardos: objetos_rx01.rivais, o mesmo código de quebra roda pra
+    cada carro. Rivais mudos (o som não é posicional).
+  - teste_ia (1 volta, jogador pilotado pela mesma IA, SEMENTE fixa = 7):
+    os 7 completam; 3 sementes: 1 a 3 reposições/ré por corrida (quando dois
+    se tocam), média 73..99 km/h (a volta gravada dá ~101).
+  - Desempenho: 8 carros = ~10 ms de física por passo na nuvem (1 carro 3.5).
+- Largada pelo vídeo do speedrun (Amateur National, Hunter Valley, intro
+  pulada): o jogo não conta 3-2-1. A câmera de corrida entra com "Get Ready"
+  (vermelho) por 2.25 s, 2.75 s sem nada, "Go!" (verde, com um sinal verde)
+  e o cronômetro começa: 5 s de espera. Você larga em 8º (confirmado pelo
+  Matheus e pelo HUD do vídeo, POSITION 08/08); os nomes da lista do vídeo
+  (Cullen, Pugh, Clarke, Shiarlis, Wood, Eagle, Dicken) são do AIPlayers.xml.
+  Antes da câmera de corrida o vídeo mostra ~2.5 s de uma câmera baixa
+  andando pela pista: a "câmera que desce até o carro" que o Matheus lembra
+  depois da intro ainda não tem referência (o speedrun pula a intro).
+- Rivais, 2ª rodada (feedback do Matheus: FPS de 240 caiu pra 110, IA burra
+  e lenta, sem desviar, sem som):
+  - FPS: sem tela os 7 rivais custam ~1.3 ms/quadro de CPU (física); o resto
+    era desenho. VehicleLOD.xml: Vehicle_AI troca o modelo pela fração da
+    tela (High 0.24, Mid 0.055, Low 0.0175) e o jogo tem Models_2K (12
+    peças, piloto embutido), 1K (4), 500 (2) e Models_Shadow (só sombra).
+    Ainda não gerados: NOSSO por enquanto, cada peça some abaixo do Low
+    (ia.gd _lod) e a sombra sai de uma cópia da carroceria numa superfície
+    só (de 392 superfícies com sombra pra 7). No meio da corrida ficam 208..304
+    das 499 superfícies dos rivais. O nó espelho tem escala -1 (o raio da
+    peça saía negativo e o LOD não fazia nada).
+  - IA: Skill pesa menos (GANHO_SKILL 0.1); desvio de carro mais lento até
+    25 m à frente pro lado com mais espaço (centro e larguras do AIT, 2.5 m
+    da borda, no máximo 6 m da linha); sem espaço, segue o da frente se ele
+    passar de 5 m/s; vigia: menos de 15 m em 5 s -> volta pra linha; 3 rés
+    sem andar 20 m -> volta pra linha. teste_ia, 4 sementes: os 7 completam,
+    média 83..100 km/h (a volta gravada dá ~101).
+  - Som: os rivais tocam motor e pneus em AudioStreamPlayer3D presos no
+    carro (som_jogo.novo_player; volume cheio até 8 m, cai com 1/d até 150
+    m: NOSSO). ~8 sons por rival tocando.
+- Câmera depois da intro (vídeo do Matheus no PCSX2, RX01 de truck): o voo
+  da intro corta (7.05 s) pra uma câmera alta atrás do carro olhando ~35°
+  pra baixo, que desce até a câmera de corrida em 5.0 s chegando devagar
+  (a mudança por quadro cai quase em linha reta: posição 1 - (1 - t)^2);
+  12.2 s entra o HUD com "Get Ready". corrida.gd camera_descida, por cima
+  da câmera de corrida já calculada; a altura de saída (5 m) é NOSSA,
+  estimada no quadro. Enter/A na intro vai pra descida, na descida pula
+  pro Get Ready.
+- IA, 3ª rodada, pelo save state com rivais (corrida_no_normal, buggy
+  Normal; docs/engenharia_reversa.md): os rivais andam a 123..139 km/h de
+  acelerador cheio, 1.15..1.40 x o +0x24 do AIT (que NÃO é a velocidade-
+  alvo, foi engano da 1ª versão), 3.5..6.8 m fora da linha, direção em
+  sétimos (-6/7, -4/7, 2/7, 5/7) escrita direto (cru = suavizado; o
+  acelerador é suavizado normal). Seguir a linha nesses pontos a 38 m/s
+  pediria 20..48 m/s² de lateral: a IA corta pela pista larga. Agora:
+  direção em sétimos e direta (car.direcao_direta), acelerador cheio (Skill
+  e catchup só limitam o máximo), alivia acima de 17° até o alvo andando a
+  mais de 15 m/s, freia acima de 34°, e limite pela curva até 65 m à frente
+  (raio pela virada da linha em 30 m, A_LAT 14, frenagem 8 m/s²: NOSSO);
+  desvio de cada rival de -4.8 a 4.8 m. teste_ia, 2 voltas, 3 sementes:
+  média 89..127 km/h, 0..2 reposições por rival (engavetamento). O piloto
+  do exe (acelerador/freio) ainda não foi lido.
+- IA, 4ª rodada: achado o objeto do piloto (vtable 0x5ae0d0; docs/
+  engenharia_reversa.md). Da RAM dos 7 rivais: direção = ângulo até o alvo
+  / 20° (GANHO_VIRA 2.865, era 2.2 nosso) e alvo a 0.5 s de velocidade (era
+  7 m + 0.55 s, longe demais). teste_ia, 2 voltas, 3 sementes: média
+  101..127 km/h, 0..1 reposição por rival (era até 2). Acelerador e freio
+  continuam NOSSOS: pra achar, um save state com um rival FREANDO (freio >
+  0 na RAM) ajudaria a cruzar os campos.
+- Acelerador e freio da IA em sétimos (nov/2026, save state freiando.p2s
+  do Matheus): como a direção, os 3 comandos vão pro corpo em round(x x 7)
+  / 7 (ia.gd). Um rival a 124 km/h com a direção no batente estava de
+  acelerador 0 e freio só 1/7 (o nosso freia 1.0 acima de ANG_FREIO: fica
+  NOSSO até achar quem escreve a struct, docs/engenharia_reversa.md). teste_ia
+  1 volta: 96..121 km/h, 1 reposição.
+- IA, acelerador e freio do exe (nov/2026, pedido do Matheus; docs/
+  engenharia_reversa.md, Acelerador e freio + Catchup; re/ia_alvo_ram.py):
+  - Lei 0x34ed10: k = (v_alvo - v) x 0.2 preso em +-1 (k > 0 acelera, < 0
+    freia). v_alvo (0x359eb8) = o menor de 2 arcos de bicicleta do próprio
+    carro (0x214328) até a rota à frente. Saiu o NOSSO (alivia acima de 17°,
+    freia acima de 34°, A_LAT/A_FRENA, teto da Skill e do catchup).
+  - 1ª tentativa (só a lei e os arcos na volta gravada): reposições 1 -> 13
+    em 4 sementes, mesma média. O limite de velocidade por link (+0x4c) não
+    salvava: -1 mph nos 75 (vale só 1..150).
+  - Faltavam 2 coisas, as duas da RAM dos rivais: (1) o catchup vai na
+    FÍSICA do rival, corpo+0x720 potência (0.95..1.11) e +0x724 subesterço
+    (1.77..2.10; com a flag +0xc em 0 o jogo usa s - 0.5: 2 - 2s), que entra
+    na direção e no arco: curva a ~1/raiz(2) da velocidade; o catchup do
+    jogo (0x34cea8) também é outro: a mesma escala pra todos os rivais da
+    frente (de trás), pela distância do jogador pro carro LOGO à frente
+    (atrás), e o bônus da Skill acima de 0.5. (2) O zero da IA é o CENTRO
+    +0x5c do link, não a volta gravada: a pista vai das bordas do bloco
+    extra (o +0x24 é LARGURA e não velocidade; conta pros links sem bloco) e
+    o zero fica no centro. Na RAM o alvo da direção de 4 dos 7 rivais está a
+    0.0 m dele. Com o centro, a velocidade-alvo bate 0..5% em 11 de 14
+    rivais (corrida_no_normal + freiando) e a lei dá os pedais crus da RAM.
+  - O espalhamento NOSSO (-4.8..4.8 m por rival) virou o do jogo: só Skill <
+    0.5 anda desviada ((0.5 - Skill) x 2 x sorteio [0, 10) m, 0x360550), no
+    zero nos primeiros 5 s. NOSSO: sorteia 1 vez por corrida.
+  - teste_ia, 1 volta, 4 sementes (28 voltas de rival): 0 reposições (era 1
+    no NOSSO e 13 na 1ª tentativa), 98..146 km/h de média (era 97..126).
+    bench_corrida igual com ATV4_CPP=0 e 1 (o C++ lê mult_pot / mult_sub;
+    libs 0.11). Física do jogador idêntica (os 2 ficam em 1 nele).
+  - teste_batida_carros: os casos laterais dos prints foram montados com o
+    rival sem catchup; com o subesterço x2 o volante 0.6 do teste não segura
+    o rival no jogador e ele decola num barranco a 17..21 m (sem contato).
+    O teste é do resolvedor: roda com os rivais sem catchup.
+  - Aprovado pelo Matheus jogando (nov/2026: "ficou muito bom").
+- IA, largada (nov/2026, item 1 do Matheus; docs/engenharia_reversa.md,
+  Estados do corredor): a "demora na largada pela posição" que eu tinha
+  achado (0x352c98) NÃO é da largada: é do estado 4 (sua chegada) e só em
+  outros tipos de evento. A demora de verdade (0x353750, base + 0.3 +- 0.15
+  s) só existe com um contador que é 0 offline: no jogo o rival sai no Go!
+  junto com todos. Na contagem ele fica "esperando" (alvo 0, pedais 0); o
+  nosso acelera no último segundo (NOSSO).
+  - Achado no caminho: o update dos pilotos (0x3525f8) liga DAT_0055155c =
+    1 enquanto roda a IA; o save state mostra 0 porque é tirado fora dele.
+    Então a borda da pista pra IA é a do bloco extra (+0x68/+0x6c), não
+    -+largura/2 (diferem até 2.7 m à esquerda e 5 m à direita). O zero
+    muda no máximo 1 cm (a validação da RAM continua igual).
+  - teste_ia, 8 sementes (56 voltas de rival), reposições:
+      borda do bloco + largada fiel 6; -+largura/2 + largada fiel 9;
+      borda do bloco + ronco NOSSO 3; -+largura/2 + ronco (o de ontem) 6.
+    A borda do jogo é melhor nas duas. A largada fiel engaveta o bolo no
+    grampo (~500 m) porque falta o comportamento de seguir do jogo: fica o
+    ronco NOSSO até portar o seguir, aí refazer a conta.
+  - Portado: bordas do bloco no desvio, catchup desligado na sua chegada
+    (s = 0: potência x1, subesterço x2). bench igual com ATV4_CPP=0 e 1.
+- IA, ronco antes do Go! (nov/2026; save idle_antes_do_Go do Matheus, a ~3
+  s do Go!: os 7 no estado 1 e no "esperar", 1000 rpm, acelerador 0). O
+  Matheus confirmou que no jogo eles roncam antes do Go!. No exe: o relógio
+  da largada parada fica no estado 6 por 4.595 s e o "esperar" só segura o
+  rival enquanto faltam mais de 2 s; depois o de corrida pisa com o carro
+  travado. Era NOSSO o último 1 s; agora são os 2 s do jogo (ESPERA_T).
+  - teste_ia com a pista completa, 16 sementes: 2 s = 12 reposições, 1 s =
+    6. Aos 10 s de corrida as posições são as mesmas nas duas (numa
+    semente, idênticas): a largada sai igual e a diferença são engavetamentos
+    no grampo que mudam de semente pra semente (falta o comportamento de
+    ultrapassar, #5).
+  - Container novo da nuvem vem sem os assets gerados: sem os .obj do RX01 a
+    pista fica sem cercas, fardos e arquibancadas (objetos_rx01 só cria o
+    que tem modelo) e o teste_ia muda de cara. Gerar com tools/rx01_objetos.py
+    (2 s) antes de medir. Sem os carros, efeitos e sons, teste_batida_carros,
+    teste_quebra, teste_volante, teste_mao e os de efeito/som falham
+    igual no commit anterior (ambiente, não código).
+- IA, ultrapassar (nov/2026; saves tentando_ultrapassar, tentando_passar_2,
+  andando_em_linha_reta): o cérebro tem 8 comportamentos numa lista fixa
+  (docs/engenharia_reversa.md, Cérebro da IA). Andando, 5 rivais estão no #7
+  (corrida na linha, o portado) e 2 no #5: ultrapassar, uma máquina de 5
+  fases com um carro-alvo (num dos saves, o carro do jogador).
+- IA, ultrapassar portado (nov/2026, pedido do Matheus "pode seguir nessa
+  ordem"; pista/ia_ultrapassar.gd). Lido inteiro no exe: percepção dos
+  vizinhos (45 m de rota, setor, distâncias, tempo até bater pelas pegadas),
+  busca do alvo, prioridade, o plano e as 5 fases (seguir, colado, desviar,
+  passar, sair pro lado). Entrou no lugar do desvio NOSSO (_desviar: carro a
+  25 m mais lento -> lado com mais espaço, MARGEM 2.5, DESVIO_MAX 6).
+  - Achados que mudaram o #7 também: o #7 não segura a vez (todo quadro o #5
+    pode entrar); recomeçar o #7 sorteia o desvio da Skill de novo
+    (0x360550, era 1 vez por corrida); nos 5 s depois do Go! o ponto da
+    direção fica na faixa do próprio carro (modo 0; trocou o JUNTA, nosso,
+    150 m pra juntar na linha); depois o modo 1 (mistura com a lateral do
+    carro se o bico está torto mais de 10°). A lateral fica dentro da borda
+    menos a meia largura do carro (objeto +0xf4, ~1.1 m). O arco 2 da
+    velocidade-alvo (0x35a150) parte do ponto da direção com a lateral, no
+    rumo do carro: nos 3 saves acerta 3 dos 4 casos que o zero errava.
+  - Conferido com a RAM: o rival na fase 4 (que replaneja todo quadro)
+    guardou lateral -2.812 e borda -10.372; a nossa conta com a pista dá
+    -2.82 e -10.37. Transições vistas nos saves: 4 -> 3 e 2 -> 3. O mundo é
+    espelhado: lateral do jogo = -(a nossa); o setor do vizinho bate com o
+    lado da pista nos saves.
+  - Detalhe do PS2: "livre pro lado" é |dele - passa| > folga com passa =
+    dele + folga; o FPU do PS2 corta o arredondamento, então isso só é
+    livre pra quem já está além (ou indo pro zero / borda). Portado assim.
+  - Sem rivalidade (offline, Skill slots 1/3/4 = 0 na RAM) a fase 0 nunca é
+    escolhida. A fase 1 (colado, para-choque < 2 m) mira na BORDA do lado a
+    95% da velocidade do alvo.
+  - teste_ia, 8 sementes (pista completa, objetos do RX01 gerados): antes 5
+    reposições, 1 ré, o último rival termina em 66.4 s na média; com o #5
+    (1ª versão, ainda com o JUNTA) 2 reposições, 1 ré, 59.7 s; com a
+    largada do exe 0 reposições, 0 ré, 58.4 s (uma rodada intermediária da
+    mesma lógica deu 3 reposições e 58.5 s: a corrida é caótica, a média é o
+    que vale). O #5 entra 155..300 vezes por corrida (os 7 somados), ~metade
+    do tempo de cada um (RAM: 2 de 7 a cada instante).
+  - Caso visto (semente 3, 1ª versão): Sheppard (Skill 0.26) colado atrás de
+    um rival mirando na borda (fase 1); a batida prevista some, o #5 acaba,
+    o #7 recomeça e sorteia o desvio de novo (+8.5 -> -3.6 m), ele corta pra
+    cima do outro e capota. É a lógica do jogo (0x360550 sorteia a cada
+    começo); com a largada do exe não repetiu nas 8 sementes.
+  - NOSSO: a caixa da IA (metade do AABB dos vértices do VehicleWorld.hsc;
+    RAM: meia largura 1.04..1.19, meio comprimento 2.51..2.90); o +0xf0 do
+    objeto (<= 2 pro #5) sempre ok; o corte de curva do 0x359730 não
+    portado; o alcance do ponto sem o raio do carro (o exe soma, mas nos
+    saves o ponto fica a alcance + 0.8 +- 1.6 m, não + 3 m); reposto, o
+    cérebro recomeça.
+  - CPU: a IA foi de 0.47 pra 1.04 ms por passo (medir_cpu, nuvem). O
+    grosso é a percepção na largada (~6.5 vizinhos por carro a menos de 45
+    m, ~3.6 µs de GDScript cada). Os dados de cada carro saem 1 vez por passo
+    na lista (dados_carro) e a previsão de batida pela caixa (mesmo
+    resultado dos 4 cantos em 200 mil casos sorteados) com filtro exato
+    pelos círculos. Se pesar, o próximo passo é a percepção em C++.
+  - C++ x GDScript: bench_corrida igual (os 8 carros na mesma posição, rpm e
+    marcha). teste_cpp: as 4 falhas do F3 são de ambiente (iguais no commit
+    anterior; sem os modelos dos carros).
+- Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
+  teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
+  das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
+  pista: cair numa repõe na hora (o jogador e os rivais). Caixa centrada em
+  pos, Z = dir (bate com o eixo Z do modelo da arquibancada embaixo, nas
+  6), tamanho inteiro. O ponto de reposição segue a seção Respotting do
+  TrackSetup/RALLYCROSS.xml (lida em 0x1bfb68): chão com normal.y >=
+  mUprightTolerance 0.93, sem água mais funda que mWaterDepthTolerance 0.01
+  (na água, normal >= mWaterUprightTolerance 0.99) e ninguém a menos de
+  mSafePlayerDistance 8 m. NOSSO: voltar pela linha da IA de 4 em 4 m a
+  partir do último ponto conhecido do carro (o rastreio não pula: quem cai
+  na arquibancada volta pra onde saiu da pista) e cair de 1 m. Os rivais
+  usam a mesma função nas reposições deles (capotado, longe, travado).
+- CPU da corrida (nov/2026, "240 caindo pra 90 FPS", F2 do Matheus: física
+  11 ms por passo, desenho 1 ms CPU / 0.6 ms GPU; tests/medir_cpu.gd): é
+  CPU numa thread só (GPU 8%, CPU 12-15% no total), o passo de 50 Hz cai em
+  1 de cada ~5 quadros a 240 FPS. Por passo na nuvem (~13 ms): car.gd 0.55
+  ms por carro (som de pneu 0.08, braços do piloto 0.07, raios das rodas
+  0.09, esferas das rodas 0.05, pneus 0.06, suspensão visual 0.05), IA 2.4
+  -> 0.8 ms (rastreio projetando nos trechos em vez de 121 pontos de 1 m),
+  objetos 0.6, batida carro-carro 0.2, o resto é o motor de física do Godot
+  (2057 esferas de colisão dos objetos, 377 pares). NOSSO, só CPU: rival a
+  mais de 50 m da câmera não mexe braços do piloto nem suspensão visual, e
+  além do som 3D (150 m) não calcula som de pneu. A consulta do raio das
+  rodas é montada 1 vez por passo. rodar_testes idêntico antes/depois.
+  Testado e NÃO adotado: a física numa thread separada e o Jolt (~10%,
+  dentro do ruído, e o Jolt muda a colisão do casco).
+  2ª rodada (F2 do Matheus: física 5-8 ms por passo, "process" 7 ms com pico
+  de 24, FPS 150-170 -> 110 com carro na tela): a POEIRA custava 3.9 ms por
+  quadro com 8 carros (3 arrays por nuvem por quadro e 10 resize por nuvem
+  que morria): agora grava direto no buffer e compacta numa passada, ~1.4
+  ms. O resto do _process por quadro: car.gd 0.8, som_jogo 0.6, main 0.4.
+  3ª rodada (F2: 141 FPS, física 6.5 ms por passo; tests/bench_corrida.gd =
+  tempo de CPU do processo numa corrida fixa de 15 s, ruído ~5%, bem menor
+  que o do relógio na nuvem): 14.0 -> 13.0 s (3.1 s são o carregamento, a
+  corrida caiu ~10%). Esfera das rodas só mexe na forma quando muda; HUD de
+  depuração 10x/s; rival além do som 3D não solta poeira/pedrinha nova;
+  peça de cerca parada 1 s dorme (ficava ativa tremendo no relevo). Motor
+  do Godot ~5 ms por passo, ~1.5 dele são os objetos da pista. Testado sem
+  efeito: tirar a colisão contínua (CCD) dos carros.
+  Física do Godot numa thread separada (project.godot
+  physics/3d/run_on_separate_thread, nov/2026): ADOTADA. Medida no tempo de
+  parede do bench_corrida, 3 rodadas cada: 11.5 -> 10.0 s (a corrida sem o
+  carregamento ~18% mais rápida); suíte e rodar_testes idênticos. Na 1ª
+  tentativa a medida no relógio da nuvem tinha ruído demais pra ver.
+  Carros divididos entre os núcleos (pedido do Matheus, nov/2026): TESTADO E
+  NÃO ADOTADO. O passo do car.gd foi dividido em 3 fases (consulta na thread
+  principal: a consulta de física só existe nela, World3D.direct_space_state
+  dá nulo em outra thread; conta em paralelo no WorkerThreadPool com
+  Thread.set_thread_safety_checks_enabled(false); efeitos e visual na
+  principal: MultiMesh, som, nós). A divisão sozinha deu rodar_testes
+  idêntico e a corrida igual (jogador no mesmo metro, nuvens iguais até a
+  unidade), mas a parte paralelizável é pequena (motor, câmbio, pneus,
+  arrasto: ~0.1-0.15 ms por carro) e a coordenação das threads come o
+  ganho: bench_corrida 9.0 s de parede sem threads x 9.4-10.1 s com (3
+  rodadas cada, 4 núcleos). O que pesa no carro (raios, esferas, efeitos,
+  visual) precisa da thread principal. Caminho que sobra pra ganho grande:
+  a física do carro em C# ou C++ (GDExtension).
+  Física do carro em C++ (nov/2026, escolha do Matheus: C++ por ser o mais
+  rápido e não trocar de Godot): fisica_cpp/ (GDExtension, godot-cpp 4.5
+  como submódulo; extensão de versão menor roda no 4.7.1), classe
+  FisicaCarro, bin/atv4_fisica.gdextension + as bibliotecas compiladas no
+  git (Linux .so e Windows .dll, a do Windows feita na nuvem com mingw).
+  Sem a biblioteca, o carro segue no GDScript; tests/teste_cpp.gd confere
+  que carrega e que cada conta portada bate com o GDScript. Medida antes de
+  portar (por carro e passo, nuvem): pneus 0.06 ms, motor 0.02,
+  água/arrasto/giro 0.03, raios das rodas 0.09, esferas 0.05, efeitos 0.14
+  (som 0.08), visual 0.14 (piloto 0.07, suspensão 0.05): o ganho vem de
+  levar o passo inteiro, não só os pneus.
+  Parte 1, motor e câmbio (fisica_cpp/src/motor.cpp: _drivetrain, _gearbox,
+  _shift_step, _razao_patinada, _giro_rodas): porta linha a linha, escalar
+  em double e vetor em Vector3 (float) como o GDScript. Uma FisicaCarro por
+  carro (car.cpp, configurar(car) guarda P, marchas e curvas); o estado
+  continua nas variáveis do car.gd, lido no começo e gravado no fim.
+  Conferido: rodar_testes idêntico e bench_corrida (8 carros, 15 s) com
+  posição, rpm e marcha iguais com ATV4_CPP=0 e 1. Ganho de CPU nesta
+  parte some no ruído (o motor era 0.02 ms): é base pras próximas.
+  Parte 2, pneus (pneus.cpp: _tires, _powerslide, _corte_recuperacao,
+  _side_to_fwd, _h_lat, _arrasto) e parte 3, rodas e molas (rodas.cpp:
+  _integra_rodas, _spring, _damper, _add_corr e o laço do raio de cada
+  roda; terreno e cercas continuam no GDScript, chamados do C++). Mesma
+  conferência: rodar_testes idêntico e bench_corrida igual com 0 e 1.
+  Medido (medir_cpu, PERF_CARRO=1, por carro e passo, nuvem): pneus 0.061
+  -> 0.017 ms, motor 0.023 -> 0.013, rodas 0.083 -> 0.059 (o raio do Godot
+  e as 3 chamadas do terreno por roda ficam), giro 0.025 -> 0.021. Uns 0.08
+  ms por carro, ~0.65 ms por passo com 8 carros. Pegadinha: o C++ guarda o
+  P no _ready; o teste_freio desliga o ABS depois e falhou até chamar
+  car.p_mudou(). No Windows o seno/cosseno da DLL pode diferir no último
+  bit do GDScript (outra libm): mesma física, não bit a bit.
+  Parte 4 (nov/2026): esferas das rodas (rodas.cpp esferas, física, mesma
+  conferência) e o visual: pose do piloto (piloto.cpp, PilotoCpp: STEER_LEFT
+  + IK dos braços pela tabela; montagem e tabela continuam no piloto.gd) e
+  suspensão visual (suspensao.cpp, SuspensaoCpp: cantos, barras, eixo do
+  truck, telescópio, balança deslocada). Desenho não precisa ser bit a bit:
+  teste_cpp compara ossos e peças com o GDScript (C++ primeiro, senão um C++
+  que não mexesse em nada passaria), pior diferença 3e-7 em 7 carros.
+  As conferências do piloto (erro_maos, medidas_bracos, juntas_bracos) leem
+  a pose do esqueleto (_globais_agora), não o _lp/_lr. Medido (por carro):
+  piloto 0.063 -> 0.013 ms, suspensão 0.044 -> 0.016, esferas 0.049 ->
+  0.041 (o resto é a consulta de forma do Godot).
+  Parte 5 (nov/2026), som e efeitos: som dos pneus (som.cpp SomPneuCpp: o
+  laço das rodas do sfx_carro.passo, 0.060 dos 0.076 ms; os números do
+  sound_database.xml lidos uma vez), som do motor (MotorSomCpp: atualizar e
+  _camada dos loops), tremida das rodas + vibração (efeitos.cpp tremida:
+  _wheel_jitter e _vibracao, o sorteio global do Godot na mesma ordem).
+  Conferido: bench_corrida soma volume e tom das rodas de som e dos loops do
+  motor em todo passo, igual com 0 e 1; a tremida não dá pra comparar pela
+  corrida (o randf global é disputado fora de ordem, muda até entre 2
+  rodadas de GDScript), então o teste_cpp põe o mesmo estado e a mesma
+  semente nos dois e compara byte a byte (210 casos; semente diferente só no
+  C++ dá FALHA, conferido). Fumaça: só regrava amount_ratio e o material
+  quando muda (custo é do motor, ficou igual). Medido (por carro): som pneu
+  0.080 -> 0.033 ms, som motor 0.034 -> 0.021, tremida 0.016 -> 0.011;
+  car.gd inteiro 0.69 -> 0.38 ms por carro com tudo em C++. Poeira (0.019)
+  e pedras (0.014) ficaram: o que sobra é guardar as nuvens nos arrays do
+  GDScript; portar exige levar as partículas inteiras pro C++.
+  Print do Matheus no PC (59 FPS, física 11.7 ms por passo, pior que os 6.5
+  de antes) sem dar pra saber se o C++ tinha carregado: o F2 agora mostra
+  o estado e o F3 liga/desliga na hora (carro.liga_cpp em cada carro).
+- Otimização geral (nov/2026, "hiper focado em otimizar", tests/medir_cpu.gd
+  com 8 carros, nuvem): física 9.9 -> ~6.4 ms por passo e quadro real 8.1
+  -> ~6.0 ms; corrida fixa do bench_corrida 11.6-12.2 s de CPU sem C++ e
+  8.7-9.4 com (os dois com ~3.1 s de carregamento). Tudo conferido: corrida
+  igual com ATV4_CPP=0 e 1 e igual à de antes, rodar_testes idêntico, 36
+  testes ok, teste_cpp byte a byte nas partes novas.
+  - Objetos da pista 0.68 -> 0.05 ms/passo: as 128 cercas numa grade de 16 m
+    (cada carro só olha as casas em volta, na ordem de antes). Os 51 fardos
+    nasciam ACORDADOS (o 1º passo do motor acorda corpo recém-criado, mesmo
+    dormindo; medido com e sem a thread de física), ~20 nunca dormiam
+    (tremendo no relevo, simulados a cada passo) e uns 10 escorregavam mais
+    de 0.5 m sozinhos em 10 s: agora voltam a dormir nos 5 primeiros passos e,
+    depois de uma batida, dormem quase parados (0.3 m/s e rad/s por 1 s,
+    NOSSO, como as peças da cerca; 3 de 11 empurrados ficavam tremendo pra
+    sempre). O passo dos fardos só visita os acordados (sleeping_state_changed).
+  - IA 0.89 -> ~0.4 ms/passo: a linha (ponto, segmento, curva à frente,
+    lateral, direção, rastreio) em C++ (linha_ia.cpp, LinhaIA); a lista de
+    carros do desvio feita 1 vez no laço (refeita quando alguém é reposto).
+  - Batida carro-carro 0.55 -> ~0.08 ms/passo: posição lida 1 vez, raio que
+    envolve as esferas (longe: pula o par) e os contatos esfera x esfera em
+    C++ (a ordenação continua no GDScript, pros empates darem igual).
+  - Poeira 0.87 -> ~0.08 ms/quadro: nuvens guardadas e desenhadas em C++
+    (nuvens.cpp, NuvensCpp); o sorteio e onde nascem continuam no GDScript.
+  - Tocador de som (som_jogo): parado dorme o _process; sem programa andando
+    não conta os ticks; volume/tom só regravados quando mudam.
+  - Rodas: material do chão lido direto no mapa do terreno e atrito/Damping
+    guardados por material; posição e giros das rodas, água e arrasto em
+    C++. Pegadinha: no godot-cpp, mapa[i] num Packed* vindo do GDScript pede
+    escrita e COPIA o array (1 MB do mapa a cada roda: rodas 0.06 -> 0.13
+    ms); ler pelo ptr().
+  - Som do pneu: números do XML convertidos uma vez (era float("...") de
+    cada atributo a cada passo). HUD da corrida troca a cor só quando muda.
+  - Rival além do som 3D (150 m) não atualiza os loops do motor; a mais de
+    50 m da câmera, motor tremendo, ventoinhas e painel param (NOSSO, CPU).
+  - Medido e NÃO mexido: o motor de física é quase todo o casco dos carros
+    (esferas x terreno; sem casco, só pra medir: 10.9 -> 6.2 ms). O CCD dos
+    carros (continuous_cd) custa ~20% da física (1.2-1.6 ms por passo), não
+    age na corrida nem no rodar_testes, mas age em batida forte (Storm na
+    parede a 20 m/s: 17.60 m/s com CCD, 18.09 sem) e evita atravessar parede
+    fina: fica, decisão do Matheus. Crash achado no caminho: giro_volante do
+    C++ chamado antes do volante configurado (lista vazia); corrigido e
+    protegido.
+- Otimização, 2ª rodada (nov/2026, "deixa o CCD ligado, pode seguir
+  otimizando"; medir_cpu na nuvem): passo do carro 0.370 -> 0.339 ms por
+  carro, tocador de som 0.46 -> 0.28 ms/quadro, bench_corrida 8.5 s de CPU
+  com C++ (era 8.7-9.4). Corrida igual com ATV4_CPP=0 e 1 e igual à de
+  antes, rodar_testes idêntico, 36 testes ok.
+  - Vozes do som do jogo em C++ (som_jogo.cpp, SomJogoCpp.vivas): envelope
+    do SPU, vozes que morrem e volume/tom gravados no player, a mesma conta
+    do _vivas (teste_cpp: 300 quadros com key-off e player parando, byte a
+    byte). O sequenciador dos grãos continua no GDScript.
+  - Vazamento achado: cada voz 3D (rival) ligava uma função no tree_exiting
+    do tocador e nunca desligava. Numa corrida eram milhares de ligações e,
+    ao trocar de carro ou sair, um erro "Lambda capture ... was freed" por
+    voz que já tinha morrido (1456 por rodada do medir_cpu; 28 ligações em
+    10 s de um tocador só). Agora o tocador solta as vozes 3D vivas no
+    _exit_tree (as mesmas que a ligação soltava).
+  - Rodas em C++: o roda_na_cerca (GDScript) só é chamado quando o chão é
+    uma cerca (_cerca_do_corpo) e o ignorar_roda só com peça separando:
+    eram 4 chamadas ao GDScript por carro por passo pra devolver false.
+    Rodas 0.050 -> 0.043 ms por carro.
+  - Poeira: o raio da folga (roda no ar) reaproveita a consulta.
+  - Medido e NÃO mexido: câmera de corrida, 0.03 ms por passo de 60 Hz
+    cada uma das 2 (portar pra C++ não compensa). Renderização em thread
+    separada (rendering/driver/threads/thread_model): não dá pra medir na
+    nuvem (Vulkan em software, 2 FPS até em 320x180). Na print do Matheus
+    (0.6) o desenho era 2.23 ms de CPU num quadro de 9.16 ms: fica pra ele
+    testar no PC (--render-thread separate, docs/comandos.md).
+- Otimização, 3ª rodada (nov/2026, desenho e FPS alto). Chamadas de
+  desenho contadas na largada (lavapipe, câmera atrás do jogador, os 8
+  carros na frente): 704 no total = 102 do jogador + 507 dos 7 rivais (~72
+  cada) + 92 dos objetos + 3 de céu e terreno. A sombra do sol desenha
+  2.18 milhões de triângulos por quadro: é o terreno inteiro (524 mil)
+  nas 4 faixas da sombra.
+  - Lentes e brilhos das luzes (luzes.gd, farol.gd) escondidos apagados:
+    são aditivos x aceso, apagados somam zero mas gastavam desenho (as
+    lentes e brilhos todos são 43 chamadas com os 8 carros; na largada o
+    freio segurado e o farol ligado acendem quase todos e sai -11, correndo
+    sem frear sai a maior parte). E o Godot soma a cor da névoa em material
+    aditivo (testado: pixel 1.0 com a lente apagada x 0.8 sem): a lente
+    apagada clareava nos carros a mais de 87.5 m. Prints do Storm (farol,
+    freio, ré) acesas e apagadas iguais às de antes.
+  - Som e HUD no máximo ~75 vezes por segundo (som_jogo PASSO_SOM, motor_som,
+    corrida PASSO_HUD): o PS2 atualizava por quadro (50/60 Hz) e a mistura do
+    Godot anda em blocos de ~10 ms. Até 75 FPS a conta é a mesma (bench a 50
+    igual); acima, o tempo acumulado entra de uma vez. A 200 FPS (sem tela)
+    a CPU por quadro foi de ~2.14 pra ~1.92 ms (mediana 1.44 -> 1.25).
+  - Câmera: a normal do chão (4 alturas do terreno) só nos quadros com passo
+    de 60 Hz de alguma das 2 câmeras de corrida (mesma decisão do update).
+  - Medido e NÃO mexido: esconder efeito vazio (o Godot já pula, -4
+    chamadas); juntar as peças paradas de cada rival (metade das
+    superfícies tem material repetido, mas o que sobra parado dá ~14
+    chamadas por rival, com risco). O que resolve os rivais é o LOD do jogo
+    (Models_2K/1K/500, pendente; os 2K são por peça como os 4K, com várias
+    texturas cada).
+  - Terreno não projeta mais sombra (recebe a do carro). Ele entrava
+    inteiro nas 4 faixas da sombra do sol: 2.18 milhões -> 79 mil
+    triângulos por quadro na sombra. Com o jogo pausado em 4 pontos da
+    volta, com e sem: 0 a 3 pixels diferentes em 57600 (sol a 51°; a sombra
+    dos morros já está na textura, regra "só a sombra do carro escurece").
+- Terra dos rivais sumindo e piscando (Matheus, nov/2026, depois de cravar
+  240 FPS). Poeira, pedrinhas, lascas e espirro são MultiMesh top_level na
+  origem do mundo, filhos do carro: o LOD dos rivais (ia._lod) punha neles
+  o visibility_range_end do carro (273-299 m). O Godot mede essa distância
+  até o centro da caixa da instância, e no Forward+ a caixa da MultiMesh
+  conta TODOS os espaços (os vazios zerados na origem): ia da origem até a
+  pista, centro a ~300 m da câmera, em cima do corte. Medido no lavapipe
+  numa corrida: 83% dos quadros com terra viva nos rivais saíam cortados e
+  16 trocas aparece/some em 20 s. No OpenGL a caixa só conta as visíveis
+  (não aparecia) e o jogador não tem LOD (não piscava). Correção: o LOD
+  pula as MultiMesh top_level (0% cortado, 0 trocas) e as três gravam
+  custom_aabb em volta das partículas vivas (nuvens.cpp, poeira.gd, pedras.gd,
+  lascas.gd: centro agora a 2-80 m, junto do carro dono), que também
+  acerta a ordem de desenho entre as transparentes de carros diferentes.
+- Otimização, 4ª rodada (nov/2026, Matheus já cravado em 240 FPS; o alvo é
+  o quadro com passo de física, que no PC dele ficava em cima dos 4.17 ms):
+  - Som 3D: 219 tocadores 3D na corrida, até ~110 tocando juntos. Cada um
+    tocando faz, a cada passo, a conta de volume/posição e procura Area3D
+    de reverb/bus (uma consulta de física). O projeto não tem Area3D:
+    area_mask 0 no novo_player (som igual; passo+quadro ~3-5% menor).
+  - Rivais além de 150 m (longe_som, onde o 3D já zera o volume) seguiam com
+    motor e pneus tocando: aos 105 s eram 48 tocadores em 6 rivais longe
+    contra 17 nos de perto. Agora calar_som() para tudo na hora em que ele
+    sai do alcance e o próprio passo religa quando volta (testado: rival
+    calado perto volta com 9 tocadores em 0.1 s). Entre 60 e 120 s de
+    corrida o passo+quadro foi de ~3.1-3.3 pra ~2.9-3.2 ms (nuvem, ruído
+    grande). NOSSO, só CPU: o que se ouve não muda.
+  - Medido e NÃO mexido: avisar os ~130 nós de cada carro que ele andou
+    custa só 0.5 µs (o Godot só marca como sujo). C++ lendo/gravando
+    variável do GDScript: 17-22 ns (entrada do dicionário da roda 37-51 ns),
+    então a interface não pesa; chamada GDScript -> C++ ~0.85 µs (~15 por
+    carro por passo, ~0.1 ms nos 8). IA inteira ~0.3 ms/passo (o desvio é
+    0.07). O passo do carro (~0.3 ms) está espalhado em muita linha de
+    GDScript de ~1 µs: o próximo salto seria o passo inteiro em C++, grande
+    demais pro ganho com o jogo já cravado em 240 FPS no PC do Matheus.
+- LOD dos rivais (nov/2026, prints do Matheus: de longe a suspensão sumia e
+  a carroceria ficava "voando"): cada peça cortava pelo próprio tamanho;
+  agora o carro inteiro corta junto, pelo maior pedaço (ia.gd _lod).
+- Reposição automática fora das caixas (nov/2026, pista/reposicao.gd,
+  teste_reposicao_auto; docs/engenharia_reversa.md, Reposição automática):
+  porta do objeto de progresso de cada corredor (update 0x4d3658), igual pro
+  jogador e os 7 rivais (na RAM os 8 têm reposição ligada). Fora da pista =
+  quanto passou da BORDA do AIT, com a largura esquerda/direita (+0x68 /
+  +0x6c, assimétricas) medida a partir do ponto da linha, não do centro
+  (o grafo de rota da RAM é o próprio AIT: nó = ponto da linha, largura 27.4
+  = 13.7 x 2). Conferido: os 75 centros da pista caem dentro do corredor.
+  Regra: contramão (frente do link . direção da velocidade < -0.5) por 0.2 s
+  mostra "Wrong Way", 2 s depois vira "Off Track, Go Back!" com 3-2-1 e
+  repõe (5.2 s); fora > mWarningStray 4 m (ou trapaça: fora > 8 m, voltou >
+  100 m, pulou > 30 m) por 0.2 s mostra "Off Track, Go Back!", 3-2-1 e repõe
+  (3.2 s). Tem que valer em todo passo; um passo dentro zera. Repõe no último
+  progresso ACEITO (trapaça não aceita avanço). Botão (R na corrida): só
+  abaixo de mRespotSpeed 40 mph (17.88 m/s no exe); acima "Too Fast For
+  Respot". Textos do text/15205_en.txt. A regra NOSSA "longe da linha 18 m
+  por 1 s" dos rivais saiu (agora é a do jogo); capotado, preso e lento
+  continuam NOSSOS. No jogo o botão é a opção "Reposicionar" do menu de
+  pausa (o Matheus, nov/2026): o R é NOSSO até ter menu de pausa (aí a
+  opção chama corrida.botao_repor). Teste: fora 3.24 s, contramão 5.24 s (1 passo de 50 Hz
+  além do jogo pela soma de 0.02). NOSSO: a mensagem do "Too Fast" fica
+  1.5 s (o jogo mostra enquanto o botão está apertado), cor vermelha, o R.
+- Batida carro com carro (nov/2026, carro/batida_carros.gd,
+  teste_batida_carros): o casco é o VehicleVehicle.hsc (o outro casco que o
+  0x1fed48 carrega; tools/casco.py grava esferas_carro, 25 no Renegade
+  contra 20 do VehicleWorld) e as esferas do VehicleWorld não batem em outro
+  carro (exceção de colisão do Godot entre os carros). O par (2, 2) do exe
+  (0x1529d0) cria um contato comum por ponto e as lasquinhas só do mais
+  rápido, com a velocidade relativa e a tabela de carro com carro do
+  gerente (+0x88: 25, 45, 24, 27, 4, 3, 4, 6, 0.7; lascas.gd CARRO). Som:
+  contato sem material = patch Vehicle; entra também na tremida da câmera
+  (car.contato_carro). NOSSO: o resolvedor (impulso com restituição e
+  atrito médios do RigidBody do XML, 2 passadas, empurra 20% da
+  penetração acima de 1 cm, até 4 contatos por par). Teste: rival a 50 km/h
+  na traseira do jogador parado: penetração máx 0.105 m, jogador empurrado
+  a 26 km/h, 4 lasquinhas do rival, som Vehicle.
+  Carros voando (prints do Matheus, nov/2026: 4 carros se batendo e 2 lado a
+  lado saíram voando). 3 causas, todas do lado NOSSO: (1) o raio e a esfera
+  das rodas (car.gd) pisavam no casco de mundo do OUTRO carro (a exceção de
+  colisão do Godot não vale pra consulta): agora excluem os outros carros
+  (car.outros_carros, preenchido pelo separar); (2) a penetração virava
+  velocidade (20%/passo): agora é desfeita na posição (40%/passo, até 5 cm)
+  e a velocidade só cancela a aproximação; (3) contato de lado com a normal
+  inclinada (esferas em alturas diferentes) fazia um subir no outro: de lado
+  (|n.y| < 0.7) a normal fica horizontal. teste_batida_carros lado a lado
+  (90 km/h, o rival virando pra cima do jogador 3 s): antes subida 6.1 m/s e
+  capotou (up.y -0.66), agora 1.4 m/s e up.y >= 0.97; batida de trás agora
+  empurra a 42.6 km/h (era 26: a correção não freia mais o empurrão).
+  2ª rodada (prints do Matheus: roda com roda ainda bugava, o Storm ficou em
+  pé). A CAUSA DE VERDADE: o apply_impulse do Godot só entra no passo
+  seguinte (linear_velocity não muda na hora), então cada contato e cada
+  passada reaplicava o impulso inteiro em cima da velocidade velha (até 8x
+  o necessário). Agora a conta usa velocidades locais e grava 1 vez no fim.
+  Mais: o atrito entre carros é só horizontal; a correção de posição nunca
+  afunda o de baixo no chão (o Godot devolvia ele com velocidade: bomba de
+  energia), só levanta o de cima; a batida não joga ninguém pra cima mais
+  que 1 m/s por passo (NOSSO). Testado e NÃO adotado: rodas como esferas
+  na batida (piorou: 5.4 m/s), empurrão na altura do centro de massa,
+  normal sempre horizontal. teste_batida_carros: lado a lado 2.3 m/s, de
+  lado meio carro à frente 1.4 m/s (up.y 0.98); caindo em cima (1.2 m) só
+  relatório: 1.4 a 5.8 m/s conforme o estado de antes, sem virar de cabeça
+  pra baixo. Batida de trás empurra a 25 km/h (a correção ficou certa).
 
 ## Pendente / ideias
 
@@ -1321,8 +1890,22 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- RX01, falta: LOD das árvores, reposição (cInstantRespotBox),
-  câmera de introdução, as 2 luzes direcionais. A tremida da batida
+- IA: os outros comportamentos do cérebro (#2 preso -> repõe, #3, #4, #6),
+  a percepção em C++ se o FPS cair, o corte de curva do 0x359730, a caixa da
+  IA de verdade (de onde o objeto +0x08..+0x20 sai) e a flag
+  +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
+  Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
+  (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
+- Reposição: falta o efeito na tela/câmera na hora de repor, o pedido
+  tipo 3 (checkpoint perdido), as 2 flags do corredor+0x120 e a opção
+  "Reposicionar" no menu de pausa (quando tiver menu; seção Reposição
+  automática).
+- RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).
+  As 2 luzes direcionais (cLightDirectional) NÃO existem no jogo (nov/2026):
+  são só do editor, como as cercas; o exe não tem o nome da classe (toda
+  entidade usada tem). Brancas, quase horizontais, uma em cada ponta do
+  mapa: devem ter servido pra assar a luz. A luz da corrida é só a do
+  Environment.xml, já portada. FECHADO (docs/engenharia_reversa.md). A tremida da batida
   (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
   não portada.
 - Som do motor (melhoria nossa, plano combinado com o Matheus): o jogo só
@@ -1365,9 +1948,5 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 - Sinal do giro/direção visual: falta save state andando com volante virado.
 - Sujeira: reflexo menor com o carro sujo (0x22ace8, 1 - nível) não
   portado. Sujeira do piloto como o jogo.
-- Erro antigo com tela (não é da poeira): "Condition !v.is_finite()" em
-  instance_set_transform quando o carro pula fora da pista (gravar_poeira na
-  terra: 238 vezes em 2 s, com a poeira desligada também); sem tela não
-  aparece. Algum nó visual recebe transformação com NaN.
 - Para-choque e luzes comprados (componentes Bumper/Lighting; de fábrica é NOT_INSTALLED).
   Os LIGHTRIG são só modelo (sem halo); o Matheus acha feios.

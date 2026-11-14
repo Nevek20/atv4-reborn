@@ -106,8 +106,11 @@ func seguir() -> void:
 		var pm: ParticleProcessMaterial = e.process_material
 		if seg.length() < 0.002:
 			e.global_transform = boca
-			pm.emission_box_extents = Vector3.ZERO
-			pm.direction = Vector3(0, 0, 1)
+			# CPU: só regrava o material quando muda (parado fica igual)
+			if pm.emission_box_extents != Vector3.ZERO:
+				pm.emission_box_extents = Vector3.ZERO
+			if pm.direction != Vector3(0, 0, 1):
+				pm.direction = Vector3(0, 0, 1)
 			continue
 		var z := seg.normalized()
 		var up := Vector3.UP if absf(z.y) < 0.95 else Vector3.RIGHT
@@ -118,9 +121,13 @@ func seguir() -> void:
 
 
 ## taxa pela carga do motor (car.som_carga) e pelo rpm
+var _taxa := -1.0
 func atualizar(carga: float, rpm: float) -> void:
 	var r := clampf((rpm - 1000.0) / 7000.0, 0.0, 1.0)
 	var t := clampf(TAXA_LENTA + (1.0 - TAXA_LENTA) * carga * (0.4 + 0.6 * r), 0.0, 1.0)
+	if t == _taxa:                       # CPU: só regrava quando muda
+		return
+	_taxa = t
 	for e in canos:
 		e.amount_ratio = t
 

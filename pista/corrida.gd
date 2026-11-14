@@ -5,8 +5,13 @@ extends Node
 ## 15.8 x 5.9 x 1.4 m), traçado da IA (75 links) e 5 voltas (eventos
 ## Rallycross Amateur, xml 14840).
 ##
-## Largada: o carro vai pra posição 1 do grid (a mesma da RAM), contagem de 3 s
-## com o freio preso, cronômetro a partir do "VAI". A largada fica 54.8 m
+## Largada: o carro vai pra posição 1 do grid (a mesma da RAM) e roda a câmera
+## de introdução do jogo (IntroCameras.XML: caminho Intro1 de 7 nós olhando
+## pro Introlookat1 de 5, os 2 a 35 m/s, ~14 s; Enter ou o A do controle pulam, no PS2 era o X). Depois contagem
+## de 3 s e o cronômetro a partir do "VAI". Na espera toda o jogador pode
+## acelerar com o carro preso (car.largada_presa: embreagem aberta, freio
+## ignorado; até nov/2026 o freio ficava preso e parado o freio engata a ré:
+## o carro largava de ré). A largada fica 54.8 m
 ## antes da linha (mFirstLapLength): a 1ª passagem pela linha começa a volta
 ## 1, cada passagem seguinte fecha uma volta; acaba na 5ª. Tempo total desde
 ## o VAI. NOSSO (o jogo não foi lido): como ele conta essa 1ª passagem e a
@@ -20,10 +25,23 @@ extends Node
 ## desde a última passagem.
 
 const ARQ := "res://data/rx01_corrida.json"
-const CONTAGEM := 3.0
+# largada do vídeo do speedrun (Amateur National, Hunter Valley; a intro
+# pulada): a câmera de corrida entra com "Get Ready" por 2.25 s, 2.75 s sem
+# nada, "Go!" com o sinal verde e o cronômetro começa
+const CONTAGEM := 5.0
+const GET_READY := 2.25
+# depois do voo da intro (vídeo do Matheus, PCSX2 nov/2026, RX01 de truck):
+# corta pra uma câmera alta atrás do carro, olhando pra baixo, que desce até
+# a câmera de corrida em 5.0 s (7.05 -> 12.1 s no vídeo) chegando devagar
+# (a mudança por quadro cai quase em linha reta: posição 1 - (1 - t)^2); o
+# HUD e o "Get Ready" entram logo depois (12.2 s). A altura de saída é NOSSA,
+# estimada no quadro (o carro do mesmo tamanho, ~35° pra baixo)
+const DESCIDA := 5.0
+const DESCIDA_ALTURA := 5.0
 const AVANCO_MIN := 60          # dos 75 links
+const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
-enum { LIVRE, CONTANDO, CORRENDO, CHEGOU }
+enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
 
 var main
 var estado := LIVRE
@@ -46,6 +64,17 @@ var _cp_frente := Vector3.ZERO
 var _cp_lado := Vector3.ZERO
 var _cp_meia := Vector3.ZERO
 var hud: Label
+var ia                          # rivais (pista/ia.gd)
+var t_fim := 0.0                # tempo total do jogador na chegada
+var t_desce := 0.0              # descida da câmera que falta (s)
+var caixas: Array = []          # cInstantRespotBox: [inversa da caixa, meia caixa]
+var reposicoes := 0             # quantas vezes alguém caiu numa caixa
+var t_rapido := 0.0             # "Too Fast For Respot" na tela (s que faltam)
+var _intro_cam: Array = []      # caminho da câmera (mundo)
+var _intro_alvo: Array = []
+var _intro_s := 0.0             # metros andados no caminho
+var _intro_comp := 0.0
+var _intro_comp_alvo := 0.0
 
 
 ## jogo (x, y, z) -> mundo do Godot (z - 1024, y, x)
@@ -79,6 +108,28 @@ func montar(m) -> bool:
 	if _cp_frente.dot(dir_mundo(dados.grid[0].dir)) < 0.0:
 		_cp_frente = -_cp_frente
 	_cp_meia = Vector3(cp.tamanho[0], cp.tamanho[1], cp.tamanho[2]) * 0.5
+	# caixas de reposição na hora (RALLYCROSS.bin): centradas em pos, Z = dir
+	# (bate com o eixo Z do modelo da arquibancada embaixo), tamanho inteiro
+	for c in dados.get("reposicao", {}).get("caixas", []):
+		var z := dir_mundo(c.dir)
+		z.y = 0.0
+		z = z.normalized()
+		var xx := Vector3.UP.cross(z)
+		var xf := Transform3D(Basis(xx, Vector3.UP, z), mundo(c.pos))
+		caixas.append([xf.affine_inverse(), Vector3(c.tamanho[0], c.tamanho[1], c.tamanho[2]) * 0.5])
+	if dados.has("intro"):
+		for q in dados.intro.caminho:
+			_intro_cam.append(mundo(q))
+		for q in dados.intro.alvo:
+			_intro_alvo.append(mundo(q))
+		_intro_comp = _comprimento(_intro_cam)
+		_intro_comp_alvo = _comprimento(_intro_alvo)
+	ia = preload("res://pista/ia.gd").new()
+	ia.name = "IA"
+	add_child(ia)
+	if not ia.montar(self):
+		ia.queue_free()
+		ia = null
 	hud = Label.new()
 	hud.name = "HudCorrida"
 	hud.add_theme_font_size_override("font_size", 28)
@@ -103,12 +154,54 @@ func largada(n: int) -> Array:
 	return [p, atan2(d.x, d.z)]
 
 
-## Enter: reinicia tudo e começa a contagem
+static func _comprimento(pts: Array) -> float:
+	var l := 0.0
+	for i in pts.size() - 1:
+		l += pts[i].distance_to(pts[i + 1])
+	return l
+
+
+## ponto a s metros num caminho Catmull-Rom pelos nós (o jogo não foi lido:
+## a curva entre os nós é NOSSA)
+static func _no_caminho(pts: Array, s: float) -> Vector3:
+	var n := pts.size()
+	for i in n - 1:
+		var l: float = pts[i].distance_to(pts[i + 1])
+		if s <= l or i == n - 2:
+			var f := clampf(s / maxf(l, 1e-4), 0.0, 1.0)
+			var p0: Vector3 = pts[maxi(i - 1, 0)]
+			var p3: Vector3 = pts[mini(i + 2, n - 1)]
+			return (pts[i] as Vector3).cubic_interpolate(pts[i + 1], p0, p3, f)
+		s -= l
+	return pts[n - 1]
+
+
+## a câmera de introdução, se estiver nela (o main não mexe na câmera)
+func camera_intro(cam: Camera3D) -> bool:
+	if estado != INTRO or _intro_cam.is_empty():
+		return false
+	var p := _no_caminho(_intro_cam, _intro_s)
+	# os 2 a 35 m/s: o alvo anda o mesmo tanto no caminho dele
+	var alvo := _no_caminho(_intro_alvo, _intro_s * float(dados.intro.vel_alvo) / float(dados.intro.vel))
+	cam.near = 0.1
+	cam.global_position = p
+	cam.look_at(alvo, Vector3.UP)
+	return true
+
+
+## Enter: reinicia tudo e começa a corrida (pela introdução)
 func comecar() -> void:
+	if estado == INTRO:
+		_fim_intro()            # Enter de novo pula a introdução
+		return
+	if estado == CONTANDO and t_desce > 0.0:
+		t_desce = 0.0           # e de novo pula a descida da câmera
+		return
 	var l := largada(0)
 	var p: Vector3 = l[0]
 	main.recomecar(Vector3(p.x, main.terrain.height_at(p.x, p.z) + 1.5, p.z), l[1])
-	estado = CONTANDO
+	estado = INTRO if not _intro_cam.is_empty() else CONTANDO
+	_intro_s = 0.0
 	t_conta = CONTAGEM
 	t = 0.0
 	volta = 0
@@ -118,15 +211,47 @@ func comecar() -> void:
 	avanco = 0
 	link = _mais_perto(main.car.global_position)
 	_lado_ant = _lado(main.car.global_position)
-	main.car.test_input = {"thr": 0.0, "brk": 1.0, "steer": 0.0}
+	main.car.test_input = null
+	main.car.largada_presa = true
 	hud.visible = true
+	if ia and RIVAIS:
+		ia.criar()
+
+
+func _fim_intro() -> void:
+	estado = CONTANDO
+	t_conta = CONTAGEM
+	t_desce = DESCIDA
+	main.reset_camera()
+
+
+## Enter / A pulam: a intro ou a descida da câmera
+func pode_pular() -> bool:
+	return estado == INTRO or (estado == CONTANDO and t_desce > 0.0)
+
+
+## a descida depois da intro, por cima da câmera de corrida já calculada
+## (main._update_camera)
+func camera_descida(cam: Camera3D, car: Node3D) -> void:
+	if estado != CONTANDO or t_desce <= 0.0:
+		return
+	var f := 1.0 - t_desce / DESCIDA
+	var k := (1.0 - f) * (1.0 - f)          # quanto falta (1 -> 0, chegando devagar)
+	var fim: Transform3D = cam.global_transform
+	var p := fim.origin + Vector3.UP * DESCIDA_ALTURA * k
+	var olha := Basis.looking_at(car.global_position - p, Vector3.UP)
+	var q := Quaternion(olha.orthonormalized()).slerp(Quaternion(fim.basis.orthonormalized()), 1.0 - k)
+	cam.global_transform = Transform3D(Basis(q), p)
 
 
 func parar() -> void:
 	estado = LIVRE
 	hud.visible = false
+	if ia:
+		ia.limpar()
 	if main.car:
 		main.car.test_input = null
+		main.car.largada_presa = false
 
 
 func _mais_perto(p: Vector3) -> int:
@@ -138,6 +263,46 @@ func _mais_perto(p: Vector3) -> int:
 			d = e
 			melhor_i = i
 	return melhor_i
+
+
+## o carro (a origem) dentro de alguma cInstantRespotBox
+func na_caixa(p: Vector3) -> bool:
+	for c in caixas:
+		var l: Vector3 = (c[0] as Transform3D) * p
+		var m: Vector3 = c[1]
+		if absf(l.x) <= m.x and absf(l.y) <= m.y and absf(l.z) <= m.z:
+			return true
+	return false
+
+
+## caiu numa caixa de reposição: volta pra linha (pista/ia.gd repor_em)
+func _caixas() -> void:
+	if ia == null or caixas.is_empty():
+		return
+	if na_caixa(main.car.global_position):
+		ia.repor_jogador()
+		reposicoes += 1
+	for x in ia.rivais:
+		if is_instance_valid(x.car) and na_caixa(x.car.global_position):
+			ia._repor(x)
+			reposicoes += 1
+
+
+## botão de reposição (R) na corrida: o do jogo (pista/reposicao.gd
+## pode_botao: abaixo de mRespotSpeed, 40 mph); acima mostra "Too Fast For
+## Respot" (a mensagem fica TEMPO_RAPIDO s: NOSSO, o jogo mostra enquanto o
+## botão está apertado). Devolve false fora da corrida (o R normal).
+const TEMPO_RAPIDO := 1.5
+
+
+func botao_repor() -> bool:
+	if estado != CORRENDO or ia == null or ia.vigia_jogador == null:
+		return false
+	if ia.vigia_jogador.pode_botao(main.car):
+		ia.repor_jogador()
+	else:
+		t_rapido = TEMPO_RAPIDO
+	return true
 
 
 ## distância com sinal até a linha de chegada (+ = já passou)
@@ -154,16 +319,28 @@ func _physics_process(dt: float) -> void:
 	if estado == LIVRE or main.car == null:
 		return
 	var car = main.car
+	if estado == INTRO:
+		_intro_s += float(dados.intro.vel) * dt
+		if _intro_s >= _intro_comp:
+			_fim_intro()
+		return
 	if estado == CONTANDO:
+		if t_desce > 0.0:
+			t_desce -= dt           # a câmera descendo: a contagem ainda não anda
+			return
 		t_conta -= dt
 		if t_conta <= 0.0:
 			estado = CORRENDO
-			car.test_input = null
+			car.largada_presa = false
+			if ia:
+				ia.soltar()
 		return
 	if estado == CHEGOU:
 		t_conta += dt
+		t += dt                     # os rivais ainda chegando
 		return
 	t += dt
+	_caixas()
 	var p: Vector3 = car.global_position
 	# avança pelo traçado: só pros vizinhos (não pula pra outro trecho da pista)
 	var n := links.size()
@@ -200,7 +377,9 @@ func _cruzou() -> void:
 	if volta >= voltas:
 		estado = CHEGOU
 		t_conta = 0.0
-		main.car.test_input = {"thr": 0.0, "brk": 1.0, "steer": 0.0}
+		t_fim = t
+		# solta tudo: o carro para sozinho (segurar o freio parado engata a ré)
+		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		return
 	volta += 1
 
@@ -211,19 +390,66 @@ static func relogio(s: float) -> String:
 	return "%d:%05.2f" % [int(s) / 60, fmod(s, 60.0)]
 
 
-func _process(_dt: float) -> void:
+## CPU: a cor do texto só é trocada quando muda (trocar avisa o rótulo de
+## tema novo; era em todo quadro)
+var _cor_atual = null
+func _cor_hud(c: Color) -> void:
+	if _cor_atual == null or c != _cor_atual:
+		hud.add_theme_color_override("font_color", c)
+		_cor_atual = c
+
+
+## CPU: o texto do HUD (relógio com centésimos: muda todo quadro e o rótulo
+## mede o texto de novo a cada troca) no máximo ~75 vezes por segundo, como a
+## tela do PS2 (50/60 Hz). Até 75 FPS é igual a antes
+const PASSO_HUD := 1.0 / 75.0
+var _dt_hud := 0.0
+
+
+func _process(dt: float) -> void:
 	if estado == LIVRE:
 		return
+	_dt_hud += dt
+	if _dt_hud < PASSO_HUD:
+		return
+	dt = _dt_hud
+	_dt_hud = 0.0
+	# cores do vídeo: "Get Ready" vermelho, "Go!" verde
+	var cor := Color.WHITE
+	if estado == CONTANDO:
+		cor = Color(0.9, 0.1, 0.1)
+	elif estado == CORRENDO and t < 1.0:
+		cor = Color(0.3, 0.9, 0.2)
+	_cor_hud(cor)
 	match estado:
+		INTRO:
+			hud.text = "Enter / A: pular"
 		CONTANDO:
-			hud.text = "%d" % ceili(t_conta) if t_conta > 0.0 else "VAI!"
+			hud.text = "Get Ready" if t_desce <= 0.0 and t_conta > CONTAGEM - GET_READY else ""
 		CORRENDO:
 			if t < 1.0:
-				hud.text = "VAI!"
+				hud.text = "Go!"
 				return
 			var txt := "Volta %d/%d   %s" % [maxi(volta, 1), voltas, relogio(t)]
+			if ia and not ia.rivais.is_empty():
+				txt = "Pos %d/%d   " % [ia.posicao_jogador(), ia.rivais.size() + 1] + txt
 			if volta > 0:
 				txt += "\nvolta %s   última %s   melhor %s" % [relogio(t - t_volta), relogio(ultima), relogio(melhor)]
+			# avisos do jogo (pista/reposicao.gd): contramão, fora da pista
+			var aviso: String = ia.vigia_jogador.texto() if ia and ia.vigia_jogador else ""
+			if t_rapido > 0.0:
+				t_rapido -= dt
+				aviso = "Too Fast For Respot"
+			if aviso != "":
+				txt = aviso + "\n" + txt
+				_cor_hud(Color(0.9, 0.1, 0.1))
 			hud.text = txt
 		CHEGOU:
-			hud.text = "CHEGADA!   %s\nmelhor volta %s\nEnter: correr de novo   Backspace: treino livre" % [relogio(t), relogio(melhor)]
+			var txt := "CHEGADA!   %s\nmelhor volta %s" % [relogio(t_fim), relogio(melhor)]
+			if ia and not ia.rivais.is_empty():
+				var cl: Array = ia.classificacao()
+				for i in cl.size():
+					var e: Dictionary = cl[i]
+					var tt: String = relogio(e.fim) if e.fim >= 0.0 else "volta %d" % clampi(int(e.prog / ia.comp) + 1, 1, voltas)
+					txt += "\n%d. %s   %s" % [i + 1, e.nome, tt]
+			hud.text = txt + "\nEnter: correr de novo   Backspace: treino livre"

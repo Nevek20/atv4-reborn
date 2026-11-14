@@ -1,0 +1,1202 @@
+{
+ "fonte": "AIPlayers.xml, CatchupDatabase.xml, Setup/Ai/ctchup_*.xml (tools/ia_dados.py)",
+ "pilotos": [
+  {
+   "nome": "Diego",
+   "skill": 0.95,
+   "rivalry": "POTENTIAL",
+   "numero": 0,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Yoshi",
+   "skill": 0.93,
+   "rivalry": "POTENTIAL",
+   "numero": 1,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Taz",
+   "skill": 0.91,
+   "rivalry": "POTENTIAL",
+   "numero": 2,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Manu",
+   "skill": 0.89,
+   "rivalry": "POTENTIAL",
+   "numero": 3,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "McGee",
+   "skill": 0.87,
+   "rivalry": "POTENTIAL",
+   "numero": 4,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Rutter",
+   "skill": 0.85,
+   "rivalry": "POTENTIAL",
+   "numero": 5,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Davis",
+   "skill": 0.83,
+   "rivalry": "POTENTIAL",
+   "numero": 6,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Geddes",
+   "skill": 0.94,
+   "rivalry": "POTENTIAL",
+   "numero": 7,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Gibson",
+   "skill": 0.92,
+   "rivalry": "POTENTIAL",
+   "numero": 8,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Hudson",
+   "skill": 0.9,
+   "rivalry": "POTENTIAL",
+   "numero": 9,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Bowles",
+   "skill": 0.88,
+   "rivalry": "POTENTIAL",
+   "numero": 10,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Riley",
+   "skill": 0.86,
+   "rivalry": "POTENTIAL",
+   "numero": 11,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Gilfeather",
+   "skill": 0.83,
+   "rivalry": "POTENTIAL",
+   "numero": 12,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Patrick",
+   "skill": 0.8,
+   "rivalry": "POTENTIAL",
+   "numero": 13,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Coles",
+   "skill": 0.75,
+   "rivalry": "POTENTIAL",
+   "numero": 14,
+   "classes": [
+    "ATV",
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Wood",
+   "skill": 0.93,
+   "rivalry": "POTENTIAL",
+   "numero": 15,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Hassan",
+   "skill": 0.9,
+   "rivalry": "POTENTIAL",
+   "numero": 16,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Davies",
+   "skill": 0.87,
+   "rivalry": "POTENTIAL",
+   "numero": 17,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Harrison",
+   "skill": 0.84,
+   "rivalry": "POTENTIAL",
+   "numero": 18,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Shiarlis",
+   "skill": 0.81,
+   "rivalry": "POTENTIAL",
+   "numero": 19,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Eagle",
+   "skill": 0.78,
+   "rivalry": "POTENTIAL",
+   "numero": 20,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Scott",
+   "skill": 0.75,
+   "rivalry": "POTENTIAL",
+   "numero": 21,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Fordyce",
+   "skill": 0.72,
+   "rivalry": "POTENTIAL",
+   "numero": 22,
+   "classes": [
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Pugh",
+   "skill": 0.69,
+   "rivalry": "POTENTIAL",
+   "numero": 23,
+   "classes": [
+    "ATV",
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Walker",
+   "skill": 0.68,
+   "rivalry": "POTENTIAL",
+   "numero": 24,
+   "classes": [
+    "ATV",
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Sampson",
+   "skill": 0.67,
+   "rivalry": "POTENTIAL",
+   "numero": 25,
+   "classes": [
+    "ATV",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Callin",
+   "skill": 0.66,
+   "rivalry": "POTENTIAL",
+   "numero": 26,
+   "classes": [
+    "ATV",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Clarke",
+   "skill": 0.65,
+   "rivalry": "POTENTIAL",
+   "numero": 27,
+   "classes": [
+    "Bike",
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Ritchie",
+   "skill": 0.64,
+   "rivalry": "POTENTIAL",
+   "numero": 28,
+   "classes": [
+    "Bike",
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Bennet",
+   "skill": 0.63,
+   "rivalry": "POTENTIAL",
+   "numero": 29,
+   "classes": [
+    "Bike",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Valenti",
+   "skill": 0.6,
+   "rivalry": "POTENTIAL",
+   "numero": 30,
+   "classes": [
+    "Bike",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Harvey",
+   "skill": 0.68,
+   "rivalry": "POTENTIAL",
+   "numero": 31,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Frary",
+   "skill": 0.64,
+   "rivalry": "POTENTIAL",
+   "numero": 32,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Jeremy",
+   "skill": 0.6,
+   "rivalry": "POTENTIAL",
+   "numero": 33,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Hay",
+   "skill": 0.56,
+   "rivalry": "POTENTIAL",
+   "numero": 34,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Knight",
+   "skill": 0.3,
+   "rivalry": "POTENTIAL",
+   "numero": 35,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Knowles",
+   "skill": 0.29,
+   "rivalry": "POTENTIAL",
+   "numero": 36,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Bruce",
+   "skill": 0.28,
+   "rivalry": "POTENTIAL",
+   "numero": 37,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Loscalzo",
+   "skill": 0.27,
+   "rivalry": "POTENTIAL",
+   "numero": 38,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Lyhane",
+   "skill": 0.26,
+   "rivalry": "POTENTIAL",
+   "numero": 39,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Maton",
+   "skill": 0.25,
+   "rivalry": "POTENTIAL",
+   "numero": 40,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "McCormick",
+   "skill": 0.24,
+   "rivalry": "POTENTIAL",
+   "numero": 41,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Elwick",
+   "skill": 0.23,
+   "rivalry": "POTENTIAL",
+   "numero": 42,
+   "classes": [
+    "ATV"
+   ]
+  },
+  {
+   "nome": "Michael",
+   "skill": 0.68,
+   "rivalry": "POTENTIAL",
+   "numero": 43,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Modern",
+   "skill": 0.65,
+   "rivalry": "POTENTIAL",
+   "numero": 44,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Bromley",
+   "skill": 0.62,
+   "rivalry": "POTENTIAL",
+   "numero": 45,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Norman",
+   "skill": 0.59,
+   "rivalry": "POTENTIAL",
+   "numero": 46,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Pajak",
+   "skill": 0.3,
+   "rivalry": "POTENTIAL",
+   "numero": 47,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Palmer",
+   "skill": 0.29,
+   "rivalry": "POTENTIAL",
+   "numero": 48,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Parford",
+   "skill": 0.28,
+   "rivalry": "POTENTIAL",
+   "numero": 49,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Parker",
+   "skill": 0.27,
+   "rivalry": "POTENTIAL",
+   "numero": 50,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Parrish",
+   "skill": 0.26,
+   "rivalry": "POTENTIAL",
+   "numero": 51,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Gillham",
+   "skill": 0.25,
+   "rivalry": "POTENTIAL",
+   "numero": 52,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Phillpot",
+   "skill": 0.24,
+   "rivalry": "POTENTIAL",
+   "numero": 53,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Devereau",
+   "skill": 0.23,
+   "rivalry": "POTENTIAL",
+   "numero": 54,
+   "classes": [
+    "Bike"
+   ]
+  },
+  {
+   "nome": "Lockey",
+   "skill": 0.67,
+   "rivalry": "POTENTIAL",
+   "numero": 55,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Graham",
+   "skill": 0.64,
+   "rivalry": "POTENTIAL",
+   "numero": 56,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Russell",
+   "skill": 0.61,
+   "rivalry": "POTENTIAL",
+   "numero": 57,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Ryan",
+   "skill": 0.58,
+   "rivalry": "POTENTIAL",
+   "numero": 58,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Borstel",
+   "skill": 0.3,
+   "rivalry": "POTENTIAL",
+   "numero": 59,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Cullen",
+   "skill": 0.29,
+   "rivalry": "POTENTIAL",
+   "numero": 60,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Scully",
+   "skill": 0.28,
+   "rivalry": "POTENTIAL",
+   "numero": 61,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Serkan",
+   "skill": 0.27,
+   "rivalry": "POTENTIAL",
+   "numero": 62,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Sheppard",
+   "skill": 0.26,
+   "rivalry": "POTENTIAL",
+   "numero": 63,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Dicken",
+   "skill": 0.25,
+   "rivalry": "POTENTIAL",
+   "numero": 64,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Linn",
+   "skill": 0.24,
+   "rivalry": "POTENTIAL",
+   "numero": 65,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Tom",
+   "skill": 0.23,
+   "rivalry": "POTENTIAL",
+   "numero": 66,
+   "classes": [
+    "Buggy"
+   ]
+  },
+  {
+   "nome": "Trevor",
+   "skill": 0.69,
+   "rivalry": "POTENTIAL",
+   "numero": 67,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Trewin",
+   "skill": 0.65,
+   "rivalry": "POTENTIAL",
+   "numero": 68,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Truman",
+   "skill": 0.61,
+   "rivalry": "POTENTIAL",
+   "numero": 69,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Twelves",
+   "skill": 0.57,
+   "rivalry": "POTENTIAL",
+   "numero": 70,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Johnson",
+   "skill": 0.3,
+   "rivalry": "POTENTIAL",
+   "numero": 71,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Grant",
+   "skill": 0.29,
+   "rivalry": "POTENTIAL",
+   "numero": 72,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Watt",
+   "skill": 0.28,
+   "rivalry": "POTENTIAL",
+   "numero": 73,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "White",
+   "skill": 0.27,
+   "rivalry": "POTENTIAL",
+   "numero": 74,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Phil",
+   "skill": 0.26,
+   "rivalry": "POTENTIAL",
+   "numero": 75,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Wong",
+   "skill": 0.25,
+   "rivalry": "POTENTIAL",
+   "numero": 76,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Cords",
+   "skill": 0.24,
+   "rivalry": "POTENTIAL",
+   "numero": 77,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Johns",
+   "skill": 0.23,
+   "rivalry": "POTENTIAL",
+   "numero": 78,
+   "classes": [
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Smith",
+   "skill": 0.68,
+   "rivalry": "POTENTIAL",
+   "numero": 81,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Williams",
+   "skill": 0.67,
+   "rivalry": "POTENTIAL",
+   "numero": 82,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Jones",
+   "skill": 0.2,
+   "rivalry": "POTENTIAL",
+   "numero": 83,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Brown",
+   "skill": 0.2,
+   "rivalry": "POTENTIAL",
+   "numero": 83,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Skelly",
+   "skill": 0.93,
+   "rivalry": "NEVER",
+   "numero": 90,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Astrid",
+   "skill": 0.91,
+   "rivalry": "NEVER",
+   "numero": 91,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  },
+  {
+   "nome": "Dirk",
+   "skill": 1.0,
+   "rivalry": "ALWAYS",
+   "numero": 99,
+   "classes": [
+    "ATV",
+    "Bike",
+    "Buggy",
+    "Truck"
+   ]
+  }
+ ],
+ "catchup": {
+  "STD_01": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.2,
+   "AIinfrontThreshold": 25.0,
+   "AIinfrontInterval": 50.0,
+   "AIinfrontMaxScale": -1.0,
+   "AIbehindThreshold": 40.0,
+   "AIbehindInterval": 200.0,
+   "AIbehindMaxScale": 0.6
+  },
+  "STD_02": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.15,
+   "AIinfrontThreshold": 27.7777777777778,
+   "AIinfrontInterval": 77.7777777777778,
+   "AIinfrontMaxScale": -0.966666666666667,
+   "AIbehindThreshold": 41.1111111111111,
+   "AIbehindInterval": 188.888888888889,
+   "AIbehindMaxScale": 0.644444444444444
+  },
+  "STD_03": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.1,
+   "AIinfrontThreshold": 30.5555555555556,
+   "AIinfrontInterval": 105.555555555556,
+   "AIinfrontMaxScale": -0.933333333333333,
+   "AIbehindThreshold": 42.2222222222222,
+   "AIbehindInterval": 177.777777777778,
+   "AIbehindMaxScale": 0.688888888888889
+  },
+  "STD_04": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.05,
+   "AIinfrontThreshold": 33.3333333333333,
+   "AIinfrontInterval": 133.333333333333,
+   "AIinfrontMaxScale": -0.9,
+   "AIbehindThreshold": 43.3333333333333,
+   "AIbehindInterval": 166.666666666667,
+   "AIbehindMaxScale": 0.733333333333333
+  },
+  "STD_05": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.0,
+   "AIinfrontThreshold": 36.1111111111111,
+   "AIinfrontInterval": 161.111111111111,
+   "AIinfrontMaxScale": -0.866666666666667,
+   "AIbehindThreshold": 44.4444444444444,
+   "AIbehindInterval": 155.555555555556,
+   "AIbehindMaxScale": 0.777777777777778
+  },
+  "STD_06": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.05,
+   "AIinfrontThreshold": 38.8888888888889,
+   "AIinfrontInterval": 188.888888888889,
+   "AIinfrontMaxScale": -0.833333333333333,
+   "AIbehindThreshold": 45.5555555555556,
+   "AIbehindInterval": 144.444444444444,
+   "AIbehindMaxScale": 0.822222222222222
+  },
+  "STD_07": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.1,
+   "AIinfrontThreshold": 41.6666666666667,
+   "AIinfrontInterval": 216.666666666667,
+   "AIinfrontMaxScale": -0.8,
+   "AIbehindThreshold": 46.6666666666667,
+   "AIbehindInterval": 133.333333333333,
+   "AIbehindMaxScale": 0.866666666666667
+  },
+  "STD_08": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.15,
+   "AIinfrontThreshold": 44.4444444444444,
+   "AIinfrontInterval": 244.444444444444,
+   "AIinfrontMaxScale": -0.766666666666667,
+   "AIbehindThreshold": 47.7777777777778,
+   "AIbehindInterval": 122.222222222222,
+   "AIbehindMaxScale": 0.911111111111111
+  },
+  "STD_09": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.2,
+   "AIinfrontThreshold": 47.2222222222222,
+   "AIinfrontInterval": 272.222222222222,
+   "AIinfrontMaxScale": -0.733333333333333,
+   "AIbehindThreshold": 48.8888888888889,
+   "AIbehindInterval": 111.111111111111,
+   "AIbehindMaxScale": 0.955555555555555
+  },
+  "STD_10": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.25,
+   "AIinfrontThreshold": 50.0,
+   "AIinfrontInterval": 300.0,
+   "AIinfrontMaxScale": -0.7,
+   "AIbehindThreshold": 50.0,
+   "AIbehindInterval": 100.0,
+   "AIbehindMaxScale": 1.0
+  },
+  "STDL_01": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.2,
+   "AIinfrontThreshold": 25.0,
+   "AIinfrontInterval": 50.0,
+   "AIinfrontMaxScale": -1.0,
+   "AIbehindThreshold": 40.0,
+   "AIbehindInterval": 200.0,
+   "AIbehindMaxScale": 0.1
+  },
+  "STDL_02": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.15,
+   "AIinfrontThreshold": 27.7777777777778,
+   "AIinfrontInterval": 77.7777777777778,
+   "AIinfrontMaxScale": -0.966666666666667,
+   "AIbehindThreshold": 41.1111111111111,
+   "AIbehindInterval": 188.888888888889,
+   "AIbehindMaxScale": 0.155555555555556
+  },
+  "STDL_03": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.1,
+   "AIinfrontThreshold": 30.5555555555556,
+   "AIinfrontInterval": 105.555555555556,
+   "AIinfrontMaxScale": -0.933333333333333,
+   "AIbehindThreshold": 42.2222222222222,
+   "AIbehindInterval": 177.777777777778,
+   "AIbehindMaxScale": 0.211111111111111
+  },
+  "STDL_04": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.05,
+   "AIinfrontThreshold": 33.3333333333333,
+   "AIinfrontInterval": 133.333333333333,
+   "AIinfrontMaxScale": -0.9,
+   "AIbehindThreshold": 43.3333333333333,
+   "AIbehindInterval": 166.666666666667,
+   "AIbehindMaxScale": 0.266666666666667
+  },
+  "STDL_05": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.0,
+   "AIinfrontThreshold": 36.1111111111111,
+   "AIinfrontInterval": 161.111111111111,
+   "AIinfrontMaxScale": -0.866666666666667,
+   "AIbehindThreshold": 44.4444444444444,
+   "AIbehindInterval": 155.555555555556,
+   "AIbehindMaxScale": 0.322222222222222
+  },
+  "STDL_06": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.05,
+   "AIinfrontThreshold": 38.8888888888889,
+   "AIinfrontInterval": 188.888888888889,
+   "AIinfrontMaxScale": -0.833333333333333,
+   "AIbehindThreshold": 45.5555555555556,
+   "AIbehindInterval": 144.444444444444,
+   "AIbehindMaxScale": 0.377777777777778
+  },
+  "STDL_07": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.1,
+   "AIinfrontThreshold": 41.6666666666667,
+   "AIinfrontInterval": 216.666666666667,
+   "AIinfrontMaxScale": -0.8,
+   "AIbehindThreshold": 46.6666666666667,
+   "AIbehindInterval": 133.333333333333,
+   "AIbehindMaxScale": 0.433333333333333
+  },
+  "STDL_08": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.15,
+   "AIinfrontThreshold": 44.4444444444444,
+   "AIinfrontInterval": 244.444444444444,
+   "AIinfrontMaxScale": -0.766666666666667,
+   "AIbehindThreshold": 47.7777777777778,
+   "AIbehindInterval": 122.222222222222,
+   "AIbehindMaxScale": 0.488888888888889
+  },
+  "STDL_09": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.2,
+   "AIinfrontThreshold": 47.2222222222222,
+   "AIinfrontInterval": 272.222222222222,
+   "AIinfrontMaxScale": -0.733333333333333,
+   "AIbehindThreshold": 48.8888888888889,
+   "AIbehindInterval": 111.111111111111,
+   "AIbehindMaxScale": 0.544444444444444
+  },
+  "STDL_10": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.25,
+   "AIinfrontThreshold": 50.0,
+   "AIinfrontInterval": 300.0,
+   "AIinfrontMaxScale": -0.7,
+   "AIbehindThreshold": 50.0,
+   "AIbehindInterval": 100.0,
+   "AIbehindMaxScale": 0.6
+  },
+  "STDH_01": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.2,
+   "AIinfrontThreshold": 25.0,
+   "AIinfrontInterval": 50.0,
+   "AIinfrontMaxScale": -1.0,
+   "AIbehindThreshold": 40.0,
+   "AIbehindInterval": 200.0,
+   "AIbehindMaxScale": 0.1
+  },
+  "STDH_02": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.15,
+   "AIinfrontThreshold": 27.7777777777778,
+   "AIinfrontInterval": 77.7777777777778,
+   "AIinfrontMaxScale": -0.966666666666667,
+   "AIbehindThreshold": 41.1111111111111,
+   "AIbehindInterval": 188.888888888889,
+   "AIbehindMaxScale": 0.155555555555556
+  },
+  "STDH_03": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.1,
+   "AIinfrontThreshold": 30.5555555555556,
+   "AIinfrontInterval": 105.555555555556,
+   "AIinfrontMaxScale": -0.933333333333333,
+   "AIbehindThreshold": 42.2222222222222,
+   "AIbehindInterval": 177.777777777778,
+   "AIbehindMaxScale": 0.211111111111111
+  },
+  "STDH_04": {
+   "StartDelay": 100.0,
+   "DefaultScale": -0.05,
+   "AIinfrontThreshold": 33.3333333333333,
+   "AIinfrontInterval": 133.333333333333,
+   "AIinfrontMaxScale": -0.9,
+   "AIbehindThreshold": 43.3333333333333,
+   "AIbehindInterval": 166.666666666667,
+   "AIbehindMaxScale": 0.266666666666667
+  },
+  "STDH_05": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.0,
+   "AIinfrontThreshold": 36.1111111111111,
+   "AIinfrontInterval": 161.111111111111,
+   "AIinfrontMaxScale": -0.866666666666667,
+   "AIbehindThreshold": 44.4444444444444,
+   "AIbehindInterval": 155.555555555556,
+   "AIbehindMaxScale": 0.322222222222222
+  },
+  "STDH_06": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.05,
+   "AIinfrontThreshold": 38.8888888888889,
+   "AIinfrontInterval": 188.888888888889,
+   "AIinfrontMaxScale": -0.833333333333333,
+   "AIbehindThreshold": 45.5555555555556,
+   "AIbehindInterval": 144.444444444444,
+   "AIbehindMaxScale": 0.377777777777778
+  },
+  "STDH_07": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.1,
+   "AIinfrontThreshold": 41.6666666666667,
+   "AIinfrontInterval": 216.666666666667,
+   "AIinfrontMaxScale": -0.8,
+   "AIbehindThreshold": 46.6666666666667,
+   "AIbehindInterval": 133.333333333333,
+   "AIbehindMaxScale": 0.433333333333333
+  },
+  "STDH_08": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.15,
+   "AIinfrontThreshold": 44.4444444444444,
+   "AIinfrontInterval": 244.444444444444,
+   "AIinfrontMaxScale": -0.766666666666667,
+   "AIbehindThreshold": 47.7777777777778,
+   "AIbehindInterval": 122.222222222222,
+   "AIbehindMaxScale": 0.488888888888889
+  },
+  "STDH_09": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.2,
+   "AIinfrontThreshold": 47.2222222222222,
+   "AIinfrontInterval": 272.222222222222,
+   "AIinfrontMaxScale": -0.733333333333333,
+   "AIbehindThreshold": 48.8888888888889,
+   "AIbehindInterval": 111.111111111111,
+   "AIbehindMaxScale": 0.544444444444444
+  },
+  "STDH_10": {
+   "StartDelay": 100.0,
+   "DefaultScale": 0.25,
+   "AIinfrontThreshold": 50.0,
+   "AIinfrontInterval": 300.0,
+   "AIinfrontMaxScale": -0.7,
+   "AIbehindThreshold": 50.0,
+   "AIbehindInterval": 100.0,
+   "AIbehindMaxScale": 0.6
+  }
+ },
+ "eventos": {
+  "BIKES": {
+   "NORMAL": "STDL_04",
+   "EXPERT": "STDL_09"
+  },
+  "BIKES_DOWN": {
+   "NORMAL": "STDL_04",
+   "EXPERT": "STDL_09"
+  },
+  "BIKES_UP": {
+   "NORMAL": "STDL_04",
+   "EXPERT": "STDL_09"
+  },
+  "CIRCUIT": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  },
+  "HEAD2HEAD_BIKES": {
+   "NORMAL": "STDL_04",
+   "EXPERT": "STDL_09"
+  },
+  "HEAD2HEAD_TRUCKS": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  },
+  "P2P": {},
+  "RALLYCROSS": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  },
+  "SPONSOR_HEAVY": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  },
+  "SPONSOR_LIGHT": {
+   "NORMAL": "STDL_04",
+   "EXPERT": "STDL_09"
+  },
+  "SUPERCROSS": {
+   "NORMAL": "STDL_04",
+   "EXPERT": "STDL_09"
+  },
+  "TRUCKS": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  },
+  "TRUCKS_DOWN": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  },
+  "TRUCKS_UP": {
+   "NORMAL": "STDH_04",
+   "EXPERT": "STDH_09"
+  }
+ }
+}

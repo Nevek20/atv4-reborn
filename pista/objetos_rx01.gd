@@ -82,6 +82,7 @@ const ESTOQUE_PECAS := 20                # por modelo (0x140318: até 0x13)
 const BIT_CARRO := 1 << 10               # camada só do carro, pra consulta das cercas
 const CAMADA := 2                       # bit das cercas: a consulta só olha elas
 var carro: RigidBody3D = null            # main.gd põe (o que bate nas cercas)
+var rivais: Array = []                   # carros da IA (pista/ia.gd): também quebram as cercas
 var cercas: Array = []                   # [{corpo, forma, malha, q, xf, quebrada, normal}]
 var blocos: Array = []                   # [{corpo, xf0, mexido, t}]
 var pecas := {}                          # modelo -> [RigidBody3D] (o estoque)
@@ -563,12 +564,21 @@ func _interativo(it: Dictionary, q: Dictionary, malha: Mesh, col: Dictionary) ->
 		cs.shape = forma
 		rb.add_child(cs)
 		rb.add_child(_malha_no(malha, it, cx.affine_inverse() * x))
+		# no lugar ANTES de entrar na cena: o global_transform depois do
+		# add_child chega no motor só no quadro seguinte e acorda o corpo. Até
+		# nov/2026 os 51 nasciam acordados, ~20 nunca dormiam (tremendo no
+		# relevo, simulados a cada passo) e uns 10 escorregavam mais de 0.5 m
+		# sozinhos em 10 s. No jogo o fardo fica parado até alguém bater
+		rb.transform = global_transform.affine_inverse() * cx
 		add_child(rb)
-		rb.global_transform = cx
+		rb.sleeping = true
+		_fardos_assentar = PASSOS_ASSENTAR
 		var pq: Dictionary = q.get("particula", {})
 		if not pq.get("pontos", []).is_empty():
 			rb.contact_monitor = true         # impulso dos contatos (ParticleTrigger)
 			rb.max_contacts_reported = 8
+		rb.sleeping_state_changed.connect(_bloco_acordou.bind(blocos.size()))
+		_blocos_ativos.append(blocos.size())
 		blocos.append({"corpo": rb, "xf0": cx, "mexido": false, "t": 0.0,
 			"reset": float(q.get("reset", 0.0)), "q": q, "malha_local": cx.affine_inverse() * x,
 			"acum": [0.0, 0.0, 0.0, 0.0], "emite": 0.0, "som_t": 0.0})
@@ -584,14 +594,72 @@ func _interativo(it: Dictionary, q: Dictionary, malha: Mesh, col: Dictionary) ->
 ## quebra antes da física resolver o contato (o carro atravessa); abaixo
 ## disso ela segura como parede
 func _physics_process(dt: float) -> void:
+	# cada carro (o jogador e os rivais) pelo mesmo código; "carro" volta a
+	# ser o jogador no fim (o resto do arquivo usa ele)
+	var jog := carro
+	for r in rivais:
+		if is_instance_valid(r):
+			carro = r
+			_cercas(dt)
+	carro = jog
+	_cercas(dt)
+	_resto(dt)
+
+
+## CPU (nov/2026): as 128 cercas numa grade de GRADE_CERCA m (x, z). Cada carro
+## só olha as das casas que cobrem o raio da consulta (8 m + o passo), na
+## ordem da lista como antes: mesmo resultado, sem passar pelas 128 x 8
+## carros a cada passo (0.36 ms -> poucas dezenas)
+const GRADE_CERCA := 16.0
+var _grade := {}                         # Vector2i -> [índices em cercas]
+var _grade_n := -1                       # cercas.size() quando a grade foi feita
+var _cerca_pos := PackedVector3Array()   # origem de cada cerca (= c.xf.origin)
+
+
+func _monta_grade() -> void:
+	_grade.clear()
+	_cerca_pos.resize(cercas.size())
+	for i in cercas.size():
+		var o: Vector3 = (cercas[i].xf as Transform3D).origin
+		_cerca_pos[i] = o
+		var k := Vector2i(floori(o.x / GRADE_CERCA), floori(o.z / GRADE_CERCA))
+		if not _grade.has(k):
+			_grade[k] = []
+		(_grade[k] as Array).append(i)
+	_grade_n = cercas.size()
+
+
+## índices (em ordem) das cercas com |dx| e |dz| <= r em volta de p
+func _cercas_perto(p: Vector3, r: float) -> Array:
+	if _grade_n != cercas.size():
+		_monta_grade()
+	var out: Array = []
+	var casas := 0
+	for gx in range(floori((p.x - r) / GRADE_CERCA), floori((p.x + r) / GRADE_CERCA) + 1):
+		for gz in range(floori((p.z - r) / GRADE_CERCA), floori((p.z + r) / GRADE_CERCA) + 1):
+			var l = _grade.get(Vector2i(gx, gz))
+			if l:
+				out.append_array(l)
+				casas += 1
+	if casas > 1:
+		out.sort()
+	return out
+
+
+func _cercas(dt: float) -> void:
 	var tem_carro := carro != null and is_instance_valid(carro)
-	var v: Vector3 = carro.linear_velocity if tem_carro else Vector3.ZERO
-	var pc: Vector3 = carro.global_position if tem_carro else Vector3(INF, INF, INF)
+	if not tem_carro or cercas.is_empty():
+		return
+	var v: Vector3 = carro.linear_velocity
+	var pc: Vector3 = carro.global_position
+	var raio := 8.0 + v.length() * dt
+	var perto := _cercas_perto(pc, raio)
+	if perto.is_empty():
+		return
 	var espaco := get_world_3d().direct_space_state
-	for c in cercas:
-		if not tem_carro:
-			break
-		if c.quebrada or (c.xf as Transform3D).origin.distance_to(pc) > 8.0 + v.length() * dt:
+	for i in perto:
+		var c: Dictionary = cercas[i]
+		if c.quebrada or _cerca_pos[i].distance_to(pc) > raio:
 			continue
 		# só o carro (bit próprio, ninguém mais usa)
 		carro.collision_layer |= BIT_CARRO
@@ -625,6 +693,11 @@ func _physics_process(dt: float) -> void:
 				n_imp = -(info.normal as Vector3).normalized()
 				p_imp = info.point
 		_bate_cerca(c, imp, n_imp, p_imp)
+
+
+func _resto(dt: float) -> void:
+	var tem_carro := carro != null and is_instance_valid(carro)
+	var pc: Vector3 = carro.global_position if tem_carro else Vector3(INF, INF, INF)
 	# peças não batem no carro (nossa, pelo que o Matheus vê no jogo: a cerca
 	# laranja não freia). Carro novo (menu): exceção com todas
 	if tem_carro and carro != _carro_ant:
@@ -632,12 +705,33 @@ func _physics_process(dt: float) -> void:
 		for pr in _separando:
 			if is_instance_valid(pr):
 				(pr as RigidBody3D).add_collision_exception_with(carro)
-	for b in blocos:
+	_dormir_pecas(dt)
+	if _fardos_assentar > 0:
+		_fardos_assentar -= 1
+		for b in blocos:
+			if not b.mexido:
+				(b.corpo as RigidBody3D).sleeping = true
+	# CPU: só os blocos ativos, na ordem da lista (os outros não fazem nada:
+	# dormindo, parados no lugar, sem palha saindo e sem relógio de volta)
+	if _blocos_ativos.size() > 1:
+		_blocos_ativos.sort()
+	var fica: Array[int] = []
+	for i in _blocos_ativos:
+		var b: Dictionary = blocos[i]
 		var rb: RigidBody3D = b.corpo
 		_bloco_batida(b, dt)
-		if not b.mexido and rb.global_position.distance_to((b.xf0 as Transform3D).origin) > 0.5:
-			b.mexido = true
-			b.t = 0.0
+		_fardo_dorme(b, rb, dt)
+		if _bloco_parado(b, rb):
+			continue
+		fica.append(i)
+		if not b.mexido:
+			# dormindo e ainda não mexido = está no lugar (pra dormir ele fica
+			# parado 0.5 s acordado antes, e acordado ele é medido aqui)
+			if rb.sleeping:
+				continue
+			if rb.global_position.distance_to((b.xf0 as Transform3D).origin) > 0.5:
+				b.mexido = true
+				b.t = 0.0
 		if b.mexido and b.reset > 0.0:
 			b.t += dt
 			if b.t >= b.reset and rb.global_position.distance_to(pc) > 4.0:
@@ -647,8 +741,50 @@ func _physics_process(dt: float) -> void:
 				rb.linear_velocity = Vector3.ZERO
 				rb.angular_velocity = Vector3.ZERO
 				b.mexido = false
+	_blocos_ativos = fica
 	if palha:
 		palha.passo(dt)
+
+
+## blocos que ainda precisam do passo (índices em blocos). Entram todos no
+## começo e quando acordam (sleeping_state_changed); saem quando o passo não
+## faria mais nada com eles
+var _blocos_ativos: Array[int] = []
+# o 1º passo do motor de física acorda os corpos recém-criados (mesmo
+# dormindo, com ou sem a thread de física; medido nov/2026): nos primeiros
+# passos depois de montar, quem ninguém mexeu volta a dormir
+const PASSOS_ASSENTAR := 5
+var _fardos_assentar := 0
+
+
+func _bloco_acordou(i: int) -> void:
+	if not _blocos_ativos.has(i):
+		_blocos_ativos.append(i)
+
+
+## fardo quase parado por DORME_T s dorme (NOSSO, como as peças da cerca:
+## depois de uma batida ~1 em 4 ficava tremendo no relevo a 0.2 m/s e 0.2
+## rad/s pra sempre, simulado a cada passo). Acorda quando algo bate nele
+const DORME_V_FARDO := 0.3
+func _fardo_dorme(b: Dictionary, rb: RigidBody3D, dt: float) -> void:
+	if rb.sleeping:
+		b.parado = 0.0
+		return
+	if rb.linear_velocity.length() < DORME_V_FARDO and rb.angular_velocity.length() < DORME_V_FARDO:
+		b.parado = b.get("parado", 0.0) + dt
+		if b.parado >= DORME_T:
+			rb.sleeping = true
+			b.parado = 0.0
+	else:
+		b.parado = 0.0
+
+
+## dormindo e já com o v_ant de dormindo, sem palha saindo, no lugar (ou
+## mexido sem relógio de volta): o passo não mexe em nada
+func _bloco_parado(b: Dictionary, rb: RigidBody3D) -> bool:
+	if not rb.sleeping or not b.get("dormindo", false) or b.emite > 0.0:
+		return false
+	return not b.mexido or b.reset <= 0.0
 
 
 ## 0x153390: impulso do contato do carro com um corpo parado (a cerca), em
@@ -703,17 +839,30 @@ func _som(o: Dictionary, amostra: String) -> void:
 
 ## fardo: impulso dos contatos do passo (t·m/s) > Impulse do ParticleTrigger
 ## liga a palha por Timeout s; batida com o carro toca o CollisionSample (HAY)
+var _gravidade = null                    # CPU: o default_gravity, lido uma vez
 func _bloco_batida(b: Dictionary, dt: float) -> void:
 	var rb: RigidBody3D = b.corpo
 	if not rb.contact_monitor:
 		return
+	# CPU: já dormindo no passo anterior = a velocidade é a mesma (o motor não
+	# integra corpo dormindo; mexer nela acorda), o v_ant já é ela e o impulso
+	# dá 0: só a palha que ainda estiver saindo
+	var dorme := rb.sleeping
+	if dorme and b.get("dormindo", false):
+		if b.emite > 0.0 and palha:
+			palha.emitir(b, minf(dt, b.emite))
+			b.emite -= dt
+		return
+	b.dormindo = dorme
 	var pq: Dictionary = b.q.get("particula", {})
 	# impulso que o fardo recebeu no passo (t·m/s) = massa x (variação da
 	# velocidade - gravidade): o Godot não informa o impulso dos contatos
 	var v := rb.linear_velocity
-	var g := Vector3(0, -float(ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)), 0)
+	if _gravidade == null:
+		_gravidade = Vector3(0, -float(ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)), 0)
+	var g: Vector3 = _gravidade
 	var imp := 0.0
-	if b.has("v_ant") and not rb.sleeping:
+	if b.has("v_ant") and not dorme:
 		imp = rb.mass / 1000.0 * (v - (b.v_ant as Vector3) - g * dt).length()
 	b.v_ant = v
 	if imp > float(pq.get("impulso", 0.2)):
@@ -735,6 +884,8 @@ func _bloco_batida(b: Dictionary, dt: float) -> void:
 
 ## roda do carro (raio da suspensão) encostando numa cerca: o jogo trata as
 ## rodas pelo mesmo 0x153390 (0x154088). true = quebrou (refazer o raio)
+## (o C++ das rodas, fisica_cpp/src/rodas.cpp, olha o _cerca_do_corpo e o
+## _separando antes de chamar este e o ignorar_roda: mudou um, muda o outro)
 func roda_na_cerca(corpo: Object, ponto: Vector3, normal: Vector3) -> bool:
 	if corpo == null or not _cerca_do_corpo.has(corpo.get_instance_id()):
 		return false
@@ -799,10 +950,34 @@ func quebrar(c: Dictionary) -> void:
 		# batida em ângulo tirava mais 4 a 12 km/h. Rola e cai só no chão
 		if not _separando.has(rb):
 			_separando.append(rb)
-		if carro and is_instance_valid(carro):
-			rb.add_collision_exception_with(carro)
+		for k in [carro] + rivais:
+			if k and is_instance_valid(k):
+				rb.add_collision_exception_with(k)
 		lista.append(rb)
 		pecas[p.modelo] = lista
+
+
+## CPU (nov/2026): peça de cerca quase parada por DORME_T s dorme (o Godot
+## não punha pra dormir: tremia no relevo e ficava ativa pra sempre, ~12 de 20
+## simuladas a cada passo). Acorda sozinha quando algo bate nela
+const DORME_V := 0.2              # m/s e rad/s
+const DORME_T := 1.0
+var _parada := {}
+
+
+func _dormir_pecas(dt: float) -> void:
+	for lista in pecas.values():
+		for rb in lista:
+			if not is_instance_valid(rb) or rb.sleeping:
+				continue
+			var id: int = rb.get_instance_id()
+			if rb.linear_velocity.length() < DORME_V and rb.angular_velocity.length() < DORME_V:
+				_parada[id] = _parada.get(id, 0.0) + dt
+				if _parada[id] >= DORME_T:
+					rb.sleeping = true
+					_parada.erase(id)
+			else:
+				_parada.erase(id)
 
 
 ## aviso pro HUD (vazio = tudo carregado)

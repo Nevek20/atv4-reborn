@@ -184,6 +184,7 @@ var faces := {"freio": 0, "re": 0}     # faces de lente achadas por tipo
 var halos := {"freio": 0, "re": 0}
 var aceso := {"freio": 0.0, "re": 0.0}
 var _mats := {"freio": [], "re": []}
+var _nos := {"freio": [], "re": []}   # lente e brilhos de cada tipo (escondidos apagados)
 var _imgs := {}
 
 
@@ -339,6 +340,8 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 	no.mesh = malha
 	no.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.add_child(no)
+	no.visible = false              # apagada (aceso 0): ver _anda
+	_nos[tipo].append(no)
 	for g in _juntar(grupos):
 		var n: Vector3 = g.n.normalized() if g.n.length() > 0.0 else Vector3(0, 0, -1)
 		var ext: Vector3 = g.hi - g.lo
@@ -358,6 +361,8 @@ func _montar_tipo(mi: MeshInstance3D, tipo: String, sh: Shader, sh_halo: Shader)
 		h.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.extra_cull_margin = 1.0
 		mi.add_child(h, true)
+		h.visible = false
+		_nos[tipo].append(h)
 		_mats[tipo].append(mat)
 		halos[tipo] += 1
 
@@ -384,17 +389,41 @@ static func _juntar(grupos: Array) -> Array:
 
 
 ## freio 0..1 (brake_in) e ré engatada; a lâmpada sobe em ACENDE e desce em APAGA
+# print_tela: FREIO / RE = 1 acesa, 0 apagada (lidos uma vez)
+static var _TEM_FREIO := OS.has_environment("FREIO")
+static var _FREIO_LIGADO := OS.get_environment("FREIO") == "1"
+static var _TEM_RE := OS.has_environment("RE")
+static var _RE_LIGADO := OS.get_environment("RE") == "1"
+var _aplicado := {}             # tipo -> último aceso mandado pro shader
+
+
 func atualizar(delta: float, freio: float, re := false) -> void:
-	var alvos := {"freio": 1.0 if freio > LIGA else 0.0, "re": 1.0 if re else 0.0}
-	if OS.has_environment("FREIO"):              # print_tela: 1 acesa, 0 apagada
-		alvos.freio = 1.0 if OS.get_environment("FREIO") == "1" else 0.0
-	if OS.has_environment("RE"):
-		alvos.re = 1.0 if OS.get_environment("RE") == "1" else 0.0
-	for tipo in alvos:
-		var vel := 1.0 / (ACENDE if alvos[tipo] > aceso[tipo] else APAGA)
-		aceso[tipo] = move_toward(aceso[tipo], alvos[tipo], delta * vel)
+	var a_freio := 1.0 if freio > LIGA else 0.0
+	var a_re := 1.0 if re else 0.0
+	if _TEM_FREIO:
+		a_freio = 1.0 if _FREIO_LIGADO else 0.0
+	if _TEM_RE:
+		a_re = 1.0 if _RE_LIGADO else 0.0
+	_anda("freio", a_freio, delta)
+	_anda("re", a_re, delta)
+
+
+## CPU: o shader só recebe o valor quando ele muda (aceso parado em 0 ou 1
+## regravava todos os materiais a cada quadro)
+func _anda(tipo: String, alvo: float, delta: float) -> void:
+	var vel := 1.0 / (ACENDE if alvo > aceso[tipo] else APAGA)
+	aceso[tipo] = move_toward(aceso[tipo], alvo, delta * vel)
+	if _aplicado.get(tipo) == null or aceso[tipo] != _aplicado[tipo]:
 		for m in _mats[tipo]:
 			m.set_shader_parameter("aceso", aceso[tipo])
+		# apagada, lente e brilho somam zero (blend_add x aceso 0): escondidos
+		# não gastam desenho (eram ~40 chamadas na largada) e a lente deixa de
+		# pegar a cor da névoa nos carros longe (o Godot soma a névoa em
+		# material aditivo: lente apagada clareava a mais de 87.5 m)
+		var ve: bool = aceso[tipo] > 0.0
+		for n in _nos[tipo]:
+			n.visible = ve
+		_aplicado[tipo] = aceso[tipo]
 
 
 func _imagem(tex: Texture2D) -> Image:

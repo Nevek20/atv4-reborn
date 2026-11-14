@@ -185,7 +185,7 @@ func _ready() -> void:
 	layer.add_child(hud)
 	fps_label = Label.new()
 	fps_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	fps_label.offset_left = -140
+	fps_label.offset_left = -420
 	fps_label.offset_right = -16
 	fps_label.offset_top = 12
 	fps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -193,6 +193,7 @@ func _ready() -> void:
 	fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	fps_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(fps_label)
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 	_make_menu(layer)
 	cam_piloto = CameraPiloto.new()
 	cam_piloto.name = "CameraPiloto"
@@ -368,11 +369,17 @@ func _unhandled_input(event: InputEvent) -> void:
 				hud.visible = not hud.visible
 			KEY_F2:
 				fps_label.visible = not fps_label.visible
+				# mede o tempo de desenho na CPU e na GPU (só com o F2 ligado)
+				RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
+			KEY_F3:
+				_troca_cpp()
 			KEY_C:
 				_troca_camera()
 			KEY_G:
 				cam_piloto.ligado = not cam_piloto.ligado
 			KEY_R:
+				if corrida and corrida.botao_repor():
+					return              # na corrida: o botão de reposição do jogo
 				var p: Vector3 = car.global_position
 				car.reset_to(Vector3(p.x, terrain.height_at(p.x, p.z) + 1.5, p.z), car.global_rotation.y)
 				reset_camera()
@@ -408,9 +415,13 @@ func _unhandled_input(event: InputEvent) -> void:
 						KEY_MINUS: Vector2(-0.01, 0), KEY_EQUAL: Vector2(0.01, 0)}[event.physical_keycode])
 			KEY_ESCAPE:
 				get_tree().quit()
-	# controle: Select troca a câmera (o A é a embreagem, car.gd)
+	# controle: Select troca a câmera (o A é a embreagem, car.gd, e pula a introdução)
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_BACK:
 		_troca_camera()
+	# A pula a introdução e a descida da câmera (o X do PS2, como no jogo)
+	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A \
+			and corrida and corrida.pode_pular():
+		corrida.comecar()
 	# olhar livre na câmera do piloto e órbita nas de corrida: botão direito
 	# do mouse apertado
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -499,6 +510,9 @@ func _ajusta_piloto(k: int) -> void:
 	car.update_eye()
 
 
+var _hud_t := 0.0
+
+
 func _process(delta: float) -> void:
 	if car == null:
 		return
@@ -507,11 +521,16 @@ func _process(delta: float) -> void:
 		ceu.seguir(cam, delta)
 	if fps_label.visible:
 		var f := Engine.get_frames_per_second()
-		fps_label.text = "%d FPS" % f
+		fps_label.text = "%d FPS" % f + _medidor(delta)
 		fps_label.add_theme_color_override("font_color",
 			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
 	if not hud.visible:
 		return
+	# CPU: o texto grande do HUD 10x por segundo (era a cada quadro)
+	_hud_t -= delta
+	if _hud_t > 0.0:
+		return
+	_hud_t = 0.1
 	var kmh: float = car.linear_velocity.length() * 3.6
 	var fp := ""
 	if cam_mode == 4:
@@ -519,7 +538,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
@@ -567,7 +586,9 @@ func _make_cameras() -> void:
 	]
 
 
-func cam_state() -> Dictionary:
+## normal = false: sem a normal do chão (4 alturas do terreno), que só entra
+## no passo de 60 Hz das câmeras de corrida (game_camera._step)
+func cam_state(normal := true) -> Dictionary:
 	# transform interpolado: é o que aparece na tela (física roda a 50 Hz)
 	var xf: Transform3D = car.get_global_transform_interpolated()
 	var b := xf.basis.orthonormalized()
@@ -577,14 +598,79 @@ func cam_state() -> Dictionary:
 		"tp": tp, "basis": b, "vel": v, "v_f": v.dot(b.z),
 		"speed": v.length(), "chao": car.jitter_chao, "batida": car.batida,
 		"air_time": car.air_time, "grounded": car.grounded,
-		"ground_n": ground_normal(tp.x, tp.z),
+		"ground_n": ground_normal(tp.x, tp.z) if normal else Vector3.UP,
 	}
+
+
+## CPU: alguma das 2 câmeras de corrida vai dar passo neste quadro? A mesma
+## conta do GameCamera.update (acc += minf(delta, 0.25); passo se >= STEP).
+## A 200 FPS 3 de cada 4 quadros não têm passo e não precisam da normal
+func _algum_passo(delta: float) -> bool:
+	for i in 2:
+		if gcams[i].acc + minf(delta, 0.25) >= GameCamera.STEP:
+			return true
+	return false
 
 
 func ground_normal(x: float, z: float) -> Vector3:
 	var e := 0.5
 	return Vector3(terrain.height_at(x - e, z) - terrain.height_at(x + e, z), 2.0 * e,
 		terrain.height_at(x, z - e) - terrain.height_at(x, z + e)).normalized()
+
+
+## F3: liga/desliga a física, o visual e o som em C++ em todos os carros, na
+## hora (comparar o F2 no mesmo lugar). Sem a biblioteca não faz nada.
+func _troca_cpp() -> void:
+	var Base := preload("res://carro/carro_base.gd")
+	if not Base.cpp_carregou():
+		return
+	Base.usar_cpp = not Base.usar_cpp
+	var carros: Array = [car]
+	if corrida and corrida.ia:
+		for r in corrida.ia.rivais:
+			carros.append(r.car)
+	for c in carros:
+		if is_instance_valid(c) and c.has_method("liga_cpp"):
+			c.liga_cpp()
+	if corrida and corrida.ia:
+		corrida.ia.liga_cpp()
+
+
+## linha do C++ no F2
+func _cpp_txt() -> String:
+	var Base := preload("res://carro/carro_base.gd")
+	if not Base.cpp_carregou():
+		return "C++: NÃO CARREGOU (falta a biblioteca em bin/ ou o Godot recusou: veja o Output)"
+	return "C++: %s (%s)   F3 liga/desliga" % ["ligado" if Base.usar_cpp else "DESLIGADO",
+		ClassDB.class_call_static("FisicaCarro", "versao")]
+
+
+## F2: onde vai o tempo do quadro (média de 0.5 s). process = o monitor do
+## Godot (o quadro todo), física = um passo de 50 Hz (os carros), desenho =
+## CPU montando e GPU desenhando, chamadas = draw calls do quadro
+var _med := {"n": 0, "t": 0.0, "proc": 0.0, "fis": 0.0, "cpu": 0.0, "gpu": 0.0, "txt": ""}
+func _medidor(delta: float) -> String:
+	var vp := get_viewport().get_viewport_rid()
+	_med.n += 1
+	_med.t += delta
+	_med.proc += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	_med.fis += Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+	_med.cpu += RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu()
+	_med.gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
+	if _med.t >= 0.5:
+		var n: float = _med.n
+		var rivais: int = corrida.ia.rivais.size() if corrida and corrida.ia else 0
+		_med.txt = "\nquadro %.2f ms   (Godot: process %.2f ms)\nfísica %.2f ms por passo de 50 Hz\ndesenho CPU %.2f ms   GPU %.2f ms\nchamadas %d   objetos %d   rivais %d\n" % [
+			_med.t / n * 1000.0, _med.proc / n, _med.fis / n, _med.cpu / n, _med.gpu / n,
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), rivais] + _cpp_txt()
+		_med.n = 0
+		_med.t = 0.0
+		_med.proc = 0.0
+		_med.fis = 0.0
+		_med.cpu = 0.0
+		_med.gpu = 0.0
+	return _med.txt
 
 
 ## recomeço da corrida (Enter): carro no lugar, sujeira e câmeras zeradas,
@@ -620,7 +706,18 @@ func reset_camera() -> void:
 func _update_camera(delta: float) -> void:
 	if not cam_ready:
 		reset_camera()
-	var s := cam_state()
+	if corrida and corrida.camera_intro(cam):
+		car.model_root.visible = true
+		if car.susp_vis:
+			car.susp_vis.visible = true
+		for w in car.wheels:
+			if w.has("pivot"):
+				w.pivot.visible = true
+		if car.piloto:
+			car.piloto.visible = true
+			car.piloto.sem_cabeca = false
+		return
+	var s := cam_state(_algum_passo(delta))
 	# as câmeras de órbita rodam sempre (como no jogo, trocar não dá tranco)
 	for i in 2:
 		gcams[i].update(delta, s, terrain)
@@ -650,6 +747,8 @@ func _update_camera(delta: float) -> void:
 		if ORBITA:
 			orbita.passo(delta)
 			orbita.aplicar(cam, s.tp, terrain)
+		if corrida:
+			corrida.camera_descida(cam, car)
 		return
 
 	if cam_piloto.car != car:

@@ -284,6 +284,11 @@ func _build_mesh() -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
 	mi.material_override = mat
+	# o chão recebe a sombra do carro mas não projeta: a dos morros já está na
+	# textura (luz assada). Projetando, ele entrava inteiro nas 4 faixas da
+	# sombra do sol (2.1 milhões de triângulos por quadro) pra mudar 0 a 3
+	# pixels em 57600 na corrida (sol a 51°; prints pausados, nov/2026)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 
 

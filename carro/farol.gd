@@ -36,6 +36,7 @@ var faces := 0
 var halos := 0
 var aceso := 0.0
 var _mats := []
+var _nos := []                  # lente e brilhos (escondidos apagados, como no luzes.gd)
 
 
 ## acha as lâmpadas na carroceria e monta a lente acesa e o brilho de cada uma.
@@ -87,6 +88,8 @@ func montar(c) -> bool:
 	lente.mesh = malha
 	lente.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.add_child(lente)
+	lente.visible = false
+	_nos.append(lente)
 	# brilho: um por lâmpada, no centro, do tamanho dela (os limites do freio)
 	for l in lampadas:
 		var q := QuadMesh.new()
@@ -104,19 +107,31 @@ func montar(c) -> bool:
 		h.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.extra_cull_margin = 1.0
 		mi.add_child(h, true)
+		h.visible = false
+		_nos.append(h)
 		_mats.append(mat)
 		halos += 1
 	return true
 
 
 ## liga e desliga como a lâmpada do freio (Luzes.ACENDE / APAGA)
+static var _TEM_FAROL := OS.has_environment("FAROL")     # print_tela: 1 aceso, 0 apagado
+static var _FAROL_LIGADO := OS.get_environment("FAROL") == "1"
+var _aplicado = null            # último aceso mandado pro shader
+
+
 func atualizar(delta: float) -> void:
 	var alvo := 1.0 if ligado else 0.0
-	if OS.has_environment("FAROL"):              # print_tela: 1 aceso, 0 apagado
-		alvo = 1.0 if OS.get_environment("FAROL") == "1" else 0.0
+	if _TEM_FAROL:
+		alvo = 1.0 if _FAROL_LIGADO else 0.0
 	aceso = move_toward(aceso, alvo, delta / (Luzes.ACENDE if alvo > aceso else Luzes.APAGA))
-	for m in _mats:
-		m.set_shader_parameter("aceso", aceso)
+	# CPU: só manda pro shader quando muda
+	if _aplicado == null or aceso != _aplicado:
+		for m in _mats:
+			m.set_shader_parameter("aceso", aceso)
+		for n in _nos:
+			n.visible = aceso > 0.0      # apagado soma zero (luzes.gd _anda)
+		_aplicado = aceso
 
 
 ## faces com textura de farol, agrupadas pelas que se tocam (cada grupo é uma

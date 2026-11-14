@@ -1,0 +1,567 @@
+extends SceneTree
+## Física do carro em C++ (fisica_cpp/, bin/atv4_fisica.gdextension): a
+## extensão carrega e cada conta portada dá EXATAMENTE os mesmos números do
+## GDScript (comparação com ==, não com tolerância).
+##  - curvas do VehicleData (sample, integrate, triple, fcurve_eval): todas
+##    as do P do Renegade, do Jericho e do Lazarus numa grade de x e mu.
+##  - pose do piloto (piloto.cpp): ossos iguais ao GDScript até TOL_POSE
+##    (só desenho; o Godot do C++ é o godot-cpp, conta igual mas outra
+##    compilação), numa grade de direção e tremida.
+##  - tremida das rodas e vibração (efeitos.cpp): mesmo estado e mesma semente
+##    nos dois, tudo igual com == (a vibração usa o sorteio global do Godot).
+##  - linha da IA (linha_ia.cpp): ponto, segmento, curva à frente, lateral,
+##    direção e rastreio iguais ao GDScript com == numa grade da volta toda.
+##  - contatos das esferas carro com carro (rodas.cpp contatos_esferas): a
+##    mesma lista, na mesma ordem, do batida_carros._contatos_gd (byte a byte).
+##  - nuvens da poeira (nuvens.cpp): com as mesmas nuvens entrando, quadro a
+##    quadro, o buffer da MultiMesh e as nuvens que sobram iguais byte a byte.
+##  - posição e giros das rodas (rodas.cpp visual_rodas): iguais ao
+##    _visual_rodas_gd byte a byte, com curso, tremida, giro e esterço variados.
+##  - água das rodas (pneus.cpp agua_passo): a água achada e a profundidade de
+##    cada roda iguais ao _agua_passo, em volta de cada poça (com e sem a
+##    água de antes).
+##  - suspensão visual (suspensao.cpp): todas as peças e pivôs das rodas
+##    iguais até TOL_POSE, com cursos e esterço variados (Mosquito: barras;
+##    Storm: rally; Hammerhead: telescópio; Fireball: balança deslocada).
+##  - vozes do tocador do jogo (som_jogo.cpp): envelope (ADSR do sons.json e
+##    bordas), volume e tom gravados no player e vozes que morrem iguais ao
+##    _vivas byte a byte, quadro a quadro, com key-off e player parando.
+## Uso: godot --headless --path . -s res://tests/teste_cpp.gd
+
+const VD := preload("res://carro/vehicle_data.gd")
+
+var main
+var q := 0
+var falhas := 0
+var contas := 0
+var carros := ["Renegade", "Jericho", "Lazarus", "Mosquito", "Storm", "Hammerhead", "Fireball"]
+var k := 0
+var espera := 0
+const TOL_POSE := 1e-5
+var pior_pose := 0.0
+
+
+func _initialize() -> void:
+	if not ClassDB.class_exists("FisicaCarro"):
+		print("teste_cpp: FALHA (extensão não carregou: falta a biblioteca em bin/?)")
+		quit()
+		return
+	print("  extensão: ", ClassDB.class_call_static("FisicaCarro", "versao"))
+	main = load("res://main.tscn").instantiate()
+	root.add_child(main)
+
+
+func _falha(m: String) -> void:
+	falhas += 1
+	if falhas <= 10:
+		print("FALHA: ", m)
+
+
+func _igual(nome: String, a: float, b: float) -> void:
+	contas += 1
+	if a != b and not (is_nan(a) and is_nan(b)):
+		_falha("%s: GDScript %.17g, C++ %.17g" % [nome, a, b])
+
+
+## chama o C++ pelo ClassDB (o script carrega mesmo sem a biblioteca)
+static func _cpp(f: String, a = null, b = null, c = null) -> float:
+	if c != null:
+		return ClassDB.class_call_static("FisicaCarro", f, a, b, c)
+	return ClassDB.class_call_static("FisicaCarro", f, a, b)
+
+
+func _curvas(P: Dictionary) -> void:
+	var xs := [-1.0, 0.0, 0.013, 0.5, 1.0, 3.7, 12.0, 37.5, 80.0, 133.3, 250.0, 1e4]
+	var mus := [0.0, 0.05, 0.1, 0.33, 0.7, 0.999, 1.0, 1.2]
+	for nome in P:
+		var c = P[nome]
+		if not (c is Dictionary):
+			continue
+		if c.has("v"):
+			for x in xs:
+				_igual("%s sample(%s)" % [nome, x], VD.sample(c, x), _cpp("curva_sample", c, x))
+				_igual("%s integrate(%s)" % [nome, x], VD.integrate(c, x), _cpp("curva_integrate", c, x))
+		elif c.has("lmin") and c.get("min") is Dictionary:
+			for mu in mus:
+				for x in xs:
+					_igual("%s fcurve(%s, %s)" % [nome, mu, x], VD.fcurve_eval(c, mu, x), _cpp("fcurvas", c, mu, x))
+		elif c.has("lmin"):
+			for mu in mus:
+				_igual("%s triple(%s)" % [nome, mu], VD.triple(c, mu), _cpp("trio", c, mu))
+
+
+func _ossos(sk: Skeleton3D) -> Array:
+	var out := []
+	for b in sk.get_bone_count():
+		out.append([sk.get_bone_pose_position(b), sk.get_bone_pose_rotation(b), sk.get_bone_pose_scale(b)])
+	return out
+
+
+func _piloto(car) -> void:
+	var pil = car.piloto
+	if pil == null:
+		print("  %s: sem piloto" % car.vehicle_name)
+		return
+	if pil._cpp == null:
+		_falha("%s: piloto sem C++" % car.vehicle_name)
+		return
+	var cpp = pil._cpp
+	for s in [-1.0, -0.73, -0.31, -0.02, 0.0, 0.05, 0.4, 0.88, 1.0]:
+		for extra in [0.0, 0.03, -0.05]:
+			pil._cpp = cpp
+			pil.alcance = 0.0
+			pil.pose(s, extra)
+			var b := _ossos(pil.skel)
+			var alc_cpp: float = pil.alcance
+			pil._cpp = null
+			pil.alcance = 0.0
+			pil.pose(s, extra)
+			var a := _ossos(pil.skel)
+			var alc_gd: float = pil.alcance
+			pil._cpp = cpp
+			contas += 1
+			for i in a.size():
+				var d: float = maxf(a[i][0].distance_to(b[i][0]), (a[i][1] - b[i][1]).length())
+				d = maxf(d, a[i][2].distance_to(b[i][2]))
+				pior_pose = maxf(pior_pose, d)
+				if d > TOL_POSE:
+					_falha("%s piloto s=%s extra=%s osso %d: diferença %s" % [car.vehicle_name, s, extra, i, d])
+					break
+			if pil.no_volante():
+				pil._cpp = null
+				var gv_gd: float = pil.giro_volante(s)
+				pil._cpp = cpp
+				if gv_gd != pil.giro_volante(s):
+					_falha("%s giro do volante s=%s: %s x %s" % [car.vehicle_name, s, gv_gd, pil.giro_volante(s)])
+			if absf(alc_gd - alc_cpp) > TOL_POSE:
+				_falha("%s piloto alcance %s x %s" % [car.vehicle_name, alc_gd, alc_cpp])
+
+
+func _nos(n: Node, out: Array) -> void:
+	for c in n.get_children():
+		if c is Node3D:
+			out.append(c)
+		_nos(c, out)
+
+
+func _suspensao(car) -> void:
+	var sv = car.susp_vis
+	if sv == null:
+		print("  %s: sem suspensão visual" % car.vehicle_name)
+		return
+	if sv._cpp == null:
+		_falha("%s: suspensão sem C++" % car.vehicle_name)
+		return
+	var cpp = sv._cpp
+	var nos: Array = []
+	_nos(car.espelho, nos)
+	var guarda := []
+	for w in car.wheels:
+		guarda.append([w.x, w.get("jit", 0.0)])
+	var casos := [[0.0, 0.0, 0.0], [1.0, 0.004, 0.2], [-1.0, -0.003, -0.35], [0.4, 0.0, 0.05]]
+	for c in casos:
+		for i in car.wheels.size():
+			var w: Dictionary = car.wheels[i]
+			# frente e trás, esquerda e direita com cursos diferentes
+			var f: float = c[0] * (0.3 + 0.2 * i)
+			w.x = w.max * f if f > 0.0 else -w.min * f
+			w.jit = c[1] * (1 if i % 2 == 0 else -1)
+		# C++ primeiro: se ele não mexesse em nada, as peças ficariam na pose do
+		# caso anterior e não bateriam com a do GDScript
+		sv._cpp = cpp
+		sv.update(c[2])
+		var b := nos.map(func(n): return n.transform)
+		sv._cpp = null
+		sv.update(c[2])
+		sv._cpp = cpp
+		contas += 1
+		for j in nos.size():
+			var ta: Transform3D = nos[j].transform
+			var tb: Transform3D = b[j]
+			var d := ta.origin.distance_to(tb.origin)
+			for e in 3:
+				d = maxf(d, ta.basis[e].distance_to(tb.basis[e]))
+			pior_pose = maxf(pior_pose, d)
+			if d > TOL_POSE:
+				_falha("%s suspensão caso %s: %s diferença %s" % [car.vehicle_name, c, nos[j].name, d])
+				break
+	for i in car.wheels.size():
+		car.wheels[i].x = guarda[i][0]
+		car.wheels[i].jit = guarda[i][1]
+
+
+const TREMIDA_VARS := ["jit_seed", "jitter_chao", "vibracao", "pouso", "ar_som", "susp_taxa", "pancada",
+	"_treme_alvo", "spd_ground", "grounded"]
+
+
+func _foto_tremida(car) -> Array:
+	var out := []
+	for k in TREMIDA_VARS:
+		out.append(car.get(k))
+	out.append((car._susp_ant as Array).duplicate())
+	out.append((car._susp_acima as Array).duplicate())
+	for w in car.wheels:
+		out.append([w.jit, w.hit, w.sr, w.omega, w.x, w.mat])
+	return out
+
+
+func _poe_tremida(car, f: Array) -> void:
+	for i in TREMIDA_VARS.size():
+		car.set(TREMIDA_VARS[i], f[i])
+	car._susp_ant = (f[TREMIDA_VARS.size()] as Array).duplicate()
+	car._susp_acima = (f[TREMIDA_VARS.size() + 1] as Array).duplicate()
+	for i in car.wheels.size():
+		var w: Dictionary = car.wheels[i]
+		var r: Array = f[TREMIDA_VARS.size() + 2 + i]
+		w.jit = r[0]
+		w.hit = r[1]
+		w.sr = r[2]
+		w.omega = r[3]
+		w.x = r[4]
+		w.mat = r[5]
+
+
+func _tremida(car) -> void:
+	if car.cpp == null:
+		return
+	var orig := _foto_tremida(car)
+	# casos: rodando no chão, travando, patinando, pousando, no ar
+	var casos := [[3, 0.2, 0.1, 0.0, 12.0], [3, -1.0, 0.0, 0.3, 4.0], [2, 0.5, 9.0, 0.0, 22.0],
+		[0, 0.0, 0.0, 0.5, 15.0], [4, -0.97, 2.0, 0.05, 30.0]]
+	for c in casos:
+		for passo in 6:
+			var base := _foto_tremida(car)
+			car.grounded = c[0]
+			car.spd_ground = c[4]
+			car.ar_som = c[3] if passo == 0 else car.ar_som
+			for i in car.wheels.size():
+				var w: Dictionary = car.wheels[i]
+				w.hit = i < c[0]
+				w.sr = c[1] * (1.0 + 0.1 * i)
+				w.omega = c[2] + i
+				w.x = 0.02 * passo - 0.01 * i
+				w.mat = i % 3
+			var ini := _foto_tremida(car)
+			var vl: float = 0.7 * passo - 1.0
+			var vf: float = c[4]
+			seed(1000 + passo)
+			car._wheel_jitter()
+			car._vibracao(1.0 / car.JIT_HZ, vl, vf)
+			var gd := _foto_tremida(car)
+			_poe_tremida(car, ini)
+			seed(1000 + passo)
+			car.cpp.tremida(1.0 / car.JIT_HZ, vl, vf)
+			var cc := _foto_tremida(car)
+			contas += 1
+			if var_to_bytes(gd) != var_to_bytes(cc):
+				_falha("%s tremida caso %s passo %d:\n GD  %s\n C++ %s" % [car.vehicle_name, c, passo, gd, cc])
+			_poe_tremida(car, gd)
+	_poe_tremida(car, orig)
+
+
+func _linha_ia() -> void:
+	var ia = main.corrida.ia if main.corrida else null
+	if ia == null or ia._cpp == null:
+		_falha("linha da IA sem C++")
+		return
+	var cpp = ia._cpp
+	var vigia = preload("res://pista/reposicao.gd").new(ia, 0.0)
+	var xf: Transform3D = main.car.global_transform
+	var n0 := contas
+	var s: float = -ia.comp - 3.3
+	while s < 2.0 * ia.comp + 5.0:
+		var p: Vector3 = ia.ponto(s) + Vector3(2.7, 0.4, -1.9)
+		ia._cpp = null
+		var g := [ia._seg(fposmod(s, ia.comp)), ia.ponto(s), ia._v_curva(s), ia._lateral(p, s)]
+		ia.ponto(s)
+		var xg := {"lat": 1.3, "r": {"prog": s - ia.s_linha}}
+		ia._direcao(xg, main.car)
+		var rg := {"prog": s - ia.s_linha + 7.5, "dist": 0.0}
+		ia.rastrear(rg, p)
+		ia._cpp = cpp
+		var c := [ia._seg(fposmod(s, ia.comp)), ia.ponto(s), ia._v_curva(s), ia._lateral(p, s)]
+		var xc := {"lat": 1.3, "r": {"prog": s - ia.s_linha}}
+		ia._direcao(xc, main.car)
+		var rc := {"prog": s - ia.s_linha + 7.5, "dist": 0.0}
+		ia.rastrear(rc, p)
+		# borda do AIT (reposicao.gd) com o mesmo ponto
+		var vg: Array = vigia._fora_gd(s - ia.s_linha, p)
+		var vc: PackedFloat64Array = cpp.fora(s - ia.s_linha, ia.s_linha, p)
+		if vg[0] != vc[0] or vg[1] != Vector3(vc[1], 0.0, vc[2]):
+			_falha("borda do AIT em s=%s: GD %s, C++ %s" % [s, vg, vc])
+		contas += 1
+		if var_to_bytes(g) != var_to_bytes(c) or xg.ang != xc.ang or rg.prog != rc.prog or rg.dist != rc.dist:
+			_falha("linha da IA em s=%s:\n GD  %s %s %s\n C++ %s %s %s" % [s, g, xg.ang, rg, c, xc.ang, rc])
+		s += 3.71
+	print("  linha da IA: %d pontos conferidos" % (contas - n0))
+	var _x = xf
+
+
+func _contatos() -> void:
+	var bt = main.corrida.ia.batidas if main.corrida and main.corrida.ia else null
+	if bt == null:
+		_falha("sem batida_carros")
+		return
+	var car = main.car
+	bt.esferas(car)
+	var v: Array = bt._vetores[car]
+	var xa: Transform3D = car.global_transform
+	var n_cont := 0
+	for k in 60:
+		var giro := Basis(Vector3(0.3, 1.0, 0.2).normalized(), k * 0.37)
+		var desl := Vector3(sin(k * 1.3) * 2.2, cos(k * 0.7) * 0.6, cos(k * 1.1) * 3.1)
+		var xb := Transform3D(giro * xa.basis, xa.origin + desl)
+		var g: Array = bt._contatos_gd(car, car, xa, xb)
+		var c: Array = ClassDB.class_call_static("FisicaCarro", "contatos_esferas", xa, v[0], v[1], xb, v[0], v[1])
+		contas += 1
+		n_cont += g.size()
+		if var_to_bytes(g) != var_to_bytes(c):
+			_falha("contatos das esferas caso %d: GD %d contatos, C++ %d" % [k, g.size(), c.size()])
+	print("  contatos das esferas: 60 casos, %d contatos conferidos" % n_cont)
+
+
+func _nuvens(car) -> void:
+	var pz = car.poeira
+	if pz == null:
+		print("  sem poeira (falta o asset?)")
+		return
+	var guarda = pz._cpp
+	pz._cpp = null
+	for a in [pz.n_pos, pz.n_idade, pz.n_vida, pz.n_max, pz.n_ini, pz.n_alvo, pz.n_a0, pz.n_cor, pz.n_cel, pz.n_agua]:
+		a.clear()
+	var cap0: int = pz.cap
+	var nc = ClassDB.instantiate("NuvensCpp")
+	nc.configurar(pz.mm, pz.mm_agua, cap0, pz.max_nuvens)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var cap_gd := cap0
+	var n_buf := 0
+	for fr in 80:
+		for k in 9:
+			var v := [Vector3(rng.randf_range(-50, 50), rng.randf_range(0, 9), rng.randf_range(-50, 50)),
+				rng.randf() * 0.2, rng.randf_range(0.3, 1.5), rng.randf_range(0.3, 1.0), rng.randf_range(0.1, 0.6),
+				rng.randf_range(0.5, 1.5), rng.randf(), Color(rng.randf(), rng.randf(), rng.randf(), rng.randf()),
+				float(k % 6), 1 if k == 8 else 0]
+			pz.n_pos.append(v[0]); pz.n_idade.append(v[1]); pz.n_vida.append(v[2]); pz.n_max.append(v[3])
+			pz.n_ini.append(v[4]); pz.n_alvo.append(v[5]); pz.n_a0.append(v[6]); pz.n_cor.append(v[7])
+			pz.n_cel.append(v[8]); pz.n_agua.append(v[9])
+			nc.add(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9])
+		var delta := 1.0 / 60.0 + fr * 0.0007
+		pz.cap = cap_gd
+		pz._process(delta)
+		cap_gd = pz.cap
+		var vis_gd: int = pz.mm.visible_instance_count
+		var vis_agua_gd: int = pz.mm_agua.visible_instance_count if pz.mm_agua else 0
+		var bg: PackedFloat32Array = pz.buf.slice(0, vis_gd * 20)
+		var ag: PackedFloat32Array = pz.buf_agua.slice(0, vis_agua_gd * 20)
+		var cap_c: int = nc.quadro(delta, pz.escala)
+		var bs: Array = nc.buffers()
+		var vis_c: int = pz.mm.visible_instance_count
+		var vis_agua_c: int = pz.mm_agua.visible_instance_count if pz.mm_agua else 0
+		var gd_vivas := [pz.n_pos, pz.n_idade, pz.n_vida, pz.n_max, pz.n_ini, pz.n_alvo, pz.n_a0, pz.n_cor, pz.n_cel, pz.n_agua]
+		contas += 1
+		n_buf += bg.size() + ag.size()
+		if cap_gd != cap_c or vis_gd != vis_c or vis_agua_gd != vis_agua_c \
+				or var_to_bytes(bg) != var_to_bytes((bs[0] as PackedFloat32Array).slice(0, vis_c * 20)) \
+				or var_to_bytes(ag) != var_to_bytes((bs[1] as PackedFloat32Array).slice(0, vis_agua_c * 20)) \
+				or var_to_bytes(gd_vivas) != var_to_bytes(nc.exportar()):
+			_falha("nuvens quadro %d: cap %d x %d, visíveis %d x %d, água %d x %d" % [fr, cap_gd, cap_c, vis_gd, vis_c, vis_agua_gd, vis_agua_c])
+			break
+	print("  nuvens da poeira: 80 quadros, %d floats do buffer conferidos" % n_buf)
+	for a in [pz.n_pos, pz.n_idade, pz.n_vida, pz.n_max, pz.n_ini, pz.n_alvo, pz.n_a0, pz.n_cor, pz.n_cel, pz.n_agua]:
+		a.clear()
+	pz._cpp = guarda
+
+
+func _visual_rodas(car) -> void:
+	if car.cpp == null:
+		return
+	var guarda := []
+	for w in car.wheels:
+		guarda.append([w.x, w.get("jit", 0.0), w.spin])
+	for k in 12:
+		var a := -0.6 + 0.11 * k
+		for i in car.wheels.size():
+			var w: Dictionary = car.wheels[i]
+			w.x = (w.max - w.min) * fposmod(0.37 * k + 0.21 * i, 1.0) + w.min - 0.02
+			w.jit = 0.004 * sin(k + i)
+			w.spin = fposmod(1.7 * k + i, TAU)
+		car.cpp.visual_rodas(a)
+		var c := []
+		for w in car.wheels:
+			c.append([w.pivot.transform, w.spin_node.transform])
+		car._visual_rodas_gd(a)
+		var g := []
+		for w in car.wheels:
+			g.append([w.pivot.transform, w.spin_node.transform])
+		contas += 1
+		if var_to_bytes(g) != var_to_bytes(c):
+			_falha("%s visual das rodas caso %d diferente" % [car.vehicle_name, k])
+	for i in car.wheels.size():
+		car.wheels[i].x = guarda[i][0]
+		car.wheels[i].jit = guarda[i][1]
+		car.wheels[i].spin = guarda[i][2]
+
+
+func _agua(car) -> void:
+	var ob = main.objetos
+	if ob == null or ob.aguas.is_empty() or car.cpp == null:
+		print("  sem água pra conferir")
+		return
+	var xf0: Transform3D = car.global_transform
+	var guarda_agua = car.agua
+	var guarda_prof: PackedFloat32Array = car.agua_prof.duplicate()
+	var n := 0
+	var dentro := 0
+	for a in ob.aguas:
+		var centro: Vector3 = (a.inv as Transform3D).affine_inverse() * Vector3(a.cx, 0.0, a.cz)
+		for k in 16:
+			var desl := Vector3(cos(k * 0.9) * (a.hx * 0.15 * (k % 9)), 0.0, sin(k * 1.3) * (a.hz * 0.15 * (k % 7)))
+			var alt: float = a.y - 0.6 + 0.12 * (k % 11)
+			car.global_transform = Transform3D(Basis(Vector3.UP, k * 0.4), Vector3(centro.x, alt, centro.z) + desl)
+			for antes in [null, a]:
+				car.agua = antes
+				car._agua_passo()
+				var g := [car.agua, car.agua_prof.duplicate()]
+				car.agua = antes
+				car.cpp.agua_passo()
+				var c := [car.agua, car.agua_prof.duplicate()]
+				contas += 1
+				n += 1
+				if g[0] != null:
+					dentro += 1
+				if not is_same(g[0], c[0]) or var_to_bytes(g[1]) != var_to_bytes(c[1]):
+					_falha("água caso %d: GD %s %s, C++ %s %s" % [k, g[0] != null, g[1], c[0] != null, c[1]])
+	car.global_transform = xf0
+	car.agua = guarda_agua
+	car.agua_prof = guarda_prof
+	print("  agua das rodas: %d casos conferidos (%d com roda na agua)" % [n, dentro])
+
+
+## vozes do som do jogo: o _vivas do GDScript x o SomJogoCpp, duas listas
+## iguais (players separados, mesmo tratamento), quadro a quadro
+func _som_jogo() -> void:
+	if not ClassDB.class_exists("SomJogoCpp"):
+		_falha("SomJogoCpp não existe")
+		return
+	var SJ := preload("res://som/som_jogo.gd")
+	var sj: Node = SJ.new()
+	root.add_child(sj)
+	var cpp = ClassDB.instantiate("SomJogoCpp")
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = 22050
+	var dados := PackedByteArray()
+	dados.resize(4000)
+	wav.data = dados
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_end = 2000
+	# os 13 ADSR do sons.json + bordas: seco, ataque linear, sustentação linear
+	# subindo/descendo, release linear
+	var adsrs := [[33023, 40896], [33023, 40908], [33023, 40909], [33023, 40910], [33023, 40911],
+		[33023, 52430], [33023, 52494], [33023, 57294], [45567, 40908], [45823, 40908], [46079, 40908],
+		[47103, 40896], [50687, 40910], [0x80ff, 0x9fc0], [0x1f35, 0x1fc6], [0x2a77, 0x5f8a],
+		[0x0000, 0x0000], [0xffff, 0xffff], [0x7fff, 0x4040]]
+	var pbs := [[0, 0], [2, 5], [7, 0], [3, 3], [0, 10]]
+	var listas := [[], []]
+	var curs := []
+	for i in adsrs.size():
+		var c := {"pb": 0}
+		curs.append(c)
+		for l in 2:
+			var p := AudioStreamPlayer.new()
+			p.stream = wav
+			sj.add_child(p)
+			p.play()
+			listas[l].append({"p": p, "amp": 0.3 + 0.05 * i, "loop": true, "cur": c,
+				"pb": pbs[i % pbs.size()], "a1": adsrs[i][0], "a2": adsrs[i][1],
+				"fase": 0, "nivel": 0.0, "vol": 0.0, "tom": 1.0})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var n := 0
+	for fr in 300:
+		var dt := 1.0 / 60.0 + rng.randf_range(-0.004, 0.02)
+		sj.volume = rng.randf_range(0.2, 1.2)
+		sj.ganho = 0.6 if fr % 50 < 25 else 1.0
+		if fr % 7 == 0:
+			sj.tom = rng.randf_range(0.5, 2.0)
+		if fr % 13 == 0:
+			for c in curs:
+				c.pb = rng.randi_range(-32768, 32767)
+		if fr == 150 or fr == 240:
+			# key-off (o parar() do som_jogo) de metade das vozes
+			for l in 2:
+				for j in listas[l].size():
+					var v: Dictionary = listas[l][j]
+					if j % 2 == fr / 150 - 1 and v.fase < 3:
+						v.fase = 3
+						v.vol = sj.volume * sj.ganho * v.amp
+						v.tom = sj.tom * SJ._dobra(v)
+		if fr == 60 or fr == 200:
+			# player parando (som sem loop que acabou)
+			for l in 2:
+				if listas[l].size() > 3:
+					listas[l][3].p.stop()
+		var ticks := dt * SJ.SPU_HZ
+		listas[0] = sj._vivas(listas[0], ticks)
+		listas[1] = cpp.vivas(listas[1], ticks, sj.volume, sj.ganho, sj.tom)
+		contas += 1
+		var a := []
+		var b := []
+		for v in listas[0]:
+			a.append([v.fase, v.nivel, v.get("db_ult"), v.get("pt_ult"), v.p.volume_db, v.p.pitch_scale])
+		for v in listas[1]:
+			b.append([v.fase, v.nivel, v.get("db_ult"), v.get("pt_ult"), v.p.volume_db, v.p.pitch_scale])
+		if var_to_bytes(a) != var_to_bytes(b):
+			_falha("som do jogo quadro %d: GD %s, C++ %s" % [fr, a, b])
+			break
+		n += a.size()
+	print("  vozes do som do jogo: 300 quadros, %d vozes conferidas (sobraram %d)" % [n, listas[0].size()])
+	sj.queue_free()
+
+
+func _physics_process(_dt: float) -> bool:
+	q += 1
+	if main.car == null:
+		return q > 300
+	if q < 5:
+		return false
+	# troca de carro, espera 3 quadros, confere as curvas dele, próximo
+	if espera > 0:
+		espera -= 1
+		if espera == 0:
+			_curvas(main.car.P)
+			_piloto(main.car)
+			_suspensao(main.car)
+			_tremida(main.car)
+			_visual_rodas(main.car)
+			print("  %s: curvas conferidas" % main.car.vehicle_name)
+		return false
+	if k < carros.size():
+		var lista: Array = main.frota()
+		for i in lista.size():
+			if lista[i].name == carros[k]:
+				main._swap_vehicle(i)
+				break
+		k += 1
+		espera = 3
+		return false
+	_linha_ia()
+	_contatos()
+	_nuvens(main.car)
+	_agua(main.car)
+	_som_jogo()
+	# F3: desliga e religa tudo na hora
+	var Base := preload("res://carro/carro_base.gd")
+	main._troca_cpp()
+	if Base.usar_cpp or main.car.cpp != null or main.car.sfx._cpp != null:
+		_falha("F3 não desligou o C++")
+	main._troca_cpp()
+	if not Base.usar_cpp or main.car.cpp == null or (main.car.piloto and main.car.piloto._cpp == null):
+		_falha("F3 não religou o C++")
+	if not main._cpp_txt().begins_with("C++: ligado"):
+		_falha("linha do F2: " + main._cpp_txt())
+	print("  F2: " + main._cpp_txt())
+	print("  %d contas comparadas (piloto e suspensão: pior diferença %s)" % [contas, pior_pose])
+	print("teste_cpp: %s" % ("ok" if falhas == 0 and contas > 0 else "FALHA (%d de %d)" % [falhas, contas]))
+	return true

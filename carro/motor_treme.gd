@@ -42,6 +42,7 @@ const PONTA := 0.20               # m: trucks, faces em volta da boca do escape 
 const BALANCO_GRAUS := 0.8        # inclinação com carga cheia
 const BALANCO_HZ := 7.0           # frequência da mola do coxim
 const BALANCO_AMORT := 0.6        # amortecimento (fração do crítico)
+const PASSO_MAX := 1.0 / 120.0    # s: passo da mola (estável até ~37 FPS por passo)
 
 # ajustes por carro (conferidos nos prints com MOTOR_COR=2): peça pelo centro
 # da caixa dela (frame do modelo, 3 cm de folga). "motor" entra, "fica" sai
@@ -444,9 +445,14 @@ func atualizar(rpm: float, carga: float, dt: float) -> void:
 	# mola do coxim: alvo pela carga, tranco quando a carga muda
 	var w := TAU * BALANCO_HZ
 	var alvo := deg_to_rad(BALANCO_GRAUS) * clampf(carga, 0.0, 1.0)
-	var acc := w * w * (alvo - _ang) - 2.0 * BALANCO_AMORT * w * _vel
-	_vel += acc * dt
-	_ang += _vel * dt
+	# em passos de no máximo 1/120 s: a mola de 7 Hz explode (NaN) com o
+	# passo inteiro abaixo de ~37 FPS (era o erro "!v.is_finite()" com tela)
+	var n := ceili(minf(dt, 0.25) / PASSO_MAX)
+	var h := minf(dt, 0.25) / n
+	for _i in n:
+		var acc := w * w * (alvo - _ang) - 2.0 * BALANCO_AMORT * w * _vel
+		_vel += acc * h
+		_ang += _vel * h
 	var giro := Basis(Vector3(0, 0, 1), _ang)
 	if malha:
 		malha.transform = Transform3D(giro, centro - giro * centro + vib)

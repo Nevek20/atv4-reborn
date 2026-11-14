@@ -35,3 +35,11 @@ assets/terrain/
 
 # logs do tests/rodar_tudo.py
 tests/.saida/
+
+# build do C++ (fisica_cpp): só as bibliotecas de bin/ vão no git
+fisica_cpp/src/*.os
+fisica_cpp/src/*.o
+fisica_cpp/src/*.obj
+fisica_cpp/.sconsign.dblite
+*.lib
+*.exp

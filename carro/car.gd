@@ -136,11 +136,10 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 		if cs == null:
 			continue
 		var c := Vector3(w.px, w.y0 + clampf(w.x, w.min, w.max), w.pz)
-		cs.position = c
 		var q := PhysicsShapeQueryParameters3D.new()
 		q.shape = w.esfera_teste
 		q.transform = Transform3D(Basis(), global_transform * c)
-		q.exclude = [get_rid()]
+		q.exclude = [get_rid()] + outros_carros
 		var info := space.get_rest_info(q)
 		# roda de lado na cerca: o jogo mede pelo 0x153390 (0x154088, rodas)
 		# antes do contato; quebrou, a esfera não liga (senão vira parede)
@@ -148,7 +147,15 @@ func _passo_esferas_rodas(space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 				and objetos.roda_na_cerca(instance_from_id(info.collider_id), info.point, info.normal):
 			q.exclude = q.exclude + [info.rid]
 			info = space.get_rest_info(q)
-		cs.set_deferred("disabled", info.is_empty() or (info.normal as Vector3).dot(up) >= w.cos_max)
+		var off: bool = info.is_empty() or (info.normal as Vector3).dot(up) >= w.cos_max
+		# CPU: mexer na forma (posição, disabled) atualiza o corpo no motor de
+		# física; só quando ela está ligada / quando o estado muda (até nov/2026
+		# era a cada passo nas 4 rodas dos 8 carros). O efeito é o mesmo
+		if not off:
+			cs.position = c
+		if off != w.get("esfera_off", true) or off != cs.disabled:
+			cs.set_deferred("disabled", off)
+			w.esfera_off = off
 
 
 ## pecas.json (tools/gerar_buggies.py): modelo, peças e rodas do carro
@@ -521,6 +528,36 @@ func _load_physics() -> void:
 	P.axle_f = (wheels[0].pz + wheels[1].pz) * 0.5 - model_offset.z
 	P.axle_r = (wheels[2].pz + wheels[3].pz) * 0.5 - model_offset.z
 	reset_drivetrain()
+	if usar_cpp:
+		cpp = ClassDB.instantiate("FisicaCarro")
+		p_mudou()
+
+
+## O C++ guarda o P, as curvas e as rodas no _ready: quem mexer no P depois
+## (testes) chama isto pra ele reler.
+func p_mudou() -> void:
+	if cpp:
+		cpp.configurar(self)
+
+
+## liga/desliga tudo que tem C++ neste carro (física, piloto, suspensão, som)
+## conforme o usar_cpp (main.gd F3: comparar na hora, no mesmo lugar). O
+## estado mora nas variáveis do GDScript: trocar no meio da corrida não pula.
+func liga_cpp() -> void:
+	cpp = null
+	if usar_cpp:
+		cpp = ClassDB.instantiate("FisicaCarro")
+		cpp.configurar(self)
+	if piloto:
+		piloto._liga_cpp()
+	if susp_vis:
+		susp_vis.liga_cpp()
+	if sfx:
+		sfx.liga_cpp()
+	if som and som.has_method("liga_cpp"):
+		som.liga_cpp()
+	if poeira and poeira.has_method("liga_cpp"):
+		poeira.liga_cpp()
 
 
 ## Mola do jogo (0x248a80): F = k x curva(x normalizado) x x, em kN.
@@ -709,7 +746,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # ------------------------------------------------------------------ física
 func _physics_process(dt: float) -> void:
+	var _t := Time.get_ticks_usec() if perf_on else 0
 	_batida_passo()
+	if perf_on: _t = _pf("batida", _t)
 	# ---- comandos
 	var thr_raw := 0.0
 	var brk_raw := 0.0
@@ -741,6 +780,9 @@ func _physics_process(dt: float) -> void:
 		if Input.is_joy_button_pressed(0, JOY_BUTTON_A):
 			emb_btn = 1.0
 
+	if largada_presa:
+		brk_raw = 0.0           # o freio do jogador não conta (engataria a ré)
+		emb_btn = 1.0
 	var b := global_transform.basis
 	var up := b.y
 	var fwd_body := b.z
@@ -771,6 +813,10 @@ func _physics_process(dt: float) -> void:
 		reverse_hold = 0.0
 	thr_cx = thr_raw
 	brk_cx = brk_raw
+	# largada: o freio fica preso nas rodas DEPOIS da lógica dos pedais (que
+	# engataria a ré com o freio parado); a embreagem aberta deixa acelerar
+	if largada_presa:
+		brk_raw = 1.0
 
 	throttle = move_toward(throttle, thr_raw, dt * (P.thr_up if thr_raw > throttle else P.thr_down))
 	brake_in = move_toward(brake_in, brk_raw, dt * (P.brk_up if brk_raw > brake_in else P.brk_down))
@@ -787,6 +833,8 @@ func _physics_process(dt: float) -> void:
 		else:
 			st_rate = P.st_opp
 	steer = move_toward(steer, st_raw, dt * st_rate)
+	if direcao_direta:
+		steer = st_raw          # rivais: a IA escreve o suavizado também (save state com rivais)
 	steer_cx = st_raw
 
 	# ---- suspensão portada (0x248768 contato, 0x248a80 mola, 0x2484c8 roda)
@@ -799,70 +847,37 @@ func _physics_process(dt: float) -> void:
 	# o do contato. Integrando no fim, como o remake fazia até out/2026, o x
 	# guardado ficava f/m·dt² mais baixo (1 a 4 cm parado; tests/teste_curso.gd).
 	# A física é a mesma: o ciclo de operações não muda.
-	_integra_rodas(dt)
+	if perf_on: _t = _pf("comandos", _t)
 	var space := get_world_3d().direct_space_state
-	var com_w := global_transform * center_of_mass
-	grounded = 0
+	var com_w: Vector3
 	var n_sum := Vector3.ZERO
 	var rear_g := 0
 	var h_sum := 0.0
 	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
-	var ignorar: Array = objetos.ignorar_roda() if objetos else []
-	for w in wheels:
-		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
-		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
-		var reach: float = (w.max - w.min) + w.r + 0.05
-		var q := PhysicsRayQueryParameters3D.create(top, top - up * reach)
-		q.exclude = [get_rid()] + ignorar
-		var hit := space.intersect_ray(q)
-		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
-		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
-			q.exclude = q.exclude + [hit.rid]
-			hit = space.intersect_ray(q)
-		w.hit = false
-		var pen := 0.0
-		if not hit.is_empty():
-			var hn0: Vector3 = hit.normal
-			# distância do ponto de fixação até o chão, e quanto a roda (no
-			# curso atual) entra nele
-			var d0: float = top.distance_to(hit.position) - w.max
-			pen = (w.r - w.x) - d0
-			w.hit = pen > 0.0 and hn0.dot(up) >= w.cos_max
-		if not w.hit:
-			w.f = 0.0
-			continue
-		var hp: Vector3 = hit.position
-		var hn: Vector3 = hit.normal
-		w.point = hp
-		w.normal = hn
-		if terrain:
-			w.mat = terrain.material_at(hp.x, hp.z)
-			w.mu = terrain.atrito(w.mat, pneu)
-			w.amort = terrain.amortecimento(w.mat)
-		grounded += 1
-		n_sum += hn
-		if not w.front:
-			rear_g += 1
-		h_sum += (com_w - hp).dot(up)
-		w.x += pen
-		if w.x > w.max:
-			# batente: o jogo empurra o carro pra fora, sem mexer na velocidade
-			corr = _add_corr(corr, hn * (w.x - w.max))
-			w.x = w.max
-		var vp: Vector3 = linear_velocity + angular_velocity.cross(attach - com_w)
-		w.v = clampf(-hn.dot(vp) * hn.dot(up), -w.vmax, w.vmax)
-		var f_s: float = _spring(w, w.x) + _damper(w, w.v)
-		w.f = f_s
-		apply_force(hn * f_s, attach - global_position)
-		# roda em cima de corpo solto (fardo, peça da cerca): a reação vai
-		# nele, senão ele vira rampa fixa (no jogo é contato entre os dois)
-		if hit.collider is RigidBody3D and f_s > 0.0:
-			(hit.collider as RigidBody3D).sleeping = false
-			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
+	if cpp:
+		var r: Array = cpp.rodas(dt, space, up)   # o mesmo de baixo, em C++
+		com_w = r[0]
+		n_sum = r[1]
+		rear_g = r[2]
+		h_sum = r[3]
+		corr = r[4]
+	else:
+		_rodas_gd(dt, space, up)
+		com_w = _r_com_w
+		n_sum = _r_n_sum
+		rear_g = _r_rear_g
+		h_sum = _r_h_sum
+		corr = _r_corr
 
-	_passo_esferas_rodas(space, up)
+	if perf_on: _t = _pf("rodas (raio, mola)", _t)
+	if cpp:
+		cpp.esferas(space, up)
+	else:
+		_passo_esferas_rodas(space, up)
+	if perf_on: _t = _pf("esferas das rodas", _t)
 	_material_medio()
 	var ground_n := up if grounded == 0 else n_sum.normalized()
+	n_chao = ground_n                       # a IA lê (velocidade-alvo, 0x214328)
 	var fwd := (fwd_body - ground_n * fwd_body.dot(ground_n)).normalized()
 	var left := ground_n.cross(fwd)
 	var v := linear_velocity
@@ -873,16 +888,24 @@ func _physics_process(dt: float) -> void:
 
 	# ---- motor e câmbio
 	var driven_g := rear_g if REAR_DRIVE else grounded
-	var drive := _drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)   # 0x20c558: embreagem > 0.1 abre
-	_razao_patinada(v_f)
+	var drive: float                         # 0x20c558: embreagem > 0.1 abre
+	if cpp:
+		drive = cpp.drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)
+		cpp.razao_patinada(v_f)
+	else:
+		drive = _drivetrain(dt, v_f, driven_g > 0, emb_in > 0.1)
+		_razao_patinada(v_f)
 
+	if perf_on: _t = _pf("motor e câmbio", _t)
 	var f_fwd := 0.0                        # forças das rodas pra frente (0x5c8) + atrito interno
 	if grounded > 0:
 		air_time = 0.0
 		air_lat_state = 0
 		air_lat_scale = 1.0
 		gravity_scale = 1.0
-		if use_ported:
+		if use_ported and cpp:
+			f_fwd = cpp.pneus(dt, v, fwd, left, ground_n, com_w, h_sum / grounded, drive)
+		elif use_ported:
 			f_fwd = _tires(dt, v, fwd, left, ground_n, com_w, h_sum / grounded, drive)
 		else:
 			_tires_legacy(dt, v, fwd, left, ground_n, com_w, h_sum / grounded, drive, false)
@@ -942,16 +965,20 @@ func _physics_process(dt: float) -> void:
 				acc_p = tgt_p - wl.x
 			apply_torque(b.x * inertia.x * acc_p / dt)
 
+	if perf_on: _t = _pf("pneus / no ar", _t)
 	# resistência angular do jogo (amortece rolagem e arfagem)
 	var w_loc := b.transposed() * angular_velocity
 	var res_loc: Vector3 = -Vector3(inertia.x * P.ang_res.x * w_loc.x, inertia.y * P.ang_res.y * w_loc.y, inertia.z * P.ang_res.z * w_loc.z)
 	apply_torque(b * res_loc)
 
-	_agua_passo()
+	if cpp:
+		cpp.agua_passo()
+	else:
+		_agua_passo()
 	# 0x20e5e8: arrasto do ar + do chão, contra a velocidade
 	var f_arr := 0.0
 	if spd > 1e-6:
-		f_arr = _arrasto(spd, dt)
+		f_arr = cpp.arrasto(spd, dt) if cpp else _arrasto(spd, dt)
 		apply_central_force(-v / spd * f_arr)
 
 	# 0x211e48: velocidade pra frente prevista no fim do passo = a de agora +
@@ -960,7 +987,11 @@ func _physics_process(dt: float) -> void:
 	var f_arr_f: float = f_arr * v_f / spd if spd > 1e-6 else 0.0
 	var a_f: float = (f_fwd - f_arr_f) / mass + get_gravity().dot(fwd) * gravity_scale
 	v_ref = v_f + a_f * dt
-	_giro_rodas(dt, v_f, rear_g)
+	if cpp:
+		cpp.giro_rodas(dt, v_f, rear_g)
+	else:
+		_giro_rodas(dt, v_f, rear_g)
+	if perf_on: _t = _pf("água, arrasto, giro", _t)
 
 	if corr != Vector3.ZERO:
 		global_position += corr
@@ -972,20 +1003,32 @@ func _physics_process(dt: float) -> void:
 	jit_acc += dt
 	while jit_acc >= 1.0 / JIT_HZ:
 		jit_acc -= 1.0 / JIT_HZ
-		_wheel_jitter()
-		_vibracao(1.0 / JIT_HZ, v.dot(left), v_f)
+		if cpp:
+			cpp.tremida(1.0 / JIT_HZ, v.dot(left), v_f)
+		else:
+			_wheel_jitter()
+			_vibracao(1.0 / JIT_HZ, v.dot(left), v_f)
+		if perf_on: _t = _pf("ef: tremida e vibração", _t)
 		_sujeira_passo()
 		_roda_suja_passo(1.0 / JIT_HZ)
-		if poeira:
+		if perf_on: _t = _pf("ef: sujeira", _t)
+		# rival além do som 3D (150 m): não solta poeira nem pedrinha nova
+		# (minúsculas na tela; as soltas continuam). NOSSO, só CPU
+		if poeira and not longe_som:
 			poeira.passo(1.0 / JIT_HZ, v)
-		if pedras:
+		if perf_on: _t = _pf("ef: poeira", _t)
+		if pedras and not longe_som:
 			pedras.passo(1.0 / JIT_HZ, v)
 		if lascas:
 			lascas.passo(1.0 / JIT_HZ)
-		if sfx:
+		if perf_on: _t = _pf("ef: pedras e lascas", _t)
+		if sfx and not longe_som:
 			sfx.passo(1.0 / JIT_HZ, v.dot(left), v_f)
 			sfx.batida_passo(1.0 / JIT_HZ, contato_som, _v_antes)
+		if perf_on: _t = _pf("ef: som", _t)
+	if perf_on: _t = _pf("efeitos (tremida, sujeira, poeira, pedras, som)", _t)
 	_update_visuals(dt, v_f)
+	if perf_on: _t = _pf("visual (rodas, piloto, suspensão)", _t)
 
 
 ## 0x223e68 (do update do veículo 0x203930, um por quadro = 50 Hz no PAL):
@@ -997,6 +1040,90 @@ func _physics_process(dt: float) -> void:
 ## roda (0x224418, não portada). Confere com 2 save states: tests/teste_derrapagem.gd.
 ## 0x215140: maior velocidade na normal dos contatos do casco no último passo,
 ## com a velocidade do ponto de antes desse passo (_v_antes, _w_antes)
+
+## Rodas e molas no GDScript (sem a biblioteca C++; fisica_cpp/src/rodas.cpp é
+## a mesma conta). Resultado em _r_* pro _physics_process.
+var _r_com_w := Vector3.ZERO
+var _r_n_sum := Vector3.ZERO
+var _r_rear_g := 0
+var _r_h_sum := 0.0
+var _r_corr := Vector3.ZERO
+func _rodas_gd(dt: float, space: PhysicsDirectSpaceState3D, up: Vector3) -> void:
+	_integra_rodas(dt)
+	var com_w := global_transform * center_of_mass
+	grounded = 0
+	var n_sum := Vector3.ZERO
+	var rear_g := 0
+	var h_sum := 0.0
+	var corr := Vector3.ZERO                # correção de posição (batente), 0x23f6c0
+	var ignorar: Array = objetos.ignorar_roda() if objetos else []
+	# a mesma consulta pras 4 rodas (CPU: montar a lista uma vez por passo)
+	var excluir: Array[RID] = [get_rid()]
+	excluir.append_array(ignorar)
+	excluir.append_array(outros_carros)
+	var q := PhysicsRayQueryParameters3D.new()
+	for w in wheels:
+		var attach: Vector3 = global_transform * Vector3(w.px, w.y0, w.pz)
+		var top: Vector3 = global_transform * Vector3(w.px, w.y0 + w.max, w.pz)
+		var reach: float = (w.max - w.min) + w.r + 0.05
+		q.from = top
+		q.to = top - up * reach
+		q.exclude = excluir
+		var hit := space.intersect_ray(q)
+		# roda na cerca (0x154088 -> 0x153390): quebrou, o raio passa por ela
+		if objetos and not hit.is_empty() and objetos.roda_na_cerca(hit.collider, hit.position, hit.normal):
+			var mais: Array[RID] = excluir.duplicate()
+			mais.append(hit.rid)
+			q.exclude = mais
+			hit = space.intersect_ray(q)
+		w.hit = false
+		var pen := 0.0
+		if not hit.is_empty():
+			var hn0: Vector3 = hit.normal
+			# distância do ponto de fixação até o chão, e quanto a roda (no
+			# curso atual) entra nele
+			var d0: float = top.distance_to(hit.position) - w.max
+			pen = (w.r - w.x) - d0
+			w.hit = pen > 0.0 and hn0.dot(up) >= w.cos_max
+		if not w.hit:
+			w.f = 0.0
+			continue
+		var hp: Vector3 = hit.position
+		var hn: Vector3 = hit.normal
+		w.point = hp
+		w.normal = hn
+		if terrain:
+			w.mat = terrain.material_at(hp.x, hp.z)
+			w.mu = terrain.atrito(w.mat, pneu)
+			w.amort = terrain.amortecimento(w.mat)
+		grounded += 1
+		n_sum += hn
+		if not w.front:
+			rear_g += 1
+		h_sum += (com_w - hp).dot(up)
+		w.x += pen
+		if w.x > w.max:
+			# batente: o jogo empurra o carro pra fora, sem mexer na velocidade
+			corr = _add_corr(corr, hn * (w.x - w.max))
+			w.x = w.max
+		var vp: Vector3 = linear_velocity + angular_velocity.cross(attach - com_w)
+		w.v = clampf(-hn.dot(vp) * hn.dot(up), -w.vmax, w.vmax)
+		var f_s: float = _spring(w, w.x) + _damper(w, w.v)
+		w.f = f_s
+		apply_force(hn * f_s, attach - global_position)
+		# roda em cima de corpo solto (fardo, peça da cerca): a reação vai
+		# nele, senão ele vira rampa fixa (no jogo é contato entre os dois)
+		if hit.collider is RigidBody3D and f_s > 0.0:
+			(hit.collider as RigidBody3D).sleeping = false
+			(hit.collider as RigidBody3D).apply_force(-hn * f_s, hp - (hit.collider as RigidBody3D).global_position)
+
+	_r_com_w = com_w
+	_r_n_sum = n_sum
+	_r_rear_g = rear_g
+	_r_h_sum = h_sum
+	_r_corr = corr
+
+
 func _batida_passo() -> void:
 	batida = 0.0
 	contato_som = {}
@@ -1018,6 +1145,12 @@ func _batida_passo() -> void:
 				if n.dot(com - p) < 0.0:
 					n = -n
 				lascas.batida(p, n, _v_antes)
+	# outro carro (carro/batida_carros.gd): som com o patch Vehicle e tremida
+	if not _contato_carro.is_empty():
+		batida = maxf(batida, _contato_carro.vn)
+		if contato_som.is_empty() or _contato_carro.vn > contato_som.vn:
+			contato_som = _contato_carro
+		_contato_carro = {}
 	_v_antes = linear_velocity
 	_w_antes = angular_velocity
 
@@ -1123,7 +1256,7 @@ func _tires(dt: float, v: Vector3, fwd: Vector3, left: Vector3, n: Vector3, com_
 
 	# ---- 0x20ede8: curvatura. Subesterço entra como U * v² * 0.001
 	var delta: float = steer * VehicleData.sample(steer_curve, mph) * DEG
-	var kappa: float = delta / ((P.axle_f - P.axle_r) + v_p * v_p * P.understeer_raw * 0.001)
+	var kappa: float = delta / ((P.axle_f - P.axle_r) + v_p * v_p * P.understeer_raw * mult_sub * 0.001)
 	if absf(v_f) < 0.223472:
 		kappa *= absf(v_f) / 0.223472
 
@@ -1864,7 +1997,7 @@ func _razao_patinada(v_f: float) -> void:
 ##    contra o freio, sem passar do giro do motor.
 ## O "torque" do freio aqui é desaceleração x parte do eixo / rodas x raio, sem
 ## a massa (o jogo divide pela inércia em t·m²; com a inércia em kg·m² entra
-## x1000). 0x720 = 1 (RAM, multiplica o motor).
+## x1000). Motor x corpo+0x720 (mult_pot: catchup dos rivais, 1 no jogador).
 func _giro_rodas(dt: float, v_f: float, rear_g: int) -> void:
 	# 0x2113e0: preso. Acelerando (botão da embreagem em 0) a menos de 0,5 m/s e o
 	# carro não sai de 3 cm (0.0009 m²) por 0,33 s
@@ -1901,7 +2034,7 @@ func _giro_rodas(dt: float, v_f: float, rear_g: int) -> void:
 	var d_fr: float = P.front_bias * dmax
 	for w in wheels:
 		var I: float = w.inercia
-		var t_mot := clutch * ratio * eng_torque / n_tr if _motriz(w) else 0.0
+		var t_mot := clutch * ratio * eng_torque * mult_pot / n_tr if _motriz(w) else 0.0
 		var t_frei: float = (d_fr / nf_s if w.front else (dmax - d_fr) / nr_s) * w.r * 1000.0
 		var t: float
 		if not _motriz(w):
@@ -2029,14 +2162,15 @@ func _gearbox(dt: float, v_f: float, out_rpm: float, auto_ok: bool, forced: bool
 				cstate = 2
 				shift_flag = true
 
-	# torque que a embreagem passa
+	# torque que a embreagem passa (câmbio+0x38 = torque do motor x 0x720, 0x20c7a8)
+	var t_m := eng_torque * mult_pot
 	if clutch <= 0.0 or gear == 0:
 		clutch_t = 0.0
 	elif cstate == 3:
-		clutch_t = eng_torque
+		clutch_t = t_m
 	elif cstate == 2:
 		var cap: float = clutch * P.clutch_max
-		clutch_t = 0.0 if eng_torque <= 0.0 else minf(cap, eng_torque)
+		clutch_t = 0.0 if t_m <= 0.0 else minf(cap, t_m)
 	elif cstate == 1:
 		clutch_t = signf(diff) * clutch * P.clutch_max
 	return clutch_t
