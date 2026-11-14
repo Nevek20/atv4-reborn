@@ -1783,6 +1783,25 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   custom_aabb em volta das partículas vivas (nuvens.cpp, poeira.gd, pedras.gd,
   lascas.gd: centro agora a 2-80 m, junto do carro dono), que também
   acerta a ordem de desenho entre as transparentes de carros diferentes.
+- Poeira e água ainda piscando (Matheus, nov/2026, depois da correção do
+  LOD). Outra causa: a ORDEM das transparentes. O Godot desenha cada
+  MultiMesh (poeira, espirro, pedras, lascas) e cada fumaça inteira e ordena
+  pela distância da câmera ao centro da caixa; a caixa da poeira é a do
+  rastro todo e o centro pula quando nuvem nasce ou morre, então 2 efeitos
+  que se cruzam na tela trocavam de ordem (o de cima virava o de baixo).
+  tests/medir_ordem_fx.gd conta essas trocas: 368 em 80 s (50 FPS), 569 em
+  40 s (240 FPS). Correção (efeitos/ordem_fx.gd, NOSSO): todos os efeitos de
+  um carro ordenam pela distância do carro desenhado + desempate por tipo
+  (sorting_offset compensa o centro da caixa), todo quadro e depois de todo
+  mundo: 117 e 109, só carros cruzando a mesma distância. Tentativas que
+  não deram: a posição crua do carro (só muda a cada passo de física, a 240
+  FPS a distância oscilava: 756 trocas), atualizar a 75 Hz (offset velho com
+  o centro pulando: 14 mil trocas) e desempate de 1 mm entre os 2 escapes
+  com tolerância de 1 mm (613 trocas). As poças já desenhavam antes (render
+  priority -1). Não deu pra ver na nuvem: no OpenGL a poeira não desenha e o
+  Forward+ no lavapipe passou a cair (segfault do Godot com o xvfb);
+  tests/medir_pisca_fx.gd conta pixels piscando na imagem, pra quando
+  rodar. Custo: 0.07 ms por quadro (nuvem).
 - Otimização, 4ª rodada (nov/2026, Matheus já cravado em 240 FPS; o alvo é
   o quadro com passo de física, que no PC dele ficava em cima dos 4.17 ms):
   - Som 3D: 219 tocadores 3D na corrida, até ~110 tocando juntos. Cada um

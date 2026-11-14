@@ -100,6 +100,8 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 %GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
 %GODOT% --headless --path . -s res://tests/teste_batida_carros.gd   :: rival a VEL km/h (50) na traseira do jogador: cascos do VehicleVehicle, empurrão, lasquinhas, som Vehicle
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro), quadro real e cada nó
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_ordem_fx.gd   :: efeitos transparentes que se cruzam na tela trocando de ordem (pisca): trocas por par, PASSOS=n
+godot --path . --resolution 480x270 --rendering-method forward_plus --rendering-driver vulkan --fixed-fps 50 -s res://tests/medir_pisca_fx.gd   :: pixels piscando na imagem (sobe e desce num quadro); ORDEM_FX=0 sem a ordem pelo carro, SAIDA=pasta grava os PNG, INICIO/QUADROS/LIMIAR
   (PERF_CARRO=1 antes: também o car.gd por parte do passo: rodas, pneus, efeitos, piloto, suspensão...)
 bash: TIMEFORMAT=%U; time $GODOT --headless --path . --fixed-fps 50 -s res://tests/bench_corrida.gd   :: CPU de uma corrida fixa de 15 s (comparar versões; PASSOS=1 = só o carregamento)
 %GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph)

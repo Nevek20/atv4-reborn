@@ -242,6 +242,11 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
   lascas, espirro) fica FORA do LOD dos rivais e grava custom_aabb das
   partículas vivas: no Forward+ a caixa contava os espaços vazios (origem
   do mundo) e a terra dos rivais sumia e piscava.
+- Ordem das transparentes (efeitos/ordem_fx.gd, NOSSO): cada efeito de um
+  carro (poeira, espirro, pedras, lascas, fumaça) ordena pela distância do
+  CARRO + desempate por tipo (sorting_offset compensa o centro da caixa).
+  Pela caixa do rastro a ordem trocava ~5 vezes por segundo e piscava
+  (tests/medir_ordem_fx.gd). Efeito novo: entra nessa lista.
 - Som de pneu, suspensão, pouso e batida = do jogo (989snd). Mistura nossa
   por cima: SO_DERRAPANDO e GANHO_PNEU 0.6.
 - Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no

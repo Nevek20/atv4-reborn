@@ -174,6 +174,9 @@ func _ready() -> void:
 	# a câmera é posta no _process a partir do carro interpolado
 	cam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	cam.global_position = spawn_point() + Vector3(-8, 4, 0)
+	# ordem de desenho dos efeitos transparentes pelo carro (efeitos/ordem_fx.gd,
+	# NOSSO): a poeira e a água não trocam de ordem entre si e piscam
+	add_child(preload("res://efeitos/ordem_fx.gd").new(self))
 
 	var layer := CanvasLayer.new()
 	add_child(layer)
