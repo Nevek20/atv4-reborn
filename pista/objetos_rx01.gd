@@ -990,6 +990,8 @@ func quebrar(c: Dictionary, n := Vector3.ZERO, ponto := Vector3.ZERO) -> void:
 			rb = RigidBody3D.new()
 			rb.name = "Peca"
 			rb.mass = MASSA_PECA
+			rb.linear_damp = FREIO_PECA      # NOSSO (ver CHUTE)
+			rb.angular_damp = FREIO_PECA
 			var pm := PhysicsMaterial.new()
 			pm.friction = c.q.get("atrito", 0.2)
 			rb.physics_material_override = pm
@@ -1019,11 +1021,17 @@ func quebrar(c: Dictionary, n := Vector3.ZERO, ponto := Vector3.ZERO) -> void:
 
 
 ## peça empurrada pelo carro: n aponta da peça pro carro (fora da cerca), vp =
-## velocidade do carro no ponto. Na normal ela sai (1 + e) x mais rápida que o
-## carro chega (corpo leve x pesado); do resto leva ATRITO_PECA; um pouco pra
+## velocidade do carro no ponto. Na normal ela sai com CHUTE x (1 + e) da
+## velocidade com que o carro chega; do resto leva ATRITO_PECA; um pouco pra
 ## cima e girando (sorteio NOSSO, pra não saírem todas iguais)
-const ATRITO_PECA := 0.3
-const SOBE_PECA := 0.25          # fração da velocidade da batida pra cima
+# (nov/2026, 2ª versão: "ta bem exagerado, pode deixar pra voar menos?"; a 1ª
+# era a conta de corpo leve x pesado, (1 + e) = 1.2x a velocidade do carro na
+# normal, e a peça a 60 km/h parava a ~25 m)
+const CHUTE := 0.45              # fração da velocidade do carro que a peça leva na normal
+const ATRITO_PECA := 0.15        # do resto (de lado)
+const SOBE_PECA := 0.1           # fração da velocidade da batida pra cima
+const GIRO_PECA := 0.3           # rad/s por m/s de batida (máximo)
+const FREIO_PECA := 1.5          # linear_damp da peça (arrasto/chão: para em poucos metros)
 # sorteio próprio: o randf global é o mesmo da poeira e mudava a corrida do
 # bench_corrida entre C++ e GDScript (a poeira do GDScript sorteia nele)
 var _rng := RandomNumberGenerator.new()
@@ -1032,13 +1040,14 @@ func _chutar(rb: RigidBody3D, vp: Vector3, n: Vector3, e: float) -> float:
 	var vn := -rel.dot(n)             # quanto o carro entra na peça
 	if vn <= 0.0:
 		return 0.0
-	var dv := -n * vn * (1.0 + e) + (rel + n * vn) * ATRITO_PECA
+	var dv := -n * vn * CHUTE * (1.0 + e) + (rel + n * vn) * ATRITO_PECA
 	dv += Vector3.UP * vn * SOBE_PECA * _rng.randf_range(0.5, 1.0)
 	dv += n.cross(Vector3.UP).normalized() * vn * _rng.randf_range(-0.15, 0.15)
 	rb.linear_velocity += dv
-	rb.angular_velocity += Vector3(_rng.randf_range(-1, 1), _rng.randf_range(-1, 1), _rng.randf_range(-1, 1)).normalized() * vn * _rng.randf_range(0.3, 0.8)
+	rb.angular_velocity += Vector3(_rng.randf_range(-1, 1), _rng.randf_range(-1, 1), _rng.randf_range(-1, 1)).normalized() * vn * _rng.randf_range(0.3, 1.0) * GIRO_PECA
 	rb.sleeping = false
 	_parada.erase(rb.get_instance_id())
+	_chutada[rb.get_instance_id()] = Engine.get_physics_frames()
 	return rb.mass * dv.length()      # kg·m/s que a peça levou
 
 
@@ -1046,6 +1055,10 @@ func _chutar(rb: RigidBody3D, vp: Vector3, n: Vector3, e: float) -> float:
 ## o carro leva a reação de no máximo EMPURRAO_MAX, como a cerca quebrada no
 ## 0x153390; contato de verdade travava o carro, ver quebrar). NOSSO
 const RAIO_PECAS := 4.0
+# peça chutada fica PASSOS_CHUTE passos sem levar outro (o carro mais rápido
+# que ela encostava de novo a cada passo e ia levando a peça junto: 18 m)
+const PASSOS_CHUTE := 25
+var _chutada := {}                       # id da peça -> passo do último chute
 func _empurrar_pecas() -> void:
 	var carros: Array = []
 	for k in [carro] + rivais:
@@ -1063,6 +1076,8 @@ func _empurrar_pecas() -> void:
 				continue
 			var rb: RigidBody3D = pr
 			if rb.freeze or rb.global_position.distance_squared_to(pk) > RAIO_PECAS * RAIO_PECAS:
+				continue
+			if Engine.get_physics_frames() - int(_chutada.get(rb.get_instance_id(), -1000)) < PASSOS_CHUTE:
 				continue
 			var cs := rb.get_child(0) as CollisionShape3D
 			if cs == null or cs.shape == null:

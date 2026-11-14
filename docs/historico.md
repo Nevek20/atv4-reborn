@@ -458,6 +458,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     (_empurrar_pecas: a peça leva a batida, o carro a reação de no máximo
     0.25 t·m/s). teste_quebra: a 60 km/h a peça mais longe fica a ~25 m em 2
     s; medir_perda: o carro perde 0.6 a 1.2 km/h na cerca (antes 0.1 a 0.8).
+    "Ta bem exagerado, pode deixar pra voar menos?": a peça leva só CHUTE
+    0.45 da conta (0.45 x 1.2 = 0.54x a velocidade do carro na normal), 15%
+    do resto, sobe 10%, gira menos, linear/angular_damp 1.5 e no máximo um
+    chute a cada 25 passos (o carro mais rápido que ela encostava de novo a
+    cada passo e levava a peça junto). A 60 km/h a mais longe para a ~6 m.
   Som da batida (PORTA, 0x36b998, chamado pelo 0x153390 em cada contato):
   CollisionSample do objeto -> SoundDatabase Collisions/InteractiveObjects
   (PLASTIC_FENCE = FencePlastic, HAY = Hay, do Collide.bnk), volume Volume x
