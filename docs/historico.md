@@ -663,6 +663,15 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   o movimento ficou: jato de 5 m/s, arrasto 12/s (o gás perde a velocidade do
   carro em ~0.1 s: andando o rastro tem ~80% do comprimento do antigo),
   esteira 0.3, empuxo 6 m/s². Vista de trás, área opaca = a antiga + 10%.
+  Ainda grossa ("ce ta de sacanagem ne? é so deixar ela fininhas"): a causa
+  NÃO era número. O StandardMaterial com BILLBOARD_PARTICLES joga fora a
+  escala da partícula se billboard_keep_scale estiver desligado (medido no
+  lavapipe: escala 0.2 e 1.0 dão os mesmos 48 px; ligado, 10 e 48 px). Na
+  antiga (quad de 0.2 m) o ExpandRate nunca valeu: ficava 0.2 m o tempo todo
+  (era isso que o Matheus aprovou). Na física nova o quad era de 1 m e toda
+  partícula saía com 1 m. Agora keep_scale ligado e CRESCE 0.2 m/s (0.2 ->
+  0.3 m na vida); simulações de densidade de antes estavam certas na conta
+  mas erradas no tamanho desenhado.
   Direção dos canos (mesmo pedido: "a do Renegade ta meio torta e a do
   Chimera pros lados"): tests/medir_escapes.gd acha a peça do cano ligada ao
   ponto e mede os anéis. Renegade: o EXHAUST do jogo fica 33 cm à frente e 11

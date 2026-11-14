@@ -26,19 +26,20 @@ extends Node3D
 ##   - cresce o do XML; CRESCE_VENTO (m/s a mais por m/s de vento) e DILUI
 ##     (alfa x (tamanho inicial / tamanho)^DILUI) ficam em 0: ligados, a
 ##     fumaça engrossava andando.
-## Tamanho, transparência, vida e taxa = os do XML (o Matheus: "afina ela
-## como era a antiga"; a 1ª versão com vida 1.2 s e crescendo com o vento
-## virou bolas de 1 m). Só o movimento é novo. Simulado (média de 40
-## partículas): parado o jato anda ~0.4 m pra trás e sobe ~0.15 m; andando o
-## rastro tem ~80% do comprimento do antigo (o gás sai com a velocidade do
-## carro e o ar freia em ~0.1 s: 1.9 m em 0.45 s a 18 km/h, antigo 2.3 m);
-## vista de trás a área opaca é a da antiga (+10%).
+## Tamanho: a fumaça antiga (aprovada, "fininha") ficava SEMPRE em 0.2 m: o
+## billboard das partículas do Godot jogava fora a escala (falta o
+## billboard_keep_scale), então o ExpandRate do XML nunca valeu. Aqui a
+## escala vale e cresce pouco (CRESCE). Transparência, vida e taxa = XML.
+## Movimento (simulado, média de 40 partículas): parado o jato anda ~0.4 m
+## pra trás e sobe ~0.15 m; andando o rastro tem ~80% do comprimento do
+## antigo (o gás sai com a velocidade do carro e o ar freia em ~0.1 s).
 
 const TEXTURA := "res://assets/efeitos/fumaca.png"
 const VIDA := 0.5
 const MAX := 60                     # MaxParticles
 const TAMANHO := 0.2
-const CRESCE := 0.7                 # média do ExpandRate 0.6..0.8 (m/s)
+const CRESCE := 0.2                 # m/s (NOSSO: o ExpandRate do XML é 0.6..0.8, mas a antiga
+                                    # aprovada nunca cresceu, ficava 0.2 m; 0.2 -> 0.3 m em 0.5 s)
 const COR := Color(0.35, 0.35, 0.35, 0.3)
 const SOME := 0.3                   # FadeOutTime x Life
 const TAXA_LENTA := 0.15            # fração do máximo (120/s) parado
@@ -301,6 +302,11 @@ func _malha(tex: Texture2D) -> QuadMesh:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	# sem isto o billboard joga fora a escala da partícula e desenha o quad
+	# inteiro (medido no lavapipe: escala 0.2 e 1.0 saem do mesmo tamanho). A
+	# fumaça antiga (quad de 0.2 m) nunca cresceu por isso; a 1ª física (quad
+	# de 1 m) saiu com bolas de 1 m ("ce ta de sacanagem ne?")
+	mat.billboard_keep_scale = true
 	mat.vertex_color_use_as_albedo = true
 	mat.albedo_texture = tex
 	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
