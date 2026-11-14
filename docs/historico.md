@@ -1812,6 +1812,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Forward+ no lavapipe passou a cair (segfault do Godot com o xvfb);
   tests/medir_pisca_fx.gd conta pixels piscando na imagem, pra quando
   rodar. Custo: 0.07 ms por quadro (nuvem).
+- Poeira e água AINDA piscando depois da ordem (print do Matheus, nov/2026;
+  o F4 de diagnóstico, sem o apagamento no chão ou sem MSAA, não mudou
+  nada). Causa: o projeto tem common/physics_interpolation=true e os
+  MultiMeshInstance3D dos efeitos herdavam: o Godot interpola as instâncias
+  entre o buffer do último passo de física e o de agora, pelo índice. O
+  buffer é refeito todo quadro e, quando uma nuvem morre, as de trás andam
+  um índice: entre os passos cada quadrado era desenhado no meio de 2
+  nuvens diferentes (tamanho, cor e alfa misturados). Só aparece com mais
+  quadros que passos (240 FPS no PC); os testes da nuvem rodam a 50 FPS,
+  um quadro por passo, e não pegavam. Pedras e lascas ainda interpolavam na
+  mão por cima. Correção: physics_interpolation_mode OFF nas MultiMesh da
+  poeira, espirro, pedras, lascas e palha (a fumaça já era OFF e não
+  piscava).
 - Otimização, 4ª rodada (nov/2026, Matheus já cravado em 240 FPS; o alvo é
   o quadro com passo de física, que no PC dele ficava em cima dos 4.17 ms):
   - Som 3D: 219 tocadores 3D na corrida, até ~110 tocando juntos. Cada um

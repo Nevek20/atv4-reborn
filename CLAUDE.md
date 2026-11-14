@@ -244,6 +244,11 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
   lascas, espirro) fica FORA do LOD dos rivais e grava custom_aabb das
   partículas vivas: no Forward+ a caixa contava os espaços vazios (origem
   do mundo) e a terra dos rivais sumia e piscava.
+- Efeito com buffer gravado todo quadro (MultiMesh da poeira, espirro,
+  pedras, lascas, palha): physics_interpolation_mode OFF. Interpolado, o
+  Godot misturava o buffer do passo anterior com o novo pelo índice e, com
+  nuvem morrendo, desenhava entre 2 nuvens: piscava acima de 50 FPS (nos
+  testes a 50 FPS não aparece).
 - Ordem das transparentes (efeitos/ordem_fx.gd, NOSSO): cada efeito de um
   carro (poeira, espirro, pedras, lascas, fumaça) ordena pela distância do
   CARRO + desempate por tipo (sorting_offset compensa o centro da caixa).

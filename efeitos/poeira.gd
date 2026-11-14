@@ -240,6 +240,11 @@ func _multimesh(arq: String, nome: String) -> MultiMesh:
 	mi.name = nome
 	mi.multimesh = m
 	mi.top_level = true
+	# sem interpolação de física: o buffer é gravado todo quadro em
+	# coordenadas do mundo; interpolado, o Godot misturava o buffer do passo
+	# anterior com o de agora pelo índice, e quando uma nuvem morre os índices
+	# andam: ela era desenhada entre 2 nuvens diferentes e piscava (Matheus)
+	mi.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 16384.0
 	add_child(mi)
