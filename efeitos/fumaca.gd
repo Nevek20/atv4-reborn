@@ -23,39 +23,37 @@ extends Node3D
 ##     ESTEIRA_LARG pro lado);
 ##   - gás quente sobe (EMPUXO, esfria em ESFRIA s) e mexe (TURBULENCIA, mais
 ##     forte com o vento relativo);
-##   - cresce o do XML + CRESCE_VENTO por m/s de vento e fica mais
-##     transparente quanto mais cresce (DILUI): em alta o rastro estica e
-##     dilui mais rápido.
-## Simulado antes (média de 40 partículas, a 50 Hz não muda): parado o jato
-## anda ~0.5 m pra trás e o gás sobe ~0.3 m em 0.6 s; o rastro visível (alfa
-## >= 0.04) tem 2.1 m a 18 km/h, 5.2 m a 54 e ~5.4 m a 100 km/h, deitado.
-## Densidade (1ª versão: "CARALHO Q FUMACEIRA É ESSA", vida 1.2 s, 144
-## partículas, alfa 0.3, até 1 m: vista de trás tapava 3.4x a área da
-## antiga): VIDA 0.8 s, 40 partículas (50/s no máximo), ALFA 0.18 e CRESCE
-## 0.5 m/s. Acelerando parado, a área com opacidade > 0.3 fica igual à da
-## antiga (0.12 m² por cano) e o miolo mais leve (0.90 x 1.00); na marcha
-## lenta bem mais leve.
+##   - cresce o do XML; CRESCE_VENTO (m/s a mais por m/s de vento) e DILUI
+##     (alfa x (tamanho inicial / tamanho)^DILUI) ficam em 0: ligados, a
+##     fumaça engrossava andando.
+## Tamanho, transparência, vida e taxa = os do XML (o Matheus: "afina ela
+## como era a antiga"; a 1ª versão com vida 1.2 s e crescendo com o vento
+## virou bolas de 1 m). Só o movimento é novo. Simulado (média de 40
+## partículas): parado o jato anda ~0.4 m pra trás e sobe ~0.15 m; andando o
+## rastro tem ~80% do comprimento do antigo (o gás sai com a velocidade do
+## carro e o ar freia em ~0.1 s: 1.9 m em 0.45 s a 18 km/h, antigo 2.3 m);
+## vista de trás a área opaca é a da antiga (+10%).
 
 const TEXTURA := "res://assets/efeitos/fumaca.png"
-const VIDA := 0.8                   # NOSSO (XML 0.5)
-const MAX := 40                     # 50/s no máximo (NOSSO; o XML: 60 em 0.5 s = 120/s)
+const VIDA := 0.5
+const MAX := 60                     # MaxParticles
 const TAMANHO := 0.2
-const CRESCE := 0.5                 # m/s (NOSSO; o ExpandRate do XML é 0.6..0.8 em 0.5 s)
-const COR := Color(0.35, 0.35, 0.35, 0.18)   # cinza do XML, alfa NOSSO (XML 0.3)
+const CRESCE := 0.7                 # média do ExpandRate 0.6..0.8 (m/s)
+const COR := Color(0.35, 0.35, 0.35, 0.3)
 const SOME := 0.3                   # FadeOutTime x Life
 const TAXA_LENTA := 0.15            # fração do máximo (120/s) parado
 # física do gás (NOSSA, ver acima)
-const JATO := 3.0                   # m/s pra fora do cano
+const JATO := 5.0                   # m/s pra fora do cano
 const ABERTURA := 0.14              # tan(8°): cone do jato
-const ARRASTO := 6.0                # 1/s
-const ESTEIRA := 0.5                # fração da velocidade do carro no ar logo atrás
+const ARRASTO := 12.0               # 1/s
+const ESTEIRA := 0.3                # fração da velocidade do carro no ar logo atrás
 const ESTEIRA_COMP := 1.5           # m atrás da boca (cai 1/e)
 const ESTEIRA_LARG := 0.6           # m pro lado
-const EMPUXO := 5.0                 # m/s² pra cima, gás quente
+const EMPUXO := 6.0                 # m/s² pra cima, gás quente
 const ESFRIA := 0.8                 # s (o empuxo cai 1/e)
 const TURBULENCIA := 1.2            # m/s² (x (1 + vento/10))
-const CRESCE_VENTO := 0.06          # m/s a mais de crescimento por m/s de vento
-const DILUI := 1.4                  # alfa x (tamanho inicial / tamanho)^DILUI
+const CRESCE_VENTO := 0.0           # m/s a mais de crescimento por m/s de vento
+const DILUI := 0.0                  # alfa x (tamanho inicial / tamanho)^DILUI
 
 var canos: Array = []
 var bases: Array = []               # boca de cada cano no frame do corpo (+Z = saída)

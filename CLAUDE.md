@@ -250,7 +250,8 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
   lido, calibrado em prints). Fumaça é melhoria nossa (o jogo não solta):
   gás com física num shader de partícula (jato do cano, arrasto pro ar
-  parado, esteira, empuxo; fumaca.gd); boca e direção dos canos tortos
+  parado, esteira, empuxo; fumaca.gd), mas tamanho, alfa, vida e taxa são
+  os do XML (maior/mais longa virou "fumaceira"); boca e direção dos canos tortos
   medidas no modelo (tests/medir_escapes.gd, car.gd ESCAPE_NOSSO), o
   motor_treme separa pelos pontos do jogo (escape_jogo).
   Poeira: o jogador usa o CamSubject do Dust.xml, os rivais o Other.

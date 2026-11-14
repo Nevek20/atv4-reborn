@@ -657,6 +657,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   s, 40 partículas (50/s), alfa 0.18 e cresce 0.5 m/s: acelerando parado a
   área com opacidade > 0.3 = a da antiga (0.12 m² por cano), miolo mais
   leve; o movimento (jato, subida, rastro) ficou igual.
+  Ainda "muito grossa" (prints do Matheus andando: bolas de ~0.9 m, porque
+  crescia com o vento): tamanho, alfa, vida e taxa VOLTARAM aos do XML (0.2 m
+  + 0.7 m/s, alfa 0.3, 0.5 s, 120/s), sem crescer com o vento nem diluir. Só
+  o movimento ficou: jato de 5 m/s, arrasto 12/s (o gás perde a velocidade do
+  carro em ~0.1 s: andando o rastro tem ~80% do comprimento do antigo),
+  esteira 0.3, empuxo 6 m/s². Vista de trás, área opaca = a antiga + 10%.
   Direção dos canos (mesmo pedido: "a do Renegade ta meio torta e a do
   Chimera pros lados"): tests/medir_escapes.gd acha a peça do cano ligada ao
   ponto e mede os anéis. Renegade: o EXHAUST do jogo fica 33 cm à frente e 11
