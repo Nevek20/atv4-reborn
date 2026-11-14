@@ -72,8 +72,10 @@ func _physics_process(dt: float) -> bool:
 			if todos or c.t > 100.0 * voltas:
 				var piores := 0
 				for x in ia.rivais:
-					print("%-10s skill %.2f  %-10s  andou %6.0f m  %4.1f km/h média  repostos %d  ré %d" % [
-						x.nome, x.skill, x.carro, x.r.prog, (x.r.prog + 54.8) / c.t * 3.6, x.repostos, x.res])
+					var t5: Array = x.get("t5", [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+					print("%-10s skill %.2f  %-10s  andou %6.0f m  %4.1f km/h média  repostos %d  ré %d  ultrapassar %d (s nas fases 0-4: %.0f %.0f %.0f %.0f %.0f)" % [
+						x.nome, x.skill, x.carro, x.r.prog, (x.r.prog + 54.8) / c.t * 3.6, x.repostos, x.res,
+						x.get("n5", 0), t5[0], t5[1], t5[2], t5[3], t5[4]])
 					if x.r.prog < voltas * ia.comp:
 						_falha("%s não completou %d volta(s) em %.0f s" % [x.nome, voltas, c.t])
 					if x.repostos > 2 * voltas:

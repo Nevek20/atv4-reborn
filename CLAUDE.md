@@ -210,8 +210,14 @@ Pista RX01
   do jogo (0x34cea8) vai na física do rival: potência x (1 + s), subesterço
   x (2 - 2s) (car.gd mult_pot / mult_sub, o C++ lê; 1 no jogador; s = 0 na
   sua chegada). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
-  freio, +0xa4 acel, +0xa8 dir). NOSSO: desvio pra ultrapassar, ré/preso/
-  capotado, o sorteio da Skill 1 vez por corrida.
+  freio, +0xa4 acel, +0xa8 dir). NOSSO: ré/preso/capotado, a caixa da IA
+  (metade do AABB do casco), o corte de curva do 0x359730.
+- Cérebro da IA (pista/ia_ultrapassar.gd): o #7 (linha) não segura a vez; o
+  #5 ultrapassar (prioridade 1) entra com alvo (batida prevista < 20 s, ou o
+  da frente chegando por > 10 quadros) e segura até as fases acabarem.
+  Recomeçar o #7 sorteia o desvio da Skill de novo (0x360550). Nos 5 s
+  depois do Go! o #7 segue a faixa do grid (modo 0). Lateral do jogo =
+  -(a nossa): mundo espelhado; a conta 0x3614a0 bate com a RAM a 0.01 m.
 - Largada da IA: no jogo (offline) o rival fica parado ("esperar", alvo 0)
   até faltarem 2 s pro Go! (0x364b08, save idle_antes_do_Go) e aí pisa com o
   carro travado: o ronco (o Matheus confirmou no jogo). Sai no Go! sem
@@ -276,6 +282,6 @@ Frota
 
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
-- IA: os outros comportamentos do cérebro (seguir, ultrapassar), LOD com
+- IA: os outros comportamentos do cérebro (#2 preso, #3, #4, #6), LOD com
   os modelos 2K/1K/500 do jogo.
 - Piloto: textura em camadas como o jogo, LOD, piloto feminino.

@@ -15,6 +15,8 @@ python tests/rodar_testes.py accel --veh 0 --hz 60                 :: passo NTSC
 :: save state do PCSX2 -> valores reais do jogo
 python tools/ler_savestate.py arquivo.p2s
 python tools/ler_savestate.py arquivo.p2s --json estado.json   :: estado do carro pro remake
+python re/ia_alvo_ram.py arquivo.p2s     :: save com rivais: velocidade-alvo e pedais do jogo x a nossa conta (coluna exe = arco 2 do 0x35a150)
+python re/ia_vizinhos_ram.py arquivo.p2s :: save com rivais: a percepção de cada um (vizinhos, setor, distâncias, tempo até bater)
 
 :: print do carro parado (na nuvem: xvfb-run -a ... --rendering-driver opengl3)
 %GODOT% --path . -s res://tests/print_tela.gd -- print.png lado
@@ -102,7 +104,7 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 bash: TIMEFORMAT=%U; time $GODOT --headless --path . --fixed-fps 50 -s res://tests/bench_corrida.gd   :: CPU de uma corrida fixa de 15 s (comparar versões; PASSOS=1 = só o carregamento)
 %GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph)
 %GODOT% --headless --path . -s res://tests/teste_reposicao.gd   :: as 14 caixas de reposição do RX01: cada uma repõe na linha, chão plano, longe dos rivais
-%GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> quadro a quadro)
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> a cada 5 passos com o comportamento e a fase do ultrapassar, IA_TRACE_TUDO=1 todo passo); no fim, por rival, quantas vezes o ultrapassar (#5) entrou e os segundos em cada fase
 %GODOT% --path . --fixed-fps 50 -s res://tests/print_ia.gd -- ia   :: prints da corrida com rivais (QUANDO=-1,2,25: -1 = no grid)
 python tools/ia_dados.py <unpacked>             :: pilotos (AIPlayers) e catchup -> data/ia.json
 python tools/rx01_corrida.py <unpacked>          :: traçado da IA, checkpoint e voltas do RX01 -> data/rx01_corrida.json

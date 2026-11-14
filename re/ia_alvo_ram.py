@@ -108,9 +108,15 @@ def main():
         return math.sqrt(num / k)
 
     print("rival  alvo jogo / nosso   (erro)  |  acel jogo / lei   freio jogo / lei  |  ponto da direção x zero")
-    for k in range(1, 8):
-        w = 0x14EEE80 + (k - 1) * 0x200
+    # corredores pela lista do gerente (DAT_007f5750: +4 n, +8 lista; o
+    # jogador é o 1º); o piloto da IA tem a vtable 0x5ae0d0 em +8
+    mgr = u(0x7F5750)
+    lista = u(mgr + 8)
+    for k in range(1, u(mgr + 4)):
+        w = u(lista + 4 * k)
         pil = u(w + 0x14)
+        if u(pil + 8) != 0x5AE0D0:
+            continue
         c = u(u(w + 0xC) + 0x9D4)
         ob = u(pil + 0x18)
         v = f(ob + 0xA0)
@@ -128,15 +134,27 @@ def main():
             p1[1] = p2[1] = 0.0
             r2 = sub(p1, p2)
             v2 = arco(c, ponto(s_car + d_dir + olha), p2, mul(r2, 1.0 / norm(r2))) or 8.938889
+        # 0x35a150 como no exe: A = ponto da direção (com o desvio, piloto
+        # +0x30), C = o carro (posição da rota com a lateral dele), B = zero
+        # da rota clamp(v, 15, 100) além de A; só com A a mais de 15 m
+        v2j = V_SEM
+        pa = V(pil + 0x30)
+        s_a = projetar(pa)
+        if (s_a - s_car) % comp > 15.0:
+            a0 = [pa[0], 0.0, pa[2]]
+            c0 = [f(ob + 0x30), 0.0, f(ob + 0x38)]
+            r2 = sub(c0, a0)
+            v2j = arco(c, ponto(s_a + olha), a0, mul(r2, 1.0 / norm(r2))) or 8.938889
         nosso = min(v1, v2)
+        nosso_j = min(v1, v2j)
         jogo = f(pil + 0x40)
         vs = f(c + 0x440) if f(c + 0x418) > 0.0 else -f(c + 0x440)
         kk = max(-1.0, min(1.0, (jogo - vs) * 0.2))
         alvo = V(pil + 0x30)
         fora = norm(sub(xz(alvo), xz(ponto(projetar(alvo)))))
-        print("%d   %8.2f / %8.2f  (%+5.1f%%)  |  %.3f / %.3f    %.3f / %.3f     |  %.1f m" % (
-            k, jogo, nosso, 100.0 * (nosso - jogo) / jogo, f(pil + 0xA4), max(kk, 0.0),
-            f(pil + 0xA0), max(-kk, 0.0), fora))
+        print("%d   %8.2f / %8.2f  (%+5.1f%%)  exe: %8.2f (%+5.1f%%) |  %.3f / %.3f    %.3f / %.3f     |  %.1f m" % (
+            k, jogo, nosso, 100.0 * (nosso - jogo) / jogo, nosso_j, 100.0 * (nosso_j - jogo) / jogo,
+            f(pil + 0xA4), max(kk, 0.0), f(pil + 0xA0), max(-kk, 0.0), fora))
 
 
 if __name__ == "__main__":

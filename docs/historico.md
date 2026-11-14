@@ -1494,9 +1494,60 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   andando_em_linha_reta): o cérebro tem 8 comportamentos numa lista fixa
   (docs/engenharia_reversa.md, Cérebro da IA). Andando, 5 rivais estão no #7
   (corrida na linha, o portado) e 2 no #5: ultrapassar, uma máquina de 5
-  fases com um carro-alvo (num dos saves, o carro do jogador). Pré-requisito
-  (0x361238) vale pra todos; quem decide é a busca do alvo (0x360e30). Falta
-  ler a busca, o plano (0x3612b0) e as 5 fases pra portar.
+  fases com um carro-alvo (num dos saves, o carro do jogador).
+- IA, ultrapassar portado (nov/2026, pedido do Matheus "pode seguir nessa
+  ordem"; pista/ia_ultrapassar.gd). Lido inteiro no exe: percepção dos
+  vizinhos (45 m de rota, setor, distâncias, tempo até bater pelas pegadas),
+  busca do alvo, prioridade, o plano e as 5 fases (seguir, colado, desviar,
+  passar, sair pro lado). Entrou no lugar do desvio NOSSO (_desviar: carro a
+  25 m mais lento -> lado com mais espaço, MARGEM 2.5, DESVIO_MAX 6).
+  - Achados que mudaram o #7 também: o #7 não segura a vez (todo quadro o #5
+    pode entrar); recomeçar o #7 sorteia o desvio da Skill de novo
+    (0x360550, era 1 vez por corrida); nos 5 s depois do Go! o ponto da
+    direção fica na faixa do próprio carro (modo 0; trocou o JUNTA, nosso,
+    150 m pra juntar na linha); depois o modo 1 (mistura com a lateral do
+    carro se o bico está torto mais de 10°). A lateral fica dentro da borda
+    menos a meia largura do carro (objeto +0xf4, ~1.1 m). O arco 2 da
+    velocidade-alvo (0x35a150) parte do ponto da direção com a lateral, no
+    rumo do carro: nos 3 saves acerta 3 dos 4 casos que o zero errava.
+  - Conferido com a RAM: o rival na fase 4 (que replaneja todo quadro)
+    guardou lateral -2.812 e borda -10.372; a nossa conta com a pista dá
+    -2.82 e -10.37. Transições vistas nos saves: 4 -> 3 e 2 -> 3. O mundo é
+    espelhado: lateral do jogo = -(a nossa); o setor do vizinho bate com o
+    lado da pista nos saves.
+  - Detalhe do PS2: "livre pro lado" é |dele - passa| > folga com passa =
+    dele + folga; o FPU do PS2 corta o arredondamento, então isso só é
+    livre pra quem já está além (ou indo pro zero / borda). Portado assim.
+  - Sem rivalidade (offline, Skill slots 1/3/4 = 0 na RAM) a fase 0 nunca é
+    escolhida. A fase 1 (colado, para-choque < 2 m) mira na BORDA do lado a
+    95% da velocidade do alvo.
+  - teste_ia, 8 sementes (pista completa, objetos do RX01 gerados): antes 5
+    reposições, 1 ré, o último rival termina em 66.4 s na média; com o #5
+    (1ª versão, ainda com o JUNTA) 2 reposições, 1 ré, 59.7 s; com a
+    largada do exe 0 reposições, 0 ré, 58.4 s (uma rodada intermediária da
+    mesma lógica deu 3 reposições e 58.5 s: a corrida é caótica, a média é o
+    que vale). O #5 entra 155..300 vezes por corrida (os 7 somados), ~metade
+    do tempo de cada um (RAM: 2 de 7 a cada instante).
+  - Caso visto (semente 3, 1ª versão): Sheppard (Skill 0.26) colado atrás de
+    um rival mirando na borda (fase 1); a batida prevista some, o #5 acaba,
+    o #7 recomeça e sorteia o desvio de novo (+8.5 -> -3.6 m), ele corta pra
+    cima do outro e capota. É a lógica do jogo (0x360550 sorteia a cada
+    começo); com a largada do exe não repetiu nas 8 sementes.
+  - NOSSO: a caixa da IA (metade do AABB dos vértices do VehicleWorld.hsc;
+    RAM: meia largura 1.04..1.19, meio comprimento 2.51..2.90); o +0xf0 do
+    objeto (<= 2 pro #5) sempre ok; o corte de curva do 0x359730 não
+    portado; o alcance do ponto sem o raio do carro (o exe soma, mas nos
+    saves o ponto fica a alcance + 0.8 +- 1.6 m, não + 3 m); reposto, o
+    cérebro recomeça.
+  - CPU: a IA foi de 0.47 pra 1.04 ms por passo (medir_cpu, nuvem). O
+    grosso é a percepção na largada (~6.5 vizinhos por carro a menos de 45
+    m, ~3.6 µs de GDScript cada). Os dados de cada carro saem 1 vez por passo
+    na lista (dados_carro) e a previsão de batida pela caixa (mesmo
+    resultado dos 4 cantos em 200 mil casos sorteados) com filtro exato
+    pelos círculos. Se pesar, o próximo passo é a percepção em C++.
+  - C++ x GDScript: bench_corrida igual (os 8 carros na mesma posição, rpm e
+    marcha). teste_cpp: as 4 falhas do F3 são de ambiente (iguais no commit
+    anterior; sem os modelos dos carros).
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
@@ -1839,9 +1890,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   NAT_NEW), NAT_WAHOO (pista de teste), NAT_10 e RX_AI incompletas, minigames
   MIN_02/MIN_Target/MIN_RING_OF_FIRE; o relevo delas depende do stream do
   disco (STREAMT).
-- IA: os outros 7 comportamentos do cérebro (seguir, ultrapassar... 0x35e758;
-  o desvio pra passar é NOSSO; com o seguir, tirar o ronco NOSSO da
-  contagem e medir de novo), quando o 0x360550 sorteia de novo e a flag
+- IA: os outros comportamentos do cérebro (#2 preso -> repõe, #3, #4, #6),
+  a percepção em C++ se o FPS cair, o corte de curva do 0x359730, a caixa da
+  IA de verdade (de onde o objeto +0x08..+0x20 sai) e a flag
   +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.

@@ -1131,67 +1131,125 @@ vazios). Tudo vem do evento:
   0x15bd28), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
   ultrapassar (0x360aa8, vt 0x5af228), #6 0x35ec48 (vt 0x5af638), #7 corrida
   na linha (0x360358, vt 0x5af4e8: update 0x3603d0, começo 0x360550).
-  Seletor 0x35e758 (+0xc n, +0x10 lista): o atual (cérebro +4) continua
-  enquanto o slot +0x14 dele deixar (estado 1 ou 3); senão 0x35e950 escolhe
-  pela prioridade (slot +0x54 nos do tipo do #0, ex. 0x364b08). Nos 3 saves
-  andando: 5 rivais no #7 e 2 no #5; nenhum no #3, #4 ou #6.
-  - #5 ultrapassar: prioridade 0x360c10 = corredor no estado > 1, 0x361238
-    e um alvo achado por 0x360e30 (veículo em +0x20; +0x24 conta quantas
-    vezes seguidas o alvo tinha +0xb0 = -1, ativa com > 10); começo
-    0x360d00 (plano 0x3612b0, 0x367298 com o relógio do gerente +0x28);
-    update 0x360dd8 (0x3673e0) até a fase passar de 0xfd -> estado 2. Dentro,
-    máquina de 5 fases em +0x28 (vtables 0x5af360, 0x5af330, 0x5af300,
-    0x5af2d0, 0x5af2a0; fase atual no byte +0x40): nos saves as fases 3 e 4,
-    e no tentando_passar_2 um rival no #5 com o alvo = o carro do jogador.
+  Seletor 0x35e8a0: o atual (cérebro +4) continua se o estado dele é 1 ou 3
+  E o slot +0x14 deixar; senão 0x35e950 pega a maior prioridade (slot
+  +0x54; empate fica o 1º da lista). O #7 e o #0 não seguram a vez (+0x14 =
+  0x368a18, devolve 0): com o #7 rodando, todo quadro as prioridades são
+  olhadas de novo; o #5 segura enquanto roda (0x368bf0: estado 1 ou 3).
+  Prioridade do #7 = 0.1 (0x3603b8); do #5 = 1 ou 0. Escolhido um novo:
+  sai o velho, começa o novo (slot +0x34) no mesmo quadro; o mesmo: slot
+  +0x4c (update). Nos 3 saves andando: 5 rivais no #7 e 2 no #5; nenhum no
+  #3, #4 ou #6.
+  - #7: começo 0x360550 sorteia o desvio TODA vez que o #7 começa (Skill slot
+    0 x [0, 10) m, lado sorteado); saída 0x3603d0: com o relógio
+    (DAT_007f4820+0x24, 0 até o Go!) < 5 s o 0x359660 vai com desvio 0 e modo
+    0, depois com o desvio e modo 1; alcance 0x359730(0.5, 15, 50);
+    velocidade 0x359eb8.
+  - Pedido de rota (0x359660: [0] piloto, [1..5] a posição de rota do carro,
+    [6..10] a do ponto, [0xb] modo, [0xd] lateral, [0xe] = objeto +0xf4, a
+    meia largura do carro) e o alcance 0x359730(esc, mín, máx): alcance =
+    clamp(esc x |v|, mín, máx); o ponto anda alcance + o raio (+0xc0) na rota
+    (no modo 1/2 em 2 pedaços). Modo 0: o ponto fica na fração lateral do
+    próprio carro (posição de rota dele), sem mais nada. Modos 1 e 2: a
+    lateral pedida; no 1, se o ponto pedido está a mais de 10° do bico e o da
+    lateral do carro está mais alinhado mas também a mais de 10°, mistura com
+    a lateral do carro, peso (ângulo - 10°) / 10°. Depois limita na borda
+    menos a meia largura (pelo lado do sinal) e, fora do modo 3, se a linha
+    do carro ao ponto cruza a borda (corte de curva) volta o ponto pra
+    alcance/4 + raio na borda. Nos saves o ponto da direção fica a alcance +
+    0.8 +- 1.6 m de rota do carro (15 rivais no #7), não alcance + raio: a
+    posição de rota do carro deve ficar atrás do CoM (não conferido).
+  - 0x359eb8 com o pedido: arco 1 (0x35a040) do CoM no rumo do bico até o
+    zero clamp(|v|, 15, 100) além da posição do carro; arco 2 (0x35a150, só
+    com o ponto a mais de 15 m de rota): de A = o ponto da direção (com a
+    lateral pedida) no rumo de C = o carro (posição de rota com a lateral
+    dele) até B = o zero clamp(|v|, 15, 100) além de A. Nos 3 saves de nov
+    (re/ia_alvo_ram.py, coluna exe) isso acerta 3 dos 4 casos em que o zero
+    em A e C errava; sobra 1 (45 m/s no jogo, sem limite nas duas contas).
   - Saída de todo comportamento = struct do piloto em +0x30 (0x35ec38): +0x30
     ponto-alvo, +0x40 velocidade-alvo, +0x44 flag (o #7 grava pelo slot +0x5c
-    = 0x3603d0, chamado pelo +0x4c = 0x360270). Cérebro (0x34c368, vt
-    0x5ae1e8): +0xc percepção (0x3573b8, update 0x3574b8), +0x10 vizinhos
-    (0x356958, update 0x356aa0), depois 0x3668d0 = seletor + o atual.
-  - Pré-requisito 0x361238: objeto do rival (piloto+0x18, vt 0x5af920) +0xe8
-    != 0 e +0xf0 <= 2 (nos 3 saves: 1 e 0 em todos; +0xf4 = 1.04..1.19 por
-    carro). Busca do alvo 0x360e30: as 4 vagas de vizinho (vizinhos +0x44 +
-    8i, par corredor/ficha) e pega a de menor ficha +0xb0 (sem a ficha
-    válida +0x18 = 9e30); na vaga 2 só se a distância lateral +0x28 menos as
-    2 meias-larguras (+0xc0 do objeto de cada um) <= 0. Ficha (0x355130,
-    0xb8 bytes): +0x18 válida, +0x20 última vez em contato, +0x24 vaga
-    (padrão 5), +0x28 lateral, +0x30/+0x38, +0x50 forma, +0xb0 folga.
-    0x354d20 (a cada quadro): +0xb0 = folga de 0x34e0c0 (meu objeto, forma
-    do outro, posição dele - a minha) se < 20, senão -1; guarda o de menor
-    folga por vaga; contato novo (> 1 s) aplica a Skill slot 4 (0x3552f8).
-    Quem põe a vaga (+0x24) e a lateral: 0x353d60 (junta os candidatos) /
-    0x3547f0 (ficha: +0x18 = 1, +0xc visto em, +0x10 vence em, vaga do
-    0x3550d8, +0x28/+0x2c e as taxas +0x30/+0x34 = variação / dt, +0x38,
-    +0x3c, +0x40.., forma +0x50). Conferido nos 3 saves contra a posição
-    real (re: scratch val/vizinhos.py): a tabela de vizinhos (vizinhos +0xc,
-    n em +8) guarda VEÍCULOS; +0x28 = distância longitudinal e +0x2c =
-    lateral (sem sinal); vaga 0/1 = à frente (um lado / outro), 2/3 = atrás;
-    alcance ~45 m. +0xb0 = -1 em todos os vizinhos dos 3 saves (distâncias
-    de 7 a 45 m): não é distância, deve ser tempo até colidir (só < 20), e
-    as 4 vagas ficam vazias. Os 2 rivais no #5 estavam nas fases 3 e 4,
-    que seguram sem replanejar.
-  - Máquina de fases (0x367298 começa, 0x3673e0 roda, 0x3671a8 troca):
-    fase = vtable com +0x14 entrar, +0x1c atualizar, +0x24 sair; cada uma
-    devolve a próxima (0xfe acabou bem, 0xff abortou). Contexto em sm+8:
-    [0] veículo-alvo, [3] = alvo sem +0x28 no +0x9d0->+0xc4 (não é o
-    jogador?). Plano 0x3612b0 (fase inicial): 0x3614a0 falso -> se
-    [3] e Skill slot 3 > 0.5: 0 (seguir); senão pela folga lateral (lado
-    +0x24 em 2..3 tira, senão soma a +0x28; menos as meias-larguras): 4, ou
-    1 se a folga >= 2... (conta exata no 0x3612b0); 0x3614a0 verdadeiro -> 0
-    se [3] e 0x361aa8, senão 2 (folga +0xb0 >= 0) ou 3.
-  - Fase 0 "seguir" (0x361c18 / 0x361d20 / 0x361eb8): anda na rota com o
-    desvio do contexto (0x359660 modo 2, 0x359730 0.5/15/50, alvo de
-    velocidade = 0x359eb8, a do #7), replaneja todo quadro: alvo sumiu ou
-    mudou -> 0xfe; plano != 0 -> troca de fase.
-  - Fase 1 "seguir colado" (0x362040 / 0x362100, anda com 0x3622d0): aborta
-    com o alvo abaixo de 10 mph (4.4694 m/s, objeto +0xa0); folga para-choque
-    = ficha +0x28 - (+0xc0 meu + +0xc0 dele, o "nariz" ~3 m), mínimo 0;
-    replaneja todo passo (fica enquanto o plano der 1). Anda na rota com o
-    desvio do contexto [2], alcance = a distância até o alvo (0x359730 com
-    mín = máx = ficha +0x28) e velocidade = min(0x359eb8, 0.95 x a
-    velocidade do alvo). Fases 2..4 (0x3624c8 / 0x362590 / 0x3626c8,
-    0x362b00 / 0x362bc0 / 0x362df8, 0x362f88 / 0x363048 / 0x363160) e o
-    0x3614a0 do plano: falta ler. re/ia_vizinhos_ram.py lê a percepção.
+    = 0x3603d0, chamado pelo +0x4c = 0x360270). Quem acaba sem dirigir deixa
+    a do quadro anterior. Cérebro (0x34c368, vt 0x5ae1e8): +0xc percepção
+    (0x3573b8, update 0x3574b8; +0x40 = posição de rota do carro), +0x10
+    vizinhos (0x356958, update 0x356aa0), depois 0x3668d0 = seletor + o atual.
+  - Objeto da IA (piloto+0x18, vt 0x5af920): +0x00 forma (pegada no chão:
+    +0x40 n, +0x44 cantos locais, +0x48 no mundo), +0x08..+0x20 caixa
+    (RAM: meia largura 1.04..1.19, meio comprimento 2.51..2.90), +0x30
+    posição (o CoM no plano), +0x40 velocidade no plano, +0x90 bico no plano,
+    +0xa0 |v|, +0xc0 raio (meia diagonal 3D da caixa, 2.93..3.22), +0xf4
+    meia largura. Slots: +0x14 = 0 (corredor comum: ficha vence em 5 s),
+    +0x3c rota (+0xe0), +0x44 +0xe8 != 0, +0x4c +0xf0, +0x54 +0xf4.
+  - Skill do piloto (*piloto+0x100, 0x3535f0): slot 0 = (0.5 - Skill) x 2
+    abaixo de 0.5 (o desvio); slots 1, 3, 4 = 1, 1, 0.5 x 0.2 só se o
+    0x35b1b0 (rivalidade) der 1, senão 0; slot 2 = 1. RAM: 1/3/4 = 0 nos 7.
+  - Percepção (0x353b68 a cada quadro): config *piloto+0x118 (RAM: +8 = 45 m
+    à frente, +0xc = 45 m atrás, +0x1c = 5 s, +0x20 = 0.5 s). 0x353d60 junta
+    os corredores (até 8): na mesma rota, |s dele - s meu| < 45 vira
+    candidato com +4 = |ds|, +8 = |fração x largura dele - a minha| (lateral
+    da borda esquerda), +0xc = 1, +0x10 = 1 e a posição de rota dele (fora da
+    rota: distância reta < 45 + os 2 raios). 0x3547f0 enche a ficha (0x355130,
+    0xb8 bytes): +0x18 válida, +0xc visto, +0x10 vence (visto + 5 s), +0x24
+    setor (0x3591f0: rel = dele - meu no plano; à frente pelo bico 0/1, atrás
+    2/3; (bico x rel).y > 0 = 1/3, que é o lado da lateral maior), +0x28 =
+    |ds|, +0x2c = |dlat|, +0x30 / +0x34 = variação / dt (trocou de frente
+    pra trás: o valor novo / dt; ficha nova: 0), +0x38, +0x3c, +0x40 posição
+    de rota dele, +0x50 pegada dele. Não visto no quadro: +0x18 = 0; vencido:
+    sai. 0x354d20: +0xb0 = tempo até as pegadas se tocarem (0x34e0c0, SAT com
+    velocidade relativa no plano, 0 se já se tocam) se < 20 s, senão -1; vaga
+    do setor = o de menor tempo; +0x64/+0x68 (recuo) = o da frente (setor <
+    2, +0x38 = 1) com a menor taxa +0x30 abaixo de 0 (o que mais se aproxima).
+    Contato novo (> 1 s) aplica a Skill slot 4 (0x3552f8; 0 offline).
+  - #5 ultrapassar: prioridade 0x360c10 (corredor no estado > 1, 0x361238
+    ok): alvo da busca 0x360e30 (vagas 0..3 = vizinhos +0x44 + 8i: a vaga 0
+    sempre conta, as outras só com tempo menor; atrás só lado a lado, +0x28 -
+    os 2 raios <= 0; sem nenhuma, o recuo +0x64). Tempo != -1: ativa na hora;
+    -1 (o recuo): +0x24 conta as vezes seguidas com o mesmo alvo (+0x20),
+    ativa com > 10 (RAM: 12..62). Começo 0x360d00: contexto [0] alvo, [1]
+    [2] do 0x3614a0, [3] = alvo com +0x9d0->+0xc4->+0x28 == 0 (1 no jogador);
+    plano, 0x367298. Update 0x360dd8 até a fase passar de 0xfd -> estado 2.
+    Máquina (0x367298 começa, 0x3673e0 roda, 0x3671a8 troca: sai da atual,
+    entra na nova, em cadeia): vtables 0x5af360, 0x5af330, 0x5af300,
+    0x5af2d0, 0x5af2a0 (+0x14 entrar, +0x1c atualizar, +0x24 sair); 0xfe
+    acabou bem, 0xff abortou. Toda entrada/atualização começa por 0x361238
+    + 0x3611d8 (alvo vivo, ficha válida com +0x3c), senão 0xff.
+  - 0x3614a0 (lateral pra passar): folga = minha meia largura + 1 + a dele
+    ((+0x18 - +0x08)/2); lateral minha e dele = 0x32ac40 (fração - fração do
+    zero) x largura (zero = centro, 0x32a8d0). Com tempo em 0..10 s: lado =
+    longe dele em relação a mim (dele < minha -> +); sem: longe dele em
+    relação ao zero (dele < 0 -> +). Passa = dele + folga x lado, ou a minha
+    se já estou além; com o relógio > 5 s, se passa ficou do outro lado do
+    zero, passa = 0; limitada à borda (0x32a788 / 0x32a828 na posição dele)
+    -+ (meia largura + 1). Livre se |dele - passa| > folga (c.olt.s; o FPU do
+    PS2 corta o arredondamento, então dele + folga exata NÃO é livre: só
+    quem já está além, o zero ou a borda longe) e, com tempo 0..10, 0x361ba8
+    (minha pegada indo pro ponto da borda na rota dele com velocidade (ponto
+    - eu) x |v|, sem normalizar: um raio) não bate. Senão tenta o outro lado.
+    Grava [1] = passa, [2] = a borda do lado (do lado que deu, ou do 1º).
+    RAM tentando_ultrapassar, rival 6 na fase 4 (replaneja todo quadro):
+    [1] -2.812 e [2] -10.372; a conta com a pista dá -2.82 e -10.37.
+  - Plano 0x3612b0: 0x3614a0 falso -> ([3] e Skill 3 > 0.5: 0) 1 se o
+    para-choque (+0x28 - os 2 raios, mín 0) < 2 m e eu não estou atrás
+    demais (meu raio <= raio dele +- +0x28), senão 4. Verdadeiro -> ([3] e
+    0x361aa8: lado a lado, |dv| < lerp(0, 10 mph, Skill 3) e bicos a menos
+    de 20°, DAT_00837e40/44/48: 0) 2 com tempo >= 0, senão 3.
+  - Fases (entrar / atualizar / dirigir; dirigir = 0x359660 modo 2 +
+    0x359730 + ponto + 0x359eb8): 0 seguir (0x361c18 / 0x361d20 / 0x361eb8):
+    lateral [1], alcance 0.5/15/50, replaneja (só com rivalidade). 1 colado
+    (0x362040 / 0x362100 / 0x3622d0): aborta com o alvo < 10 mph; lateral
+    [2] (a borda!), alcance = +0x28, velocidade min(linha, 0.95 x a dele);
+    replaneja. 2 desviar (0x3624c8 / 0x362590 / 0x3626c8; relógio zera ao
+    entrar): f = relógio / tempo (tempo <= 0: 1; > 1 s: 0); lateral [1] +
+    f([2] - [1]); alvo atrás: alcance padrão; à frente: o vão de para-choques
+    (mín 5) ou, sobrepostos, padrão com vão lateral (+0x2c - os 2 raios > 0)
+    ou 5 m; com f > 0 e à frente, velocidade min(linha, (1 - f) x a dele),
+    mín 20 mph. Sem alvo na busca -> 3; outro -> 0xfe; replaneja. 3 passar
+    (0x362b00 / 0x362bc0 / 0x362df8): lateral [1], alcance padrão; não
+    replaneja: tempo de novo != -1 -> 2 (mesmo alvo) ou 0xff; atrás e com vão
+    -> 0xfe; à frente se afastando (+0x30 > 1 m/s) por mais de 1 s -> 0xfe. 4
+    sair pro lado (0x362f88 / 0x363048 / 0x363160): lateral [1], alcance
+    padrão; replaneja (4 continua). Fases 0, 1, 2, 4: alvo some ou muda na
+    busca -> 0xfe. RAM: as transições vistas são 4 -> 3 e 2 -> 3.
+    re/ia_vizinhos_ram.py lê a percepção; porta em pista/ia_ultrapassar.gd.
 - Catchup e Skill aplicados (nov/2026, RAM corrida_no_normal). Gerente em
   0x14efc80: [0] linha da tabela 0x5ada80, [1] n corredores, [2] lista dos
   structs (0x30 cada; jogador 1º), [3] desligado, [4] ligado, [5] modo, +0x18

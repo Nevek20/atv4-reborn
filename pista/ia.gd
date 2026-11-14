@@ -30,24 +30,28 @@ extends Node
 ##    multiplicador na física do rival (0x353408): potência x (1 + s) ou
 ##    / (1 - s), subesterço x (2 - 2s);
 ##  - Skill < 0.5 anda desviada do zero (0x360550): (0.5 - Skill) x 2 x
-##    sorteio [0, 10) m, lado sorteado, no zero nos primeiros 5 s.
+##    sorteio [0, 10) m, lado sorteado, no zero nos primeiros 5 s; sorteia de
+##    novo toda vez que o #7 (corrida na linha) recomeça;
+##  - cérebro (0x3668d0, pista/ia_ultrapassar.gd): percepção dos vizinhos e o
+##    #5 ultrapassar (seguir colado, sair pro lado, passar, desviar de batida
+##    prevista) no lugar do #7 enquanto roda;
+##  - a lateral pedida fica dentro das bordas menos a meia largura do carro
+##    (0x359730, objeto +0xf4).
 ##
 ## NOSSO (docs/historico.md, Corrida):
-##  - os outros comportamentos do cérebro (seguir carro, ultrapassar...), os
-##    modos 15 (x1.2) e rota tipo 4 (x0.5), o limite da rota (-1 no RX01), a
-##    demora na largada pela posição (0x352c98) e quando o jogo sorteia o
-##    desvio da Skill de novo (aqui: 1 vez por corrida);
+##  - os outros comportamentos do cérebro (#3, #4, #6), os modos 15 (x1.2) e
+##    rota tipo 4 (x0.5), o limite da rota (-1 no RX01), a demora na largada
+##    pela posição (0x352c98) e o corte de curva do 0x359730 (ponto da
+##    direção que cruza a borda volta pra perto);
 ##  - preso: dá ré; capotado ou lento: volta pra linha (fora da pista e
 ##    contramão: a regra do jogo, pista/reposicao.gd, igual à do jogador);
-##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe);
-##  - desvio: carro até OLHA_CARRO m à frente e mais lento -> vai pro lado
-##    com mais espaço (dentro das bordas do bloco extra, as do jogo, menos a
-##    MARGEM); sem espaço, acompanha a velocidade dele.
+##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe).
 
 const ARQ := "res://data/ia.json"
 const Reposicao := preload("res://pista/reposicao.gd")
 const SomJogo := preload("res://som/som_jogo.gd")
 const VehicleData := preload("res://carro/vehicle_data.gd")
+const Ultrapassar := preload("res://pista/ia_ultrapassar.gd")
 const N_RIVAIS := 7
 # save state com rivais (objeto do piloto, vtable 0x5ae0d0): o alvo (+0x30)
 # fica 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s) e a direção crua
@@ -82,17 +86,13 @@ const A_FRENA := 8.0
 const PRESO_T := 2.0             # s parado correndo -> ré
 const RE_T := 1.5
 const CAPOTADO_T := 2.0
-const JUNTA := 150.0             # m: o desvio do grid vai sumindo até a linha
+const DEG_10 := 0.17453295        # 0x359730: modo 1 mistura a lateral acima de 10° (0x3e32b8c4)
+const COS_10 := 0.98480775
 # CPU (nov/2026, tests/medir_cpu.gd): rival além disso da câmera não mexe
 # braços do piloto nem suspensão visual; além do alcance do som 3D
 # (SomJogo.MAX_3D) não calcula som de pneu. NOSSO, a física não muda
 const VIS_PERTO := 50.0
 const RASTREIO := 60.0           # m: o rastreio procura só nessa janela (não pula de trecho)
-const OLHA_CARRO := 25.0         # m: carro à frente que conta pro desvio
-const LADO := 3.5                # m: distância lateral pra passar
-const MARGEM := 2.5              # m da borda da pista
-const DESVIO_MAX := 6.0          # m: o desvio não se afasta mais que isso da linha
-const DESVIO_VEL := 4.0          # m/s: quão rápido muda de lado
 # VehicleLOD.xml (Buggy_Generic/Truck_Generic, Vehicle_AI): o jogo troca o
 # modelo dos rivais pela fração da tela (High 0.24, Mid 0.055, Low 0.0175).
 # Os modelos 2K/1K/500 ainda não são gerados: NOSSO, o carro inteiro some
@@ -260,6 +260,36 @@ func bordas(s: float) -> Vector2:
 	return Vector2(lerpf(b_lo[i], b_lo[j], t), lerpf(b_hi[i], b_hi[j], t))
 
 
+## zero da IA e bordas em s numa conta só (CPU: o cérebro pede os dois toda
+## hora): x = lat_zero, y / z = as bordas (as nossas, da linha)
+func zero_bordas(s: float) -> Vector3:
+	s = fposmod(s, comp)
+	var i := _seg(s)
+	var j := (i + 1) % linha.size()
+	var t: float = (s - acc[i]) / maxf(_plano(linha[j] - linha[i]).length(), 1e-6)
+	return Vector3(lerpf(lat0[i], lat0[j], t), lerpf(b_lo[i], b_lo[j], t), lerpf(b_hi[i], b_hi[j], t))
+
+
+## lateral do jogo em s: do zero da IA, com o sinal do jogo (o nosso mundo é
+## espelhado, mundo = (z, y, x) do jogo: a do jogo = -(a nossa))
+func lat_jogo(p: Vector3, s: float) -> float:
+	return -(_lateral(p, s) - lat_zero(s))
+
+
+## bordas em s na lateral do jogo (do zero): x = a menor (0x32a788, negativa),
+## y = a maior (0x32a828)
+func bordas_jogo(s: float) -> Vector2:
+	var zb := zero_bordas(s)
+	return Vector2(zb.x - zb.z, zb.x - zb.y)
+
+
+## ponto da rota em s com a nossa lateral (do zero da IA)
+func ponto_lat(s: float, lat: float) -> Vector3:
+	var q := ponto(s)
+	var adiante := _plano(ponto(s + 2.0) - q).normalized()
+	return q + Vector3(adiante.z, 0.0, -adiante.x) * (lat_zero(s) + lat)
+
+
 func _seg(s: float) -> int:
 	if _cpp:
 		return _cpp.seg(s)
@@ -413,7 +443,7 @@ func criar() -> void:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
 			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "capotado": 0.0,
-			"desvio": desvio_skill(float(pl.skill)), "repostos": 0, "res": 0, "desvio0": 0.0, "prog0": 0.0, "lod": 0, "lat": 0.0,
+			"desvio": desvio_skill(float(pl.skill)), "repostos": 0, "res": 0, "lod": 0, "lat": 0.0,
 			"bonus": maxf(float(pl.skill) - 0.5, 0.0) * BONUS_SKILL, "cu": 0.0})
 	posicionar()
 
@@ -485,9 +515,9 @@ func posicionar() -> void:
 		x.car.largada_presa = true
 		x.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		x.r = novo_rastreio(p)
-		x.desvio0 = _lateral(p, x.r.prog + s_linha) - lat_zero(x.r.prog + s_linha)
-		x.lat = x.desvio0
-		x.prog0 = x.r.prog
+		x.lat = _lateral(p, x.r.prog + s_linha) - lat_zero(x.r.prog + s_linha)
+		x.comp = 0
+		x.viz = {}
 		x.preso = 0.0
 		x.re = 0.0
 		x.capotado = 0.0
@@ -527,6 +557,10 @@ func _physics_process(dt: float) -> void:
 	var est: int = corrida.estado
 	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
 		repor_jogador()
+	# o rastreio de todos antes da lista: ela leva os dados do passo de cada
+	# carro (Ultrapassar.dados_carro), feitos 1 vez e lidos por quem olha
+	for x in rivais:
+		rastrear(x.r, x.car.global_position)
 	_carros_laco = _monta_carros()
 	_catchup()
 	for x in rivais:
@@ -536,7 +570,6 @@ func _physics_process(dt: float) -> void:
 			x.lod += 1
 			if x.lod == 5:
 				_lod(car)
-		rastrear(x.r, car.global_position)
 		if est == corrida.INTRO or est == corrida.CONTANDO:
 			# largada parada (relógio 0x17b118 no estado 6, corredor no estado 1):
 			# o "esperar" (0x364b08 / 0x3649d0: alvo 0, pedais 0) segura o rival
@@ -566,7 +599,11 @@ func _physics_process(dt: float) -> void:
 func _direcao(x: Dictionary, car, xf_ = null, v_ := -1.0) -> float:
 	var v: float = v_ if v_ >= 0.0 else car.linear_velocity.length()
 	var xf: Transform3D = xf_ if xf_ != null else car.global_transform
-	var s: float = x.r.prog + s_linha + clampf(v * OLHA_T, OLHA_MIN, OLHA_MAX)
+	# alcance do comportamento (0x359730: clamp(esc x v, mín, máx); o #7 e as
+	# fases 0/3/4 do #5 usam 0.5, 15, 50)
+	var o: Vector3 = x.get("olha", Ultrapassar.OLHA)
+	var s: float = x.r.prog + s_linha + clampf(v * o.x, o.y, o.z)
+	x.s_alvo = s
 	var lat: float = lat_zero(s) + x.get("lat", 0.0)     # desvio conta do zero da IA
 	if _cpp:
 		x.ang = _cpp.direcao_ang(s, lat, xf)
@@ -581,6 +618,7 @@ func _direcao(x: Dictionary, car, xf_ = null, v_ := -1.0) -> float:
 
 # CPU: lidos uma vez (antes: getenv e busca no dicionário por rival e passo)
 var _ia_trace := OS.get_environment("IA_TRACE")
+var _ia_trace_tudo := OS.has_environment("IA_TRACE_TUDO")
 
 
 func _dirigir(x: Dictionary, car, dt: float) -> void:
@@ -590,11 +628,13 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	var lv: Vector3 = car.linear_velocity
 	var vf: float = lv.dot(b.z)
 	var v: float = lv.length()
+	_pensar(x, car, dt)
+	_lateral_pedida(x, car, v)
 	var st := _direcao(x, car, xf, v)
-	var v_lim: float = _desviar(x, car, dt, INF, xf, lv)      # NOSSO: carro à frente
 	# acelerador e freio do jogo (0x34ed10): k = (v_alvo - v) x 0.2, v no plano
-	# do chão (0x440), negativa andando de ré (0x418), 0 abaixo de 0.01
-	var v_alvo := minf(_v_alvo(x, car, xf, lv), v_lim)
+	# do chão (0x440), negativa andando de ré (0x418), 0 abaixo de 0.01. Fases
+	# do #5: teto (95% do alvo na 1, (1 - f) x ele na 2) e piso (20 mph na 2)
+	var v_alvo := maxf(minf(_v_alvo(x, car, xf, lv), x.get("v_max", INF)), x.get("v_min", 0.0))
 	x.v_alvo = v_alvo
 	var v_ch: float = car.spd_ground
 	var v_s := 0.0
@@ -661,11 +701,16 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	thr = roundf(thr * 7.0) / 7.0
 	brk = roundf(brk * 7.0) / 7.0
 	car.test_input = {"thr": thr, "brk": brk, "steer": st}
-	if _ia_trace == x.nome and Engine.get_physics_frames() % 5 == 0:
-		var alvo: float = x.get("v_alvo", v_lim)
-		print("trace %5.2f  prog %5.0f  dist %4.1f  v %4.1f/%4.1f  st %5.2f thr %.1f brk %.1f  up %.2f  pos %s  linha %s  frente %s" % [
-			corrida.t, x.r.prog, x.r.dist, v, alvo, st, thr, brk, b.y.y, car.global_position,
-			ponto(x.r.prog + s_linha), b.z])
+	if _ia_trace == x.nome and (_ia_trace_tudo or Engine.get_physics_frames() % 5 == 0):
+		var alvo: float = x.get("v_alvo", 0.0)
+		var f5: Dictionary = x.get("f5", {})
+		var cmp := "#5 fase %d" % int(f5.fase) if x.get("comp", 0) == 5 else "#%d" % int(x.get("comp", 0))
+		if not f5.is_empty() and is_instance_valid(f5.alvo):
+			var fi: Dictionary = x.viz.get(f5.alvo, {})
+			cmp += " alvo %s setor %s dl %.1f ttc %.2f l1 %.1f l2 %.1f" % [f5.alvo.name, fi.get("setor", "-"),
+				fi.get("dl", -1.0), fi.get("ttc", -9.0), f5.lat1, f5.lat2]
+		print("trace %5.2f  prog %5.0f  dist %4.1f  v %4.1f/%4.1f  st %5.2f thr %.1f brk %.1f  up %.2f  %s lat %.1f  pos %s" % [
+			corrida.t, x.r.prog, x.r.dist, v, alvo, st, thr, brk, b.y.y, cmp, x.get("lat", 0.0), car.global_position])
 
 
 ## 0x214328: velocidade máxima pra sair de p0 no rumo d (no plano do chão)
@@ -720,18 +765,21 @@ func _v_alvo(x: Dictionary, car, xf: Transform3D, lv: Vector3) -> float:
 		v1 = _v_arco(car, ponto_zero(s0 + olha), xf * car.center_of_mass, f_pl / lp, n, delta, vf)
 	if v1 == 0.0:
 		v1 = V_SEM_ARCO
+	# 0x35a150: A = o ponto da direção com a lateral pedida (req+6), C = o carro
+	# (a posição de rota com a lateral dele, req+1), B = o zero clamp(v, 15,
+	# 100) além de A; só com A a mais de 15 m de rota. Saves de nov/2026 (re/
+	# ia_alvo_ram.py): acerta 3 dos 4 casos que o zero em A e C errava
 	var v2 := V_SEM_LIMITE
-	var d_dir := clampf(v * OLHA_T, OLHA_MIN, OLHA_MAX)
-	if d_dir > 15.0:
-		var p1 := ponto_zero(s0)
-		var p2 := ponto_zero(s0 + d_dir)
-		p1.y = 0.0
-		p2.y = 0.0
-		var rumo := p1 - p2
+	var s_a: float = x.get("s_alvo", s0 + clampf(v * OLHA_T, OLHA_MIN, OLHA_MAX))
+	if s_a - s0 > 15.0:
+		var pa := ponto_lat(s_a, x.get("lat", 0.0))
+		var cm: Vector3 = xf * car.center_of_mass
+		pa.y = 0.0
+		var rumo := Vector3(cm.x, 0.0, cm.z) - pa
 		var lr := rumo.length()
 		if lr > 0.0:
 			rumo /= lr
-		v2 = _v_arco(car, ponto_zero(s0 + d_dir + olha), p2, rumo, n, delta, vf)
+		v2 = _v_arco(car, ponto_zero(s_a + olha), pa, rumo, n, delta, vf)
 		if v2 == 0.0:
 			v2 = V_SEM_ARCO_LINHA
 	return minf(v2, v1)
@@ -756,69 +804,106 @@ func _v_curva(s: float) -> float:
 	return v_max
 
 
-## desvio dos outros carros: muda x.lat (lado em relação à linha) e devolve a
-## velocidade-alvo (limitada à do carro da frente se não der pra passar)
-func _desviar(x: Dictionary, car, dt: float, alvo: float, xf_ = null, lv_ = null) -> float:
-	var s: float = x.r.prog + s_linha
-	var f := clampf((x.r.prog - x.get("prog0", 0.0)) / JUNTA, 0.0, 1.0)
-	var d_skill: float = x.desvio if corrida.t >= SKILL_T else 0.0      # 0x3603d0
-	var base: float = lerpf(x.get("desvio0", 0.0), d_skill, f)
-	# bordas do jogo (as do bloco extra, _bordas_jogo), contadas do zero da IA,
-	# menos a MARGEM (NOSSA; no jogo é do carro, 0x359660 +0xe)
-	var lz := lat_zero(s)
-	var bs := bordas(s)
-	var lo: float = maxf(bs.x - lz + MARGEM, -DESVIO_MAX)
-	var hi: float = minf(bs.y - lz - MARGEM, DESVIO_MAX)
-	var xf: Transform3D = xf_ if xf_ != null else car.global_transform
-	var b: Basis = xf.basis
-	var p: Vector3 = xf.origin
-	var minha: float = (lv_ if lv_ != null else car.linear_velocity).dot(b.z)
-	var lat_alvo := base
-	var v_lim := INF
-	var perto := INF
+## cérebro (0x3668d0) a cada passo: percepção dos vizinhos, depois quem
+## dirige (0x35e8a0). O #5 (ultrapassar, pista/ia_ultrapassar.gd) segura a
+## vez enquanto a máquina de fases roda; quando acaba, a saída fica a do
+## último passo e o próximo escolhe de novo. O #7 (corrida na linha, 0x3603d0)
+## não segura: todo passo o #5 pode tomar a vez (prioridade 1 contra 0.1).
+## Recomeçar o #7 sorteia o desvio da Skill de novo (0x360550)
+func _pensar(x: Dictionary, car, dt: float) -> void:
 	var lista: Array = _carros_laco if _carros_laco != null else _monta_carros()
-	for e: Array in lista:
-		var o = e[0]
-		if o == car:
-			continue
-		var o_pos: Vector3 = e[1]
-		var rel: Vector3 = o_pos - p
-		var frente: float = rel.dot(b.z)
-		var lado: float = rel.dot(b.x)
-		var dele: float = (e[2] as Vector3).dot(b.z)
-		if frente <= 0.0 or frente > OLHA_CARRO or absf(lado) > LADO or dele > minha - 0.5:
-			continue
-		if frente >= perto:
-			continue
-		perto = frente
-		# o lado do outro em relação à linha; passa pelo lado com mais espaço
-		var o_lat := _lateral(o_pos, s + frente) - lat_zero(s + frente)
-		var por_dentro := o_lat - LADO
-		var por_fora := o_lat + LADO
-		var cabe_dentro := por_dentro >= lo
-		var cabe_fora := por_fora <= hi
-		if cabe_dentro and (not cabe_fora or absf(por_dentro - x.lat) < absf(por_fora - x.lat)):
-			lat_alvo = por_dentro
-		elif cabe_fora:
-			lat_alvo = por_fora
-		elif frente < 10.0 and dele > 5.0:
-			v_lim = dele          # sem espaço: atrás dele (parado não: desvia igual)
-		else:
-			lat_alvo = por_dentro if absf(por_dentro - x.lat) < absf(por_fora - x.lat) else por_fora
-	x.lat = move_toward(x.get("lat", base), clampf(lat_alvo, lo, hi) if lo < hi else base, DESVIO_VEL * dt)
-	return minf(alvo, v_lim)
+	Ultrapassar.percepcao(self, x, car, dt, lista)
+	var comp: int = x.get("comp", 0)
+	if comp == 5:
+		if not Ultrapassar.atualizar(self, x, dt):
+			x.comp = 0
+		_conta5(x, dt)
+		return
+	if Ultrapassar.prioridade(x):
+		x.comp = 5 if Ultrapassar.comecar(self, x) else 0
+		x.n5 = int(x.get("n5", 0)) + 1
+		_conta5(x, dt)
+		return
+	if comp != 7:
+		x.comp = 7
+		x.desvio = desvio_skill(float(x.get("skill", 1.0)))
+	# #7 (0x3603d0): nos primeiros 5 s do relógio (0 até o Go!) o modo 0 do
+	# 0x359730 (o ponto da direção na fração lateral do próprio carro: cada um
+	# segue na faixa do grid); depois o modo 1 com o desvio da Skill
+	x.modo = 0 if corrida.t < SKILL_T else 1
+	x.pede_lat = x.desvio
+	x.olha = Ultrapassar.OLHA
+	x.v_max = INF
+	x.v_min = 0.0
 
 
-## CPU: [carro, posição, velocidade] dos carros válidos, na ordem de sempre
-## (jogador e rivais). No laço dos rivais (_physics_process) a lista vale o
-## laço todo: lá ninguém anda (só o _repor teleporta, e ele refaz a lista);
-## fora dele (testes chamando _dirigir) é feita na hora
+## estatística do #5 (testes): segundos em cada fase (5 = acabou no passo)
+func _conta5(x: Dictionary, dt: float) -> void:
+	if not x.has("t5"):
+		x.t5 = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	var fase: int = x.f5.fase
+	x.t5[fase if fase < 5 else 5] += dt
+
+
+## 0x359730: a lateral do ponto da direção (x.lat, a nossa, do zero) pelo modo
+##  0: a fração lateral do próprio carro (posição de rota dele) levada pro
+##     ponto, sem limite;
+##  1: a pedida; com o bico torto (o ponto pedido a mais de 10° dele e o da
+##     lateral do carro mais alinhado, mas também a mais de 10°) mistura com a
+##     do carro: peso (ângulo - 10°) / 10°;
+##  2: a pedida (as fases do #5; o corte de curva dos modos 1 e 2 é NOSSO:
+##     não portado).
+## Modos 1 e 2: dentro das bordas menos a meia largura do carro (objeto
+## +0xf4), pelo lado do sinal dela, como no jogo
+func _lateral_pedida(x: Dictionary, car, v: float) -> void:
+	var o: Vector3 = x.get("olha", Ultrapassar.OLHA)
+	var s_me: float = x.r.prog + s_linha
+	var s: float = s_me + clampf(v * o.x, o.y, o.z)
+	var bj := bordas_jogo(s)
+	var modo: int = x.get("modo", 2)
+	var l_carro := 0.0
+	if modo != 2:
+		var me: Dictionary = x.me
+		var fr: float = (float(me.l) - float(me.lo)) / maxf(float(me.hi) - float(me.lo), 1e-6)
+		l_carro = bj.x + fr * (bj.y - bj.x)
+		if modo == 0:
+			x.lat = -l_carro
+			return
+	var lg: float = -float(x.get("pede_lat", 0.0))
+	if modo == 1:
+		var cm: Vector3 = x.me.cm
+		var f2: Vector2 = x.me.f
+		var pp := ponto_lat(s, -lg)
+		var ca := f2.dot(Vector2(pp.x - cm.x, pp.z - cm.z).normalized())
+		if ca < COS_10:
+			var pc := ponto_lat(s, -l_carro)
+			var cc := f2.dot(Vector2(pc.x - cm.x, pc.z - cm.z).normalized())
+			if ca < cc and cc < COS_10:
+				var w := clampf((acos(clampf(ca, -1.0, 1.0)) - DEG_10) / DEG_10, 0.0, 1.0)
+				lg = l_carro * w + lg * (1.0 - w)
+	var hw: float = x.me.cx.hx
+	if lg < 0.0:
+		lg = maxf(lg, bj.x + hw)
+	else:
+		lg = minf(lg, bj.y - hw)
+	x.lat = -lg
+
+
+## CPU: [carro, posição, velocidade, rastreio, dados do passo] dos carros válidos, na ordem de
+## sempre (jogador e rivais). No laço dos rivais (_physics_process) a lista
+## vale o laço todo: lá ninguém anda (só o _repor teleporta, e ele refaz a
+## lista); fora dele (testes chamando _dirigir) é feita na hora. O rastreio é
+## o próprio dicionário (o progresso de quem já andou no laço é o novo)
 var _carros_laco = null
 func _monta_carros() -> Array:
 	var out: Array = []
-	for o in [main.car] + rivais.map(func(y): return y.car):
-		if is_instance_valid(o):
-			out.append([o, o.global_position, o.linear_velocity])
+	if is_instance_valid(main.car):
+		out.append([main.car, main.car.global_position, main.car.linear_velocity, jogador,
+			Ultrapassar.dados_carro(self, main.car, jogador)])
+	for y in rivais:
+		if is_instance_valid(y.car):
+			out.append([y.car, y.car.global_position, y.car.linear_velocity, y.r,
+				Ultrapassar.dados_carro(self, y.car, y.r)])
 	return out
 
 
@@ -838,9 +923,11 @@ func _repor(x: Dictionary) -> void:
 	x.vigia.recomecar(x.r.prog)
 	x.capotado = 0.0
 	x.preso = 0.0
-	x.desvio0 = x.desvio
 	x.lat = x.desvio
 	x.repostos += 1
+	# NOSSO: reposto, o cérebro recomeça (vizinhos e comportamento)
+	x.viz = {}
+	x.comp = 0
 
 
 func repor_jogador() -> void:
