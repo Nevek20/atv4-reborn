@@ -543,6 +543,8 @@ func _load_piloto() -> void:
 	piloto.name = "Piloto"
 	piloto.position = model_offset + banco() - piloto.root_pos
 	model_root.add_child(piloto)
+	if not piloto_escolhas.is_empty():
+		pintar_piloto(piloto_escolhas)
 	piloto.paredes = _paredes_do_piloto()
 	if BRACO_ABERTO.has(chave()) and OS.get_environment("COT_MIN") == "" and OS.get_environment("PAREDE") == "":
 		piloto.cotovelo_min = BRACO_ABERTO[chave()].x
@@ -691,6 +693,20 @@ func pintar(cores: Dictionary) -> bool:
 
 
 ## a pintura deste carro dá pra trocar (camadas do gerar_pintura e malha com "white")
+## oficina (aba Piloto): roupa, capacete, óculos, luva, bota e cores do piloto
+## na hora. false = sem as camadas (rodar o tools/piloto.py)
+func pintar_piloto(esc: Dictionary) -> bool:
+	if piloto == null:
+		return false
+	if _piloto_pintura == null:
+		_piloto_pintura = preload("res://carro/piloto_pintura.gd").carregar()
+	if _piloto_pintura == null:
+		return false
+	piloto_escolhas = esc.duplicate(true)
+	piloto.pintar(ImageTexture.create_from_image(_piloto_pintura.montar(esc)))
+	return true
+
+
 func tem_camadas() -> bool:
 	if _pintura == null:
 		_pintura = preload("res://carro/pintura.gd").carregar(model_path.get_base_dir(), livery_file)

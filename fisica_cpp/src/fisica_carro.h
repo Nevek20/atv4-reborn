@@ -150,6 +150,8 @@ public:
 	// pintura do carro (pintura.cpp; carro/pintura.gd tem a mesma conta)
 	static PackedByteArray compor_pintura(const PackedByteArray &masc, const PackedByteArray &det,
 			const PackedByteArray &logos, const PackedInt32Array &cores);
+	// textura do piloto (pintura.cpp; carro/piloto_pintura.gd tem a mesma conta)
+	static PackedByteArray compor_piloto(int64_t tam, const Array &partes, const PackedInt32Array &cores);
 
 	void configurar(Object *car);
 	// motor e câmbio (motor.cpp)

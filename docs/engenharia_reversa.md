@@ -547,6 +547,34 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
 
 ## Piloto e volante
 
+- Textura do piloto (oficina, nov/2026; saves gear.p2s e Paint_Shop.p2s do
+  Matheus): /Setup/CharacterComposite/Textures/COMPOSITOR.xml, uma caixa por
+  parte no RIDER.bed (Rider_Template.tga 512x512): CLOTHING, ARMS, LEGS,
+  GOGGLES, BOOTS, GLOVES, HELMET (camadas BASE com Blend Off, PRIMARY,
+  SECONDARY, OVERLAY = a DETAIL, WRINKLE Multiply só no RGB), FACE e HAIR
+  (uma textura, Blend Off), PLAYER_NAME (FE_FontMedium) e PLAYER_NUMBER
+  (HUD_Numbers), Aspect 0.6, Fit Vertical. As camadas:
+  Characters/Textures/#crc/<Parte>/RIDER_NN_<CAMADA>_<PARTE>.bog (128x128;
+  NN = mTextureNum do CLOTHING.xml; a RIDER_02 não tem DETAIL nas pernas).
+  Characters/Textures_UI tem as mesmas maiores (menu). O rosto da corrida
+  (Face_Male_FACEnn, 32x32 4 bits) vem com o CLUT preto: só o do menu tem
+  rosto (no jogo o capacete cobre). CLOTHING.xml: Gear, Helmet, Goggles,
+  Gloves, Boots (12 cada) e Armour (8, não aparece no menu), mais 12
+  DefaultColours (base, primária, secundária, texto; uma por roupa).
+- Perfil do piloto na RAM (4 cópias iguais nos 2 saves, ex. 0xd26bc0): +0x00
+  roupa, capacete, óculos, luva, bota (1..12, u32), +0x20 BASE, +0x30
+  PRIMARY, +0x40 SECONDARY, +0x50 TEXT (float RGBA; alfa 0.992 = veio da
+  paleta), +0x60 rosto, cabelo, sexo (6, 4, 0 no do Matheus), depois o nome
+  e o número (strings). Um 2º piloto ao lado com tudo no modelo 1 e as
+  DefaultColours do 1 (rosto 2, cabelo 5, sexo 1): deve ser o perfil novo.
+  As cores valem pro piloto todo (o Matheus: "é que nem carro, nada
+  separado"); cada peça escolhe o modelo separado.
+- Remake (carro/piloto_pintura.gd, tools/piloto_pintura.py): BASE x cor,
+  PRIMARY e SECONDARY x cor (v x m // 255) por cima pelo alfa (DIV255),
+  DETAIL pelo alfa, WRINKLE v x w // 255; camadas já no tamanho da caixa
+  (BILINEAR) pra o Godot repetir a conta inteira (teste_piloto_pintura: 0
+  pixel diferente). C++: FisicaCarro.compor_piloto.
+
 - O volante NÃO gira no jogo: faz parte do BODY.pingu, desenhado com a
   matriz do carro (cCompPlace_Body +0x1c = 0x1fc100, identidade). Nenhum
   .pingu tem índice de matriz por vértice. O volante girando do remake é

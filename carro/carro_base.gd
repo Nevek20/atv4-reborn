@@ -183,6 +183,11 @@ var lascas: Node3D = null
 var cores_pintura := {}
 var _pintura = null               # camadas (carro/pintura.gd), na 1ª vez que precisa
 var _mats_pintura: Array[StandardMaterial3D] = []   # materiais com a pintura ("white")
+# oficina (aba Piloto, carro/piloto_pintura.gd): roupa, capacete, óculos,
+# luva, bota e as cores. {} = a textura do piloto.png (perfil padrão); o main
+# põe as salvas do jogador antes do _ready (os rivais ficam no padrão)
+var piloto_escolhas := {}
+var _piloto_pintura = null
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas

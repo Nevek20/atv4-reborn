@@ -54,3 +54,48 @@ PackedByteArray FisicaCarro::compor_pintura(const PackedByteArray &masc, const P
 	}
 	return out;
 }
+
+// Piloto (oficina, nov/2026): as 7 partes da textura (roupa, braços, pernas,
+// óculos, bota, luva, capacete), cada uma [x, y, w, h, base, primary,
+// secondary, detail, wrinkle] (RGBA8 já no tamanho da caixa); cores = base,
+// primária, secundária (r, g, b) -> RGB8 tam x tam. A mesma conta do
+// carro/piloto_pintura.gd e do tools/piloto_pintura.py (pixel a pixel:
+// tests/teste_piloto_pintura.gd)
+PackedByteArray FisicaCarro::compor_piloto(int64_t tam, const Array &partes, const PackedInt32Array &cores) {
+	PackedByteArray out;
+	if (tam <= 0 || cores.size() < 9) {
+		return out;
+	}
+	out.resize(tam * tam * 3);
+	uint8_t *o = out.ptrw();
+	const int32_t *c = cores.ptr();
+	for (int64_t n = 0; n < partes.size(); n++) {
+		const Array pt = partes[n];
+		if (pt.size() < 9) {
+			continue;
+		}
+		const int64_t x0 = pt[0], y0 = pt[1], w = pt[2], h = pt[3];
+		const PackedByteArray ba = pt[4], pr = pt[5], se = pt[6], de = pt[7], ru = pt[8];
+		const int64_t px = w * h * 4;
+		if (ba.size() < px || pr.size() < px || se.size() < px || de.size() < px || ru.size() < px ||
+				x0 < 0 || y0 < 0 || x0 + w > tam || y0 + h > tam) {
+			continue;
+		}
+		const uint8_t *b = ba.ptr(), *p = pr.ptr(), *s = se.ptr(), *d = de.ptr(), *r = ru.ptr();
+		for (int64_t yy = 0; yy < h; yy++) {
+			for (int64_t xx = 0; xx < w; xx++) {
+				const int64_t i = (yy * w + xx) * 4;
+				uint8_t *q = o + ((y0 + yy) * tam + x0 + xx) * 3;
+				const uint32_t ap = p[i + 3], as = s[i + 3], ad = d[i + 3];
+				for (int k = 0; k < 3; k++) {
+					uint32_t v = b[i + k] * (uint32_t)c[k] / 255;
+					v = div255(v * (255 - ap) + (p[i + k] * (uint32_t)c[3 + k] / 255) * ap);
+					v = div255(v * (255 - as) + (s[i + k] * (uint32_t)c[6 + k] / 255) * as);
+					v = div255(v * (255 - ad) + d[i + k] * ad);
+					q[k] = (uint8_t)(v * r[i + k] / 255);
+				}
+			}
+		}
+	}
+	return out;
+}

@@ -248,6 +248,7 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	car = Car.new()
 	configurar(car, v)
 	car.cores_pintura = preload("res://carro/pintura.gd").salvas(car.chave())   # oficina (só o jogador)
+	car.piloto_escolhas = preload("res://carro/piloto_pintura.gd").salvas()
 	car.terrain = terrain
 	car.objetos = objetos
 	if objetos:

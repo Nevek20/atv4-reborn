@@ -199,6 +199,13 @@ def main():
     if im is None:
         sys.exit("textura %s: %s" % (TEXTURA, info))
     im.convert("RGB").save(os.path.join(a.out, "piloto.png"))
+    # textura montada como o jogo (Gear + Paint Shop do piloto; oficina): por
+    # cima da rider_fury pronta, que fica só se faltar alguma camada
+    try:
+        import piloto_pintura
+        piloto_pintura.exportar(a.unpacked, a.out)
+    except Exception as e:  # noqa: BLE001
+        print("[!] textura do piloto montada: %s (fica a rider_fury pronta)" % e)
     print("[+] %s: %d ossos, %d vértices, %d triângulos, STEER_LEFT %d quadros em %.3f s" % (
         a.out, len(nomes), len(m["pos"]), len(m["tris"]), len(anim["tempos"]), anim["dur"]))
 

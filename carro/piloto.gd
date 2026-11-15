@@ -88,6 +88,14 @@ var _cpp_vol := false          # o C++ foi configurado já com o volante (a tabe
 
 
 ## (re)copia tudo pro C++ depois de montar (carregar, prender_no_volante)
+
+## oficina (aba Piloto): troca a textura do piloto (carro/piloto_pintura.gd)
+func pintar(tex: Texture2D) -> void:
+	if malha and malha.mesh:
+		var m := malha.mesh.surface_get_material(0) as StandardMaterial3D
+		if m:
+			m.albedo_texture = tex
+
 func _liga_cpp() -> void:
 	_cpp = null
 	_cpp_vol = false

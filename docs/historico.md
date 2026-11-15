@@ -937,6 +937,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   faróis redondos da barra do para-choque (preRunnerTruck_light); os da
   grade são pintados na preRunnerTruck_front e ficam apagados.
 
+- Oficina do piloto (nov/2026, prints e saves gear.p2s / Paint_Shop.p2s do
+  Matheus; no jogo Garage -> Rider: Gear e Paint Shop): a textura do piloto
+  deixou de ser a rider_fury pronta e passou a ser montada como o jogo
+  (COMPOSITOR.xml + CLOTHING.xml, docs/engenharia_reversa.md, Piloto). Um
+  modelo por peça (roupa, capacete, óculos, luva, bota; 12 cada) e base,
+  primária, secundária e texto pro piloto todo ("é que nem carro, nada
+  separado"). Perfil padrão = o 2º piloto da RAM (tudo no modelo 1 com as
+  DefaultColours do 1); o do Matheus (roupa 11, capacete 9, óculos 12, luva
+  3, bota 10, vermelho/laranja/amarelo) é a referência do teste. O
+  tools/piloto_pintura.py monta igual ao Godot (0 pixel diferente nos 2
+  casos; C++ 8 ms, GDScript 0.5 s); ~7 MB de camadas fora do git. NOSSO: a
+  tela (aba Piloto da oficina, "Modelo N"), salvar em user://oficina.json,
+  rivais com o perfil padrão (as texturas da IA, AITextures, não foram
+  portadas). Pendente: sexo, rosto, cabelo, nome e número no menu (Change
+  Rider) e a piloto feminina.
 - Piloto (piloto.gd, tools/piloto.py): .skl/.srd/.bac decifrados
   (docs Piloto). ROOT da animação em cima do ARSE, sem a rotação do ponto.
   STEER_LEFT no tempo |s|/6, espelhado com s > 0 do jogo (= rider_s < 0 no

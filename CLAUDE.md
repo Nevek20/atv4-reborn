@@ -57,10 +57,11 @@ carro/               o carro
   luzes.gd, farol.gd   lanterna de freio, ré e farol acesos (melhoria nossa)
   sujeira.gd           sujeira do jogo na pintura e lama nas rodas
   pintura.gd           pintura montada em tempo real (camadas do gerar_pintura + 3 cores; oficina)
+  piloto_pintura.gd    textura do piloto montada como o jogo (peças + 4 cores; oficina, aba Piloto)
   batida_carros.gd     carro com carro (esferas do VehicleVehicle.hsc, lasquinha e som)
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
-menu/                oficina.gd (pintura e logos do carro, tecla O até ter a Garagem; a tela é nossa)
+menu/                oficina.gd (pintura e logos do carro e o piloto, tecla O até ter a Garagem; a tela é nossa)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida)
@@ -154,6 +155,9 @@ Arquivos, modelos e pintura
   Logos: o gerar_pintura desenha todos os logos em cada caixa (atlas,
   camadas/logos.json) e o Godot só cola (alpha_composite do PIL, exato).
   Rivais no RX01 offline = pintura de fábrica (AIPlayerColours é de outro modo).
+- Piloto: textura montada pelo COMPOSITOR.xml (um modelo por peça, 4 cores
+  pro piloto todo; tools/piloto_pintura.py = carro/piloto_pintura.gd = C++
+  compor_piloto, teste_piloto_pintura). O rosto da corrida é preto no jogo.
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.
