@@ -58,10 +58,21 @@ func _make_wheel_mesh(w: Dictionary) -> void:
 		var mesh: Mesh = load(path) as Mesh
 		var mi := MeshInstance3D.new()
 		mi.mesh = mesh
+		# aro comprado (oficina, Upgrade): a textura do material ALLOY vira a
+		# IG_WHEEL_HEAVYCLASS_0N do aro (a de fábrica é a 01)
+		var aro: Texture2D = null
+		var al: Dictionary = pecas.get("aros", {})
+		var esc_aro := String(pecas_escolhidas.get("Alloy", ""))
+		if al.has(esc_aro):
+			var ap := asset_dir.path_join(al[esc_aro]).simplify_path()
+			if ResourceLoader.exists(ap):
+				aro = load(ap)
 		for i in mesh.get_surface_count():
 			var m := mesh.surface_get_material(i)
 			if m is StandardMaterial3D:
 				var m2: StandardMaterial3D = m.duplicate()
+				if aro and m2.albedo_texture and m2.albedo_texture.resource_path.get_file().contains("ALLOY"):
+					m2.albedo_texture = aro
 				material_do_jogo(m2)
 				mi.set_surface_override_material(i, m2)
 		# component map (14881): Mirror="1" nas rodas da esquerda do jogo

@@ -2170,10 +2170,15 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   terrain.atrito: na terra comum Terra Budget 0.80, Areia Budget 0.50,
   Terra Premium/Protótipo 1.00; no asfalto 1.10 pra todos). Raio do modelo
   1-4 cm maior que o genérico; a física usa o raio do XML (o modelo é só
-  visual). tests/teste_pneu.gd. Aros (Alloy, 7) ficam pro próximo.
+  visual). tests/teste_pneu.gd.
+  Aro FEITO (nov/2026, slot Alloy): os 7 do catálogo (WHEEL_01..07 =
+  Wheel_Heavyclass_0N). No jogo o aro é só a textura do material ALLOY da
+  roda: a ALLOY de fábrica é igual pixel a pixel à IG_WHEEL_HEAVYCLASS_01, e
+  todos os modelos de pneu usam a mesma ALLOY. O gerar_buggies copia as
+  IG_WHEEL_HEAVYCLASS da classe (Buggy e Truck têm as suas) pra rodas/
+  (pecas.json "aros") e o carro_montagem troca a textura ALLOY da roda.
+  Combina com qualquer pneu. A 08 existe no archive mas o catálogo não usa.
 
-- Aro comprado (Alloy WHEEL_01..07 = Wheel_Heavyclass_01..07 do catálogo):
-  falta achar como o jogo troca (textura ALLOY das rodas?). Pneus FEITOS.
 - Modelos que o jogo não usa (docs/assets.md): CHASSIS_Truck_04 (pré-runner,
   o "Lazarus", nome escolhido pelo Matheus), CHASSIS_ATV_03..08 e os de IA
   (quadros sem carenagem), carenagens SandStorm e WolfTrekker (pinturas da

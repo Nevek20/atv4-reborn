@@ -213,6 +213,35 @@ def pneus_da_roda(arqs, unpacked, pasta, roda):
     return out
 
 
+# aros compráveis (catálogo, Alloy WHEEL_01..07 -> Wheel_Heavyclass_0N): no
+# jogo é só a textura do material ALLOY das rodas (a ALLOY de fábrica é igual
+# pixel a pixel à IG_WHEEL_HEAVYCLASS_01). Copia as da classe pra rodas/.
+def aros(unpacked, texturas, pasta, rodas_dir):
+    """{componente: png em rodas_dir} dos aros da classe"""
+    import glob
+    import shutil
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(pasta)
+    al = c.find("Alloy") if c is not None else None
+    arqs = ler_arquivos()
+    out = {}
+    for e in (al if al is not None else []):
+        nome = "IG_" + e.get("mInGameModelName").upper()
+        f = arqs.get(("Vehicles/%s/Textures/Wheel/%s.bog" % (pasta, nome)).lower())
+        if not f:
+            continue
+        base = os.path.splitext(os.path.basename(f[0]))[0]          # 22398_IG_WHEEL_HEAVYCLASS_01
+        achou = glob.glob(os.path.join(texturas, "**", base + ".png"), recursive=True)
+        if not achou:
+            print("[!] aro %s: sem %s.png nas texturas" % (e.get("mComponentName"), base))
+            continue
+        os.makedirs(rodas_dir, exist_ok=True)
+        shutil.copyfile(achou[0], os.path.join(rodas_dir, base + ".png"))
+        out[e.get("mComponentName")] = base + ".png"
+    return out
+
+
 def pingu(unpacked, tex, bloco_, out, split=()):
     cmd = [sys.executable, os.path.join(AQUI, "pingu2obj.py"),
            os.path.join(unpacked, "other", "%d_bloco.bin" % bloco_),
@@ -256,6 +285,7 @@ def main():
 
     rodas_dir = os.path.join(a.assets, "rodas")
     feitas = set()
+    lista_aros = aros(a.unpacked, a.texturas, CLASSES[a.classe]["pasta"], rodas_dir)
     falhas_pintura = []
     dados = os.path.join(PROJ, "data", "vehicles")
     for c in carros:
@@ -300,6 +330,7 @@ def main():
             "pecas": {pos: "%d_bloco.obj" % b for pos, b in c["pecas"].items()},
             "rodas": {k: "../rodas/%d_bloco.obj" % b for k, b in c["rodas"].items()},
             "pneus": {p: {k: "../rodas/%d_bloco.obj" % b for k, b in r.items()} for p, r in pneus.items()},
+            "aros": {k: "../rodas/" + v for k, v in lista_aros.items()},
             # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio)
             "rally": any(p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
             "estepe": [p for p in pos_rodas if p.startswith("SpareWheel")],

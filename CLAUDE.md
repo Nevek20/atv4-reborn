@@ -142,7 +142,8 @@ Arquivos, modelos e pintura
   DefaultConfig nessa mesma conta; trocar = salvar e remontar o carro
   (main.remontar_carro), não recarregar a física no lugar. Pneu = roda
   inteira TYRE_<pneu>_<tamanho> (pecas.json "pneus") + atrito do Override do
-  material; de fábrica é a TYRE_GENERIC (RAM), não a TYRE_DIRT_BUDGET.
+  material; de fábrica é a TYRE_GENERIC (RAM), não a TYRE_DIRT_BUDGET. Aro =
+  só a textura ALLOY da roda (IG_WHEEL_HEAVYCLASS_0N; a de fábrica é a 01).
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
 - Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os

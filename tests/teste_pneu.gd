@@ -3,7 +3,8 @@ extends SceneTree
 ## do catálogo (componentes.xml) pra buggy e truck; cada um troca a roda pelo
 ## modelo TYRE_<pneu>_<tamanho> do jogo (pecas.json "pneus", gerar_buggies) e
 ## o atrito na terra pelo Override do material (terrain.atrito). De fábrica
-## (DIRT_BUDGET) fica a TYRE_GENERIC, como na RAM.
+## (DIRT_BUDGET) fica a TYRE_GENERIC, como na RAM. Aro (Alloy): os 7 do
+## catálogo; troca a textura ALLOY da roda pela IG_WHEEL_HEAVYCLASS_0N.
 ## Uso: godot --headless --path . -s res://tests/teste_pneu.gd
 
 const PECAS := preload("res://carro/pecas.gd")
@@ -20,6 +21,10 @@ func _initialize() -> void:
 		print("  %s: %d pneus (%s)" % [cls, n, ", ".join(op.slots.get("Tire", []).map(func(p): return PECAS.rotulo(p)))])
 		if n != 11:
 			_falha("%s devia ter 11 pneus" % cls)
+		var na: int = op.slots.get("Alloy", []).size()
+		print("  %s: %d aros (%s)" % [cls, na, ", ".join(op.slots.get("Alloy", []).map(func(p): return PECAS.rotulo(p)))])
+		if na != 7:
+			_falha("%s devia ter 7 aros" % cls)
 	main = load("res://main.tscn").instantiate()
 	root.add_child(main)
 
@@ -42,7 +47,7 @@ func _process(_d: float) -> bool:
 		var Car = load("res://carro/car.gd")
 		var novo = Car.new()
 		main.configurar(novo, main.frota()[i])
-		novo.pecas_escolhidas = {"Tire": "SAND_BUDGET"}
+		novo.pecas_escolhidas = {"Tire": "SAND_BUDGET", "Alloy": "WHEEL_05"}
 		novo.terrain = main.terrain
 		novo.objetos = main.objetos
 		main.add_child(novo)
@@ -69,6 +74,9 @@ func _process(_d: float) -> bool:
 		print("  na terra comum: de fábrica %.2f, Areia Budget %.2f (no asfalto do spawn os dois %.2f)" % [a0, a1, com.mu])
 		if terra < 0 or a1 >= a0:
 			_falha("areia na terra devia agarrar menos que o de fábrica")
+		print("  aro: de fábrica %s, com WHEEL_05 %s" % [fab.aro, com.aro])
+		if not fab.aro.contains("ALLOY") or not com.aro.contains("HEAVYCLASS_05"):
+			_falha("a textura do aro não trocou")
 		print("teste_pneu: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 		quit()
 		return true
@@ -80,4 +88,13 @@ func _medir() -> Dictionary:
 	var mus: Array = []
 	for w in c.wheels:
 		mus.append(snappedf(float(w.get("mu", 0.0)), 0.01))
-	return {"pneu": c.pneu, "roda": String(c.wheel_front_file), "mu": mus.max()}
+	# textura do aro na roda da frente (material ALLOY / HEAVYCLASS)
+	var aro := ""
+	for mi in c.wheels[0].spin_node.find_children("*", "MeshInstance3D", true, false):
+		for i in mi.mesh.get_surface_count():
+			var m = mi.get_surface_override_material(i)
+			if m is StandardMaterial3D and m.albedo_texture:
+				var f: String = m.albedo_texture.resource_path.get_file()
+				if f.contains("ALLOY") or f.contains("HEAVYCLASS"):
+					aro = f
+	return {"pneu": c.pneu, "roda": String(c.wheel_front_file), "mu": mus.max(), "aro": aro}
