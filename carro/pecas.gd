@@ -4,19 +4,23 @@ extends RefCounted
 ## classe (Buggy, Truck); as de fábrica são a DefaultConfig do vehicles.xml
 ## (14887). A troca entra no lugar da DefaultConfig na mesma conta de
 ## fábrica (vehicle_data.factory_tuning: efeitos somam por tipo, presos em
-## 0..1). Shocks, GearRatios, BrakeBalanceController e GearboxType ficam pro
-## Tune & Setup. NOSSO: a tela e salvar em user://oficina.json (chave
+## 0..1). Pneu (Tire): os do catálogo (componentes.xml); muda o atrito
+## (Override do material do chão) e a roda (TYRE_<pneu>_<tamanho>, car.gd).
+## Shocks, GearRatios, BrakeBalanceController e GearboxType ficam pro Tune &
+## Setup. NOSSO: a tela e salvar em user://oficina.json (chave
 ## "pecas" -> carro -> {slot: peça}); só o carro do jogador.
 
 const UPGRADES := "res://data/upgrades.xml"
 const VEICULOS := "res://data/vehicles.xml"
 const SALVAS := "user://oficina.json"
+const COMPONENTES := "res://data/componentes.xml"   # catálogo de peças do jogo (xml 14882)
+const MATERIAIS := "res://data/materials_rx01.xml"
 const SLOTS := ["EngineInternals", "EngineManagement", "EngineHeader", "Exhaust", "IntakeKit",
-	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass"]
+	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass", "Tire"]
 const NOMES := {"EngineInternals": "Motor (interno)", "EngineManagement": "Injeção",
 	"EngineHeader": "Coletor", "Exhaust": "Escape", "IntakeKit": "Admissão",
 	"GearboxLevel": "Câmbio", "Clutch": "Embreagem", "Brake": "Freio",
-	"Suspension": "Suspensão", "BodyMass": "Peso"}
+	"Suspension": "Suspensão", "BodyMass": "Peso", "Tire": "Pneu"}
 
 
 ## {slot: [peça, ...]} da classe, na ordem do XML; e {peça: {efeito: valor}}
@@ -46,7 +50,47 @@ static func opcoes(classe: String) -> Dictionary:
 				out.slots[slot] = []
 		elif t == XMLParser.NODE_ELEMENT_END and x.get_node_name() == classe:
 			break
+	_pneus(classe, out)
 	return out
+
+
+## pneus da classe (catálogo, slot Tire, na ordem do jogo) e o atrito de cada
+## um na terra comum do RX01 (materials_rx01.xml, COMMON_1: Override FRICTION
+## TYRE <pneu> <valor>; é o que a física usa, terrain.atrito)
+static func _pneus(classe: String, out: Dictionary) -> void:
+	var x := XMLParser.new()
+	if x.open(COMPONENTES) != OK:
+		return
+	var atrito := {}
+	var m := XMLParser.new()
+	if m.open(MATERIAIS) == OK:
+		while m.read() == OK:
+			if m.get_node_type() == XMLParser.NODE_ELEMENT and m.get_node_name() == "Overrides":
+				for i in m.get_attribute_count():
+					var v := m.get_attribute_value(i).split(" ")
+					if v.size() == 4 and v[0] == "FRICTION":
+						atrito[v[2]] = v[3]
+				break                       # o 1º material é a terra comum (COMMON_1)
+	var dentro := false
+	var no_tire := false
+	var lista: Array = []
+	while x.read() == OK:
+		var t := x.get_node_type()
+		if t == XMLParser.NODE_ELEMENT:
+			var n := x.get_node_name()
+			if n == classe:
+				dentro = true
+			elif dentro and n == "Tire":
+				no_tire = true
+			elif no_tire and n == "Component":
+				var c := x.get_named_attribute_value_safe("mComponentName")
+				lista.append(c)
+				out.efeitos[c] = {"atrito na terra": atrito.get(c, "?")}
+		elif t == XMLParser.NODE_ELEMENT_END:
+			if x.get_node_name() == "Tire" and no_tire:
+				break
+	if not lista.is_empty():
+		out.slots["Tire"] = lista
 
 
 ## DefaultConfig do veículo (Name do vehicles.xml) e a classe dele
@@ -72,8 +116,12 @@ static func fabrica(veh: String) -> Dictionary:
 	return out
 
 
-## "EngineInternals_Level3" -> "Nível 3"
+## "EngineInternals_Level3" -> "Nível 3"; pneu "MUD_PREMIUM" -> "Lama Premium"
 static func rotulo(peca: String) -> String:
+	if not peca.contains("_Level") and not peca.contains("_Prototype") and peca.to_upper() == peca:
+		var tipo := {"DIRT": "Terra", "MUD": "Lama", "SAND": "Areia", "SNOW": "Neve", "GENERAL": "Uso geral"}
+		var p := peca.split("_")
+		return "%s %s" % [tipo.get(p[0], p[0]), {"BUDGET": "Budget", "PREMIUM": "Premium", "PROTOTYPE": "Protótipo"}.get(p[-1], p[-1])]
 	var s := peca.get_slice("_", 1)
 	if s.begins_with("Level"):
 		return "Nível " + s.substr(5)

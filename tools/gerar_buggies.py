@@ -180,6 +180,39 @@ def copiar(dados, dst):
     open(dst, "wb").write(dados)
 
 
+# pneus compráveis (catálogo de peças, xml 14882 -> data/componentes.xml):
+# cada um é uma roda inteira por tamanho, na pasta TYRE_<modelo>_<tamanho>
+# (o nome só existe como #crc no archive). De fábrica (DIRT_BUDGET) o jogo
+# carrega a TYRE_GENERIC_<tamanho> (conferido na RAM: bulldog, inferno,
+# phantom e storm), então o DIRT_BUDGET fica de fora daqui.
+def catalogo_pneus(unpacked, classe):
+    """{componente: modelo da corrida} dos pneus da classe (Buggy, Truck)"""
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(classe)
+    t = c.find("Tire") if c is not None else None
+    return {e.get("mComponentName"): e.get("mInGameModelName") for e in (t if t is not None else [])}
+
+
+def pneus_da_roda(arqs, unpacked, pasta, roda):
+    """{componente: {FrontWheel: bloco, RearWheel: bloco}} no tamanho da roda"""
+    import zlib
+    tam = "RALLY" if roda.lower() == "wheel_rally" else roda.upper().replace("TYRE_GENERIC_", "")
+    out = {}
+    for comp, modelo in catalogo_pneus(unpacked, pasta).items():
+        if comp == "DIRT_BUDGET":
+            continue
+        h = "%08x" % (zlib.crc32(("%s_%s" % (modelo, tam)).lower().encode()) ^ 0xFFFFFFFF)
+        r = {}
+        for lado in ("FrontWheel", "RearWheel"):
+            b = bloco(arqs, "Vehicles/%s/%s/Wheel/#%s/%s.pingu" % (pasta, LOD, h, lado))
+            if b is not None:
+                r[lado] = b
+        if len(r) == 2:
+            out[comp] = r
+    return out
+
+
 def pingu(unpacked, tex, bloco_, out, split=()):
     cmd = [sys.executable, os.path.join(AQUI, "pingu2obj.py"),
            os.path.join(unpacked, "other", "%d_bloco.bin" % bloco_),
@@ -246,6 +279,13 @@ def main():
             if b not in feitas:
                 pingu(a.unpacked, a.texturas, b, rodas_dir)
                 feitas.add(b)
+        # pneus compráveis no tamanho da roda deste carro (oficina, Upgrade)
+        pneus = pneus_da_roda(ler_arquivos(), a.unpacked, CLASSES[a.classe]["pasta"], c["roda"])
+        for r in pneus.values():
+            for b in r.values():
+                if b not in feitas:
+                    pingu(a.unpacked, a.texturas, b, rodas_dir)
+                    feitas.add(b)
         r = subprocess.run([sys.executable, os.path.join(AQUI, "gerar_pintura.py"),
                             a.unpacked, c["id"], out, "--chassis", c["chassis"]])
         if r.returncode != 0:
@@ -259,6 +299,7 @@ def main():
             "roda": c["roda"], "lod": LOD,
             "pecas": {pos: "%d_bloco.obj" % b for pos, b in c["pecas"].items()},
             "rodas": {k: "../rodas/%d_bloco.obj" % b for k, b in c["rodas"].items()},
+            "pneus": {p: {k: "../rodas/%d_bloco.obj" % b for k, b in r.items()} for p, r in pneus.items()},
             # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio)
             "rally": any(p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
             "estepe": [p for p in pos_rodas if p.startswith("SpareWheel")],
@@ -279,6 +320,9 @@ def main():
         pts = open(os.path.join(a.unpacked, "other", "%d_bloco.bin" % c["pontos"]), "rb").read()
         copiar(pts, os.path.join(dados, c["dados"] + "_points.bin"))
         print("[+] %s em %s" % (c["nome"], out))
+    # catálogo de peças do jogo (pneus, aros...): o Godot lista os pneus por ele
+    copiar(open(os.path.join(a.unpacked, "xml", "14882_root.xml"), "rb").read().replace(b"\r\n", b"\n"),
+           os.path.join(PROJ, "data", "componentes.xml"))
     # redes das janelas e treliça do Trident: alfa do jogo de volta (o
     # gob_tex2png salva sem alfa)
     subprocess.run([sys.executable, os.path.join(AQUI, "alfa_texturas.py"), a.unpacked])

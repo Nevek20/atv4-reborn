@@ -173,6 +173,12 @@ func _load_pecas() -> void:
 	if model_path == "" and pc.has("Body"):
 		model_path = asset_dir.path_join(pc.Body)
 	var rd: Dictionary = pecas.get("rodas", {})
+	# pneu comprado (oficina, Upgrade): a roda inteira TYRE_<pneu>_<tamanho>
+	# do jogo; de fábrica (DIRT_BUDGET) fica a TYRE_GENERIC (como na RAM)
+	var pn: Dictionary = pecas.get("pneus", {})
+	var tire := String(pecas_escolhidas.get("Tire", ""))
+	if pn.has(tire):
+		rd = pn[tire]
 	if wheel_front_file == "" and rd.has("FrontWheel"):
 		wheel_front_file = asset_dir.path_join(rd.FrontWheel).simplify_path()
 	if wheel_rear_file == "" and rd.has("RearWheel"):

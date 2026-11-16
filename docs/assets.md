@@ -160,9 +160,10 @@ carro fantasma do replay: o jogo usa.
   animações por classe, AtV e Bike) = braços da câmera de guidão. O exe
   carrega ("Rider POV Skeleton/Animation/Instance", HANDLEBAR): é usado, serve
   pra câmera de primeira pessoa do ATV.
-- Rodas: 56 pastas sem nome com roda completa (Front/RearWheel, ALLOY, TYRE)
-  nos buggies e 45 nos trucks. 56 = 8 pneus x 7 aros do catálogo: devem ser
-  as rodas compráveis (pendente "pneu e aro comprados"). Nome não achado.
+- Rodas: as pastas sem nome são os pneus compráveis, TYRE_<modelo do
+  pneu>_<tamanho> (crc32 do nome; 11 pneus x 5 tamanhos nos buggies, x 3 nos
+  trucks; TYRE_GENERIC_RALLY = #0678de18). Usadas pelo slot Pneu da oficina
+  (pecas.json "pneus"; docs/historico.md, Peças compradas).
 - Prints: modelos convertidos com o pingu2obj num projeto Godot à parte;
   as peças da suspensão saem fora do lugar porque no jogo quem posiciona
   é o cCompPlace.

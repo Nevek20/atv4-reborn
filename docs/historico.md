@@ -2156,10 +2156,24 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   troca as 5 de motor uma a uma e confere que nenhuma desfaz) e a escolha
   ainda não aplicada fica guardada ao fechar e reabrir a oficina no mesmo
   carro.
+  Pneu FEITO (nov/2026, slot Tire na aba Upgrade): os 11 do catálogo de
+  peças do jogo (xml 14882 -> data/componentes.xml; o Prototype vem LOCKED
+  no jogo, aqui liberado). Cada pneu é uma roda inteira por tamanho na pasta
+  TYRE_<modelo>_<tamanho> (SMALL, MEDIUM, LARGE, SANDCAR, RALLY nos buggies;
+  SMALL, MEDIUM, LARGE nos trucks): eram as "56 rodas sem nome", o nome saiu
+  por CRC32 (88 de 101 pastas). De fábrica (DIRT_BUDGET) o jogo carrega a
+  TYRE_GENERIC_<tamanho> (4 KB) e não a TYRE_DIRT_BUDGET (28 KB, mais
+  detalhada): conferido na RAM de bulldog, inferno, phantom e storm (39/42
+  pedaços da genérica achados x 5/418 da outra). O gerar_buggies exporta os
+  10 compráveis no tamanho de cada carro (pecas.json "pneus"); o car.gd troca
+  a roda e a física pega o Tire da escolha (atrito = Override do material,
+  terrain.atrito: na terra comum Terra Budget 0.80, Areia Budget 0.50,
+  Terra Premium/Protótipo 1.00; no asfalto 1.10 pra todos). Raio do modelo
+  1-4 cm maior que o genérico; a física usa o raio do XML (o modelo é só
+  visual). tests/teste_pneu.gd. Aros (Alloy, 7) ficam pro próximo.
 
-- Pneu e aro comprados (hipótese: troca de textura, ver docs/assets.md).
-  Provável resposta: 56 rodas completas sem nome no archive dos buggies (45
-  nos trucks) = 8 pneus x 7 aros (docs/assets.md, Modelos que o jogo não usa).
+- Aro comprado (Alloy WHEEL_01..07 = Wheel_Heavyclass_01..07 do catálogo):
+  falta achar como o jogo troca (textura ALLOY das rodas?). Pneus FEITOS.
 - Modelos que o jogo não usa (docs/assets.md): CHASSIS_Truck_04 (pré-runner,
   o "Lazarus", nome escolhido pelo Matheus), CHASSIS_ATV_03..08 e os de IA
   (quadros sem carenagem), carenagens SandStorm e WolfTrekker (pinturas da

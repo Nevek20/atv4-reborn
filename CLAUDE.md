@@ -140,7 +140,9 @@ Arquivos, modelos e pintura
   SOMAM. Final: Level0/1 = 0.45/0.53, Level2+ = a custom 0.61.
   Peças compradas (carro/pecas.gd, oficina aba Upgrade) entram no lugar da
   DefaultConfig nessa mesma conta; trocar = salvar e remontar o carro
-  (main.remontar_carro), não recarregar a física no lugar.
+  (main.remontar_carro), não recarregar a física no lugar. Pneu = roda
+  inteira TYRE_<pneu>_<tamanho> (pecas.json "pneus") + atrito do Override do
+  material; de fábrica é a TYRE_GENERIC (RAM), não a TYRE_DIRT_BUDGET.
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
 - Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os

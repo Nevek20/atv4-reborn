@@ -653,7 +653,9 @@ func _mostrar_upgrade() -> void:
 		var fx: Dictionary = _upg.efeitos.get(p, {})
 		var txt: Array = []
 		for k in fx:
-			if String(fx[k]) != "" and k not in ["EngineFrictionTorque", "EngineInertia", "ClutchTorque",
+			if k == "atrito na terra":
+				txt.append("atrito na terra %s" % fx[k])
+			elif String(fx[k]) != "" and k not in ["EngineFrictionTorque", "EngineInertia", "ClutchTorque",
 					"RearSuspMaxCompression", "ManualGearChangeTime"]:
 				txt.append("%s %s" % [k, fx[k]])
 			elif String(fx[k]) == "":
