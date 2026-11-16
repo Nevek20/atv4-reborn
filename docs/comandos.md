@@ -141,6 +141,7 @@ python tests/teste_pintura.py <unpacked>      :: caixas do .bed x quadros do nú
 %GODOT% --headless --path . -s res://tests/teste_pintura_jogo.gd   :: pintura montada no Godot = pintura.png (24 carros), C++ = GDScript
 python tools/piloto_pintura.py <unpacked>   :: textura do piloto montada como o jogo + camadas (o tools/piloto.py já chama)
 %GODOT% --headless --path . -s res://tests/teste_piloto_pintura.gd   :: piloto montado no Godot = o do tool (padrão e o dos saves), C++ = GDScript
+%GODOT% --headless --path . -s res://tests/teste_upgrade.gd          :: peças compradas: conta de fábrica igual, Mosquito de fábrica x tudo no máximo (0-100)
 %GODOT% --headless --path . -s res://tests/teste_rabo.gd             :: rabo de cavalo: comprimentos, raiz no pino, parado x correndo, balanço virando
 %GODOT% --headless --path . -s res://tests/teste_numero.gd           :: número do perfil (oficina): carro e piloto repintam e salva; rivais com o do AIPlayers
 %GODOT% --headless --path . -s res://tests/medir_escapes.gd -- BUGGY_10 TRUCK_12   :: direção do cano no modelo x ponto EXHAUST (RAIO=0.5, VERTICES=1)

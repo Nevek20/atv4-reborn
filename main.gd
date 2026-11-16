@@ -249,6 +249,7 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	configurar(car, v)
 	car.cores_pintura = preload("res://carro/pintura.gd").salvas(car.chave())   # oficina (só o jogador)
 	car.piloto_escolhas = preload("res://carro/piloto_pintura.gd").salvas()
+	car.pecas_escolhidas = preload("res://carro/pecas.gd").salvas(car.chave())     # oficina, Upgrade
 	car.terrain = terrain
 	car.objetos = objetos
 	if objetos:
@@ -505,6 +506,11 @@ func _swap_vehicle(i: int) -> void:
 		corrida.parar()          # trocar de carro no meio volta pro treino
 	var p: Vector3 = car.global_position
 	spawn_vehicle(i, Vector3(p.x, terrain.height_at(p.x, p.z) + 1.5, p.z), car.global_rotation.y)
+
+
+## monta o mesmo carro de novo no lugar (oficina: peças novas mudam a física)
+func remontar_carro() -> void:
+	_swap_vehicle(veh_idx)
 
 
 func _ajusta_piloto(k: int) -> void:

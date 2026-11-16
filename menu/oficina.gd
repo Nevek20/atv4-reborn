@@ -36,6 +36,13 @@ var camada_piloto := "base"
 var _abas_piloto := {}
 var _quadros_piloto: Array[Button] = []
 var _amostra_piloto: ColorRect
+var _pag_upgrade: VBoxContainer
+var _lista_upg: VBoxContainer
+var _resumo_upg: Label
+var _upg := {}                     # opções da classe (carro/pecas.gd opcoes)
+var _upg_fab := {}                 # DefaultConfig do carro
+var _upg_esc := {}                 # escolha ainda não aplicada {slot: peça}
+var _upg_veh := ""
 
 
 func _init(m) -> void:
@@ -55,7 +62,7 @@ func _init(m) -> void:
 	var topo := HBoxContainer.new()
 	col.add_child(topo)
 	var g_pag := ButtonGroup.new()
-	for par in [["Pintura", true], ["Logos", false], ["Piloto", false]]:
+	for par in [["Pintura", true], ["Logos", false], ["Piloto", false], ["Upgrade", false]]:
 		var b := Button.new()
 		b.text = par[0]
 		b.toggle_mode = true
@@ -76,9 +83,14 @@ func _init(m) -> void:
 	_pag_piloto.add_theme_constant_override("separation", 8)
 	_pag_piloto.visible = false
 	col.add_child(_pag_piloto)
+	_pag_upgrade = VBoxContainer.new()
+	_pag_upgrade.add_theme_constant_override("separation", 6)
+	_pag_upgrade.visible = false
+	col.add_child(_pag_upgrade)
 	_montar_pintura()
 	_montar_logos()
 	_montar_piloto()
+	_montar_upgrade()
 	_aviso = Label.new()
 	_aviso.add_theme_color_override("font_color", Color(1, 0.75, 0.3))
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -172,12 +184,14 @@ func abrir() -> void:
 	_atualizar()
 	_refazer_logos()
 	_mostrar_piloto()
+	_abrir_upgrade()
 
 
 func _pagina(nome: String) -> void:
 	_pag_pintura.visible = nome == "Pintura"
 	_pag_logos.visible = nome == "Logos"
 	_pag_piloto.visible = nome == "Piloto"
+	_pag_upgrade.visible = nome == "Upgrade"
 
 
 func _aba(k: String) -> void:
@@ -549,3 +563,134 @@ func _input(event: InputEvent) -> void:
 			and event.physical_keycode in [KEY_ESCAPE, KEY_O]:
 		visible = false
 		get_viewport().set_input_as_handled()
+
+
+## ---------------------------------------------------------------- upgrade
+## Garage > Vehicle > Upgrade do jogo: uma peça por slot (upgrades.xml da
+## classe). Mexer nas setas só escolhe; "Aplicar" salva e monta o carro de
+## novo no lugar (a física lê as peças no _ready). NOSSO: a tela
+const PECAS_UPG := preload("res://carro/pecas.gd")
+
+
+func _montar_upgrade() -> void:
+	var t := Label.new()
+	t.text = "Peças (efeitos do upgrades.xml; Aplicar monta o carro de novo)"
+	t.add_theme_color_override("font_color", Color(1, 0.8, 0.4))
+	_pag_upgrade.add_child(t)
+	_lista_upg = VBoxContainer.new()
+	_lista_upg.add_theme_constant_override("separation", 4)
+	_pag_upgrade.add_child(_lista_upg)
+	_resumo_upg = Label.new()
+	_resumo_upg.add_theme_color_override("font_color", Color(0.75, 0.85, 1.0))
+	_pag_upgrade.add_child(_resumo_upg)
+	var botoes := HBoxContainer.new()
+	_pag_upgrade.add_child(botoes)
+	for par in [["De fábrica", _upg_fabrica], ["Tudo no máximo", _upg_maximo], ["Aplicar", _upg_aplicar]]:
+		var b := Button.new()
+		b.text = par[0]
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(par[1])
+		botoes.add_child(b)
+
+
+func _abrir_upgrade() -> void:
+	var car = main.car
+	_upg_veh = car.tuning_id if car.tuning_id != "" else car.vehicle_id
+	var f: Dictionary = PECAS_UPG.fabrica(_upg_veh)
+	_upg_fab = f.config
+	_upg = PECAS_UPG.opcoes(f.classe)
+	_upg_esc = (car.pecas_escolhidas as Dictionary).duplicate()
+	for c in _lista_upg.get_children():
+		c.queue_free()
+	for slot in PECAS_UPG.SLOTS:
+		if not _upg.slots.has(slot) or not _upg_fab.has(slot):
+			continue
+		var linha := HBoxContainer.new()
+		_lista_upg.add_child(linha)
+		var l := Label.new()
+		l.text = PECAS_UPG.NOMES.get(slot, slot)
+		l.custom_minimum_size.x = 130
+		linha.add_child(l)
+		for d in [-1, 1]:
+			var b := Button.new()
+			b.text = "◀" if d < 0 else "▶"
+			b.focus_mode = Control.FOCUS_NONE
+			b.pressed.connect(_upg_passo.bind(slot, d))
+			linha.add_child(b)
+			if d < 0:
+				var nome := Label.new()
+				nome.name = "Nome"
+				nome.custom_minimum_size.x = 170
+				nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				linha.add_child(nome)
+		var fx := Label.new()
+		fx.name = "Efeito"
+		fx.modulate = Color(1, 1, 1, 0.7)
+		linha.add_child(fx)
+		linha.set_meta("slot", slot)
+	_mostrar_upgrade()
+
+
+func _upg_peca(slot: String) -> String:
+	return String(_upg_esc.get(slot, _upg_fab.get(slot, "")))
+
+
+func _mostrar_upgrade() -> void:
+	for linha in _lista_upg.get_children():
+		if not linha.has_meta("slot"):
+			continue
+		var slot: String = linha.get_meta("slot")
+		var p := _upg_peca(slot)
+		var nome: Label = linha.get_node("Nome")
+		nome.text = PECAS_UPG.rotulo(p) + ("  (fábrica)" if p == _upg_fab.get(slot) else "")
+		var fx: Dictionary = _upg.efeitos.get(p, {})
+		var txt: Array = []
+		for k in fx:
+			if String(fx[k]) != "" and k not in ["EngineFrictionTorque", "EngineInertia", "ClutchTorque",
+					"RearSuspMaxCompression", "ManualGearChangeTime"]:
+				txt.append("%s %s" % [k, fx[k]])
+			elif String(fx[k]) == "":
+				txt.append(k)
+		(linha.get_node("Efeito") as Label).text = ", ".join(txt)
+	# o que a física vai usar (0..1 entre _non_tuned e _fully_tuned)
+	var t: Dictionary = preload("res://carro/vehicle_data.gd").factory_tuning(PECAS_UPG.VEICULOS, PECAS_UPG.UPGRADES, _upg_veh, _upg_esc)
+	_resumo_upg.text = "Motor %.2f   Freio %.2f   Suspensão %.2f (subesterço %.2f)   Final %.2f   Embreagem %.2f   Peso %.2f" % [
+		t.engine, t.brake, t.susp, t.understeer, t.final, t.shift, t.mass]
+	var mudou: bool = _upg_esc != main.car.pecas_escolhidas
+	_aviso.text = "Peças mudadas: aperte Aplicar." if mudou else ""
+
+
+func _upg_passo(slot: String, d: int) -> void:
+	var lista: Array = _upg.slots.get(slot, [])
+	if lista.is_empty():
+		return
+	var i := posmod(lista.find(_upg_peca(slot)) + d, lista.size())
+	if lista[i] == _upg_fab.get(slot):
+		_upg_esc.erase(slot)
+	else:
+		_upg_esc[slot] = lista[i]
+	_mostrar_upgrade()
+
+
+func _upg_fabrica() -> void:
+	_upg_esc = {}
+	_mostrar_upgrade()
+
+
+func _upg_maximo() -> void:
+	for slot in PECAS_UPG.SLOTS:
+		var lista: Array = _upg.slots.get(slot, [])
+		if lista.is_empty() or not _upg_fab.has(slot):
+			continue
+		var ult: String = lista[-1]
+		if ult == _upg_fab.get(slot):
+			_upg_esc.erase(slot)
+		else:
+			_upg_esc[slot] = ult
+	_mostrar_upgrade()
+
+
+func _upg_aplicar() -> void:
+	PECAS_UPG.salvar(main.car.chave(), _upg_esc)
+	main.remontar_carro()
+	_aviso.text = "Peças aplicadas."

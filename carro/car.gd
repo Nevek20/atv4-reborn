@@ -184,7 +184,7 @@ func _load_tuning() -> void:
 	if not FileAccess.file_exists("res://data/vehicles.xml"):
 		return
 	var t := VehicleData.factory_tuning("res://data/vehicles.xml", "res://data/upgrades.xml",
-		tuning_id if tuning_id != "" else vehicle_id)
+		tuning_id if tuning_id != "" else vehicle_id, pecas_escolhidas)
 	TUNE_ENGINE = t.engine
 	pneu = String(t.config.get("Tire", pneu))
 	TUNE_BRAKE = t.brake

@@ -2139,6 +2139,18 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 - Peças compradas (upgrade, rodas, pneus, tune & setup, para-choque): uma
   por vez, cada uma num menuzinho provisório como a oficina (tecla O); o
   menu do jogo (Garagem) vem depois.
+  Upgrade FEITO (nov/2026, carro/pecas.gd, oficina aba Upgrade): os 10
+  slots do Garage > Upgrade (motor interno, injeção, coletor, escape,
+  admissão, câmbio, embreagem, freio, suspensão, peso) com as peças da
+  classe no upgrades.xml; a escolha entra no lugar da DefaultConfig na
+  mesma conta do factory_tuning (efeitos somam). Aplicar salva
+  (user://oficina.json, "pecas" por carro) e monta o carro de novo no
+  lugar (a física lê as peças no _ready; recarregar a física com o carro
+  andando remontaria as rodas). Mosquito de fábrica x tudo no máximo, chão
+  plano: 0-100 em 5.78 x 5.28 s, 170 x 197 km/h em 20 s, 900 x 699 kg
+  (tests/teste_upgrade.gd). NOSSO: a tela; dá pra pôr peça abaixo da de
+  fábrica e não tem preço. Shocks, GearRatios, BrakeBalanceController e
+  GearboxType ficam pro Tune & Setup.
 
 - Pneu e aro comprados (hipótese: troca de textura, ver docs/assets.md).
   Provável resposta: 56 rodas completas sem nome no archive dos buggies (45

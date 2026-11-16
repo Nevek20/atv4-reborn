@@ -43,6 +43,7 @@ var som_pasta := ""            # pasta dos loops do motor, se não for a do id (
 var tuning_id := ""
 var motor_escondido := false
 var _cena_glb: Node = null     # cena do .glb enquanto monta carroceria, rodas e volante
+var pecas_escolhidas := {}   # peças compradas {slot: peça} (oficina, aba Upgrade; carro/pecas.gd)
 var tune_override := {}       # ex.: {"engine": 0.3} pra simular peças compradas
 var TUNE_ENGINE := 0.81       # Internals L3 + Management L2 + Header L2 + Intake L3 + Exhaust L3
 var TUNE_BRAKE := 0.9         # Brake_Level2

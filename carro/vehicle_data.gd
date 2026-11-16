@@ -183,7 +183,8 @@ static func fcurve_eval(c: Dictionary, mu: float, x: float) -> float:
 ## Level2/3/Prototype dão CustomFinalDriveRatio (= GearRatioTuning
 ## FinalDrive). RAM: Inferno, Bulldog, Phantom e Buccaneer de fábrica (Level0)
 ## 0.45; Renegade, Storm e Goliath 0.61.
-static func factory_tuning(veh_xml: String, upg_xml: String, veh_name: String) -> Dictionary:
+## troca = peças compradas {slot: peça} por cima da DefaultConfig (carro/pecas.gd)
+static func factory_tuning(veh_xml: String, upg_xml: String, veh_name: String, troca := {}) -> Dictionary:
 	var cfg := {}
 	var gears := {}
 	var bias := 0.5
@@ -209,6 +210,8 @@ static func factory_tuning(veh_xml: String, upg_xml: String, veh_name: String) -
 			elif x.get_node_type() == XMLParser.NODE_ELEMENT_END and x.get_node_name() == "Vehicle":
 				if inside:
 					break
+	for slot in troca:
+		cfg[slot] = troca[slot]
 	# efeitos por peça, só da classe do veículo
 	var fx := {}
 	if x.open(upg_xml) == OK:
