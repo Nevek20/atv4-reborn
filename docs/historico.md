@@ -2134,9 +2134,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   ainda são os do Jericho. Não suja: a CHASSIS_Truck_04 do jogo não tem a 2ª textura (sem _camada.obj
   mesmo gerando de novo; o aviso do HUD não se aplica).
 - Trucks: FECHADO pelo Matheus (nov/2026). Aceleração conferida (Buccaneer,
-  vídeo); a curva usa o mesmo código de pneu dos buggies (conferido com save
-  states na derrapagem) e no vídeo tem o mesmo comportamento. Só reabrir com
-  save state na curva se algo parecer estranho jogando.
+  vídeo); a curva usa o mesmo código de pneu dos buggies. O Matheus testou
+  lado a lado com o jogo: idêntica, não precisa de save state.
+- Peças compradas (upgrade, rodas, pneus, tune & setup, para-choque): uma
+  por vez, cada uma num menuzinho provisório como a oficina (tecla O); o
+  menu do jogo (Garagem) vem depois.
 
 - Pneu e aro comprados (hipótese: troca de textura, ver docs/assets.md).
   Provável resposta: 56 rodas completas sem nome no archive dos buggies (45
@@ -2164,8 +2166,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   entidade usada tem). Brancas, quase horizontais, uma em cada ponta do
   mapa: devem ter servido pra assar a luz. A luz da corrida é só a do
   Environment.xml, já portada. FECHADO (docs/engenharia_reversa.md). A tremida da batida
-  (0x380418) agora tem objeto pra bater; trava (veículo+0xa6c/0xa74/0xa78)
-  não portada.
+  (0x380418) agora tem objeto pra bater. A trava dela (descritor+0x8c+0x18
+  != 0) não vale pros nossos carros: esse campo é 0 em todos os buggies e
+  trucks da RAM (deve ser dos ATVs/motos).
 - Som do motor (melhoria nossa, plano combinado com o Matheus): o jogo só
   tem 3 bancos de motor (02/03/04, XMLs 00002/00004/00005) repetidos nos 12
   buggies (o Mosquito soa igual ao Kraken V8). Plano: o Matheus monta cada
