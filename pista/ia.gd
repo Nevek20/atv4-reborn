@@ -436,12 +436,14 @@ func criar() -> void:
 		c.terrain = main.terrain
 		c.objetos = main.objetos
 		c.name = "Rival%d" % (k + 1)
+		var pl: Dictionary = pilotos[k]
+		# número do rival (AIPlayers.xml Number): costas do piloto e quadros do carro
+		c.piloto_escolhas = {"numero": "%02d" % (int(pl.numero) % 100)}
 		main.add_child(c)
 		# carro com carro só pelas esferas do VehicleVehicle (batida_carros.gd)
 		batidas.separar(c, main.car)
 		for y in rivais:
 			batidas.separar(c, y.car)
-		var pl: Dictionary = pilotos[k]
 		if main.objetos:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),

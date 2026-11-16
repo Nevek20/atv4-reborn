@@ -292,6 +292,28 @@ def decalques(img, s, src, veh, numero, log=print):
             log(f"    {chave:12s} {nome:24s} {' '.join(caixas)}")
 
 
+def atlas_pecas(todas):
+    """peças (imagem, canto) -> atlas em prateleiras de até 1024 px e, por
+    peça, [x, y, largura, altura, canto x, canto y] (None = não desenha)"""
+    itens, x, y, alt, larg = [], 0, 0, 0, 1
+    for r in todas:
+        if r is None:
+            itens.append(None)
+            continue
+        w, h = r[0].size
+        if x + w > 1024:
+            x, y, alt = 0, y + alt, 0
+        itens.append([x, y, w, h, r[1][0], r[1][1]])
+        x += w
+        alt = max(alt, h)
+        larg = max(larg, x)
+    img = Image.new("RGBA", (larg, max(1, y + alt)), (0, 0, 0, 0))
+    for r, it in zip(todas, itens):
+        if it:
+            img.paste(r[0], (it[0], it[1]))
+    return img, itens
+
+
 def pecas_logos(s, src, veh, numero, size, pasta, log=print):
     """oficina (Logos, carro/pintura.gd): cada lugar de logo do carro (a
     k-ésima camada Decal de uma área, chave HOOD1, SIDE3...) com TODOS os logos
@@ -313,11 +335,17 @@ def pecas_logos(s, src, veh, numero, size, pasta, log=print):
             bed = arq.bed(lay.get("BedFile"))
             if t is None or not bed or lay.get("Box") not in bed:
                 continue
-            r = texto_peca(arq, bed[lay.get("Box")], t, numero, size)
+            # o número do perfil (oficina: Número, 00..99; rivais: o do
+            # AIPlayers.xml): os 100 já desenhados nesta caixa, como os logos
+            todas = [texto_peca(arq, bed[lay.get("Box")], t, "%02d" % k, size) for k in range(100)]
+            folhas["numeros"] = ["%02d" % k for k in range(100)]
+            padrao["NUMERO"] = numero
+            img, itens = atlas_pecas(todas)
+            nome = "numero_%s.png" % lay.get("Box")
+            img.save(os.path.join(pasta, nome))
+            pecas.append({"chave": "NUMERO", "folha": "numeros", "atlas": nome, "itens": itens})
+            r = todas[int(numero)] if numero.isdigit() and int(numero) < 100 else texto_peca(arq, bed[lay.get("Box")], t, numero, size)
             if r:
-                nome = "numero_%d.png" % len(pecas)
-                r[0].save(os.path.join(pasta, nome))
-                pecas.append({"chave": "", "png": nome, "x": r[1][0], "y": r[1][1]})
                 camada.alpha_composite(r[0], r[1])
         elif tipo == "Decal":
             area = lay.get("DecalArea", "")
@@ -342,23 +370,7 @@ def pecas_logos(s, src, veh, numero, size, pasta, log=print):
                 if not (bed and b.get("Box") in bed and sp is not None):
                     continue
                 todas = [sprite_peca(rc, bed[b.get("Box")], sp, size) for rc in recortes]
-                # atlas em prateleiras de até 1024 px
-                itens, x, y, alt, larg = [], 0, 0, 0, 1
-                for r in todas:
-                    if r is None:
-                        itens.append(None)
-                        continue
-                    w, h = r[0].size
-                    if x + w > 1024:
-                        x, y, alt = 0, y + alt, 0
-                    itens.append([x, y, w, h, r[1][0], r[1][1]])
-                    x += w
-                    alt = max(alt, h)
-                    larg = max(larg, x)
-                img = Image.new("RGBA", (larg, max(1, y + alt)), (0, 0, 0, 0))
-                for r, it in zip(todas, itens):
-                    if it:
-                        img.paste(r[0], (it[0], it[1]))
+                img, itens = atlas_pecas(todas)
                 nome = "logo_%s_%s.png" % (chave, b.get("Box"))
                 img.save(os.path.join(pasta, nome))
                 pecas.append({"chave": chave, "folha": path, "atlas": nome, "itens": itens})

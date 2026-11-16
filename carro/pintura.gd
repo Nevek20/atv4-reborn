@@ -15,7 +15,8 @@ extends RefCounted
 ## lugares do carro (HOOD1, SIDE3...: a k-ésima camada Decal da área) e cada
 ## logo da folha já desenhado em cada caixa (atlas por caixa), mais o número;
 ## aqui cola as peças na ordem do XML com a conta do alpha_composite do PIL.
-## Com os logos de fábrica sai igual ao logos.png (teste_pintura_jogo).
+## Com os logos de fábrica sai igual ao logos.png (teste_pintura_jogo). O
+## número (00..99) é o lugar "NUMERO", com os 100 desenhados em cada caixa.
 
 const PALETA := "res://assets/pintura/paleta.json"
 const SALVAS := "user://oficina.json"   # NOSSO: o jogo guarda no perfil
@@ -89,8 +90,12 @@ func montar(cores := {}, cpp := true) -> Image:
 		else:
 			c.append_array([(v as Color).r8, (v as Color).g8, (v as Color).b8])
 	var lg := logos
-	if cores.get("logos") is Dictionary and not info_logos.is_empty():
-		lg = camada_logos(cores.logos)
+	if (cores.get("logos") is Dictionary or cores.has("numero")) and not info_logos.is_empty():
+		# o número do perfil (piloto) entra como o lugar "NUMERO" (00..99)
+		var esc: Dictionary = (cores.get("logos", {}) as Dictionary).duplicate()
+		if cores.has("numero"):
+			esc["NUMERO"] = String(cores.numero)
+		lg = camada_logos(esc)
 	var px: PackedByteArray
 	if cpp and ClassDB.class_exists("FisicaCarro") and ClassDB.class_has_method("FisicaCarro", "compor_pintura"):
 		px = ClassDB.class_call_static("FisicaCarro", "compor_pintura", masc, det, lg, c)

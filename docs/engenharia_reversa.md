@@ -1596,8 +1596,9 @@ de profundidade), sem luz e sem névoa. Não portado: SunHalo, rotationSpeed
   (tests/teste_pintura_jogo.gd). C++: FisicaCarro.compor_pintura.
   Logos: camadas/logos.json = lugares (chave, área, nº), folhas (nomes da
   .bed na ordem), padrão (DefaultDecals casado com a .bed sem diferenciar
-  maiúscula/espaço) e peças na ordem do XML (número: png e canto; logo:
-  atlas da caixa com [x, y, largura, altura, canto x, canto y] por logo).
+  maiúscula/espaço) e peças na ordem do XML (logo e número: atlas da caixa
+  com [x, y, largura, altura, canto x, canto y] por item; número = chave
+  NUMERO, folha "numeros" 00..99, padrão "00" do perfil novo).
   Rotação dos Sprite no jogo: 0..355 graus (não só 90 em 90).
 - Textura "white" gerada em tempo real pelas camadas do XML 150xx
   (Buggy_NN_Base/Primary/Secondary/Detail + cores + decalques + número).

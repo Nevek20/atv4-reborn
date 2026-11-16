@@ -201,16 +201,22 @@ def exportar(unpacked, out, log=print):
         if t is None:
             continue
         b = gp.ler_bed(f.bloco("Setup/CharacterComposite/Textures/RIDER.bed"))[lay.get("Box")]
-        texto = NOME_PADRAO if lay.get("Box") == "PLAYER_NAME" else NUMERO_PADRAO
-        r = gp.texto_peca(arq, b, t, texto, (TAM, TAM))
+        if lay.get("Box") == "PLAYER_NUMBER":
+            # o número do perfil (oficina: Número, 00..99): os 100 desenhados
+            todas = [gp.texto_peca(arq, b, t, "%02d" % k, (TAM, TAM)) for k in range(100)]
+            img, itens = gp.atlas_pecas(todas)
+            img.save(os.path.join(pasta, "player_number.png"))
+            textos["PLAYER_NUMBER"] = {"atlas": "player_number.png", "itens": itens}
+            continue
+        r = gp.texto_peca(arq, b, t, NOME_PADRAO, (TAM, TAM))
         if r:
             nome = lay.get("Box").lower() + ".png"
             r[0].save(os.path.join(pasta, nome))
-            textos[lay.get("Box")] = {"png": nome, "x": r[1][0], "y": r[1][1], "texto": texto}
+            textos[lay.get("Box")] = {"png": nome, "x": r[1][0], "y": r[1][1], "texto": NOME_PADRAO}
     # perfil padrão: o 2º piloto da RAM nos 2 saves (perfil novo, provável):
     # tudo no modelo 1 e as DefaultColours do 1; rosto 2, cabelo 5, sexo 1?
     padrao = {"roupa": 1, "capacete": 1, "oculos": 1, "luva": 1, "bota": 1,
-              "rosto": 1, "cabelo": 1, "sexo": "m", "cores": cores_padrao[0]}
+              "rosto": 1, "cabelo": 1, "sexo": "m", "numero": NUMERO_PADRAO, "cores": cores_padrao[0]}
     info = {"tamanho": TAM, "caixas": cx, "partes": [[b, e, p] for b, e, p in PARTES], "modelos": modelos,
             "cores_padrao": cores_padrao, "rostos": rostos, "cabelos": cabelos, "textos": textos, "padrao": padrao}
     with open(os.path.join(pasta, "piloto.json"), "w", encoding="utf-8") as fp:
@@ -221,7 +227,7 @@ def exportar(unpacked, out, log=print):
     # do Matheus (roupa 11, capacete 9, óculos 12, luva 3, bota 10, cores do
     # Paint Shop: base 233,35,0, primária 255,100,0, secundária 255,200,69)
     teste = {"roupa": 11, "capacete": 9, "oculos": 12, "luva": 3, "bota": 10, "rosto": 6, "cabelo": 4,
-             "sexo": "m", "cores": {"base": [233, 35, 0], "primary": [255, 100, 0],
+             "sexo": "m", "numero": "67", "cores": {"base": [233, 35, 0], "primary": [255, 100, 0],
                                     "secondary": [255, 200, 69], "text": [255, 255, 255]}}
     info["teste"] = teste
     with open(os.path.join(pasta, "piloto.json"), "w", encoding="utf-8") as fp:
@@ -255,7 +261,14 @@ def montar(pasta, info, esc):
         t = info["textos"].get(box)
         if not t:
             continue
-        im = Image.open(os.path.join(pasta, t["png"])).convert("RGBA")
+        if "atlas" in t:          # número: o do perfil, no atlas dos 100
+            it = t["itens"][int(esc.get("numero", NUMERO_PADRAO))]
+            if not it:
+                continue
+            im = Image.open(os.path.join(pasta, t["atlas"])).convert("RGBA").crop((it[0], it[1], it[0] + it[2], it[1] + it[3]))
+            t = {"x": it[4], "y": it[5]}
+        else:
+            im = Image.open(os.path.join(pasta, t["png"])).convert("RGBA")
         w, h = im.size
         src = list(im.get_flattened_data())
         for j in range(h):

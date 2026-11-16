@@ -337,8 +337,9 @@ func _padrao_logos() -> void:
 ## CLOTHING.xml); Paint Shop: base, primária, secundária e texto pro piloto
 ## todo, na paleta do jogo. "De fábrica" = as cores da roupa escolhida
 ## (DefaultColours), "Perfil padrão" = tudo de volta
-## Change Rider do jogo (sexo, rosto, cabelo; nome e número ainda não)
-const PILOTO_EXTRA := {"sexo": "Sexo", "rosto": "Rosto", "cabelo": "Cabelo"}
+## Change Rider do jogo (sexo, rosto, cabelo e número 00..99; nome ainda não).
+## O número vai nas costas do piloto e nos quadros do número do carro
+const PILOTO_EXTRA := {"sexo": "Sexo", "rosto": "Rosto", "cabelo": "Cabelo", "numero": "Número"}
 
 
 func _montar_piloto() -> void:
@@ -353,21 +354,22 @@ func _montar_piloto() -> void:
 		l.text = PILOTO_EXTRA[k]
 		l.custom_minimum_size.x = 90
 		linha.add_child(l)
-		var menos := Button.new()
-		menos.text = "◀"
-		menos.focus_mode = Control.FOCUS_NONE
-		menos.pressed.connect(_passo_extra.bind(k, -1))
-		linha.add_child(menos)
-		var nome := Label.new()
-		nome.custom_minimum_size.x = 120
-		nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		linha.add_child(nome)
-		var mais := Button.new()
-		mais.text = "▶"
-		mais.focus_mode = Control.FOCUS_NONE
-		mais.pressed.connect(_passo_extra.bind(k, 1))
-		linha.add_child(mais)
-		_nomes_peca[k] = nome
+		# número: ◀◀ ▶▶ pulam de 10 (NOSSO, o jogo digita)
+		var passos := [[-10, "◀◀"], [-1, "◀"], [0, ""], [1, "▶"], [10, "▶▶"]] if k == "numero" \
+			else [[-1, "◀"], [0, ""], [1, "▶"]]
+		for ps in passos:
+			if ps[0] == 0:
+				var nome := Label.new()
+				nome.custom_minimum_size.x = 120
+				nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				linha.add_child(nome)
+				_nomes_peca[k] = nome
+				continue
+			var b := Button.new()
+			b.text = ps[1]
+			b.focus_mode = Control.FOCUS_NONE
+			b.pressed.connect(_passo_extra.bind(k, ps[0]))
+			linha.add_child(b)
 	var titulo := Label.new()
 	titulo.text = "Equipamento"
 	titulo.add_theme_color_override("font_color", Color(1, 0.8, 0.4))
@@ -476,6 +478,8 @@ func _mostrar_piloto() -> void:
 			_nomes_peca[k].text = String(cab[i]).capitalize() if i >= 0 and i < cab.size() else str(e.cabelo)
 		elif k == "rosto":
 			_nomes_peca[k].text = "Rosto %d" % int(e.rosto)
+		elif k == "numero":
+			_nomes_peca[k].text = "%02d" % String(e.get("numero", "00")).to_int()
 		else:
 			_nomes_peca[k].text = "Modelo %d" % int(e[k])
 	var v: Array = e.cores[camada_piloto]
@@ -509,6 +513,8 @@ func _passo_extra(k: String, d: int) -> void:
 	var e := _esc_piloto()
 	if k == "sexo":
 		esc["sexo"] = "m" if String(e.sexo) == "f" else "f"
+	elif k == "numero":
+		esc["numero"] = "%02d" % posmod(String(e.get("numero", "00")).to_int() + d, 100)
 	else:
 		var n := maxi((_pp.info.get("rostos", {}).get(String(e.sexo), []) as Array).size(), 1) if k == "rosto" \
 			else maxi((_pp.info.get("cabelos", []) as Array).size(), 1)

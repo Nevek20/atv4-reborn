@@ -125,7 +125,7 @@ func _load_model() -> void:
 	var lp := model_path.get_base_dir().path_join(livery_file)
 	if ResourceLoader.exists(lp):
 		livery = load(lp)
-	if not cores_pintura.is_empty():
+	if not cores_pintura.is_empty() or piloto_escolhas.has("numero"):
 		var t := _textura_pintura(cores_pintura)
 		if t:
 			livery = t
@@ -708,7 +708,11 @@ func pintar_piloto(esc: Dictionary) -> bool:
 		_piloto_pintura = preload("res://carro/piloto_pintura.gd").carregar()
 	if _piloto_pintura == null:
 		return false
+	var num_antes := String(piloto_escolhas.get("numero", "00"))
 	piloto_escolhas = esc.duplicate(true)
+	# o número do perfil também vai no carro (quadros do número): repinta
+	if String(esc.get("numero", "00")) != num_antes and tem_camadas():
+		pintar(cores_pintura)
 	# trocou o sexo: outro modelo (o mesmo esqueleto), monta o piloto de novo
 	var sexo := String(_piloto_pintura.completo(esc).sexo)
 	if sexo != piloto_sexo and (sexo == "m" or FileAccess.file_exists(PILOTO_DIR.path_join("piloto_f.json"))):
@@ -734,7 +738,12 @@ func _textura_pintura(cores: Dictionary) -> ImageTexture:
 		_pintura = preload("res://carro/pintura.gd").carregar(model_path.get_base_dir(), livery_file)
 	if _pintura == null:
 		return null
-	return ImageTexture.create_from_image(_pintura.montar(cores))
+	# o número do piloto (perfil) vai nos quadros do número do carro
+	var e := cores
+	if piloto_escolhas.has("numero"):
+		e = cores.duplicate()
+		e["numero"] = piloto_escolhas.numero
+	return ImageTexture.create_from_image(_pintura.montar(e))
 
 
 func _load_lascas() -> void:

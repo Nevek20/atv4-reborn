@@ -90,6 +90,14 @@ func montar(esc := {}, cpp := true) -> Image:
 		var t = info.textos.get(box)
 		if t == null:
 			continue
+		if t.has("atlas"):
+			# número do perfil (00..99), recortado do atlas dos 100
+			var k := String(e.get("numero", "00")).to_int()
+			var it = (t.itens as Array)[clampi(k, 0, (t.itens as Array).size() - 1)]
+			var at = _png(t.atlas)
+			if it and at:
+				_texto(px, _recorte(at, it), int(it[2]), int(it[4]), int(it[5]), tc)
+			continue
 		var a = _png(t.png)
 		if a:
 			_texto(px, a[1], a[0], int(t.x), int(t.y), tc)
@@ -166,6 +174,17 @@ func _texto(dst: PackedByteArray, src: PackedByteArray, sw: int, x0: int, y0: in
 				var s: int = src[i + k] * int(cor[k]) / 255
 				var tt: int = s * c1 + dst[o + k] * c2 + (0x80 << 7)
 				dst[o + k] = (((tt >> 8) + tt) >> 8) >> 7
+
+
+## pedaço [x, y, w, h, ...] do atlas (largura, bytes RGBA8) -> bytes RGBA8
+static func _recorte(at: Array, it: Array) -> PackedByteArray:
+	var sw: int = at[0]
+	var src: PackedByteArray = at[1]
+	var out := PackedByteArray()
+	for yy in int(it[3]):
+		var i := ((int(it[1]) + yy) * sw + int(it[0])) * 4
+		out.append_array(src.slice(i, i + int(it[2]) * 4))
+	return out
 
 
 func _png(nome: String):

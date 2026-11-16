@@ -950,8 +950,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   casos; C++ 8 ms, GDScript 0.5 s); ~7 MB de camadas fora do git. NOSSO: a
   tela (aba Piloto da oficina, "Modelo N"), salvar em user://oficina.json,
   rivais com o perfil padrão (as texturas da IA, AITextures, não foram
-  portadas). Pendente: sexo, rosto, cabelo, nome e número no menu (Change
-  Rider) e a piloto feminina.
+  portadas). Sexo, rosto, cabelo e número vieram depois (abaixo).
   APROVADO pelo Matheus (nov/2026): "testado e aprovado".
 - Piloto feminino (nov/2026): FEMALE_HIGH.srd usa o mesmo esqueleto do
   masculino (braços, mãos no volante e STEER_LEFT servem igual: alcance das
@@ -959,8 +958,20 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   cavalo já dobrado pela PONY_TAIL_POSE do jogo e preso inteiro no osso
   "head" (NOSSO: no jogo ele tem 7 ossos próprios; a pose é parada, então
   o rabo não balança). Aba Piloto: Sexo, Rosto (6) e Cabelo (13) do Change
-  Rider; trocar o sexo monta o piloto de novo (a sujeira continua). Nome e
-  número ainda fixos ("PLAYER", "00").
+  Rider; trocar o sexo monta o piloto de novo (a sujeira continua). Nome
+  ainda fixo ("PLAYER").
+  APROVADO pelo Matheus (nov/2026): "ficou mt bom!!!".
+- Número do perfil (nov/2026, "faz o numero no menu primeiro"): o Number do
+  Change Rider (00..99) vai nas costas do piloto (PLAYER_NUMBER do
+  COMPOSITOR.xml, HUD_Numbers na cor TEXT) e nos quadros do número do carro
+  (Box com Text do XML 150xx, como no jogo: o mesmo número do perfil). Como
+  os logos, os 100 já desenhados por caixa (gerar_pintura: numero_<Box>.png,
+  chave NUMERO; piloto_pintura: camadas/player_number.png) e o Godot só cola:
+  --numero 42 do gerar_pintura = o Godot com 42, 0 pixel (Renegade, Shinto,
+  Kraken; GDScript e C++). Rivais: o Number do AIPlayers.xml (ia.gd, carro e
+  piloto). NOSSO: a linha "Número" na aba Piloto com ◀◀ ▶▶ de 10 em 10 (o
+  jogo digita), salvo em user://oficina.json (piloto.numero) e trocar repinta
+  o carro na hora. tests/teste_numero.gd.
 - Piloto (piloto.gd, tools/piloto.py): .skl/.srd/.bac decifrados
   (docs Piloto). ROOT da animação em cima do ARSE, sem a rotação do ponto.
   STEER_LEFT no tempo |s|/6, espelhado com s > 0 do jogo (= rider_s < 0 no
@@ -2152,7 +2163,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   num loop limpo) e o gravar_som.gd ganhou SOM_PASTA (comparar variantes). O
   "buraco" de força em 5500-6500 no dinamômetro (Panther, Chimera, Punisher)
   é da medida, não do motor: o nível dos loops não cai ali.
-- Piloto: LOD MID/LOW, nome e número no menu, rabo de cavalo balançando.
+- Piloto: LOD MID/LOW, nome no menu, rabo de cavalo balançando.
 - Câmera do piloto: referência do Matheus = cockpit do Dirt Rally 2.0
   (horizonte perto do meio, volante cortado embaixo, muita estrada).
 - Sinal do giro/direção visual: falta save state andando com volante virado.

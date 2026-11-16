@@ -17,6 +17,7 @@ func _initialize() -> void:
 	var t_cpp := 0.0
 	var t_logos := 0.0
 	var n_logos := 0
+	var n_numero := 0
 	var cpp := ClassDB.class_exists("FisicaCarro") and ClassDB.class_has_method("FisicaCarro", "compor_pintura")
 	if pal.size() != 128:
 		print("  paleta: %d cores (esperado 128; rode o gerar_pintura.py)" % pal.size())
@@ -76,6 +77,15 @@ func _initialize() -> void:
 				if outro != "" and p.camada_logos({ch: outro}) == p.logos:
 					print("  %s: trocar o logo de %s não mudou nada" % [nome, ch])
 					falhas += 1
+			# número do perfil (oficina, Piloto: Número): "00" = o de fábrica, outro muda
+			if not p.nomes_logos("NUMERO").is_empty():
+				n_numero += 1
+				if p.camada_logos({"NUMERO": "00"}) != p.logos:
+					print("  %s: número 00 pelas peças x logos.png diferente" % nome)
+					falhas += 1
+				if p.camada_logos({"NUMERO": "42"}) == p.logos:
+					print("  %s: trocar o número não mudou nada" % nome)
+					falhas += 1
 		# cores da paleta (as do save state: base 80, primária e secundária)
 		var cores := {"base": pal[79] if pal.size() > 79 else Color.RED,
 			"primary": pal[86] if pal.size() > 86 else Color.GREEN,
@@ -88,8 +98,8 @@ func _initialize() -> void:
 		print("  nenhum carro com camadas (rode o gerar_pintura.py)")
 		falhas += 1
 	else:
-		print("  %d carros; montar: GDScript %.0f ms, C++ %s por carro; logos (%d carros): %.0f ms" % [carros, t_gd / carros,
-			"%.1f ms" % (t_cpp / carros) if cpp else "sem a biblioteca", n_logos, t_logos / maxi(n_logos, 1)])
+		print("  %d carros; montar: GDScript %.0f ms, C++ %s por carro; logos (%d carros): %.0f ms; número em %d" % [carros, t_gd / carros,
+			"%.1f ms" % (t_cpp / carros) if cpp else "sem a biblioteca", n_logos, t_logos / maxi(n_logos, 1), n_numero])
 	print("teste_pintura_jogo: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 	quit()
 
