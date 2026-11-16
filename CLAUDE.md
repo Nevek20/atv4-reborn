@@ -158,6 +158,8 @@ Arquivos, modelos e pintura
 - Piloto: textura montada pelo COMPOSITOR.xml (um modelo por peça, 4 cores
   pro piloto todo; tools/piloto_pintura.py = carro/piloto_pintura.gd = C++
   compor_piloto, teste_piloto_pintura). O rosto da corrida é preto no jogo.
+  Feminino = FEMALE_HIGH (mesmo esqueleto) + rabo de cavalo na pose do jogo
+  preso no osso "head" (piloto_f.json); trocar o sexo remonta o piloto.
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.
@@ -323,4 +325,4 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
 - IA: LOD com os modelos 2K/1K/500 do jogo.
-- Piloto: textura em camadas como o jogo, LOD, piloto feminino.
+- Piloto: LOD, nome e número no menu, rabo de cavalo balançando.

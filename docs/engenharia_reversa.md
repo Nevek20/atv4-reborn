@@ -569,6 +569,15 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
   DefaultColours do 1 (rosto 2, cabelo 5, sexo 1): deve ser o perfil novo.
   As cores valem pro piloto todo (o Matheus: "é que nem carro, nada
   separado"); cada peça escolhe o modelo separado.
+- Piloto feminino: Characters/Models/InGame_MidSkel/FEMALE_HIGH.srd
+  (other/00510) usa o MESMO InGame_Mid.skl (47 ossos, mesmas matrizes da
+  cabeça) do MALE_HIGH; o rabo de cavalo é Characters/Models/PonyTail/
+  PONYTAIL.srd (00517, 183 vértices) com o PonyTail.skl (00520: PONY_A..
+  PONY_END, em fila) no espaço do corpo, PONY_A 6 cm atrás do osso "head",
+  e a pose PonyTail/HighDetail/Generic/PONY_TAIL_POSE.bac (raw/00507r +0,
+  514 bytes, tipo 1, 2 quadros iguais: cada osso gira em X, a ponta desce
+  pra 1.41 m, 20 cm atrás). UV do rabo na caixa HAIR da textura. Sexo no
+  perfil = +0x68 (0 no do Matheus); rostos Face_Female_FACE01..06.
 - Remake (carro/piloto_pintura.gd, tools/piloto_pintura.py): BASE x cor,
   PRIMARY e SECONDARY x cor (v x m // 255) por cima pelo alfa (DIV255),
   DETAIL pelo alfa, WRINKLE v x w // 255; camadas já no tamanho da caixa

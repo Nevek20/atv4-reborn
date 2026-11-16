@@ -536,7 +536,13 @@ func _load_piloto() -> void:
 	if not points.has("ARSE"):
 		return
 	piloto = preload("res://carro/piloto.gd").new()
-	if not piloto.carregar(PILOTO_DIR, MODEL_CULL):
+	# piloto feminino (tools/piloto.py: FEMALE_HIGH + rabo de cavalo, o mesmo
+	# esqueleto); sem o piloto_f.json fica o masculino
+	var arquivo := "piloto.json"
+	if String(piloto_escolhas.get("sexo", "m")) == "f" and FileAccess.file_exists(PILOTO_DIR.path_join("piloto_f.json")):
+		arquivo = "piloto_f.json"
+	piloto_sexo = "f" if arquivo == "piloto_f.json" else "m"
+	if not piloto.carregar(PILOTO_DIR, MODEL_CULL, arquivo):
 		piloto.free()
 		piloto = null
 		return
@@ -703,6 +709,16 @@ func pintar_piloto(esc: Dictionary) -> bool:
 	if _piloto_pintura == null:
 		return false
 	piloto_escolhas = esc.duplicate(true)
+	# trocou o sexo: outro modelo (o mesmo esqueleto), monta o piloto de novo
+	var sexo := String(_piloto_pintura.completo(esc).sexo)
+	if sexo != piloto_sexo and (sexo == "m" or FileAccess.file_exists(PILOTO_DIR.path_join("piloto_f.json"))):
+		var overlay: Material = piloto.malha.material_overlay if piloto.malha else null
+		piloto.queue_free()
+		piloto = null
+		_load_piloto()          # já pinta (piloto_escolhas) e prende no volante
+		if piloto and piloto.malha and overlay:
+			piloto.malha.material_overlay = overlay      # sujeira do piloto
+		return piloto != null
 	piloto.pintar(ImageTexture.create_from_image(_piloto_pintura.montar(esc)))
 	return true
 

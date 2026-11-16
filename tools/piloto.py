@@ -52,6 +52,13 @@ import sys
 
 SKL = "other/00519_bloco.bin"          # Characters/Skeletons/InGame_Mid.skl
 SRD = "other/00514_bloco.bin"          # MALE_HIGH.srd
+# piloto feminino (nov/2026): o mesmo esqueleto de 47 ossos; o rabo de cavalo
+# é outro modelo (7 ossos próprios) no mesmo espaço do corpo, atrás do osso
+# "head", que a PONY_TAIL_POSE (2 quadros iguais) dobra pra baixo
+SRD_F = "other/00510_bloco.bin"        # FEMALE_HIGH.srd
+SKL_RABO = "other/00520_bloco.bin"     # Characters/Skeletons/PonyTail.skl
+SRD_RABO = "other/00517_bloco.bin"     # Characters/Models/PonyTail/PONYTAIL.srd
+BAC_RABO = ("raw/00507r_bloco.bin", 0, 514)   # PonyTail/HighDetail/Generic/PONY_TAIL_POSE.bac
 BAC = "other/00312_bloco.bin"          # Truck/Controls STEER_LEFT.bac
 TEXTURA = "gob/00970_rider_fury.gob"   # Characters/Textures/Template/rider_fury.bog
 
@@ -169,6 +176,68 @@ def ler_bac(d):
     return {"dur": dur, "tempos": tempos, "quadros": quadros}
 
 
+def rabo_de_cavalo(ler):
+    """malha do rabo de cavalo na PONY_TAIL_POSE (vértices e normais no espaço
+    do corpo, já dobrado), pra ir inteira no osso "head" do corpo. NOSSO: o
+    rabo não balança (no jogo ele tem os 7 ossos dele; a pose é parada)"""
+    import numpy as np
+    nomes, pais, _esp = ler_skl(ler(SKL_RABO))
+    m = ler_srd(ler(SRD_RABO))
+    arq, ini, tam = BAC_RABO
+    pose = ler_bac(ler(arq)[ini:ini + tam])["quadros"][0]
+
+    def qmat(x, y, z, w):
+        return np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                         [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+                         [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    g = [None] * len(nomes)
+    for b in range(len(nomes)):
+        lm = np.eye(4)
+        lm[:3, :3] = qmat(*pose[b][3:])
+        lm[:3, 3] = pose[b][:3]
+        g[b] = lm if pais[b] < 0 else g[pais[b]] @ lm
+    # pele: pose global x inversa de repouso (a do .srd é em linhas: transpõe)
+    pele = [g[b] @ np.array(m["inv"][b], dtype=float).reshape(4, 4).T for b in range(len(nomes))]
+    pos, nrm = [], []
+    for v, n, ob, pw in zip(m["pos"], m["normal"], m["ossos"], m["pesos"]):
+        acc = np.zeros(3)
+        accn = np.zeros(3)
+        for b, w in zip(ob, pw):
+            if w > 0 and b < len(pele):
+                acc += w * (pele[b] @ np.append(v, 1.0))[:3]
+                accn += w * (pele[b][:3, :3] @ np.array(n))
+        pos.append(acc.tolist())
+        ln = np.linalg.norm(accn)
+        nrm.append((accn / ln if ln > 0 else accn).tolist())
+    return {"pos": pos, "normal": nrm, "uv": m["uv"], "tris": m["tris"]}
+
+
+def modelo_json(nomes, pais, espelho, m, anim, fonte, rabo=None, osso_cabeca=-1):
+    r = lambda v: [round(x, 6) for x in v]
+    pos, normal, uv = list(m["pos"]), list(m["normal"]), list(m["uv"])
+    ossos_v, pesos, tris = list(m["ossos"]), list(m["pesos"]), list(m["tris"])
+    if rabo:
+        base = len(pos)
+        pos += rabo["pos"]
+        normal += rabo["normal"]
+        uv += rabo["uv"]
+        ossos_v += [[osso_cabeca, 0, 0, 0]] * len(rabo["pos"])
+        pesos += [[1.0, 0.0, 0.0, 0.0]] * len(rabo["pos"])
+        tris += [[a + base, b + base, c + base] for a, b, c in rabo["tris"]]
+    return {
+        "fonte": fonte,
+        "ossos": [{"nome": nomes[b], "pai": pais[b], "espelho": espelho[b], "inv": r(m["inv"][b])}
+                  for b in range(len(nomes))],
+        "pos": [x for v in pos for x in r(v)],
+        "normal": [x for v in normal for x in r(v)],
+        "uv": [x for v in uv for x in r(v)],
+        "ossos_v": [x for v in ossos_v for x in v],
+        "pesos": [x for v in pesos for x in r(v)],
+        "tris": [x for t in tris for x in t],
+        "steer_left": anim,
+    }
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unpacked")
@@ -178,21 +247,23 @@ def main():
     nomes, pais, espelho = ler_skl(ler(SKL))
     m = ler_srd(ler(SRD))
     anim = ler_bac(ler(BAC))
-    r = lambda v: [round(x, 6) for x in v]
-    out = {
-        "fonte": "tools/piloto.py: %s, %s, %s; textura %s" % (SKL, SRD, BAC, TEXTURA),
-        "ossos": [{"nome": nomes[b], "pai": pais[b], "espelho": espelho[b], "inv": r(m["inv"][b])}
-                  for b in range(len(nomes))],
-        "pos": [x for v in m["pos"] for x in r(v)],
-        "normal": [x for v in m["normal"] for x in r(v)],
-        "uv": [x for v in m["uv"] for x in r(v)],
-        "ossos_v": [x for v in m["ossos"] for x in v],
-        "pesos": [x for v in m["pesos"] for x in r(v)],
-        "tris": [x for t in m["tris"] for x in t],
-        "steer_left": anim,
-    }
+    out = modelo_json(nomes, pais, espelho, m, anim,
+                      "tools/piloto.py: %s, %s, %s; textura %s" % (SKL, SRD, BAC, TEXTURA))
+    # piloto feminino: corpo + rabo de cavalo no osso da cabeça
+    try:
+        mf = ler_srd(ler(SRD_F))
+        rabo = rabo_de_cavalo(ler)
+        out_f = modelo_json(nomes, pais, espelho, mf, anim,
+                            "tools/piloto.py: %s, %s (+ rabo %s, %s, pose %s), %s" % (SKL, SRD_F, SKL_RABO, SRD_RABO, BAC_RABO[0], BAC),
+                            rabo, nomes.index("head"))
+    except Exception as e:  # noqa: BLE001
+        out_f = None
+        print("[!] piloto feminino: %s" % e)
     os.makedirs(a.out, exist_ok=True)
     json.dump(out, open(os.path.join(a.out, "piloto.json"), "w"), separators=(",", ":"))
+    if out_f:
+        json.dump(out_f, open(os.path.join(a.out, "piloto_f.json"), "w"), separators=(",", ":"))
+        print("[+] piloto feminino: %d vértices (%d do rabo de cavalo)" % (len(out_f["pos"]) // 3, len(out_f["pos"]) // 3 - len(mf["pos"])))
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from gob_tex2png import convert
     im, info = convert(os.path.join(a.unpacked, TEXTURA))

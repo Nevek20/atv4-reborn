@@ -108,8 +108,8 @@ func _liga_cpp() -> void:
 
 
 ## monta tudo a partir de dir/piloto.json; false se o asset não existe
-func carregar(dir: String, cull: int) -> bool:
-	var arq := dir.path_join("piloto.json")
+func carregar(dir: String, cull: int, arquivo := "piloto.json") -> bool:
+	var arq := dir.path_join(arquivo)
 	if not FileAccess.file_exists(arq):
 		return false
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(arq))

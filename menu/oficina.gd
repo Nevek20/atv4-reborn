@@ -337,7 +337,37 @@ func _padrao_logos() -> void:
 ## CLOTHING.xml); Paint Shop: base, primária, secundária e texto pro piloto
 ## todo, na paleta do jogo. "De fábrica" = as cores da roupa escolhida
 ## (DefaultColours), "Perfil padrão" = tudo de volta
+## Change Rider do jogo (sexo, rosto, cabelo; nome e número ainda não)
+const PILOTO_EXTRA := {"sexo": "Sexo", "rosto": "Rosto", "cabelo": "Cabelo"}
+
+
 func _montar_piloto() -> void:
+	var t0 := Label.new()
+	t0.text = "Piloto"
+	t0.add_theme_color_override("font_color", Color(1, 0.8, 0.4))
+	_pag_piloto.add_child(t0)
+	for k in PILOTO_EXTRA:
+		var linha := HBoxContainer.new()
+		_pag_piloto.add_child(linha)
+		var l := Label.new()
+		l.text = PILOTO_EXTRA[k]
+		l.custom_minimum_size.x = 90
+		linha.add_child(l)
+		var menos := Button.new()
+		menos.text = "◀"
+		menos.focus_mode = Control.FOCUS_NONE
+		menos.pressed.connect(_passo_extra.bind(k, -1))
+		linha.add_child(menos)
+		var nome := Label.new()
+		nome.custom_minimum_size.x = 120
+		nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		linha.add_child(nome)
+		var mais := Button.new()
+		mais.text = "▶"
+		mais.focus_mode = Control.FOCUS_NONE
+		mais.pressed.connect(_passo_extra.bind(k, 1))
+		linha.add_child(mais)
+		_nomes_peca[k] = nome
 	var titulo := Label.new()
 	titulo.text = "Equipamento"
 	titulo.add_theme_color_override("font_color", Color(1, 0.8, 0.4))
@@ -438,7 +468,16 @@ func _mostrar_piloto() -> void:
 		_aviso.text = "Este carro está sem o piloto (rode o tools/piloto.py)."
 	var e := _esc_piloto()
 	for k in _nomes_peca:
-		_nomes_peca[k].text = "Modelo %d" % int(e[k])
+		if k == "sexo":
+			_nomes_peca[k].text = "Feminino" if String(e.sexo) == "f" else "Masculino"
+		elif k == "cabelo":
+			var cab: Array = _pp.info.get("cabelos", [])
+			var i := int(e.cabelo) - 1
+			_nomes_peca[k].text = String(cab[i]).capitalize() if i >= 0 and i < cab.size() else str(e.cabelo)
+		elif k == "rosto":
+			_nomes_peca[k].text = "Rosto %d" % int(e.rosto)
+		else:
+			_nomes_peca[k].text = "Modelo %d" % int(e[k])
 	var v: Array = e.cores[camada_piloto]
 	var c := Color8(int(v[0]), int(v[1]), int(v[2]))
 	_amostra_piloto.color = c
@@ -460,6 +499,20 @@ func _passo_peca(k: String, d: int) -> void:
 	var esc: Dictionary = main.car.piloto_escolhas.duplicate(true)
 	var n := maxi(_pp.quantos(k), 1)
 	esc[k] = posmod(int(_esc_piloto()[k]) - 1 + d, n) + 1
+	_aplicar_piloto(esc)
+
+
+func _passo_extra(k: String, d: int) -> void:
+	if not _pp_ok():
+		return
+	var esc: Dictionary = main.car.piloto_escolhas.duplicate(true)
+	var e := _esc_piloto()
+	if k == "sexo":
+		esc["sexo"] = "m" if String(e.sexo) == "f" else "f"
+	else:
+		var n := maxi((_pp.info.get("rostos", {}).get(String(e.sexo), []) as Array).size(), 1) if k == "rosto" \
+			else maxi((_pp.info.get("cabelos", []) as Array).size(), 1)
+		esc[k] = posmod(int(e[k]) - 1 + d, n) + 1
 	_aplicar_piloto(esc)
 
 
