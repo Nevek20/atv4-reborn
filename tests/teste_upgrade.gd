@@ -49,6 +49,15 @@ func _initialize() -> void:
 		_falha("motor no máximo devia somar 1.0 (0.35+0.2+0.1+0.1+0.2+0.05 do câmbio protótipo)")
 	if f1.brake != 1.0 or f1.susp != 1.0 or f1.shift != 1.0 or f1.mass != 1.0:
 		_falha("freio, suspensão, embreagem e peso no máximo deviam dar 1.0")
+	# o bug do jogo: ir trocando peça e outra voltar. Aqui: cada slot só dele
+	var esc := {}
+	var op: Dictionary = PECAS.opcoes("Buggy")
+	for slot in ["EngineInternals", "EngineManagement", "EngineHeader", "Exhaust", "IntakeKit"]:
+		esc[slot] = op.slots[slot][-1]
+		var tt: Dictionary = VD.factory_tuning(PECAS.VEICULOS, PECAS.UPGRADES, "BUGGY_01", esc)
+		for s2 in esc:
+			if tt.config.get(s2) != esc[s2]:
+				_falha("trocar %s desfez %s" % [slot, s2])
 	# 2) na pista plana
 	var chao := StaticBody3D.new()
 	var cs := CollisionShape3D.new()

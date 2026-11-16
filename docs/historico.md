@@ -2151,6 +2151,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   (tests/teste_upgrade.gd). NOSSO: a tela; dá pra pôr peça abaixo da de
   fábrica e não tem preço. Shocks, GearRatios, BrakeBalanceController e
   GearboxType ficam pro Tune & Setup.
+  Bug do jogo que o Matheus pediu pra não repetir: ir comprando peças de
+  motor e uma já comprada voltar. Aqui cada slot é só dele (teste_upgrade
+  troca as 5 de motor uma a uma e confere que nenhuma desfaz) e a escolha
+  ainda não aplicada fica guardada ao fechar e reabrir a oficina no mesmo
+  carro.
 
 - Pneu e aro comprados (hipótese: troca de textura, ver docs/assets.md).
   Provável resposta: 56 rodas completas sem nome no archive dos buggies (45

@@ -43,6 +43,7 @@ var _upg := {}                     # opções da classe (carro/pecas.gd opcoes)
 var _upg_fab := {}                 # DefaultConfig do carro
 var _upg_esc := {}                 # escolha ainda não aplicada {slot: peça}
 var _upg_veh := ""
+var _upg_chave := ""
 
 
 func _init(m) -> void:
@@ -595,11 +596,17 @@ func _montar_upgrade() -> void:
 
 func _abrir_upgrade() -> void:
 	var car = main.car
-	_upg_veh = car.tuning_id if car.tuning_id != "" else car.vehicle_id
+	var veh: String = car.tuning_id if car.tuning_id != "" else car.vehicle_id
+	# reabrir no mesmo carro mantém a escolha que ainda não foi aplicada (no
+	# jogo, ir trocando peça fazia outra voltar: aqui cada slot é só dele)
+	var mesmo: bool = veh == _upg_veh and car.chave() == _upg_chave
+	_upg_veh = veh
+	_upg_chave = car.chave()
 	var f: Dictionary = PECAS_UPG.fabrica(_upg_veh)
 	_upg_fab = f.config
 	_upg = PECAS_UPG.opcoes(f.classe)
-	_upg_esc = (car.pecas_escolhidas as Dictionary).duplicate()
+	if not mesmo:
+		_upg_esc = (car.pecas_escolhidas as Dictionary).duplicate()
 	for c in _lista_upg.get_children():
 		c.queue_free()
 	for slot in PECAS_UPG.SLOTS:
