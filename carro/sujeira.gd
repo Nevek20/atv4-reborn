@@ -123,6 +123,8 @@ func montar(car) -> bool:
 		piloto.set_shader_parameter("tex", load(TEX_PILOTO))
 		piloto.set_shader_parameter("escala", ESCALA_PILOTO)
 		car.piloto.malha.material_overlay = piloto
+		if car.piloto.rabo:
+			car.piloto.rabo.malha.material_overlay = piloto
 	if aviso != "":
 		push_warning("Sujeira: " + aviso)
 	return camadas > 0 or piloto != null

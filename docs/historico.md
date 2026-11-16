@@ -961,6 +961,32 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Rider; trocar o sexo monta o piloto de novo (a sujeira continua). Nome
   ainda fixo ("PLAYER").
   APROVADO pelo Matheus (nov/2026): "ficou mt bom!!!".
+- Rabo de cavalo balançando (nov/2026, carro/rabo.gd): no jogo o rabo é um
+  modelo à parte (0x1a9588, piloto+0x2d4) com os 7 ossos dele, no espaço do
+  corpo (quem chama, 0x183e40, passa o mundo do piloto), e cada osso é uma
+  partícula (massa 1, 0x235640). Por quadro (0x1886f8, dt do quadro): força
+  -Y max(8, 20 - v) e, com o piloto+0x2b8 ligado (correndo), -Z do ROOT x
+  max(v, 20) nas 4 primeiras e max(v, 10) nas outras (v = corpo+0xe0 em
+  m/s); Verlet (0x1b1648: d = x - x_ant + F·dt²) e o osso anda 0.8·d. Aí as
+  restrições numa passada (0x1abdf0, ordem de criação do 0x1a9880): esfera
+  head + 1.0·Z r 0.15 (longe de tudo: é o que o exe faz), cilindro ombro
+  direito/esquerdo + 0.035·Z r 0.17 (reta sem ponta, 0x1ae2e0), esfera
+  upper_back + 0.15·Y + 0.01·Z r 0.15 (0x1ae618: empurra d·(1 - |d|/r)),
+  pino neck + 0.09·Y - 0.08·Z (tipo 1) e as distâncias da pose (tipo 2,
+  0x1ac018: só o filho anda e gira o quanto o pedaço girou). Os pontos dos
+  colisores saíram rodando o 0x1a9db0 no re/emu_ee.py (re/rabo_colisores.py):
+  o descompilador embaralha as contas de vetor do VU0.
+  No buggy o eixo Z do ROOT aponta quase pra cima (piloto sentado), então o
+  "vento" puxa mais pra baixo que pra trás: o rabo fica encostado nos
+  ombros/costas a ~47 graus e a velocidade quase não muda (48 a 30 m/s); o
+  balanço vem do pescoço virando o volante (~4 cm pro lado) e das trocas de
+  velocidade (~0.3 s). Igual ao jogo, que foi feito pros ATVs (lá o ROOT
+  aponta pra frente).
+  NOSSO: passo fixo de 0.02 s com interpolação na tela, a pose começar com a
+  raiz no pino (a PONY_TAIL_POSE fica 16 cm atrás com o piloto sentado e o
+  encaixe dava um tranco que jogava o rabo por cima dos ombros) e assentar
+  1 s ao montar; some com a cabeça na câmera do piloto. Custo ~11 us por
+  passo (só a piloto do jogador). tests/teste_rabo.gd.
 - Número do perfil (nov/2026, "faz o numero no menu primeiro"): o Number do
   Change Rider (00..99) vai nas costas do piloto (PLAYER_NUMBER do
   COMPOSITOR.xml, HUD_Numbers na cor TEXT) e nos quadros do número do carro
@@ -2173,7 +2199,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   num loop limpo) e o gravar_som.gd ganhou SOM_PASTA (comparar variantes). O
   "buraco" de força em 5500-6500 no dinamômetro (Panther, Chimera, Punisher)
   é da medida, não do motor: o nível dos loops não cai ali.
-- Piloto: LOD MID/LOW, nome no menu, rabo de cavalo balançando.
+- Piloto: LOD MID/LOW, nome no menu.
 - Câmera do piloto: referência do Matheus = cockpit do Dirt Rally 2.0
   (horizonte perto do meio, volante cortado embaixo, muita estrada).
 - Sinal do giro/direção visual: falta save state andando com volante virado.

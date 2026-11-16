@@ -578,6 +578,19 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
   514 bytes, tipo 1, 2 quadros iguais: cada osso gira em X, a ponta desce
   pra 1.41 m, 20 cm atrás). UV do rabo na caixa HAIR da textura. Sexo no
   perfil = +0x68 (0 no do Matheus); rostos Face_Female_FACE01..06.
+- Rabo balançando: objeto em piloto+0x2d4 (0x1a9588 cria: +0xc modelo, +0x10
+  esqueleto, +0x18 pose PONY_TAIL_POSE, +0x14 camada da física, +8 sistema
+  de partículas 0x1b17d0 com uma partícula por osso, 0x2e0 bytes, +0x2c0 =
+  índice do osso; +0x1c pino, +0x20 esfera da cabeça, +0x24 cilindro dos
+  ombros, +0x28 esfera das costas). Restrições (0x1abd38 lista, 0x1abdf0
+  aplica; 0x20 bytes: tipo em float, depois os números): 1 pino (0x1abf78),
+  2 distância (0x1ac018), 8 esfera (0x1ae618), 9 cilindro sem ponta
+  (0x1ae2e0); 3..7 e 10 existem mas o rabo não usa. Por quadro: 0x183e40 ->
+  0x1a9db0 (põe os colisores pelos ossos do piloto 3, 4, 5, 6 e 18) ->
+  0x1886f8 (forças, 0x1b1bc8 integra cada partícula pelo 0x1b1648, 0.8 do
+  passo, 0x1b1c50 restrições). Partícula: +0x10 posição, +0xb0 anterior,
+  +0x130 força, +0x170 massa, +0x174 1/massa (0x2356f8; padrão 1.0 em
+  0x235640), +0x2d0 posição no começo do quadro.
 - Remake (carro/piloto_pintura.gd, tools/piloto_pintura.py): BASE x cor,
   PRIMARY e SECONDARY x cor (v x m // 255) por cima pelo alfa (DIV255),
   DETAIL pelo alfa, WRINKLE v x w // 255; camadas já no tamanho da caixa

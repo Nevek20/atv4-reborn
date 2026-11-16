@@ -212,6 +212,57 @@ def rabo_de_cavalo(ler):
     return {"pos": pos, "normal": nrm, "uv": m["uv"], "tris": m["tris"]}
 
 
+def rabo_modelo(ler):
+    """rabo de cavalo como modelo próprio, como no jogo (FUN_001a9588): os 7
+    ossos do PonyTail.skl (PONY_A..PONY_END) com a inversa de repouso do
+    .srd, a malha presa neles e a PONY_TAIL_POSE em transforms globais (espaço
+    do corpo). O carro/rabo.gd balança a corrente (física do jogo) em cima."""
+    import numpy as np
+    nomes, pais, _esp = ler_skl(ler(SKL_RABO))
+    m = ler_srd(ler(SRD_RABO))
+    arq, ini, tam = BAC_RABO
+    pose = ler_bac(ler(arq)[ini:ini + tam])["quadros"][0]
+    g = [None] * len(nomes)
+    for b in range(len(nomes)):
+        x, y, z, w = pose[b][3:]
+        lm = np.eye(4)
+        lm[:3, :3] = [[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                      [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+                      [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]]
+        lm[:3, 3] = pose[b][:3]
+        g[b] = lm if pais[b] < 0 else g[pais[b]] @ lm
+    r = lambda v: [round(float(x), 6) for x in v]
+    glob = []
+    for b in range(len(nomes)):
+        # rotação global como quatérnio (x, y, z, w) + posição
+        rm = g[b][:3, :3]
+        t = np.trace(rm)
+        if t > 0:
+            k = 0.5 / np.sqrt(t + 1.0)
+            q = [(rm[2, 1] - rm[1, 2]) * k, (rm[0, 2] - rm[2, 0]) * k, (rm[1, 0] - rm[0, 1]) * k, 0.25 / k]
+        else:
+            i = int(np.argmax([rm[0, 0], rm[1, 1], rm[2, 2]]))
+            j, kk = (i + 1) % 3, (i + 2) % 3
+            sq = np.sqrt(1.0 + rm[i, i] - rm[j, j] - rm[kk, kk]) * 2
+            q = [0.0] * 4
+            q[i] = 0.25 * sq
+            q[j] = (rm[j, i] + rm[i, j]) / sq
+            q[kk] = (rm[kk, i] + rm[i, kk]) / sq
+            q[3] = (rm[kk, j] - rm[j, kk]) / sq
+        glob.append(r(list(g[b][:3, 3]) + q))
+    return {
+        "fonte": "tools/piloto.py: %s, %s, pose %s" % (SKL_RABO, SRD_RABO, BAC_RABO[0]),
+        "ossos": [{"nome": nomes[b], "pai": pais[b], "inv": r(m["inv"][b])} for b in range(len(nomes))],
+        "pose": glob,
+        "pos": [x for v in m["pos"] for x in r(v)],
+        "normal": [x for v in m["normal"] for x in r(v)],
+        "uv": [x for v in m["uv"] for x in r(v)],
+        "ossos_v": [x for v in m["ossos"] for x in v],
+        "pesos": [x for v in m["pesos"] for x in r(v)],
+        "tris": [x for t in m["tris"] for x in t],
+    }
+
+
 def modelo_json(nomes, pais, espelho, m, anim, fonte, rabo=None, osso_cabeca=-1):
     r = lambda v: [round(x, 6) for x in v]
     pos, normal, uv = list(m["pos"]), list(m["normal"]), list(m["uv"])
@@ -249,13 +300,14 @@ def main():
     anim = ler_bac(ler(BAC))
     out = modelo_json(nomes, pais, espelho, m, anim,
                       "tools/piloto.py: %s, %s, %s; textura %s" % (SKL, SRD, BAC, TEXTURA))
-    # piloto feminino: corpo + rabo de cavalo no osso da cabeça
+    # piloto feminino: corpo + rabo de cavalo, que é um modelo à parte com os
+    # ossos dele (balança: carro/rabo.gd). O rabo_de_cavalo() (preso inteiro
+    # na cabeça) ficou de reserva pra quem não tiver o rabo.gd
     try:
         mf = ler_srd(ler(SRD_F))
-        rabo = rabo_de_cavalo(ler)
         out_f = modelo_json(nomes, pais, espelho, mf, anim,
-                            "tools/piloto.py: %s, %s (+ rabo %s, %s, pose %s), %s" % (SKL, SRD_F, SKL_RABO, SRD_RABO, BAC_RABO[0], BAC),
-                            rabo, nomes.index("head"))
+                            "tools/piloto.py: %s, %s (+ rabo %s, %s, pose %s), %s" % (SKL, SRD_F, SKL_RABO, SRD_RABO, BAC_RABO[0], BAC))
+        out_f["rabo"] = rabo_modelo(ler)
     except Exception as e:  # noqa: BLE001
         out_f = None
         print("[!] piloto feminino: %s" % e)
@@ -263,7 +315,8 @@ def main():
     json.dump(out, open(os.path.join(a.out, "piloto.json"), "w"), separators=(",", ":"))
     if out_f:
         json.dump(out_f, open(os.path.join(a.out, "piloto_f.json"), "w"), separators=(",", ":"))
-        print("[+] piloto feminino: %d vértices (%d do rabo de cavalo)" % (len(out_f["pos"]) // 3, len(out_f["pos"]) // 3 - len(mf["pos"])))
+        print("[+] piloto feminino: %d vértices + rabo de cavalo (%d vértices, %d ossos)" % (
+            len(out_f["pos"]) // 3, len(out_f["rabo"]["pos"]) // 3, len(out_f["rabo"]["ossos"])))
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from gob_tex2png import convert
     im, info = convert(os.path.join(a.unpacked, TEXTURA))

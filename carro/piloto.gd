@@ -17,6 +17,7 @@ var root_pos := Vector3.ZERO      # osso ROOT na animação: vai em cima do ARSE
 # câmera do piloto (nossa, não existe no buggy do jogo): o capacete some (osso
 # head encolhido) e ficam o corpo, os braços e as mãos no volante
 var sem_cabeca := false
+var rabo = null                    # carro/rabo.gd (piloto feminino: o rabo de cavalo balançando)
 var _cabeca := -1
 var _esp := PackedInt32Array()
 var _tempos := PackedFloat32Array()
@@ -232,7 +233,20 @@ func carregar(dir: String, cull: int, arquivo := "piloto.json") -> bool:
 			_punho[mao] = g0[mao].affine_inverse() * (soma / cnt)
 	pose(0.0)
 	_liga_cpp()
+	# rabo de cavalo: modelo à parte, no espaço do corpo (o mesmo do esqueleto)
+	if d.has("rabo"):
+		rabo = preload("res://carro/rabo.gd").new()
+		add_child(rabo)
+		rabo.montar(d.rabo, mat, self)
 	return true
+
+
+## rabo de cavalo: um quadro da tela (v = |v| do carro em m/s). Some junto
+## com a cabeça (câmera do piloto)
+func rabo_passo(dt: float, v: float) -> void:
+	if rabo:
+		rabo.visible = not sem_cabeca
+		rabo.avancar(dt, v)
 
 
 func _desce_de(b: int, ancestral: int) -> bool:

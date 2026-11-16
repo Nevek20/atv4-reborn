@@ -722,6 +722,8 @@ func pintar_piloto(esc: Dictionary) -> bool:
 		_load_piloto()          # já pinta (piloto_escolhas) e prende no volante
 		if piloto and piloto.malha and overlay:
 			piloto.malha.material_overlay = overlay      # sujeira do piloto
+			if piloto.rabo:
+				piloto.rabo.malha.material_overlay = overlay
 		return piloto != null
 	piloto.pintar(ImageTexture.create_from_image(_piloto_pintura.montar(esc)))
 	return true
@@ -1235,6 +1237,7 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 	var _t := Time.get_ticks_usec() if perf_on else 0
 	if piloto and not longe_vis:
 		piloto.pose(rider_s, treme if VOLANTE_GIRA else 0.0)
+		piloto.rabo_passo(dt, linear_velocity.length())     # corpo+0xe0
 	if perf_on: _t = _pf("vis: piloto (braços IK)", _t)
 	if susp_vis and not longe_vis:
 		susp_vis.update(a_jogo)

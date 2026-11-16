@@ -50,6 +50,7 @@ carro/               o carro
   suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
   carro_glb.gd         carros extras nossos (.glb no frame do jogo)
   piloto.gd            piloto do jogo no ARSE, braços pela direção (STEER_LEFT) e mãos no aro
+  rabo.gd              rabo de cavalo da piloto balançando (corrente de partículas do jogo)
   volantes.gd          volantes gerados, um estilo por carro (melhoria nossa)
   painel.gd            painel funcional (melhoria nossa)
   motor_treme.gd       motor e escape tremendo (melhoria nossa)
@@ -164,6 +165,10 @@ Arquivos, modelos e pintura
   (os 100 pré-desenhados por caixa, como os logos); rivais = Number do
   AIPlayers.xml. Trocar repinta os dois (teste_numero). Lazarus: o 87
   desenhado nas placas é apagado e as caixas são NOSSAS (PLACAS_NOSSAS).
+  Rabo de cavalo = modelo à parte com 7 ossos e a corrente de partículas do
+  jogo (carro/rabo.gd, teste_rabo) no espaço do corpo: no buggy ele fica
+  encostado nas costas e balança pelo pescoço, não pela velocidade (o eixo
+  Z do ROOT sentado aponta pra cima). Não "melhorar" no chute.
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.
@@ -329,4 +334,4 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
 - IA: LOD com os modelos 2K/1K/500 do jogo.
-- Piloto: LOD, nome no menu, rabo de cavalo balançando.
+- Piloto: LOD, nome no menu.
