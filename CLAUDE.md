@@ -162,7 +162,8 @@ Arquivos, modelos e pintura
   preso no osso "head" (piloto_f.json); trocar o sexo remonta o piloto.
   Número do perfil (00..99) = costas do piloto E quadros do número do carro
   (os 100 pré-desenhados por caixa, como os logos); rivais = Number do
-  AIPlayers.xml. Trocar repinta os dois (teste_numero).
+  AIPlayers.xml. Trocar repinta os dois (teste_numero). Lazarus: o 87
+  desenhado nas placas é apagado e as caixas são NOSSAS (PLACAS_NOSSAS).
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.

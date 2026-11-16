@@ -972,6 +972,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   piloto). NOSSO: a linha "Número" na aba Piloto com ◀◀ ▶▶ de 10 em 10 (o
   jogo digita), salvo em user://oficina.json (piloto.numero) e trocar repinta
   o carro na hora. tests/teste_numero.gd.
+  Lazarus (nov/2026, print do Matheus com "87" na porta): o carro cortado
+  não ganhou o número. O XML 15106 manda o PLAYER_NUMBER pra
+  Fairing_Truck_04.bed, que não existe no archive, e o Text nem tem Fit (a
+  Chassis_Truck_04.bed tem um PLAYER_NUMBER, mas cai em cima de nada da
+  textura). O "87" está desenhado na Truck_04_Detail em 3 placas brancas
+  (as 2 laterais e o teto). NOSSO (pedido dele): gerar_pintura.PLACAS_NOSSAS
+  apaga o 87 (miolo = o branco da placa, 246 com alfa 254) e põe 3 caixas
+  PLAYER_NUMBER no lugar e do tamanho do 87 (calibrado contra ele: IoU 0.73
+  a 0.76, a fonte do 87 não é a HUD_Numbers; teto girado 270). O maior
+  número (36 x 26 px) cabe na placa (46 x 47).
 - Piloto (piloto.gd, tools/piloto.py): .skl/.srd/.bac decifrados
   (docs Piloto). ROOT da animação em cima do ARSE, sem a rotação do ponto.
   STEER_LEFT no tempo |s|/6, espelhado com s > 0 do jogo (= rider_s < 0 no

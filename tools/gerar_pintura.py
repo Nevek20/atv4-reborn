@@ -111,6 +111,54 @@ def ler_bed(d):
     return out
 
 
+# caixas NOSSAS (não estão no archive), pelo nome do .bed: placas_nossas()
+BEDS_NOSSOS = {}
+
+# Lazarus (CHASSIS_Truck_04, carro cortado do jogo): o XML 15106 manda o
+# número pra Fairing_Truck_04.bed, que não existe, e o Text dele nem tem Fit
+# (a Chassis_Truck_04.bed tem um PLAYER_NUMBER, mas em cima de nada desta
+# textura). O "87" ficou desenhado na Truck_04_Detail, em 3 placas brancas: as
+# 2 laterais e o teto. NOSSO (pedido do Matheus): apaga o 87 (o miolo vira o
+# branco da placa) e põe uma caixa PLAYER_NUMBER em cada placa, no lugar e do
+# tamanho do 87 (casado com ele: IoU 0.73-0.76, a fonte do 87 não é a
+# HUD_Numbers), o do teto girado 270. Em px da Detail (512):
+# (tinta do 87 x0, y0, x1, y1), (centro do número), altura, giro
+PLACAS_NOSSAS = {
+    "Truck_04": [((152, 74, 187, 97), (170.0, 87.0), 25.5, 0),
+                 ((318, 213, 353, 237), (335.5, 226.0), 25.5, 0),
+                 ((409, 363, 440, 410), (425.0, 386.0), 33.0, 270)],
+}
+
+
+def placas_nossas(prefixo, s, detalhe):
+    """PLACAS_NOSSAS: (XML com as caixas novas, Detail sem o número velho)"""
+    from PIL import ImageDraw
+    placas = PLACAS_NOSSAS[prefixo]
+    w, h = detalhe.size
+    fx, fy = w / 512, h / 512
+    detalhe = detalhe.copy()
+    px = detalhe.load()
+    d = ImageDraw.Draw(detalhe)
+    bed = "Placas_" + prefixo
+    BEDS_NOSSOS[bed] = {}
+    raiz = ET.fromstring(s)
+    for lay in raiz.findall("LAYER"):
+        if lay.get("Type") == "Box" and lay.find("LAYER[@Type='Text']") is not None:
+            raiz.remove(lay)                       # a caixa quebrada (Fairing_Truck_04)
+    for k, (tinta, centro, alt, giro) in enumerate(placas):
+        x0, y0, x1, y1 = tinta
+        fundo = px[int((x0 - 3) * fx), int((y0 - 3) * fy)]      # o branco da placa
+        d.rectangle(((x0 - 2) * fx, (y0 - 2) * fy, (x1 + 2) * fx, (y1 + 2) * fy), fill=fundo)
+        nome = "PLAYER_NUMBER" + ("_%02d" % (k + 1) if k else "")
+        cx, cy = centro[0] / 512, centro[1] / 512
+        BEDS_NOSSOS[bed][nome] = (cx - 0.05, cy - alt / 1024, cx + 0.05, cy + alt / 1024)
+        caixa = ET.SubElement(raiz, "LAYER", Type="Box", BedFile=bed, Box=nome)
+        t = ET.SubElement(caixa, "LAYER", Type="Text", Name=nome, Font="HUD_Numbers",
+                          Fit="Vertical", Rotation=str(giro))
+        ET.SubElement(t, "Diffuse", A="255", R="0", G="0", B="0")
+    return ET.tostring(raiz, encoding="unicode"), detalhe
+
+
 class Arquivos:
     """bed e textura pelo nome do arquivo no archive (data/arquivos.tsv)"""
 
@@ -127,6 +175,8 @@ class Arquivos:
         return None
 
     def bed(self, nome):
+        if nome in BEDS_NOSSOS:
+            return BEDS_NOSSOS[nome]
         if nome not in self.cache:
             cam = self._caminho(nome + ".bed")
             self.cache[nome] = ler_bed(ler_bloco(self.src, self.arqs, cam)) if cam else None
@@ -427,6 +477,9 @@ def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, 
 
     if "Base" not in camadas:
         return None
+    if prefixo in PLACAS_NOSSAS and "Detail" in camadas:
+        s, camadas["Detail"] = placas_nossas(prefixo, s, camadas["Detail"])
+        log(f"[+] {prefixo}: número velho apagado, {len(PLACAS_NOSSAS[prefixo])} caixas de número NOSSAS")
     w, h = camadas["Base"].size
     vazio = Image.new("L", (w, h), 0)
     mascara = {k: camadas[k].resize((w, h)).getchannel("A") if k in camadas else vazio
