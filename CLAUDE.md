@@ -159,8 +159,8 @@ Arquivos, modelos e pintura
 - Piloto: textura montada pelo COMPOSITOR.xml (um modelo por peça, 4 cores
   pro piloto todo; tools/piloto_pintura.py = carro/piloto_pintura.gd = C++
   compor_piloto, teste_piloto_pintura). O rosto da corrida é preto no jogo.
-  Feminino = FEMALE_HIGH (mesmo esqueleto) + rabo de cavalo na pose do jogo
-  preso no osso "head" (piloto_f.json); trocar o sexo remonta o piloto.
+  Feminino = FEMALE_HIGH (mesmo esqueleto) + rabo de cavalo (piloto_f.json,
+  chave "rabo"); trocar o sexo remonta o piloto.
   Número do perfil (00..99) = costas do piloto E quadros do número do carro
   (os 100 pré-desenhados por caixa, como os logos); rivais = Number do
   AIPlayers.xml. Trocar repinta os dois (teste_numero). Lazarus: o 87
