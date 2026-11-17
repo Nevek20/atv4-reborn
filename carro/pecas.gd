@@ -97,6 +97,11 @@ static func _pneus(classe: String, out: Dictionary) -> void:
 				slot = ""
 			elif n == classe and dentro:
 				break
+	# NOSSO: o aro 8 (IG_WHEEL_HEAVYCLASS_08) está pronto no archive e o
+	# catálogo não lista: entra como extra no fim (gerar_buggies copia)
+	if out.slots.has("Alloy") and not out.slots.Alloy.has("WHEEL_08"):
+		out.slots.Alloy.append("WHEEL_08")
+		out.efeitos["WHEEL_08"] = {}
 
 
 ## DefaultConfig do veículo (Name do vehicles.xml) e a classe dele
@@ -126,7 +131,7 @@ static func fabrica(veh: String) -> Dictionary:
 ## aro "WHEEL_03" -> "Aro 3"
 static func rotulo(peca: String) -> String:
 	if peca.begins_with("WHEEL_"):
-		return "Aro %d" % peca.substr(6).to_int()
+		return "Aro %d%s" % [peca.substr(6).to_int(), " (extra)" if peca == "WHEEL_08" else ""]
 	if not peca.contains("_Level") and not peca.contains("_Prototype") and peca.to_upper() == peca:
 		var tipo := {"DIRT": "Terra", "MUD": "Lama", "SAND": "Areia", "SNOW": "Neve", "GENERAL": "Uso geral"}
 		var p := peca.split("_")

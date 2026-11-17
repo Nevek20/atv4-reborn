@@ -23,8 +23,8 @@ func _initialize() -> void:
 			_falha("%s devia ter 11 pneus" % cls)
 		var na: int = op.slots.get("Alloy", []).size()
 		print("  %s: %d aros (%s)" % [cls, na, ", ".join(op.slots.get("Alloy", []).map(func(p): return PECAS.rotulo(p)))])
-		if na != 7:
-			_falha("%s devia ter 7 aros" % cls)
+		if na != 8:
+			_falha("%s devia ter 8 aros (7 do catálogo + o 8 extra)" % cls)
 	main = load("res://main.tscn").instantiate()
 	root.add_child(main)
 
@@ -47,7 +47,7 @@ func _process(_d: float) -> bool:
 		var Car = load("res://carro/car.gd")
 		var novo = Car.new()
 		main.configurar(novo, main.frota()[i])
-		novo.pecas_escolhidas = {"Tire": "SAND_BUDGET", "Alloy": "WHEEL_05"}
+		novo.pecas_escolhidas = {"Tire": "SAND_BUDGET", "Alloy": "WHEEL_08"}
 		novo.terrain = main.terrain
 		novo.objetos = main.objetos
 		main.add_child(novo)
@@ -74,8 +74,8 @@ func _process(_d: float) -> bool:
 		print("  na terra comum: de fábrica %.2f, Areia Budget %.2f (no asfalto do spawn os dois %.2f)" % [a0, a1, com.mu])
 		if terra < 0 or a1 >= a0:
 			_falha("areia na terra devia agarrar menos que o de fábrica")
-		print("  aro: de fábrica %s, com WHEEL_05 %s" % [fab.aro, com.aro])
-		if not fab.aro.contains("ALLOY") or not com.aro.contains("HEAVYCLASS_05"):
+		print("  aro: de fábrica %s, com WHEEL_08 (extra) %s" % [fab.aro, com.aro])
+		if not fab.aro.contains("ALLOY") or not com.aro.contains("HEAVYCLASS_08"):
 			_falha("a textura do aro não trocou")
 		print("teste_pneu: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 		quit()

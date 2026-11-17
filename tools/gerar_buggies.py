@@ -226,19 +226,23 @@ def aros(unpacked, texturas, pasta, rodas_dir):
     al = c.find("Alloy") if c is not None else None
     arqs = ler_arquivos()
     out = {}
-    for e in (al if al is not None else []):
-        nome = "IG_" + e.get("mInGameModelName").upper()
+    lista = [(e.get("mComponentName"), e.get("mInGameModelName")) for e in (al if al is not None else [])]
+    # NOSSO: a IG_WHEEL_HEAVYCLASS_08 está pronta no archive (buggy e truck)
+    # mas o catálogo não lista; entra como aro extra (o Matheus pediu)
+    lista.append(("WHEEL_08", "Wheel_Heavyclass_08"))
+    for comp, modelo in lista:
+        nome = "IG_" + modelo.upper()
         f = arqs.get(("Vehicles/%s/Textures/Wheel/%s.bog" % (pasta, nome)).lower())
         if not f:
             continue
         base = os.path.splitext(os.path.basename(f[0]))[0]          # 22398_IG_WHEEL_HEAVYCLASS_01
         achou = glob.glob(os.path.join(texturas, "**", base + ".png"), recursive=True)
         if not achou:
-            print("[!] aro %s: sem %s.png nas texturas" % (e.get("mComponentName"), base))
+            print("[!] aro %s: sem %s.png nas texturas" % (comp, base))
             continue
         os.makedirs(rodas_dir, exist_ok=True)
         shutil.copyfile(achou[0], os.path.join(rodas_dir, base + ".png"))
-        out[e.get("mComponentName")] = base + ".png"
+        out[comp] = base + ".png"
     return out
 
 

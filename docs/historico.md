@@ -2177,7 +2177,10 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   todos os modelos de pneu usam a mesma ALLOY. O gerar_buggies copia as
   IG_WHEEL_HEAVYCLASS da classe (Buggy e Truck têm as suas) pra rodas/
   (pecas.json "aros") e o carro_montagem troca a textura ALLOY da roda.
-  Combina com qualquer pneu. A 08 existe no archive mas o catálogo não usa.
+  Combina com qualquer pneu. Aro 8 (extra, NOSSO, pedido do Matheus): a
+  IG_WHEEL_HEAVYCLASS_08 está pronta no archive (buggy e truck, 6 raios, no
+  mesmo padrão dos outros) mas o catálogo não lista; entra no fim da lista.
+  O Matheus testou pneus e aros no PC: "deu tudo certo".
 
 - Modelos que o jogo não usa (docs/assets.md): CHASSIS_Truck_04 (pré-runner,
   o "Lazarus", nome escolhido pelo Matheus), CHASSIS_ATV_03..08 e os de IA
