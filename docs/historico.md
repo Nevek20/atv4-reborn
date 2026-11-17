@@ -2128,6 +2128,24 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   relatório: 1.4 a 5.8 m/s conforme o estado de antes, sem virar de cabeça
   pra baixo. Batida de trás empurra a 25 km/h (a correção ficou certa).
 
+## Borrão de movimento nas rodas (nov/2026, NOSSO)
+
+- Pedido do Matheus ("as rodas estão esquisitas ao olho"): a 50-60 quadros
+  por segundo a roda gira tanto por quadro que o aro e os cravos parecem
+  travar ou girar ao contrário (estroboscópico). O jogo não tem borrão de
+  roda: o mMotionBlur das câmeras (On_Front, On_Hood, Handlebars) é borrão
+  de tela inteira; nada de textura ou modelo de roda girando no archive.
+- carro/roda_borrao.gd: o material da roda vira um shader com a mesma cor
+  do StandardMaterial (textura x albedo x cor do vértice; a cor do vértice
+  só converte de sRGB quando a saída não é sRGB, como o Godot faz: sem isso
+  a roda escurecia no Compatibility). Em cada pixel gira o ponto de -a/2 a
+  +a/2 no eixo da roda e leva o deslocamento pra UV pelas derivadas de tela
+  (serve pro aro, mapeado de frente, e pra banda de qualquer pneu, que cada
+  modelo mapeia num sentido). a = |omega| x dt do quadro (instance uniform
+  por roda), preso em 1.3 rad (com 3 rad a conta linear riscava o aro).
+  Parado: 1 amostra, igual ao material de antes (só serrilhado de borda
+  muda). BORRAO_RODAS=0 desliga. tests/teste_borrao_rodas.gd.
+
 ## Pendente / ideias
 
 - Lazarus: física própria feita (lazarus.xml); peças, mapa e decalques

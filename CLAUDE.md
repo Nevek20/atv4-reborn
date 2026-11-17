@@ -57,6 +57,7 @@ carro/               o carro
   motor_anima.gd       ventoinhas, polias e correia girando (melhoria nossa)
   luzes.gd, farol.gd   lanterna de freio, ré e farol acesos (melhoria nossa)
   sujeira.gd           sujeira do jogo na pintura e lama nas rodas
+  roda_borrao.gd       borrão de movimento nas rodas (melhoria nossa)
   pecas.gd             peças compradas (upgrades.xml por classe; oficina, aba Upgrade)
   pintura.gd           pintura montada em tempo real (camadas do gerar_pintura + 3 cores; oficina)
   piloto_pintura.gd    textura do piloto montada como o jogo (peças + 4 cores; oficina, aba Piloto)
@@ -323,6 +324,9 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Mãos no aro por IK com tabela por carro. Mão de fora parar escorregando
   pelo aro foi reprovado: não voltar. Banco, eixo do volante e braço aberto
   por carro: car.gd BANCO_NOSSO, VOLANTE_EIXO, BRACO_ABERTO.
+- Borrão nas rodas (roda_borrao.gd): o material da roda é um shader com a
+  MESMA cor do StandardMaterial (cor do vértice só vira linear se a saída não
+  é sRGB) que borra girando |omega| x dt, até 1.3 rad. O jogo não tem.
 - Mola visual integrada no quadro: passos pequenos (a do motor_treme dava
   NaN abaixo de ~37 FPS, o velho "!v.is_finite()").
 - Motor treme e anima, painel, cabine fechada: tabelas por carro em

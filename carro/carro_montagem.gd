@@ -74,7 +74,9 @@ func _make_wheel_mesh(w: Dictionary) -> void:
 				if aro and m2.albedo_texture and m2.albedo_texture.resource_path.get_file().contains("ALLOY"):
 					m2.albedo_texture = aro
 				material_do_jogo(m2)
-				mi.set_surface_override_material(i, m2)
+				# borrão de movimento (NOSSO, roda_borrao.gd): mesma cor, borra girando
+				mi.set_surface_override_material(i, RodaBorrao.material(m2) if BORRAO_RODAS else m2)
+		w.malha_roda = mi
 		# component map (14881): Mirror="1" nas rodas da esquerda do jogo
 		# (o pivô está no frame do jogo, dentro do espelho)
 		if w.left:
@@ -1234,6 +1236,11 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 		fc.visual_rodas(a_jogo)
 	else:
 		_visual_rodas_gd(a_jogo)
+	if BORRAO_RODAS:
+		for w in wheels:
+			var mr = w.get("malha_roda")
+			if mr:
+				mr.set_instance_shader_parameter("giro", 0.0 if longe_vis else RodaBorrao.giro(w.omega, dt))
 	# direção suavizada do piloto (0x187060: s += min(1/dt, 30)·(direção - s)·dt):
 	# é o que move os braços dele no jogo, então o volante anda junto
 	if dt > 0.0:

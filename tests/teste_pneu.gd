@@ -93,8 +93,9 @@ func _medir() -> Dictionary:
 	for mi in c.wheels[0].spin_node.find_children("*", "MeshInstance3D", true, false):
 		for i in mi.mesh.get_surface_count():
 			var m = mi.get_surface_override_material(i)
-			if m is StandardMaterial3D and m.albedo_texture:
-				var f: String = m.albedo_texture.resource_path.get_file()
+			var tx = m.get_shader_parameter("tex") if m is ShaderMaterial else (m.albedo_texture if m is StandardMaterial3D else null)
+			if tx:
+				var f: String = tx.resource_path.get_file()
 				if f.contains("ALLOY") or f.contains("HEAVYCLASS"):
 					aro = f
 	return {"pneu": c.pneu, "roda": String(c.wheel_front_file), "mu": mus.max(), "aro": aro}

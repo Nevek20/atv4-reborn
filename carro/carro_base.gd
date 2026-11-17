@@ -43,6 +43,9 @@ var som_pasta := ""            # pasta dos loops do motor, se não for a do id (
 var tuning_id := ""
 var motor_escondido := false
 var _cena_glb: Node = null     # cena do .glb enquanto monta carroceria, rodas e volante
+# borrão de movimento nas rodas (NOSSO, carro/roda_borrao.gd; BORRAO_RODAS=0 desliga)
+var BORRAO_RODAS := OS.get_environment("BORRAO_RODAS") != "0"
+const RodaBorrao := preload("res://carro/roda_borrao.gd")
 var pecas_escolhidas := {}   # peças compradas {slot: peça} (oficina, aba Upgrade; carro/pecas.gd)
 var tune_override := {}       # ex.: {"engine": 0.3} pra simular peças compradas
 var TUNE_ENGINE := 0.81       # Internals L3 + Management L2 + Header L2 + Intake L3 + Exhaust L3
