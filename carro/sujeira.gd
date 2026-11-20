@@ -171,7 +171,7 @@ static func _material(code: String, tex: Texture2D) -> ShaderMaterial:
 static func _malhas(n: Node) -> Array[MeshInstance3D]:
 	var out: Array[MeshInstance3D] = []
 	for c in n.get_children():
-		if c is MeshInstance3D and c.mesh:
+		if c is MeshInstance3D and c.mesh and not c.has_meta("fantasma"):   # cópias do borrão das rodas: sem lama
 			out.append(c)
 		out.append_array(_malhas(c))
 	return out

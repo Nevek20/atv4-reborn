@@ -431,6 +431,7 @@ func criar() -> void:
 		var c = main.Car.new()
 		main.configurar(c, v)
 		c.som_3d = true
+		c.rodas_fantasma = false        # borrão das rodas só de textura nos rivais
 		c.direcao_direta = true
 		c.desligadas = c.desligadas + ["painel"] + (Array(OS.get_environment("IA_DESL").split(",")) if OS.has_environment("IA_DESL") else [])
 		c.terrain = main.terrain

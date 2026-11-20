@@ -83,6 +83,9 @@ func _make_wheel_mesh(w: Dictionary) -> void:
 			mi.scale.x = -1.0
 		# centro do modelo = centro da roda (sem deslocamento: matriz da RAM)
 		spin.add_child(mi)
+		# cópias girando junto pro borrão da forma (cravos, contorno): só no
+		# carro do jogador (rodas_fantasma; os rivais desligam em ia.gd)
+		w.fantasmas = RodaBorrao.fantasmas(mi) if BORRAO_RODAS and rodas_fantasma else []
 		return
 	push_warning("Roda não encontrada em %s. Veja docs/assets.md (rodas)." % path)
 	var cyl := CylinderMesh.new()
@@ -1240,7 +1243,8 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 		for w in wheels:
 			var mr = w.get("malha_roda")
 			if mr:
-				mr.set_instance_shader_parameter("giro", 0.0 if longe_vis else RodaBorrao.giro(w.omega, dt))
+				RodaBorrao.aplicar(mr, w.get("fantasmas", []), w.left,
+					0.0 if longe_vis else RodaBorrao.giro(w.omega, dt))
 	# direção suavizada do piloto (0x187060: s += min(1/dt, 30)·(direção - s)·dt):
 	# é o que move os braços dele no jogo, então o volante anda junto
 	if dt > 0.0:

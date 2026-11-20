@@ -2145,6 +2145,17 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   por roda), preso em 1.3 rad (com 3 rad a conta linear riscava o aro).
   Parado: 1 amostra, igual ao material de antes (só serrilhado de borda
   muda). BORRAO_RODAS=0 desliga. tests/teste_borrao_rodas.gd.
+- O Matheus testou: "não mudou nada, o pneu parece parado e andando ao
+  mesmo tempo". No Forward+ (lavapipe) o borrão da textura funcionava, mas
+  os cravos dos pneus comprados, o contorno poligonal e os parafusos do cubo
+  são GEOMETRIA e continuavam nítidos a 138 km/h (print do Lama Premium).
+  Agora a roda do jogador ganha 8 cópias (9 com ela) giradas dentro do giro
+  do quadro, transparentes com alfa 1/2, 1/3... na ordem do render_priority
+  (média igual) e 1.5 cm pra frente da câmera; cada uma borra a textura só
+  na fatia dela. Com 5 cópias os cravos apareciam em degraus no contorno;
+  com 9 viram uma faixa contínua. Só acima de 0.12 rad por quadro (~12
+  km/h); rivais só com o borrão de textura (ia.gd rodas_fantasma = false).
+  As cópias não ganham a camada de lama (sujeira.gd pula meta "fantasma").
 
 ## Pendente / ideias
 

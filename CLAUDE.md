@@ -326,7 +326,9 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
   por carro: car.gd BANCO_NOSSO, VOLANTE_EIXO, BRACO_ABERTO.
 - Borrão nas rodas (roda_borrao.gd): o material da roda é um shader com a
   MESMA cor do StandardMaterial (cor do vértice só vira linear se a saída não
-  é sRGB) que borra girando |omega| x dt, até 1.3 rad. O jogo não tem.
+  é sRGB) que borra girando |omega| x dt, até 1.3 rad. O jogo não tem. A
+  forma (cravos, contorno) só borra com as 8 cópias transparentes da roda do
+  jogador (só a textura não resolvia: "parado e andando ao mesmo tempo").
 - Mola visual integrada no quadro: passos pequenos (a do motor_treme dava
   NaN abaixo de ~37 FPS, o velho "!v.is_finite()").
 - Motor treme e anima, painel, cabine fechada: tabelas por carro em

@@ -1,7 +1,9 @@
 extends SceneTree
 ## Borrão de movimento das rodas (NOSSO, carro/roda_borrao.gd): todas as rodas
 ## do carro usam o shader, o giro do quadro = |ω| x dt (preso em GIRO_MAX) e
-## segue a velocidade: parado 0, andando > 0. Uso:
+## segue a velocidade: parado 0, andando > 0. A roda do jogador tem COPIAS-1
+## cópias (borrão da forma: cravos, contorno) escondidas parado e visíveis
+## rápido, sem a camada de lama da sujeira. Uso:
 ##   godot --headless --path . -s res://tests/teste_borrao_rodas.gd
 var main
 var q := 0
@@ -20,9 +22,10 @@ func _falha(t: String) -> void:
 
 
 func _giro() -> float:
+	# o giro inteiro do quadro (a roda com cópias borra só a fatia dela)
 	var g := 0.0
 	for w in main.car.wheels:
-		g = maxf(g, float(w.malha_roda.get_instance_shader_parameter("giro")))
+		g = maxf(g, main.car.RodaBorrao.giro(w.omega, 1.0 / Engine.physics_ticks_per_second))
 	return g
 
 
@@ -40,6 +43,16 @@ func _process(_d: float) -> bool:
 					_falha("material da roda sem o borrão")
 			n += 1
 		print("  %d rodas com o shader" % n)
+		for w in main.car.wheels:
+			var fa: Array = w.get("fantasmas", [])
+			if fa.size() != main.car.RodaBorrao.COPIAS - 1:
+				_falha("roda com %d cópias (esperado %d)" % [fa.size(), main.car.RodaBorrao.COPIAS - 1])
+			for f in fa:
+				if f.visible:
+					_falha("cópia visível parado")
+				for c in f.get_children():
+					if c.name == "Camada":
+						_falha("cópia ganhou a camada de lama")
 		parado = _giro()
 		main.car.test_input = {"thr": 1.0, "brk": 0.0, "steer": 0.0}
 	if q == 160:
@@ -50,6 +63,13 @@ func _process(_d: float) -> bool:
 			_falha("parado devia ser ~0")
 		if g <= 0.05:
 			_falha("andando devia borrar")
+		var vis := 0
+		for w in main.car.wheels:
+			for f in w.get("fantasmas", []):
+				vis += int(f.visible)
+		print("  cópias visíveis andando: %d" % vis)
+		if g >= main.car.RodaBorrao.GIRO_FANTASMA and vis == 0:
+			_falha("rápido as cópias deviam aparecer")
 		print("teste_borrao_rodas: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 		quit()
 		return true
