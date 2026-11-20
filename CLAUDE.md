@@ -131,7 +131,7 @@ analyzeHeadless <proj_dir> atv4 -process -noanalysis -readOnly ^
   teste_largada). Derrapagem: 4 + 5 save states (teste_derrapagem,
   teste_entrada). Buccaneer na largada (2 vídeos, teste_truck_video).
 - Velocímetro do jogo ~1.06 x a velocidade pra frente (buggies; o Buccaneer
-  mostra direto).
+  mostra direto). No HUD do PAL andando reto (RAM): 1.0x (int de |v|).
 
 ## Regras que já custaram caro (o detalhe de cada uma no docs/historico.md)
 
@@ -325,10 +325,14 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 
 HUD (menu/hud_jogo.gd)
 - Layout = o XML do jogo (data/hud_circuit.xml) com a conta do quadro do
-  exe (0x46f7c0): não posicionar nada "no olho". Sprite com
-  mPixelScaleRatio = pixels da caixa .bed / 640 (x 0.75 em widescreen).
-  Texto na altura do quadro + kerning da fonte. Barras pela CLUT (índices
-  224..255). Cores das barras: vídeo (falta RAM).
+  exe (0x46f7c0), conferida com a RAM (teste_hud: 50 quadros < 0.5 px):
+  não posicionar nada "no olho". Montado num 4:3 da altura da janela; em
+  janela larga cada bloco encosta no seu lado (NOSSO). Sprite em pixel =
+  int(caixa .bed) / 480 da altura (nunca pela largura). Texto na altura do
+  quadro + kerning. Fixos antes, números por cima. Ponteiro: rpm / Max_rpm,
+  10 rad/s, giro no canto da needle_base. Barras: int(pedal x 16), cores do
+  XML x 128. Velocidade do HUD = |v pra frente| (RAM), não o 1.06.
+  Conferir mudança com re/hud_ram.py nos save states.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

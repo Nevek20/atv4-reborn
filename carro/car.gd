@@ -247,6 +247,7 @@ func _load_physics() -> void:
 	# motor
 	P.idle = d.f("Engine", "Idle_rpm", 1000.0)
 	P.lim_on = d.tuned("Engine", "Rev_limiter_engage_rpm", TUNE_ENGINE)
+	P.max_rpm = d.tuned("Engine", "Max_rpm", TUNE_ENGINE)   # só o HUD (MAXREVS do conta-giros, motor+0xc)
 	P.lim_off = d.tuned("Engine", "Rev_limiter_disengage_rpm", TUNE_ENGINE)
 	P.lim_rate_on = d.f("Engine", "Rev_limiter_engage_rate", 15.0)
 	P.lim_rate_off = d.f("Engine", "Rev_limiter_disengage_rate", 15.0)

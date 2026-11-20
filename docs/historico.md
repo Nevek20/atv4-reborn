@@ -2278,39 +2278,53 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   pelo próprio layout (menu/hud_jogo.gd); tools/hud_jogo.py tira as
   texturas com alfa, as caixas .bed, as fontes FE_FontSmall/Medium e o
   kerning delas pra assets/hud e copia o layout pra data/hud_circuit.xml.
-- Quadro (exe 0x46f7c0; enums da RAM 0x83d1c0..0x83d1e0): X LEFT 0, RIGHT
-  1, CENTRE 2; Y BOTTOM 0, TOP 1, CENTRE 2 (y pra cima); escala RELATIVE 0
-  (fração do pai), UNIT_RELATIVE 1 (quadrada pelo lado menor do pai),
-  ABSOLUTE 2 (fração da tela, X / razão da tela); mOffsetAbsolute idem pro
-  offset. Sprite com mPixelScaleRatio > 0 (0x472778 -> 0x46f6e8): tamanho =
-  caixa do .bed em pixels x razão, 640 de referência; widescreen
-  (DAT_007f3e3c+0x18) x 0.75 (o vídeo do speedrun é 16:9 e o conta-giros
-  bate com o 0.75; nos save states do Matheus a flag é 0 = 4:3).
-- Texto (0x474e08 / 0x2689c0): glifo com a altura do quadro, topo no topo;
-  kerning (flag 0x40, bloco Fonts/#hash depois de cada fonte: base 2 px na
-  Small, 1 px na Medium, 1 px por nibble nos pares a partir de '@').
-  Número com mAlignCentre (0x475390): centrado na borda esquerda do quadro
-  pela largura do "8". Rótulos são chaves da tabela de tradução (LEAD,
-  BEST_LAP_S...; en e pt no hud.json), em maiúsculas como no vídeo.
-- Conta-giros (OBJECT_SPEEDO, 0x4890d8): ponteiro de mNeedleMinRot (-1.57)
-  a mNeedleMaxRot (3.14) pelas rpm / MAXREVS, girando na needle_base posta
-  na speedo_base; textura rev9000/10000/12000 pelo limitador do carro.
-  Velocidade = 1.06 x a pra frente (como o painel).
-- Barras de acelerador e freio (OBJECT_FILLBAR, 0x489ad0/0x489ee0): a
-  hud_tpage_bar é indexada e a paleta é só marcação; o jogo troca a cor das
-  entradas por bloco (acelerador 239->224, freio 255->240, 16 blocos),
-  mantendo o alfa da paleta. As cores (mActiveColour) não estão no XML:
-  verde (13,105,15) e preto apagado medidos no vídeo; o vermelho do freio é
-  NOSSO (não aparece aceso no vídeo). O importador do Godot sangra cor nos
-  pixels transparentes: a barra zera eles (senão a borda ficava vermelha).
-- Conferido com o vídeo do speedrun (1280x720): conta-giros, molduras,
-  rótulos (mesma altura e começo, x = 153) e o tempo batem. Os números das
-  caixas (POSITION, LAP) saem maiores que no vídeo (0.0725 da tela pela conta
-  do quadro x ~0.05 no vídeo); o vídeo é NTSC e pode ter outro layout:
-  falta print do PAL no RX01 pra fechar.
-- NOSSO: treino livre mostra só o conta-giros (o jogo não foi lido nesse
-  modo). Faltam: minimapa, lista de pilotos, bandeiras, mensagens, seta e
-  o LEAD (diferença pro líder; fica 00:00:00).
+- 1ª versão reprovada pelo Matheus (prints dele, janela 1916x741):
+  ponteiro grande e fora de sincronia, barras "varando" o conta-giros,
+  números tortos, HUD da corrida bagunçado. Causas: sprite escalado pela
+  LARGURA da janela (estourava em tela larga), ponto de giro do ponteiro no
+  centro da base e a base desenhada a mais, caixas desenhadas por cima dos
+  números, molduras e números ancorados em referências diferentes fora do
+  4:3, cores das barras chutadas (estavam no XML).
+- Refeito com a RAM dos save states dele (re/hud_ram.py lê o HUD;
+  re/hud_ref.py tira a matriz de 52 quadros pra tests/ref_hud_4x3.json; o
+  teste_hud confere 50 a < 0.5 px a 640x480):
+  - Quadro (exe 0x46f7c0; enums da RAM 0x83d1c0..0x83d1e0): X LEFT 0,
+    RIGHT 1, CENTRE 2; Y BOTTOM 0, TOP 1, CENTRE 2 (y pra cima); escala
+    RELATIVE 0, UNIT_RELATIVE 1 (quadrada pelo lado menor do pai), ABSOLUTE
+    2 (X / razão da tela); mOffsetAbsolute idem pro offset.
+  - Sprite com mPixelScaleRatio (0x472778 -> 0x46f6e8): inteiro(textura x
+    razão x caixa) pixels, x razão / 640 (x 0.75 no widescreen) = px / 480
+    da altura nos dois modos (RAM: conta-giros 158 x 138 px = 0.3292 x
+    0.2875; molduras 233 x 38, truncado).
+  - Texto (0x474e08 / 0x2689c0): glifo da altura do quadro, topo no topo,
+    kerning (Fonts/#hash depois de cada fonte; RAM: base 0.00625 = 2 px,
+    passo 1 px). Número com mAlignCentre (0x475390) centrado na borda
+    esquerda pela largura do "8". RAM: POSITION com escala 1.58 = 0.0725 da
+    altura, igual à conta (o vídeo NTSC mostra menor: outra versão).
+  - Conta-giros (0x488fd0 / 0x489068): alvo = -(min + (max-min) x
+    clamp(rpm / MAXREVS)), ponteiro anda a 10 rad/s; MAXREVS = Max_rpm do
+    XML base (9000 em todos; RAM: motor+0xc). RAM: 1000 rpm -> 1.0465 rad,
+    6171 -> -1.6607 (bate), 5841 -> -1.4941 (fórmula 1.4878: ponteiro
+    andando). Giro no canto superior esquerdo da needle_base posto no da
+    speedo_base (RAM 0.578/0.009 e 0.4392/0.4717); a bolinha da base já é
+    do sprite do ponteiro.
+  - Velocidade (0x477fc0) = int(|corpo+0x418| x 3.6) até 999 (RAM: 35.655
+    m/s -> 128; nos 3 save states andando = a velocidade pra frente e a das
+    rodas, 1.0x). Marcha = corpo+0x2f0, neutro em branco (0x474f58).
+  - Barras (0x489ad0 / 0x489ee0 / 0x4898a8): blocos = int(pedal suavizado
+    x 16) (RAM: freio 0.20 -> 3); cores do XML x 128 (acelerador 0,128,0;
+    freio 255,0,0; apagado 38,38,38, iguais na RAM). PRELOAD_BAR não existe
+    nos buggies (RAM: objeto liberado).
+  - Ordem: fixos (mStatic 1: molduras, caixas, rótulos) antes, números,
+    ponteiro e barras por cima.
+- Janela: o layout é montado num 4:3 da altura da janela (o PAL é 4:3 e
+  bate 1:1 com a RAM); em janela mais larga cada bloco (filhos da raiz e
+  das SafeScreen) encosta no lado do seu alinhamento X. NOSSO (no 16:9 o
+  exe ancora molduras e números em referências diferentes e o "01" da
+  volta saía da caixa).
+- NOSSO: treino livre mostra só o conta-giros. Faltam: pontos do minimapa
+  (o mapa do RX01 já aparece), lista de pilotos, bandeiras, mensagens,
+  seta e o LEAD (diferença pro líder; fica 00:00:00 e branco).
 
 ## HUD básico (nov/2026, NOSSO)
 
