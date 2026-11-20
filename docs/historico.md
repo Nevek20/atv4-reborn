@@ -2156,6 +2156,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   com 9 viram uma faixa contínua. Só acima de 0.12 rad por quadro (~12
   km/h); rivais só com o borrão de textura (ia.gd rodas_fantasma = false).
   As cópias não ganham a camada de lama (sujeira.gd pula meta "fantasma").
+  APROVADO pelo Matheus (nov/2026): "o fps continuou o mesmo e o pneu e a
+  roda estão ótimos agora". FECHADO.
 
 ## Pendente / ideias
 
