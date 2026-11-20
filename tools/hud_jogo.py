@@ -162,6 +162,18 @@ def main():
             if k in chaves and k.decode("latin-1") not in t:
                 t[k.decode("latin-1")] = v.decode("latin-1")
         info["textos"][lingua] = t
+    # minimapa do evento (HUD_PS2/MINIMAPS.xml): RX_01 RALLYCROSS = base x/z,
+    # escala (/1000) e offset; o ponto do carro = canto do MINIMAP_CIRCUIT +
+    # (offset - (x - base) x escala / 1000), em NDC 4:3 (RAM dos save states)
+    mm = ler(unpacked, arqs, "HUD_PS2/MINIMAPS.xml")
+    if mm:
+        import re as _re
+        t = mm.decode("latin-1")
+        b = _re.search(r"<RX_01>\s*<RALLYCROSS ([^>]*)/>", t)
+        if b:
+            at = dict(_re.findall(r'(\w+)="([^"]*)"', b.group(1)))
+            info["minimapa"] = {k: float(v) for k, v in at.items()}
+            print("[+] minimapa RX_01: %s" % info["minimapa"])
     json.dump(info, open(os.path.join(out_dir, "hud.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     if lay:
         open(os.path.join(PROJ, "data", "hud_circuit.xml"), "wb").write(lay.replace(b"\r\n", b"\n"))

@@ -10,6 +10,8 @@ extends SceneTree
 ##    rad, 5841 -> 1.4941 (0.006: o ponteiro ainda andando), 1000 -> -1.0465 (parado); freio
 ##    suavizado 0.20 acende 3 blocos de 16; velocidade 35.655 m/s -> 128
 ## 4) kerning (0x2689c0) encurtando "POSITION"
+## 5) lista de pilotos (caixas e textos de 8 linhas) e ponto do minimapa nas
+##    posições da RAM (save states andando_em_linha_reta e idle_antes_do_Go)
 ## Uso: godot --headless --path . -s res://tests/teste_hud.gd
 
 var falhas := 0
@@ -55,6 +57,30 @@ func _initialize() -> void:
 	print("  layout x RAM (640x480): %d quadros, pior diferença %.3f px (%s)" % [n, pior, pior_nome])
 	if n < 40:
 		_falha("poucos quadros comparados (%d)" % n)
+	# 1b) lista de pilotos e minimapa x RAM (save state andando_em_linha_reta,
+	# NDC 4:3): caixa da posição da 1ª e 8ª linha (centro), nome (esquerda),
+	# textos (canto de cima); ponto do jogador parado no grid (idle_antes_do_Go)
+	var rf: Dictionary = h.retangulos_frac()
+	var ndc := func(x: float, y: float) -> Vector2:
+		return Vector2((x + 1.0) * 0.5 * 640.0, (1.0 - (y + 1.0) * 0.5) * 480.0)
+	var lc: Array = h.linhas_caixas(h._no("PLAYERLIST_SPRITE"), rf.PLAYERLIST_SPRITE, 8)
+	var lt: Array = h.linhas_textos(h._no("PLAYERLIST_TEXT"), rf.PLAYERLIST_TEXT, 8)
+	var checa := [
+		["caixa 1", lc[0][0].get_center(), ndc.call(-0.8656, 0.4562)],
+		["caixa 8", lc[7][0].get_center(), ndc.call(-0.8656, -0.1869)],
+		["nome 1 (esq.)", Vector2(lc[0][1].position.x, lc[0][1].get_center().y), ndc.call(-0.8278, 0.4562)],
+		["número 1 (topo)", h._tela(lt[0][0]).position, ndc.call(-0.8805, 0.5)],
+		["número 8 (topo)", h._tela(lt[7][0]).position, ndc.call(-0.8805, -0.15625)],
+		["nome 8 (topo)", h._tela(lt[7][1]).position, ndc.call(-0.8102, -0.15625)],
+		["ponto do jogador", h._tela(h.ponto_mapa(rf.MINIMAP_CIRCUIT, 580.8, 1564.3)).get_center(), ndc.call(-0.7188, -0.7559)],
+	]
+	var pior_l := 0.0
+	for c in checa:
+		var dd: float = (c[1] as Vector2).distance_to(c[2])
+		pior_l = maxf(pior_l, dd)
+		if dd > 0.6:
+			_falha("%s: %s x RAM %s" % [c[0], c[1], c[2]])
+	print("  lista de pilotos e minimapa x RAM: %d pontos, pior %.2f px" % [checa.size(), pior_l])
 	# 2) tela larga
 	h.size = Vector2(1916, 741)
 	r = h.retangulos()

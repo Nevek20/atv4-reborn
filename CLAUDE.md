@@ -332,7 +332,10 @@ HUD (menu/hud_jogo.gd)
   quadro + kerning. Fixos antes, números por cima. Ponteiro: rpm / Max_rpm,
   10 rad/s, giro no canto da needle_base. Barras: int(pedal x 16), cores do
   XML x 128. Velocidade do HUD = |v pra frente| (RAM), não o 1.06.
-  Conferir mudança com re/hud_ram.py nos save states.
+  Conferir mudança com re/hud_ram.py nos save states e com o Screenshot.png
+  de dentro do .p2s (a tela real do PAL; o PCSX2 estica o 4:3). Rótulos
+  como na tabela (sem maiúsculas). Lista, minimapa: RAM. NOSSO: Score
+  centrado, 3 dígitos x 0.8, a conta do LEAD.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

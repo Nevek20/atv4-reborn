@@ -995,7 +995,7 @@ func classificacao() -> Array:
 	var todos: Array = [{"nome": "Você", "prog": jogador.get("prog", -INF),
 		"fim": corrida.t_fim if corrida.estado == corrida.CHEGOU else -1.0, "jogador": true}]
 	for x in rivais:
-		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro})
+		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro, "no": x.car})
 	todos.sort_custom(func(a, b):
 		if (a.fim >= 0.0) != (b.fim >= 0.0):
 			return a.fim >= 0.0

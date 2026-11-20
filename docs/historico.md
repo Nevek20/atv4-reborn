@@ -2322,9 +2322,38 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   das SafeScreen) encosta no lado do seu alinhamento X. NOSSO (no 16:9 o
   exe ancora molduras e números em referências diferentes e o "01" da
   volta saía da caixa).
-- NOSSO: treino livre mostra só o conta-giros. Faltam: pontos do minimapa
-  (o mapa do RX01 já aparece), lista de pilotos, bandeiras, mensagens,
-  seta e o LEAD (diferença pro líder; fica 00:00:00 e branco).
+- 2ª rodada (prints do Matheus + print da web, nov/2026). Os save states
+  do PCSX2 guardam um Screenshot.png: a tela real do PAL (o PCSX2 dele
+  estica o 4:3 pra 16:9; a RAM calcula em 4:3). Com o nosso 4:3 esticado
+  igual, o HUD bate com o PAL. Conclusões:
+  - BEST LAP longe do tempo e os tempos encostados na borda: é o PAL (texto
+    começa na borda do quadro, flags 0x49; a print da web é outra versão).
+  - Rótulos não são maiúsculos no PAL: "Position", "Lap", "Time", "Total",
+    "Score" (como na tabela de tradução).
+  - Lista de pilotos (RAM): caixa da posição (pos_box, 22 x 21 px) no canto
+    do quadro, a do nome logo à direita com folga de mGapSize x largura, mesma
+    altura, largura = caixa x (nome / posição) nas UV; linhas descem altura x
+    1.05. Textos: número no canto do quadro, nome mHorzSpacing (1.172) x a
+    largura à direita, linhas descem mVertSpacing (1.172) x a altura;
+    jogador em amarelo (248,44 no B), resto branco. teste_hud: < 0.1 px.
+    Nome do jogador = "PLAYER" (NOSSO: o do perfil do jogo fica de fora).
+    PLACEMENT (linha de corte, desce 0.094 por posição): índice 0 nos 3
+    save states do RX01 = sem linha (na print da web, outro evento, fica
+    depois do 3º).
+  - Minimapa: o mapa tem alfa 48/128 no PS2 (o PAL escurece o chão pra
+    ~0.62, igual). Pontos (MINIMAPS.xml RX_01 RALLYCROSS + RAM dos 4 save
+    states, erro total < 0.006): centro = canto do MINIMAP_CIRCUIT +
+    (mOffsetX - (x - mXBase) x mScaleX / 1000, mOffsetZ - (z - mZBase) x
+    mScaleZ / 1000) em NDC 4:3 (x, z do jogo); jogador amarelo por cima.
+  - Tempos: "--:--:--" antes do VAI e o BEST LAP até fechar a 1ª volta; o
+    TIME da 1ª volta = o TOTAL (PAL: 00:51:88 nos dois).
+  - LEAD: vermelho (248,44,44) com "-" atrás do líder (PAL); verde na frente
+    (vídeo NTSC). NOSSO: a conta (tempo que o líder passou no mesmo
+    progresso; na frente, o 2º).
+  - Melhorias NOSSAS pedidas: Score centrado embaixo do rótulo (no PAL sai
+    torto) e velocidade de 3 dígitos com largura x 0.8 (no PAL o "129"
+    vaza da caixa pra esquerda).
+- Faltam: bandeiras, mensagens (lap message, start) e a seta.
 
 ## HUD básico (nov/2026, NOSSO)
 

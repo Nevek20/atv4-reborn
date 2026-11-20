@@ -48,11 +48,20 @@ const LINHA := {"FONT_SMALL": 22.0, "FONT_MEDIUM": 30.0}   # altura da linha (px
 const ALTURA_REF := 480.0          # pixel do sprite = altura / 480
 const AGULHA_VEL := 10.0           # rad/s (0x489068)
 const PASSO := 1.0 / 75.0          # como o PASSO_HUD
-const NAO_PORTADOS := ["OBJECT_MINIMAP", "OBJECT_PLAYERLIST_SPRITE", "OBJECT_PLAYERLIST_TEXT",
-	"OBJECT_MESSAGE", "OBJECT_3DARROW", "OBJECT_PLACEMENT_MARKER", "OBJECT_SPRITE_ANIM"]
+const NAO_PORTADOS := ["OBJECT_MESSAGE", "OBJECT_3DARROW", "OBJECT_PLACEMENT_MARKER", "OBJECT_SPRITE_ANIM"]
 # treino livre: só o conta-giros (NOSSO: o treino do jogo não foi lido)
 const SO_CORRIDA := ["LEFT_BORDER", "RIGHT_BORDER", "LeadPosFrm", "LapTimeFrm", "BestLapTotalFrm",
-	"TrickScoreFrm"]
+	"TrickScoreFrm", "MINIMAP_SPRITE", "MINIMAP_CIRCUIT", "PLAYERLIST_SPRITE", "PLAYERLIST_TEXT"]
+const COR_JOGADOR := Color(1.0, 1.0, 0.2)   # nome e ponto do jogador (print do PAL: 248,248,44)
+const NOME_JOGADOR := "PLAYER"            # o nome do perfil do jogo (NOSSO: ainda sem perfil)
+# melhorias NOSSAS (pedido do Matheus; no PAL o número sai torto/vaza da caixa):
+const SCORE_CENTRADO := true              # o SCORE embaixo do meio do rótulo
+const VELOCIDADE_CABE := 0.8              # 3 dígitos: largura x 0.8 (cabem na caixa)
+# LEAD: atrás do líder vermelho com "-" (print do PAL: 248,44,44); na frente
+# verde (vídeo NTSC ~30,208,24; o par do vermelho). NOSSO: a conta (o tempo
+# que o outro passou no mesmo ponto da pista; o exe não foi lido)
+const COR_ATRAS := Color8(248, 44, 44)
+const COR_FRENTE := Color8(44, 248, 44)
 
 var info := {}
 var raiz := {}
@@ -63,6 +72,9 @@ var valores := {}          # nome do objeto -> valor (int, float, String)
 var rpm := 1000.0
 var agulha := 1.0472       # ângulo do ponteiro (rad, como na RAM: +0x98)
 var em_corrida := false
+var lista: Array = []            # classificação: [{nome, jogador}] na ordem
+var pontos: Array = []           # minimapa: [x do jogo, z do jogo, jogador]
+var _hist := {}                  # LEAD: nome -> [[progresso, tempo], ...] (subindo)
 var acel := 0.0            # pedais suavizados 0..1
 var freio := 0.0
 var _barra_img: Image
@@ -298,18 +310,49 @@ func _desenha(no: Dictionary, pai: Rect2, a: float, passe: int) -> void:
 			"OBJECT_TEXT":
 				var k := String(at.get("mText", ""))
 				var txt: String = info.get("textos", {}).get(lingua, {}).get(k, k)
-				_texto(txt.to_upper(), String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
+				_texto(txt, String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
 			"OBJECT_TIMER":
-				_texto(_valor(no), String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
+				_texto(_valor(no), String(at.get("mFont", "FONT_SMALL")), r, valores.get(no.nome + "#cor", no.cor), at)
 			"OBJECT_INTEGER":
 				var v = valores.get(no.nome, 0)
 				if v != null:
-					_texto(_valor(no), String(at.get("mFont", "FONT_SMALL")), r, no.cor, at, str(absi(int(v))).length())
+					var dig := str(absi(int(v))).length()
+					var cx := NAN
+					var cond := 1.0
+					if no.nome == "TOTAL_TRICK_SCORE" and SCORE_CENTRADO:
+						var rot = _no("TOTAL_TRICK_SCORE_LABEL")
+						if rot:
+							cx = _tela(_rect(rot.frame, pai, a)).get_center().x
+					if no.nome == "SPEED" and dig >= 3:
+						cond = VELOCIDADE_CABE
+					_texto(_valor(no), String(at.get("mFont", "FONT_SMALL")), r, no.cor, at, dig, cx, cond)
+			"OBJECT_PLAYERLIST_SPRITE":
+				_lista_caixas(no, r)
+			"OBJECT_PLAYERLIST_TEXT":
+				_lista_textos(no, r)
+			"OBJECT_MINIMAP":
+				_mapa_pontos(no, r)
 	var dx := _dx
 	for f in no.filhos:
 		_dx = _dx_filho(no, f)
 		_desenha(f, r, a, passe)
 		_dx = dx
+
+
+## {nome: Rect2 em fração da tela HUD (y de baixo)} de todos os objetos
+func retangulos_frac() -> Dictionary:
+	var out := {}
+	if not raiz.is_empty() and size.y > 0.0:
+		_ret_frac(raiz, Rect2(0, 0, 1, 1), _largura_hud() / size.y, out)
+	return out
+
+
+func _ret_frac(no: Dictionary, pai: Rect2, a: float, out: Dictionary) -> void:
+	var r := _rect(no.frame, pai, a, _px(no))
+	if no.nome != "":
+		out[no.nome] = r
+	for f in no.filhos:
+		_ret_frac(f, r, a, out)
 
 
 ## {nome: Rect2 em pixels} de todos os objetos (testes e conferência)
@@ -346,7 +389,9 @@ func _valor(no: Dictionary) -> String:
 	var v = valores.get(no.nome, null)
 	var modelo := String(no.at.get("mText", "0"))
 	if no.tipo == "OBJECT_TIMER":
-		var s: float = v if v != null else 0.0
+		if v == null:              # sem tempo ainda (antes do VAI, sem volta): "--:--:--" (PAL)
+			return String(no.at.get("mText", "00:00:00")).replace("0", "-")
+		var s: float = v
 		var neg := s < 0.0
 		s = absf(s)
 		var cs := int(s * 100.0)
@@ -363,13 +408,14 @@ func _valor(no: Dictionary) -> String:
 ## LEFT começa na borda esquerda, CENTRE no meio, RIGHT termina na direita.
 ## Número com mAlignCentre (0x475390): centrado na borda ESQUERDA do quadro
 ## pela largura do "8" x dígitos do valor. Avanço com o kerning da fonte.
-func _texto(txt: String, fonte: String, r: Rect2, cor: Color, at: Dictionary, digitos := -1) -> void:
+func _texto(txt: String, fonte: String, r: Rect2, cor: Color, at: Dictionary, digitos := -1,
+		centro_x := NAN, cond := 1.0) -> void:
 	if not tex.has(fonte):
 		return
 	var cel := _tela(r)
 	var linha: float = LINHA.get(fonte, 22.0)
 	var esc_y := cel.size.y / linha
-	var esc_x := cel.size.x / linha
+	var esc_x := cel.size.x / linha * cond
 	var t: Dictionary = info.texturas[fonte]
 	var cx: Dictionary = t.caixas
 	var kern: Dictionary = t.get("kern", {})
@@ -387,7 +433,9 @@ func _texto(txt: String, fonte: String, r: Rect2, cor: Color, at: Dictionary, di
 		largura += av * esc_x
 	var x := cel.position.x
 	var al := String(at.get("mTextAlignX", "ALIGN_LEFT"))
-	if digitos >= 0:
+	if not is_nan(centro_x):
+		x = centro_x - largura * 0.5            # NOSSO (SCORE_CENTRADO)
+	elif digitos >= 0:
 		if String(at.get("mAlignCentre", "0")) == "1":
 			x -= _caixa(fonte, "56").size.x * esc_x * digitos * 0.5
 	elif al == "ALIGN_CENTRE":
@@ -398,6 +446,88 @@ func _texto(txt: String, fonte: String, r: Rect2, cor: Color, at: Dictionary, di
 		var c := _caixa(fonte, str(cods[n]))
 		draw_texture_rect_region(tex[fonte], Rect2(x, cel.position.y, c.size.x * esc_x, c.size.y * esc_y), c, cor)
 		x += avancos[n]
+
+
+## lista de pilotos, caixas (OBJECT_PLAYERLIST_SPRITE; RAM do save state):
+## caixa da posição (pos_box, em pixel) no canto do quadro, a do nome
+## (name_box) logo à direita com folga de mGapSize x a largura da caixa, da
+## mesma altura e largura = caixa x (nome / posição) nas UV; cada linha
+## desce altura x (1 + mGapSize), a 1ª no topo do quadro
+func _lista_caixas(no: Dictionary, r: Rect2) -> void:
+	var tnome := _textura(String(no.at.get("mTexture", "")))
+	if not tex.has(tnome):
+		return
+	var pos := _caixa(tnome, String(no.at.get("mPosBedBox", "pos_box")))
+	var nome := _caixa(tnome, String(no.at.get("mNameBedBox", "name_box")))
+	for l in linhas_caixas(no, r, lista.size()):
+		_sprite(tex[tnome], pos, l[0], false, Color.WHITE)
+		_sprite(tex[tnome], nome, l[1], false, Color.WHITE)
+
+
+## [caixa da posição, caixa do nome] de cada linha, em pixels
+func linhas_caixas(no: Dictionary, r: Rect2, n: int) -> Array:
+	var tnome := _textura(String(no.at.get("mTexture", "")))
+	var pos := _caixa(tnome, String(no.at.get("mPosBedBox", "pos_box")))
+	var nome := _caixa(tnome, String(no.at.get("mNameBedBox", "name_box")))
+	var gap := float(no.at.get("mGapSize", 0.05))
+	var q := _tela(r)                      # já do tamanho da pos_box (mPixelScaleRatio)
+	var w_nome := q.size.x * nome.size.x / pos.size.x
+	var out := []
+	for k in n:
+		var y := q.position.y + k * q.size.y * (1.0 + gap)
+		out.append([Rect2(q.position.x, y, q.size.x, q.size.y), Rect2(q.end.x + gap * q.size.x, y, w_nome, q.size.y)])
+	return out
+
+
+## lista de pilotos, textos (OBJECT_PLAYERLIST_TEXT; RAM): número no canto do
+## quadro, nome mHorzSpacing x a largura à direita; cada linha desce
+## mVertSpacing x a altura. Jogador em amarelo
+func _lista_textos(no: Dictionary, r: Rect2) -> void:
+	var fonte := String(no.at.get("mFont", "FONT_SMALL"))
+	var hx := float(no.at.get("mHorzSpacing", 1.172))
+	var vy := float(no.at.get("mVertSpacing", 1.172))
+	var esq := {"mTextAlignX": "ALIGN_LEFT"}
+	var ls := linhas_textos(no, r, lista.size())
+	for k in lista.size():
+		var e: Dictionary = lista[k]
+		_texto(str(k + 1), fonte, ls[k][0], Color.WHITE, esq)
+		_texto(String(e.nome), fonte, ls[k][1], COR_JOGADOR if e.jogador else Color.WHITE, esq)
+
+
+## [célula do número, célula do nome] de cada linha, em fração da tela HUD
+func linhas_textos(no: Dictionary, r: Rect2, n: int) -> Array:
+	var hx := float(no.at.get("mHorzSpacing", 1.172))
+	var vy := float(no.at.get("mVertSpacing", 1.172))
+	var out := []
+	for k in n:
+		var rk := Rect2(r.position.x, r.position.y - k * r.size.y * vy, r.size.x, r.size.y)
+		out.append([rk, Rect2(rk.position.x + r.size.x * hx, rk.position.y, r.size.x, r.size.y)])
+	return out
+
+
+## pontos do minimapa (OBJECT_MINIMAP; MINIMAPS.xml + RAM dos 4 save states):
+## centro = canto do quadro + (mOffsetX - (x - mXBase) x mScaleX / 1000,
+## mOffsetZ - (z - mZBase) x mScaleZ / 1000) em NDC da tela 4:3 (x, z do
+## jogo). Rivais brancos, o jogador amarelo por cima
+func _mapa_pontos(no: Dictionary, r: Rect2) -> void:
+	var tnome := _textura(String(no.at.get("mTexture", "")))
+	var mm: Dictionary = info.get("minimapa", {})
+	if not tex.has(tnome) or mm.is_empty():
+		return
+	var dot := _caixa(tnome, String(no.at.get("mBedBox", "map_dot")))
+	for passe in 2:
+		for p in pontos:
+			if bool(p[2]) != (passe == 1):
+				continue
+			_sprite(tex[tnome], dot, _tela(ponto_mapa(r, p[0], p[1])), false, COR_JOGADOR if p[2] else Color.WHITE)
+
+
+## retângulo (fração da tela HUD) do ponto de um carro em (x, z) do jogo
+func ponto_mapa(r: Rect2, x: float, z: float) -> Rect2:
+	var mm: Dictionary = info.get("minimapa", {})
+	var u: float = mm.mOffsetX - (x - mm.mXBase) * mm.mScaleX / 1000.0
+	var v: float = mm.mOffsetZ - (z - mm.mZBase) * mm.mScaleZ / 1000.0
+	return Rect2(r.position.x + u * 0.5 - r.size.x * 0.5, r.position.y + v * 0.5 - r.size.y * 0.5, r.size.x, r.size.y)
 
 
 ## quanto o par (c, prox) encosta, em pixels da fonte (0x2689c0, flag 0x40)
@@ -534,17 +664,90 @@ func atualizar(dt: float, car, corrida) -> void:
 	if em_corrida:
 		valores.CURRENT_LAP = maxi(corrida.volta, 1)
 		valores.TOTAL_LAPS = corrida.voltas
-		valores.LAP_TIMER = corrida.t - corrida.t_volta if corrida.volta > 0 else corrida.t
-		valores.TOTAL_TIMER = corrida.t
-		valores.BEST_LAP_TIMER = corrida.melhor if corrida.melhor != INF else 0.0
+		var correndo: bool = corrida.estado >= corrida.CORRENDO
+		# PAL: a 1ª volta conta desde o VAI (TIME = TOTAL até cruzar a linha)
+		valores.LAP_TIMER = (corrida.t - corrida.t_volta if corrida.volta > 1 else corrida.t) if correndo else null
+		valores.TOTAL_TIMER = corrida.t if correndo else null
+		valores.BEST_LAP_TIMER = corrida.melhor if corrida.melhor != INF else null
+		valores.LEAD_TIMER = null
+		lista.clear()
+		pontos.clear()
 		if corrida.ia and not corrida.ia.rivais.is_empty():
 			valores.PLAYER_POS = corrida.ia.posicao_jogador()
 			valores.NUM_PLAYERS = corrida.ia.rivais.size() + 1
+			var cl: Array = corrida.ia.classificacao()
+			for e in cl:
+				lista.append({"nome": NOME_JOGADOR if e.jogador else String(e.nome), "jogador": e.jogador})
+				var c = car if e.jogador else e.get("no")
+				if c:
+					pontos.append(_jogo_xz(c.global_position) + [e.jogador])
+			if correndo:
+				_lead(cl, corrida.t)
+			else:
+				_hist.clear()
 		else:
 			valores.PLAYER_POS = 1
 			valores.NUM_PLAYERS = 1
+			lista.append({"nome": NOME_JOGADOR, "jogador": true})
+			pontos.append(_jogo_xz(car.global_position) + [true])
 	_pintar_barras()
 	queue_redraw()
+
+
+## LEAD (NOSSO): guarda quando cada carro passou em cada progresso; atrás =
+## -(agora - quando o líder passou onde o jogador está), na frente = agora -
+## quando o jogador passou onde o 2º está
+func _lead(cl: Array, t: float) -> void:
+	for e in cl:
+		var h: Array = _hist.get(e.nome, [])
+		if h.is_empty() or float(e.prog) > h[-1][0]:
+			h.append([float(e.prog), t])
+			if h.size() > 4000:
+				h = h.slice(h.size() - 3000)
+		_hist[e.nome] = h
+	var eu := -1
+	for i in cl.size():
+		if cl[i].jogador:
+			eu = i
+	if eu < 0 or cl.size() < 2:
+		return
+	var gap := NAN
+	if eu == 0:
+		var tp := _quando(_hist.get(cl[0].nome, []), float(cl[1].prog))
+		if not is_nan(tp):
+			gap = t - tp
+	else:
+		var tl := _quando(_hist.get(cl[0].nome, []), float(cl[eu].prog))
+		if not is_nan(tl):
+			gap = -(t - tl)
+	if is_nan(gap):
+		return
+	valores.LEAD_TIMER = gap
+	valores["LEAD_TIMER#cor"] = COR_ATRAS if gap < 0.0 else COR_FRENTE
+
+
+## o tempo em que o histórico passou pelo progresso p (interpolado)
+static func _quando(h: Array, p: float) -> float:
+	if h.is_empty() or p < h[0][0] or p > h[-1][0]:
+		return NAN
+	var a := 0
+	var b := h.size() - 1
+	while b - a > 1:
+		var m := (a + b) / 2
+		if h[m][0] <= p:
+			a = m
+		else:
+			b = m
+	var p0: float = h[a][0]
+	var p1: float = h[b][0]
+	if p1 <= p0:
+		return h[a][1]
+	return lerpf(h[a][1], h[b][1], (p - p0) / (p1 - p0))
+
+
+## mundo do Godot -> (x, z) do jogo: mundo = (z - 1024, y, x) do jogo
+static func _jogo_xz(p: Vector3) -> Array:
+	return [p.z, p.x + 1024.0]
 
 
 var _cache_nos := {}
