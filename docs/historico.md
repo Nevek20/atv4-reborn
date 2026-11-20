@@ -2212,6 +2212,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   IG_WHEEL_HEAVYCLASS_08 está pronta no archive (buggy e truck, 6 raios, no
   mesmo padrão dos outros) mas o catálogo não lista; entra no fim da lista.
   O Matheus testou pneus e aros no PC: "deu tudo certo".
+  Tune & Setup FEITO (nov/2026, oficina aba Ajuste): os itens do menu do
+  jogo (textos TUNE_AND_SETUP: GEARBOX, SHOCKS, GEAR RATIOS, FINAL DRIVE;
+  balanço de freio não aparece pra buggy/truck, fica o 0.5 do perfil).
+  Câmbio Auto/Manual (GearboxType: vale ao montar; o M troca na hora,
+  NOSSO), amortecedor Soft/Medium/Hard (Shocks: mola 0/0.5/1, amortecimento
+  0.82/0.91/1.0), marchas 1-5 e final de 0 a 1 entre o _non_tuned e o
+  _fully_tuned (o menu mostra a relação; 0x3ec5d0 grava a fração). Libera
+  pelo câmbio (0x3ec5d0): Level2 só a final, Level3/Prototype marchas e
+  final, Level0/1 nada (a final deles é a do FinalDriveRatio 0.45/0.53 mesmo
+  com custom, 0x21d2c8). Fica no "pecas" do oficina.json (GearRatioTuning).
+  Renegade em chão plano: fábrica 0-100 4.14 s / 220 km/h em 30 s; tudo
+  curto (1.0) 4.50 s / 149 km/h; tudo longo (0.0) 3.90 s / 262 km/h. No
+  extremo curto a 1ª bate no limitador e são 4 trocas até 100 (1 com as
+  longas): o "marcha alta acelera mais" do texto do jogo vale pra ajuste
+  moderado. NOSSO: a tela e o passo 0.05. tests/teste_ajuste.gd.
 
 - Modelos que o jogo não usa (docs/assets.md): CHASSIS_Truck_04 (pré-runner,
   o "Lazarus", nome escolhido pelo Matheus), CHASSIS_ATV_03..08 e os de IA

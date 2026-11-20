@@ -184,6 +184,7 @@ static func fcurve_eval(c: Dictionary, mu: float, x: float) -> float:
 ## FinalDrive). RAM: Inferno, Bulldog, Phantom e Buccaneer de fábrica (Level0)
 ## 0.45; Renegade, Storm e Goliath 0.61.
 ## troca = peças compradas {slot: peça} por cima da DefaultConfig (carro/pecas.gd)
+## e o Tune & Setup em troca.GearRatioTuning {Gear1..Gear5, FinalDrive: 0..1}
 static func factory_tuning(veh_xml: String, upg_xml: String, veh_name: String, troca := {}) -> Dictionary:
 	var cfg := {}
 	var gears := {}
@@ -211,7 +212,12 @@ static func factory_tuning(veh_xml: String, upg_xml: String, veh_name: String, t
 				if inside:
 					break
 	for slot in troca:
-		cfg[slot] = troca[slot]
+		if troca[slot] is Dictionary:
+			if slot == "GearRatioTuning":       # Tune & Setup: marchas e final custom (perfil)
+				for k in troca[slot]:
+					gears[k] = float(troca[slot][k])
+		else:
+			cfg[slot] = troca[slot]
 	# efeitos por peça, só da classe do veículo
 	var fx := {}
 	if x.open(upg_xml) == OK:
@@ -266,6 +272,7 @@ static func factory_tuning(veh_xml: String, upg_xml: String, veh_name: String, t
 		"spring": pick.call("FrontSuspSpringRate", 0.5),
 		"damping": pick.call("FrontSuspDamping", 0.91),
 		"gears": g,
+		"final_custom": float(gears.get("FinalDrive", 0.5)),   # a do perfil (Tune & Setup)
 		"front_bias": bias,
 		"config": cfg,
 	}

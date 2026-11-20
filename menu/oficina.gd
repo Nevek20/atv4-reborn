@@ -37,6 +37,11 @@ var _abas_piloto := {}
 var _quadros_piloto: Array[Button] = []
 var _amostra_piloto: ColorRect
 var _pag_upgrade: VBoxContainer
+var _pag_ajuste: VBoxContainer
+var _lista_aj: VBoxContainer
+var _info_aj: Label
+var _aj_dados = null               # VehicleData do carro (relação de cada marcha)
+var _aj_fab := {}                  # factory_tuning sem troca (marchas e final do perfil)
 var _lista_upg: VBoxContainer
 var _resumo_upg: Label
 var _upg := {}                     # opções da classe (carro/pecas.gd opcoes)
@@ -63,7 +68,7 @@ func _init(m) -> void:
 	var topo := HBoxContainer.new()
 	col.add_child(topo)
 	var g_pag := ButtonGroup.new()
-	for par in [["Pintura", true], ["Logos", false], ["Piloto", false], ["Upgrade", false]]:
+	for par in [["Pintura", true], ["Logos", false], ["Piloto", false], ["Upgrade", false], ["Ajuste", false]]:
 		var b := Button.new()
 		b.text = par[0]
 		b.toggle_mode = true
@@ -88,10 +93,15 @@ func _init(m) -> void:
 	_pag_upgrade.add_theme_constant_override("separation", 6)
 	_pag_upgrade.visible = false
 	col.add_child(_pag_upgrade)
+	_pag_ajuste = VBoxContainer.new()
+	_pag_ajuste.add_theme_constant_override("separation", 6)
+	_pag_ajuste.visible = false
+	col.add_child(_pag_ajuste)
 	_montar_pintura()
 	_montar_logos()
 	_montar_piloto()
 	_montar_upgrade()
+	_montar_ajuste()
 	_aviso = Label.new()
 	_aviso.add_theme_color_override("font_color", Color(1, 0.75, 0.3))
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -186,6 +196,7 @@ func abrir() -> void:
 	_refazer_logos()
 	_mostrar_piloto()
 	_abrir_upgrade()
+	_abrir_ajuste()
 
 
 func _pagina(nome: String) -> void:
@@ -193,6 +204,9 @@ func _pagina(nome: String) -> void:
 	_pag_logos.visible = nome == "Logos"
 	_pag_piloto.visible = nome == "Piloto"
 	_pag_upgrade.visible = nome == "Upgrade"
+	_pag_ajuste.visible = nome == "Ajuste"
+	if nome == "Ajuste":
+		_mostrar_ajuste()          # o câmbio escolhido no Upgrade libera o que ajustar
 
 
 func _aba(k: String) -> void:
@@ -682,7 +696,8 @@ func _upg_passo(slot: String, d: int) -> void:
 
 
 func _upg_fabrica() -> void:
-	_upg_esc = {}
+	for slot in PECAS_UPG.SLOTS:          # só as peças; o Tune & Setup tem o dele
+		_upg_esc.erase(slot)
 	_mostrar_upgrade()
 
 
@@ -703,3 +718,139 @@ func _upg_aplicar() -> void:
 	PECAS_UPG.salvar(main.car.chave(), _upg_esc)
 	main.remontar_carro()
 	_aviso.text = "Peças aplicadas."
+
+
+## ---------------------------------------------------------------- ajuste
+## Garage > Vehicle > Tune & Setup do jogo: GEARBOX (auto/manual), SHOCKS
+## (Soft/Medium/Hard), GEAR RATIOS e FINAL DRIVE. Marchas e final andam de 0
+## a 1 entre o _non_tuned e o _fully_tuned do XML de física (o menu mostra a
+## relação; 0x3ec5d0 grava a fração) e só com câmbio que deixa: Level2 a
+## final, Level3/Prototype as marchas também. Fica na mesma escolha pendente
+## do Upgrade (Aplicar monta o carro de novo). NOSSO: a tela e o passo 0.05.
+func _montar_ajuste() -> void:
+	var t := Label.new()
+	t.text = "Tune & Setup (Aplicar monta o carro de novo)"
+	t.add_theme_color_override("font_color", Color(1, 0.8, 0.4))
+	_pag_ajuste.add_child(t)
+	_lista_aj = VBoxContainer.new()
+	_lista_aj.add_theme_constant_override("separation", 4)
+	_pag_ajuste.add_child(_lista_aj)
+	_info_aj = Label.new()
+	_info_aj.add_theme_color_override("font_color", Color(0.75, 0.85, 1.0))
+	_info_aj.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_info_aj.custom_minimum_size.x = 520
+	_pag_ajuste.add_child(_info_aj)
+	var botoes := HBoxContainer.new()
+	_pag_ajuste.add_child(botoes)
+	for par in [["De fábrica", _aj_fabrica], ["Aplicar", _upg_aplicar]]:
+		var b := Button.new()
+		b.text = par[0]
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(par[1])
+		botoes.add_child(b)
+
+
+func _linha_aj(rotulo: String, chave: String) -> void:
+	var linha := HBoxContainer.new()
+	linha.set_meta("chave", chave)
+	_lista_aj.add_child(linha)
+	var l := Label.new()
+	l.text = rotulo
+	l.custom_minimum_size.x = 130
+	linha.add_child(l)
+	for d in [-1, 1]:
+		var b := Button.new()
+		b.name = "Menos" if d < 0 else "Mais"
+		b.text = "◀" if d < 0 else "▶"
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(_aj_passo.bind(chave, d))
+		linha.add_child(b)
+		if d < 0:
+			var nome := Label.new()
+			nome.name = "Nome"
+			nome.custom_minimum_size.x = 200
+			nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			linha.add_child(nome)
+
+
+func _abrir_ajuste() -> void:
+	var car = main.car
+	_aj_dados = preload("res://carro/vehicle_data.gd").new()
+	_aj_dados.load_files(car.data_files)
+	_aj_fab = preload("res://carro/vehicle_data.gd").factory_tuning(PECAS_UPG.VEICULOS, PECAS_UPG.UPGRADES, _upg_veh)
+	for c in _lista_aj.get_children():
+		c.queue_free()
+	for slot in PECAS_UPG.AJUSTE_SLOTS:
+		if _upg.slots.has(slot) and _upg_fab.has(slot):
+			_linha_aj(PECAS_UPG.AJUSTE_NOMES[slot], slot)
+	var n: int = int(_aj_dados.f("Gearbox", "Number_of_forward_gears", 5))
+	for g in range(1, n + 1):
+		_linha_aj("Marcha %d" % g, "Gear%d" % g)
+	_linha_aj("Final", "FinalDrive")
+	_mostrar_ajuste()
+
+
+## fração 0..1 de uma marcha ou da final (escolha pendente ou a do perfil)
+func _aj_valor(chave: String) -> float:
+	var gt: Dictionary = _upg_esc.get("GearRatioTuning", {})
+	if gt.has(chave):
+		return float(gt[chave])
+	if chave == "FinalDrive":
+		return float(_aj_fab.get("final_custom", 0.5))
+	return float(_aj_fab.gears[int(chave.substr(4)) - 1])
+
+
+func _mostrar_ajuste() -> void:
+	if _aj_dados == null:
+		return
+	var lib: Dictionary = PECAS_UPG.ajuste_libera(_upg_peca("GearboxLevel"))
+	for linha in _lista_aj.get_children():
+		if not linha.has_meta("chave"):
+			continue
+		var k: String = linha.get_meta("chave")
+		var nome: Label = linha.get_node("Nome")
+		var livre := true
+		if k in PECAS_UPG.AJUSTE_SLOTS:
+			var p := _upg_peca(k)
+			nome.text = PECAS_UPG.rotulo(p) + ("  (fábrica)" if p == _upg_fab.get(k) else "")
+		else:
+			var f := _aj_valor(k)
+			var rel: float = _aj_dados.tuned("Gearbox/Ratios", "Final_drive" if k == "FinalDrive" else "Gear_%s" % k.substr(4), f)
+			nome.text = "%.2f  (%d%%)" % [rel, roundi(f * 100.0)]
+			livre = lib.final if k == "FinalDrive" else lib.marchas
+		for b in ["Menos", "Mais"]:
+			(linha.get_node(b) as Button).disabled = not livre
+		nome.modulate = Color(1, 1, 1, 1.0 if livre else 0.4)
+	# textos do jogo (TUNING_INFO_*), em português
+	var info: Array = []
+	if not lib.marchas:
+		info.append("Pra ajustar as marchas precisa do câmbio Nível 3 ou Protótipo%s." % ("" if lib.final else "; a final, Nível 2 ou mais"))
+	info.append("Marchas altas: mais aceleração (pistas curtas e travadas). Baixas: mais velocidade final (retas longas).")
+	info.append("Amortecedor mole: anda mais macio, menos estável em alta. Duro: mais seco, mais estável em alta.")
+	_info_aj.text = "\n".join(info)
+	var mudou: bool = _upg_esc != main.car.pecas_escolhidas
+	_aviso.text = "Ajuste mudado: aperte Aplicar." if mudou else ""
+
+
+func _aj_passo(chave: String, d: int) -> void:
+	if chave in PECAS_UPG.AJUSTE_SLOTS:
+		var lista: Array = _upg.slots.get(chave, [])
+		if lista.is_empty():
+			return
+		var i := posmod(lista.find(_upg_peca(chave)) + d, lista.size())
+		if lista[i] == _upg_fab.get(chave):
+			_upg_esc.erase(chave)
+		else:
+			_upg_esc[chave] = lista[i]
+	else:
+		var gt: Dictionary = (_upg_esc.get("GearRatioTuning", {}) as Dictionary).duplicate()
+		gt[chave] = snappedf(clampf(_aj_valor(chave) + d * PECAS_UPG.PASSO_AJUSTE, 0.0, 1.0), 0.001)
+		_upg_esc["GearRatioTuning"] = gt
+	_mostrar_ajuste()
+
+
+func _aj_fabrica() -> void:
+	for slot in PECAS_UPG.AJUSTE_SLOTS:
+		_upg_esc.erase(slot)
+	_upg_esc.erase("GearRatioTuning")
+	_mostrar_ajuste()

@@ -256,6 +256,10 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 		objetos.carro = car
 	add_child(car)
 	car.manual = manual
+	# Tune & Setup (GearboxType): o câmbio escolhido vale ao montar; o M troca na hora (NOSSO)
+	var gt := String(car.pecas_escolhidas.get("GearboxType", ""))
+	if gt != "":
+		car.manual = gt.ends_with("Manual")
 	car.reset_to(pos, yaw)
 	gcams.clear()
 	cam_ready = false

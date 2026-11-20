@@ -18,6 +18,11 @@ const COMPONENTES := "res://data/componentes.xml"   # catálogo de peças do jog
 const MATERIAIS := "res://data/materials_rx01.xml"
 const SLOTS := ["EngineInternals", "EngineManagement", "EngineHeader", "Exhaust", "IntakeKit",
 	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass", "Tire", "Alloy"]
+# Tune & Setup do jogo (TUNE_AND_SETUP: GEARBOX, SHOCKS, GEAR RATIOS, FINAL DRIVE;
+# o balanço de freio não aparece no menu de buggy/truck, fica o 0.5 do perfil)
+const AJUSTE_SLOTS := ["GearboxType", "Shocks"]
+const AJUSTE_NOMES := {"GearboxType": "Câmbio", "Shocks": "Amortecedor"}
+const PASSO_AJUSTE := 0.05       # NOSSO: passo das marchas e da final (0..1)
 const NOMES := {"EngineInternals": "Motor (interno)", "EngineManagement": "Injeção",
 	"EngineHeader": "Coletor", "Exhaust": "Escape", "IntakeKit": "Admissão",
 	"GearboxLevel": "Câmbio", "Clutch": "Embreagem", "Brake": "Freio",
@@ -127,6 +132,13 @@ static func fabrica(veh: String) -> Dictionary:
 	return out
 
 
+## nível do câmbio (GearboxLevel) -> o que o Tune & Setup deixa mexer (0x3ec5d0):
+## Level2 só a final, Level3/Prototype as marchas e a final, Level0/1 nada
+static func ajuste_libera(gearbox_level: String) -> Dictionary:
+	var n := gearbox_level.get_slice("_", 1)
+	return {"final": n in ["Level2", "Level3", "Prototype"], "marchas": n in ["Level3", "Prototype"]}
+
+
 ## "EngineInternals_Level3" -> "Nível 3"; pneu "MUD_PREMIUM" -> "Lama Premium";
 ## aro "WHEEL_03" -> "Aro 3"
 static func rotulo(peca: String) -> String:
@@ -137,6 +149,9 @@ static func rotulo(peca: String) -> String:
 		var p := peca.split("_")
 		return "%s %s" % [tipo.get(p[0], p[0]), {"BUDGET": "Budget", "PREMIUM": "Premium", "PROTOTYPE": "Protótipo"}.get(p[-1], p[-1])]
 	var s := peca.get_slice("_", 1)
+	var aj := {"Auto": "Automático", "Manual": "Manual", "Soft": "Mole (Soft)", "Medium": "Médio (Medium)", "Hard": "Duro (Hard)"}
+	if aj.has(s):
+		return aj[s]
 	if s.begins_with("Level"):
 		return "Nível " + s.substr(5)
 	return {"Prototype": "Protótipo"}.get(s, s)
