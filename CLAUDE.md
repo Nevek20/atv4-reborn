@@ -73,7 +73,7 @@ som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
-                     truck_bonus, escort, rodas, parachoques), piloto/, pista/ (rx01, terreno), efeitos/, sons/
+                     truck_bonus, escort, rodas, parachoques, luzes), piloto/, pista/ (rx01, terreno), efeitos/, sons/
 fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
                      pneus.cpp, rodas.cpp, curvas.cpp, efeitos.cpp; visual e som: piloto.cpp,
                      suspensao.cpp, som.cpp, som_jogo.cpp; linha_ia.cpp, nuvens.cpp), SConstruct
@@ -152,7 +152,9 @@ Arquivos, modelos e pintura
   = só visual (mIsPhysical false): FrontBumper no ponto BUMPER do .pts
   (assets/carros/parachoques); RallyCompMap (Storm, Chimera) não tem. As
   light_64 dele acendem no H (farol.gd procura na carroceria e nele; o 3
-  tem a lente no atlas chassis_comp03, LAMPADAS_ATLAS só no para-choque).
+  tem a lente no atlas chassis_comp03, LAMPADAS_ATLAS só nos acessórios).
+  Barra de luz (Lighting) = mesmo esquema no LIGHTRIG (teto), do tamanho do
+  carro (vehicles.xml LightRigCategory; assets/carros/luzes).
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
 - Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os

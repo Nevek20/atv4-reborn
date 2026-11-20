@@ -10,6 +10,9 @@ extends RefCounted
 ## Para-choque (Bumper): só visual (mIsPhysical="false"), o modelo
 ## FrontBumper no ponto BUMPER do carro (carro_montagem._load_parachoque);
 ## de fábrica NOT_INSTALLED; o RallyCompMap (Storm, Chimera) não tem.
+## Barra de luz (Lighting): igual, LIGHTING no ponto LIGHTRIG (teto); o
+## catálogo tem as 8 em LARGE e SMALL e o carro só vê as do tamanho dele
+## (vehicles.xml LightRigCategory, pecas.json "luzes").
 ## Shocks, GearRatios, BrakeBalanceController e GearboxType ficam pro Tune &
 ## Setup. NOSSO: a tela e salvar em user://oficina.json (chave
 ## "pecas" -> carro -> {slot: peça}); só o carro do jogador.
@@ -20,7 +23,7 @@ const SALVAS := "user://oficina.json"
 const COMPONENTES := "res://data/componentes.xml"   # catálogo de peças do jogo (xml 14882)
 const MATERIAIS := "res://data/materials_rx01.xml"
 const SLOTS := ["EngineInternals", "EngineManagement", "EngineHeader", "Exhaust", "IntakeKit",
-	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass", "Tire", "Alloy", "Bumper"]
+	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass", "Tire", "Alloy", "Bumper", "Lighting"]
 # Tune & Setup do jogo (TUNE_AND_SETUP: GEARBOX, SHOCKS, GEAR RATIOS, FINAL DRIVE;
 # o balanço de freio não aparece no menu de buggy/truck, fica o 0.5 do perfil)
 const AJUSTE_SLOTS := ["GearboxType", "Shocks"]
@@ -30,8 +33,8 @@ const NOMES := {"EngineInternals": "Motor (interno)", "EngineManagement": "Inje�
 	"EngineHeader": "Coletor", "Exhaust": "Escape", "IntakeKit": "Admissão",
 	"GearboxLevel": "Câmbio", "Clutch": "Embreagem", "Brake": "Freio",
 	"Suspension": "Suspensão", "BodyMass": "Peso", "Tire": "Pneu", "Alloy": "Aro",
-	"Bumper": "Para-choque"}
-const VISUAIS := ["Alloy", "Bumper"]   # só aparência: o "Tudo no máximo" não mexe
+	"Bumper": "Para-choque", "Lighting": "Barra de luz"}
+const VISUAIS := ["Alloy", "Bumper", "Lighting"]   # só aparência: o "Tudo no máximo" não mexe
 
 
 ## {slot: [peça, ...]} da classe, na ordem do XML; e {peça: {efeito: valor}}
@@ -93,7 +96,7 @@ static func _pneus(classe: String, out: Dictionary) -> void:
 			var n := x.get_node_name()
 			if n == classe:
 				dentro = true
-			elif dentro and n in ["Tire", "Alloy", "Bumper"]:
+			elif dentro and n in ["Tire", "Alloy", "Bumper", "Lighting"]:
 				no_tire = n == "Tire"
 				slot = n
 				lista = []
@@ -104,7 +107,7 @@ static func _pneus(classe: String, out: Dictionary) -> void:
 				out.efeitos[c] = {"atrito na terra": atrito.get(c, "?")} if no_tire else {}
 		elif t == XMLParser.NODE_ELEMENT_END:
 			var n := x.get_node_name()
-			if n in ["Tire", "Alloy", "Bumper"]:
+			if n in ["Tire", "Alloy", "Bumper", "Lighting"]:
 				slot = ""
 			elif n == classe and dentro:
 				break
@@ -152,6 +155,8 @@ static func rotulo(peca: String) -> String:
 		return "Nenhum"
 	if peca.begins_with("BUMPER_"):
 		return "Para-choque %d" % peca.get_slice("_", 1).to_int()
+	if peca.begins_with("LIGHTRIG_"):
+		return "Barra %d (%s)" % [peca.get_slice("_", 1).to_int(), "grande" if peca.ends_with("LARGE") else "pequena"]
 	if peca.begins_with("WHEEL_"):
 		return "Aro %d%s" % [peca.substr(6).to_int(), " (extra)" if peca == "WHEEL_08" else ""]
 	if not peca.contains("_Level") and not peca.contains("_Prototype") and peca.to_upper() == peca:

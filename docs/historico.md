@@ -950,6 +950,18 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   e o farol delas, FECHADO, não muda). As 2 de fora (Lamp_cover) ficam
   tampadas.
   O Matheus testou os 8 no PC, com farol: "agr foi!!!" (nov/2026).
+  Barra de luz do teto FEITA (nov/2026, slot Lighting; o Matheus lembrou
+  dela pelos prints). Mesmo esquema do para-choque: LIGHTING.pingu de
+  Models_4K/Lighting/<peça> no ponto LIGHTRIG (teto, ~2.1-2.3 m), só visual.
+  O catálogo tem as 8 em LARGE e SMALL; o tamanho é do carro (vehicles.xml
+  LightRigCategory: Small em Mosquito, Inferno, Sphinx, Bulldog, Phantom,
+  McKenzies, Viper, Hurricane e Fireball; Large no resto), então a oficina
+  mostra 8 + Nenhum. gerar_buggies exporta pra assets/carros/luzes/
+  (pecas.json "luzes" e "ponto_luzes"); carro_montagem._load_acessorios
+  monta os dois acessórios. Lâmpadas no farol (H): 2 a 5 por barra; a 3 tem
+  as lentes no atlas chassis_comp03 (mesma regra do para-choque 3);
+  light2_64 é a carcaça escura, não acende. Sem o z_min da carroceria
+  (a barra fica atrás da roda da frente). teste_parachoque.
   Renegade e Buccaneer de fábrica continuam sem farol.
 
 - Oficina do piloto (nov/2026, prints e saves gear.p2s / Paint_Shop.p2s do

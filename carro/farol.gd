@@ -14,11 +14,13 @@ extends Node3D
 ## outros não têm farol no modelo. Trucks: Shockwave, Jericho, Goliath e
 ## Chimera (2 cada), Lazarus nos 2 redondos do para-choque; no Shinto e no Punisher a light_64 é luz de teto virada
 ## pra trás e a cadilac_light do Fireball é lanterna.
-## Para-choque comprado (carro_montagem._load_parachoque): as light_64 dele
-## acendem junto (pedido do Matheus), procuradas na malha dele do mesmo jeito.
-## O para-choque 3 não tem light_64: as 2 lentes do meio são um pedaço do
-## atlas chassis_comp03 (LAMPADAS_ATLAS, só no para-choque: as carrocerias
-## também usam esse atlas e o farol delas não muda).
+## Para-choque e barra de luz do teto comprados (carro_montagem
+## _load_acessorios): as light_64 deles acendem junto (pedido do Matheus),
+## procuradas na malha de cada um do mesmo jeito. O para-choque 3 e a barra 3
+## não têm light_64: as lentes são um pedaço do atlas chassis_comp03
+## (LAMPADAS_ATLAS, só nos acessórios: as carrocerias também usam esse atlas
+## e o farol delas não muda). A barra fica no teto, atrás da roda da frente:
+## o z_min (Goliath) só vale na carroceria.
 
 const Luzes := preload("res://carro/luzes.gd")
 # nome da textura (minúsculo) das lentes. Trucks: a desert_jeep_style_light
@@ -55,10 +57,10 @@ func montar(c) -> bool:
 	var z_min := -INF
 	if car.points.has("WHEEL_FRONT_LEFT"):
 		z_min = car.points["WHEEL_FRONT_LEFT"].z
-	for mi in [car.body_mi, car.parachoque_mi]:
+	for mi in [car.body_mi, car.parachoque_mi, car.luzes_mi]:
 		if mi != null and mi.mesh is ArrayMesh:
-			# frame da malha -> frame do jogo (o para-choque fica no ponto BUMPER)
-			_montar_malha(mi, mi.position - car.model_offset, z_min)
+			# frame da malha -> frame do jogo (acessório no ponto BUMPER/LIGHTRIG)
+			_montar_malha(mi, mi.position - car.model_offset, z_min if mi == car.body_mi else -INF)
 	lampadas.sort_custom(func(x, y): return x.c.x < y.c.x)
 	return not lampadas.is_empty()
 

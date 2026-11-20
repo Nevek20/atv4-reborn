@@ -184,44 +184,65 @@ func _load_model() -> void:
 	_load_steering_wheel()
 
 
-## para-choque comprado (oficina, Upgrade; catálogo Bumper): o FrontBumper do
-## jogo no ponto BUMPER do .pts (matriz identidade), no frame do modelo como a
-## carroceria; tools/gerar_buggies.py põe a lista e o ponto no pecas.json. Só
-## visual (mIsPhysical="false": sem casco, sem massa). De fábrica é
-## NOT_INSTALLED; o RallyCompMap (Storm, Chimera) não tem o ponto.
+## acessórios comprados (oficina, Upgrade; só visuais, mIsPhysical="false":
+## sem casco, sem massa): o modelo do jogo no ponto do .pts (matriz
+## identidade), no frame do modelo como a carroceria; tools/gerar_buggies.py
+## põe a lista e o ponto no pecas.json. De fábrica é NOT_INSTALLED; o
+## RallyCompMap (Storm, Chimera) não tem nenhum dos dois.
+## Bumper: FrontBumper no BUMPER. Lighting: a barra de luz do teto
+## (LIGHTING) no LIGHTRIG, do tamanho do carro (vehicles.xml LightRigCategory)
+const ACESSORIOS := {"Bumper": ["parachoques", "ponto_parachoque", "ParaChoque"],
+	"Lighting": ["luzes", "ponto_luzes", "BarraDeLuz"]}
+
+
+func tem_acessorio(slot: String) -> bool:
+	var a: Array = ACESSORIOS[slot]
+	var pt := String(pecas.get(a[1], ""))
+	return pt != "" and points.has(pt) and not (pecas.get(a[0], {}) as Dictionary).is_empty()
+
+
 func tem_parachoque() -> bool:
-	var pt := String(pecas.get("ponto_parachoque", ""))
-	return pt != "" and points.has(pt) and not (pecas.get("parachoques", {}) as Dictionary).is_empty()
+	return tem_acessorio("Bumper")
 
 
-## depois da física (precisa do ponto BUMPER)
-func _load_parachoque() -> void:
-	var esc := String(pecas_escolhidas.get("Bumper", ""))
-	var lista: Dictionary = pecas.get("parachoques", {})
-	if not lista.has(esc) or not tem_parachoque():
-		return
+## depois da física (precisa dos pontos BUMPER e LIGHTRIG)
+func _load_acessorios() -> void:
+	for slot in ACESSORIOS:
+		var mi := _load_acessorio(slot)
+		if slot == "Bumper":
+			parachoque_mi = mi
+		else:
+			luzes_mi = mi
+
+
+func _load_acessorio(slot: String) -> MeshInstance3D:
+	var a: Array = ACESSORIOS[slot]
+	var esc := String(pecas_escolhidas.get(slot, ""))
+	var lista: Dictionary = pecas.get(a[0], {})
+	if not lista.has(esc) or not tem_acessorio(slot):
+		return null
 	var path := asset_dir.path_join(lista[esc]).simplify_path()
 	var mesh: Mesh = load(path) as Mesh if ResourceLoader.exists(path) else null
 	if mesh == null:
 		push_warning("sem %s: rode o tools/gerar_buggies.py" % path)
-		return
+		return null
 	if mesh is ArrayMesh and _tem("acertar_giro"):
 		mesh = _acertar_giro(mesh)
 	var mi := MeshInstance3D.new()
-	mi.name = "ParaChoque"
+	mi.name = a[2]
 	mi.mesh = mesh
 	mi.set_meta("malha_path", path)      # sujeira.gd: a _camada.obj do lado
 	for i in mesh.get_surface_count():
 		var m := mesh.surface_get_material(i)
 		var m2: StandardMaterial3D = m.duplicate() if m is StandardMaterial3D else StandardMaterial3D.new()
 		if m2.albedo_texture and _tem_alfa(m2.albedo_texture):
-			m2.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR      # mesh_grey (o 7)
+			m2.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR      # mesh_grey
 			m2.alpha_scissor_threshold = 0.5
 		material_do_jogo(m2)
 		mi.set_surface_override_material(i, m2)
-	mi.position = model_offset + points[String(pecas.ponto_parachoque)]
+	mi.position = model_offset + points[String(pecas[a[1]])]
 	model_root.add_child(mi)
-	parachoque_mi = mi
+	return mi
 
 
 ## depois da física (precisa dos pontos ARSE, rodas e EXHAUST)

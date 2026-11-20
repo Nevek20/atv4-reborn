@@ -15,6 +15,10 @@ extends SceneTree
 ##    frente da carroceria; Renegade e Buccaneer de fábrica não têm farol.
 ##    O 3 não tem light_64: as 2 lentes do meio são o pedaço do atlas
 ##    chassis_comp03 (farol.gd LAMPADAS_ATLAS) e as 2 de fora ficam tampadas
+## 4) barra de luz do teto (slot Lighting, mesmo esquema no ponto LIGHTRIG):
+##    8 por carro, todas do tamanho dele (LightRigCategory: Renegade LARGE,
+##    Mosquito SMALL); a 4 no Renegade acende 4 lâmpadas no teto (no farol,
+##    sem o z_min da carroceria) e a 3 acha as lentes pelo atlas
 ## Uso: godot --headless --path . -s res://tests/teste_parachoque.gd
 
 const Main := preload("res://main.gd")
@@ -25,6 +29,7 @@ const BP := "BUMPER_04_HEAVYCLASS_LARGE"
 var falhas := 0
 var carros: Array = []
 var c3                              # Renegade com o para-choque 3 (lente no atlas)
+var cl: Array = []                  # Renegade com as barras de luz 4 e 3
 var q := 0
 
 
@@ -63,6 +68,12 @@ func _initialize() -> void:
 			continue
 		if lista.size() != 8:
 			_falha("%s: %d para-choques" % [v.name, lista.size()])
+		var lz: Dictionary = pj.get("luzes", {})
+		var tam: Array = lz.keys().map(func(k): return String(k).get_slice("_", 3))
+		if lz.size() != 8 or tam.any(func(t): return t != tam[0]) or not pts_de._load_points(v.points).has(pj.get("ponto_luzes", "")):
+			_falha("%s: barras de luz %s" % [v.name, lz.keys()])
+		elif String(v.id) in ["BUGGY_10", "BUGGY_01"] and tam[0] != ("LARGE" if v.id == "BUGGY_10" else "SMALL"):
+			_falha("%s: barra do tamanho errado (%s)" % [v.name, tam[0]])
 		var pts: Dictionary = pts_de._load_points(v.points)
 		if not pts.has(pj.ponto_parachoque):
 			_falha("%s: sem o ponto %s" % [v.name, pj.ponto_parachoque])
@@ -109,6 +120,13 @@ func _process(_d: float) -> bool:
 		c3.pecas_escolhidas = {"Bumper": "BUMPER_03_HEAVYCLASS_LARGE"}
 		root.add_child(c3)
 		c3.reset_to(Vector3(-60.0, 50.0, 0.0), 0.0)
+		for n in [4, 3]:
+			var c = Car.new()
+			Main.configurar(c, v)
+			c.pecas_escolhidas = {"Lighting": "LIGHTRIG_0%d_HEAVYCLASS_LARGE" % n}
+			root.add_child(c)
+			c.reset_to(Vector3(-90.0 - 30.0 * cl.size(), 50.0, 0.0), 0.0)
+			cl.append(c)
 	q += 1
 	if q < 2:
 		return false
@@ -153,6 +171,14 @@ func _process(_d: float) -> bool:
 		l3.size(), ", ".join(l3.map(func(l): return "%.2f" % l.c.x))])
 	if l3.size() != 2 or not l3.all(func(l): return absf(l.c.x) < 0.3 and l.n.z > 0.5):
 		_falha("para-choque 3: as 2 lentes do meio deviam acender")
+	for k in cl.size():
+		var c = cl[k]
+		var lamp: Array = c.farol.lampadas if c.farol else []
+		var teto: float = c.body_mi.mesh.get_aabb().end.y
+		print("  Renegade com a barra %d: %s, %d lâmpadas em y %s (teto da carroceria %.2f)" % [[4, 3][k],
+			"montada" if c.luzes_mi else "SEM", lamp.size(), ", ".join(lamp.map(func(l): return "%.2f" % l.c.y)), teto])
+		if c.luzes_mi == null or lamp.size() != 4 or not lamp.all(func(l): return l.c.y > teto - 0.3 and l.n.z > 0.5):
+			_falha("barra de luz %d: devia montar no teto com 4 lâmpadas no farol" % [4, 3][k])
 	print("teste_parachoque: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 	quit()
 	return true

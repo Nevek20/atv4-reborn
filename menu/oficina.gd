@@ -619,6 +619,10 @@ func _abrir_upgrade() -> void:
 	var f: Dictionary = PECAS_UPG.fabrica(_upg_veh)
 	_upg_fab = f.config
 	_upg = PECAS_UPG.opcoes(f.classe)
+	# barra de luz: só as do tamanho do carro (LightRigCategory, pecas.json "luzes")
+	if _upg.slots.has("Lighting"):
+		var lz: Dictionary = car.pecas.get("luzes", {})
+		_upg.slots.Lighting = _upg.slots.Lighting.filter(func(p): return p == "NOT_INSTALLED" or lz.has(p))
 	if not mesmo:
 		_upg_esc = (car.pecas_escolhidas as Dictionary).duplicate()
 	for c in _lista_upg.get_children():
@@ -626,8 +630,8 @@ func _abrir_upgrade() -> void:
 	for slot in PECAS_UPG.SLOTS:
 		if not _upg.slots.has(slot) or not _upg_fab.has(slot):
 			continue
-		if slot == "Bumper" and not car.tem_parachoque():
-			continue                     # Storm e Chimera (RallyCompMap): sem para-choque
+		if car.ACESSORIOS.has(slot) and not car.tem_acessorio(slot):
+			continue                     # Storm e Chimera (RallyCompMap): sem para-choque e barra
 		var linha := HBoxContainer.new()
 		_lista_upg.add_child(linha)
 		var l := Label.new()
@@ -676,7 +680,7 @@ func _mostrar_upgrade() -> void:
 				txt.append("%s %s" % [k, fx[k]])
 			elif String(fx[k]) == "":
 				txt.append(k)
-		if slot == "Bumper" and p != "NOT_INSTALLED":
+		if slot in ["Bumper", "Lighting"] and p != "NOT_INSTALLED":
 			txt.append("só visual (no jogo não mexe na física)")
 		(linha.get_node("Efeito") as Label).text = ", ".join(txt)
 	# o que a física vai usar (0..1 entre _non_tuned e _fully_tuned)

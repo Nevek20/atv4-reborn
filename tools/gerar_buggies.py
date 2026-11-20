@@ -107,6 +107,7 @@ def config_xml(prefixo="BUGGY"):
             "roda": re.search(r'DefaultConfig[^>]*Wheel="([^"]+)"', blk).group(1),
             "mapa": re.search(r'ComponentMap="([^"]+)"', blk).group(1),
             "cams": re.search(r'Cameras="([^"]+)"', blk).group(1),
+            "luzes": (re.search(r'LightRigCategory="(\w+)"', blk) or re.search("()", "")).group(1).upper(),
         }
     return out
 
@@ -161,6 +162,8 @@ def mapear(unpacked, classe="buggy"):
                 # para-choque comprado (Models_4K/Bumper/<peça>/FrontBumper) vai
                 # no ponto BUMPER do Body.pts; o RallyCompMap (Storm, Chimera) não tem
                 c["parachoque"] = pos
+            elif tipo == "Lighting":
+                c["ponto_luzes"] = pos           # LIGHTRIG (barra de luz do teto)
         # física: o arquivo do jogo pelo caminho (vazio = só a base)
         c["fisica"] = arqs.get(("Setup/VehicleParams/%s/%s.xml" % (k["pasta"], vid)).lower(), (None,))[0]
         carros.append(c)
@@ -270,6 +273,26 @@ def parachoques(arqs, unpacked, pasta):
     return out
 
 
+# barras de luz compráveis (catálogo, Lighting: LIGHTRIG_0N_HEAVYCLASS_<LARGE|
+# SMALL>, só visual): o tamanho vem do carro (vehicles.xml LightRigCategory),
+# /Vehicles/<classe>/Models_4K/Lighting/<modelo>/LIGHTING.pingu no ponto LIGHTRIG
+def luzes(arqs, unpacked, pasta):
+    """{componente: bloco} das barras de luz da classe (os 2 tamanhos)"""
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(pasta)
+    lt = c.find("Lighting") if c is not None else None
+    out = {}
+    for e in (lt if lt is not None else []):
+        comp, modelo = e.get("mComponentName"), e.get("mInGameModelName")
+        if comp == "NOT_INSTALLED":
+            continue
+        b = bloco(arqs, "Vehicles/%s/%s/Lighting/%s/LIGHTING.pingu" % (pasta, LOD, modelo))
+        if b is not None:
+            out[comp] = b
+    return out
+
+
 def pingu(unpacked, tex, bloco_, out, split=()):
     cmd = [sys.executable, os.path.join(AQUI, "pingu2obj.py"),
            os.path.join(unpacked, "other", "%d_bloco.bin" % bloco_),
@@ -321,6 +344,12 @@ def main():
         os.makedirs(pc_dir, exist_ok=True)
         for b in lista_pc.values():
             pingu(a.unpacked, a.texturas, b, pc_dir)
+    lz_dir = os.path.join(a.assets, "luzes")
+    lista_lz = luzes(ler_arquivos(), a.unpacked, CLASSES[a.classe]["pasta"])
+    if lista_lz:
+        os.makedirs(lz_dir, exist_ok=True)
+        for b in lista_lz.values():
+            pingu(a.unpacked, a.texturas, b, lz_dir)
     falhas_pintura = []
     dados = os.path.join(PROJ, "data", "vehicles")
     for c in carros:
@@ -368,6 +397,10 @@ def main():
             "aros": {k: "../rodas/" + v for k, v in lista_aros.items()},
             "parachoques": {k: "../parachoques/%d_bloco.obj" % b for k, b in lista_pc.items()} if c.get("parachoque") else {},
             "ponto_parachoque": c.get("parachoque", ""),
+            # barras de luz do tamanho do carro (LightRigCategory)
+            "luzes": {k: "../luzes/%d_bloco.obj" % b for k, b in lista_lz.items()
+                      if c.get("luzes") and k.endswith("_" + c["luzes"])} if c.get("ponto_luzes") else {},
+            "ponto_luzes": c.get("ponto_luzes", ""),
             # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio)
             "rally": any(p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
             "estepe": [p for p in pos_rodas if p.startswith("SpareWheel")],
