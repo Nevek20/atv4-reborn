@@ -2271,8 +2271,50 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   "Tudo no máximo" não mexe em aro e para-choque (aparência, NOSSO; antes
   punha o Aro 8). Lâmpadas do para-choque no farol (H): ver Farol.
 
+## HUD do jogo (nov/2026)
+
+- Pedido do Matheus. HUD_PS2/HUD_CIRCUIT.xml (xml 01476, nome pelo CRC
+  "HUD_CIRCUIT.xml"; exe: /%s/HUD_%s, cFEXHUDManager_CIRCUIT) desenhado
+  pelo próprio layout (menu/hud_jogo.gd); tools/hud_jogo.py tira as
+  texturas com alfa, as caixas .bed, as fontes FE_FontSmall/Medium e o
+  kerning delas pra assets/hud e copia o layout pra data/hud_circuit.xml.
+- Quadro (exe 0x46f7c0; enums da RAM 0x83d1c0..0x83d1e0): X LEFT 0, RIGHT
+  1, CENTRE 2; Y BOTTOM 0, TOP 1, CENTRE 2 (y pra cima); escala RELATIVE 0
+  (fração do pai), UNIT_RELATIVE 1 (quadrada pelo lado menor do pai),
+  ABSOLUTE 2 (fração da tela, X / razão da tela); mOffsetAbsolute idem pro
+  offset. Sprite com mPixelScaleRatio > 0 (0x472778 -> 0x46f6e8): tamanho =
+  caixa do .bed em pixels x razão, 640 de referência; widescreen
+  (DAT_007f3e3c+0x18) x 0.75 (o vídeo do speedrun é 16:9 e o conta-giros
+  bate com o 0.75; nos save states do Matheus a flag é 0 = 4:3).
+- Texto (0x474e08 / 0x2689c0): glifo com a altura do quadro, topo no topo;
+  kerning (flag 0x40, bloco Fonts/#hash depois de cada fonte: base 2 px na
+  Small, 1 px na Medium, 1 px por nibble nos pares a partir de '@').
+  Número com mAlignCentre (0x475390): centrado na borda esquerda do quadro
+  pela largura do "8". Rótulos são chaves da tabela de tradução (LEAD,
+  BEST_LAP_S...; en e pt no hud.json), em maiúsculas como no vídeo.
+- Conta-giros (OBJECT_SPEEDO, 0x4890d8): ponteiro de mNeedleMinRot (-1.57)
+  a mNeedleMaxRot (3.14) pelas rpm / MAXREVS, girando na needle_base posta
+  na speedo_base; textura rev9000/10000/12000 pelo limitador do carro.
+  Velocidade = 1.06 x a pra frente (como o painel).
+- Barras de acelerador e freio (OBJECT_FILLBAR, 0x489ad0/0x489ee0): a
+  hud_tpage_bar é indexada e a paleta é só marcação; o jogo troca a cor das
+  entradas por bloco (acelerador 239->224, freio 255->240, 16 blocos),
+  mantendo o alfa da paleta. As cores (mActiveColour) não estão no XML:
+  verde (13,105,15) e preto apagado medidos no vídeo; o vermelho do freio é
+  NOSSO (não aparece aceso no vídeo). O importador do Godot sangra cor nos
+  pixels transparentes: a barra zera eles (senão a borda ficava vermelha).
+- Conferido com o vídeo do speedrun (1280x720): conta-giros, molduras,
+  rótulos (mesma altura e começo, x = 153) e o tempo batem. Os números das
+  caixas (POSITION, LAP) saem maiores que no vídeo (0.0725 da tela pela conta
+  do quadro x ~0.05 no vídeo); o vídeo é NTSC e pode ter outro layout:
+  falta print do PAL no RX01 pra fechar.
+- NOSSO: treino livre mostra só o conta-giros (o jogo não foi lido nesse
+  modo). Faltam: minimapa, lista de pilotos, bandeiras, mensagens, seta e
+  o LEAD (diferença pro líder; fica 00:00:00).
+
 ## HUD básico (nov/2026, NOSSO)
 
+- Agora só quando falta o assets/hud (o HUD do jogo toma o lugar).
 - Pedido do Matheus: marcha e velocidade no canto inferior direito, só na
   terceira pessoa (câmeras perto e longe), provisório até portar o HUD do
   jogo (menu/hud_basico.gd). Some na introdução e na descida da câmera da

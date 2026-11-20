@@ -440,8 +440,10 @@ func _process(dt: float) -> void:
 			if t_rapido > 0.0:
 				t_rapido -= dt
 				aviso = "Too Fast For Respot"
+			if main.hud_jogo:
+				txt = ""                 # posição, volta e tempos: o HUD do jogo (menu/hud_jogo.gd)
 			if aviso != "":
-				txt = aviso + "\n" + txt
+				txt = aviso + ("\n" + txt if txt != "" else "")
 				_cor_hud(Color(0.9, 0.1, 0.1))
 			hud.text = txt
 		CHEGOU:

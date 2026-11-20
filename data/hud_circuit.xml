@@ -1,0 +1,231 @@
+<Root FileVersion="1.0000000">
+   <SafeScreenX mObjectType="OBJECT_FRAME" mStatic="1">
+      <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.9" mAlignY="ALIGN_CENTRE" mOffsetY="0.0" mScaleY="0.9" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+      <Children>
+         <MINIMAP_SPRITE mObjectType="OBJECT_SPRITE" mStatic="0" mTexture="Minimaps/[LEVEL_EVENT]" mPixelScaleRatio="1.0" mBedBox="MAP">
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.002" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="-0.002" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </MINIMAP_SPRITE>
+         <MINIMAP_CIRCUIT mObjectType="OBJECT_MINIMAP" mStatic="0" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mPixelScaleRatio="1.0" mBedBox="map_dot">
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="-0.038" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.0" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </MINIMAP_CIRCUIT>
+         <PLAYERLIST_SPRITE mObjectType="OBJECT_PLAYERLIST_SPRITE" mStatic="0" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mPixelScaleRatio="1.0" mPosBedBox="pos_box" mNameBedBox="name_box" mGapSize="0.05" mShuffleSpeed="1.0">
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="0.2" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="1"/>
+         </PLAYERLIST_SPRITE>
+         <PLAYERLIST_TEXT mObjectType="OBJECT_PLAYERLIST_TEXT" mStatic="0" mHorzSpacing="1.172" mVertSpacing="1.172" mShuffleSpeed="1.0" mFont="FONT_SMALL">
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.013" mScaleX="0.04" mAlignY="ALIGN_TOP" mOffsetY="0.2" mScaleY="0.04" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="1"/>
+         </PLAYERLIST_TEXT>
+      </Children>
+   </SafeScreenX>
+   <LEFT_BORDER mObjectType="OBJECT_SPRITE" mStatic="1" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mPixelScaleRatio="1.0" mBedBox="timer_border" mMirrorX="1">
+      <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.015" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="0.09" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+   </LEFT_BORDER>
+   <SafeScreen mObjectType="OBJECT_FRAME" mStatic="1">
+      <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.9" mAlignY="ALIGN_CENTRE" mOffsetY="0.0" mScaleY="0.9" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+      <Children>
+         <LeadPosFrm mObjectType="OBJECT_FRAME" mStatic="1">
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.015" mScaleX="0.35" mAlignY="ALIGN_TOP" mOffsetY="0.0" mScaleY="0.15" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+            <Children>
+               <LP_TextFrm mObjectType="OBJECT_FRAME" mStatic="1">
+                  <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.055" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="0.047" mScaleY="0.3" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+                  <Children>
+                     <LeadTxtElem mObjectType="OBJECT_TEXT" mStatic="1" mText="LEAD" mFont="FONT_SMALL">
+                        <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                        <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.074" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.002" mScaleY="1.0" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </LeadTxtElem>
+                     <PosTxtElem mObjectType="OBJECT_TEXT" mStatic="1" mText="POSITION" mFont="FONT_SMALL">
+                        <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                        <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.085" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.002" mScaleY="1.0" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </PosTxtElem>
+                  </Children>
+               </LP_TextFrm>
+               <LP_NumFrm mObjectType="OBJECT_FRAME" mStatic="1">
+                  <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.0" mScaleY="0.7" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+                  <Children>
+                     <LEAD_TIMER mObjectType="OBJECT_TIMER" mStatic="0" mText="00:00:00" mFont="FONT_SMALL" mAllowNegative="1">
+                        <Frame mAlignX="ALIGN_LEFT" mOffsetX="-0.011" mScaleX="0.5" mAlignY="ALIGN_TOP" mOffsetY="0.003" mScaleY="0.5" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </LEAD_TIMER>
+                     <PLAYER_POS mObjectType="OBJECT_INTEGER" mStatic="0" mText="00" mZeroPad="1" mFont="FONT_SMALL">
+                        <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.073" mScaleX="0.69" mAlignY="ALIGN_TOP" mOffsetY="0.004" mScaleY="0.69" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </PLAYER_POS>
+                     <LP_PosSep mObjectType="OBJECT_TEXT" mStatic="1" mText="." mFont="FONT_SMALL">
+                        <Frame mAlignX="ALIGN_RIGHT" mOffsetX="-0.016" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="-1.0" mScaleY="1.0" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </LP_PosSep>
+                     <NUM_PLAYERS mObjectType="OBJECT_INTEGER" mStatic="0" mText="00" mZeroPad="1" mFont="FONT_SMALL">
+                        <Frame mAlignX="ALIGN_RIGHT" mOffsetX="-0.014" mScaleX="0.6" mAlignY="ALIGN_BOTTOM" mOffsetY="0.035" mScaleY="0.6" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </NUM_PLAYERS>
+                  </Children>
+               </LP_NumFrm>
+            </Children>
+         </LeadPosFrm>
+         <LapTimeFrm mObjectType="OBJECT_FRAME" mStatic="1">
+            <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.015" mScaleX="0.35" mAlignY="ALIGN_TOP" mOffsetY="0.0" mScaleY="0.15" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+            <Children>
+               <LT_TextFrm mObjectType="OBJECT_FRAME" mStatic="1">
+                  <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="0.0" mScaleY="0.3" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+                  <Children>
+                     <LapTxtElem mObjectType="OBJECT_TEXT" mStatic="1" mText="LAP" mFont="FONT_SMALL">
+                        <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                        <Frame mAlignX="ALIGN_LEFT" mOffsetX="-0.012" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="-0.004" mScaleY="1.0" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </LapTxtElem>
+                     <TimeTxtElem mObjectType="OBJECT_TEXT" mStatic="1" mText="TIME" mFont="FONT_SMALL">
+                        <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                        <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.109" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="-0.004" mScaleY="1.0" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </TimeTxtElem>
+                  </Children>
+               </LT_TextFrm>
+               <LT_NumFrm mObjectType="OBJECT_FRAME" mStatic="1">
+                  <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.0" mScaleY="0.7" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+                  <Children>
+                     <LAP_TIMER mObjectType="OBJECT_TIMER" mStatic="0" mText="00:00:00" mFont="FONT_SMALL" mAllowNegative="0">
+                        <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.064" mScaleX="0.5" mAlignY="ALIGN_TOP" mOffsetY="0.003" mScaleY="0.5" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </LAP_TIMER>
+                     <CURRENT_LAP mObjectType="OBJECT_INTEGER" mStatic="0" mText="01" mZeroPad="1" mFont="FONT_SMALL">
+                        <Frame mAlignX="ALIGN_LEFT" mOffsetX="-0.014" mScaleX="0.6999" mAlignY="ALIGN_TOP" mOffsetY="0.002" mScaleY="0.6999" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </CURRENT_LAP>
+                     <LT_LapSep mObjectType="OBJECT_TEXT" mStatic="1" mText="." mFont="FONT_SMALL">
+                        <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.047" mScaleX="0.8" mAlignY="ALIGN_TOP" mOffsetY="-1.0" mScaleY="0.8" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </LT_LapSep>
+                     <TOTAL_LAPS mObjectType="OBJECT_INTEGER" mStatic="0" mText="01" mZeroPad="1" mFont="FONT_SMALL">
+                        <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.083" mScaleX="0.6" mAlignY="ALIGN_BOTTOM" mOffsetY="0.035" mScaleY="0.6" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+                     </TOTAL_LAPS>
+                  </Children>
+               </LT_NumFrm>
+            </Children>
+         </LapTimeFrm>
+         <BestLapTotalFrm mObjectType="OBJECT_FRAME" mStatic="1">
+            <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.004" mScaleX="0.28" mAlignY="ALIGN_TOP" mOffsetY="0.2" mScaleY="0.1" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+            <Children>
+               <BestLapTxtElem mObjectType="OBJECT_TEXT" mStatic="1" mText="BEST_LAP_S" mFont="FONT_SMALL">
+                  <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.363" mScaleX="0.4499" mAlignY="ALIGN_TOP" mOffsetY="-0.033" mScaleY="0.4499" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+               </BestLapTxtElem>
+               <TotalTxtElem mObjectType="OBJECT_TEXT" mStatic="1" mText="TOTAL" mFont="FONT_SMALL">
+                  <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.234" mScaleX="0.4499" mAlignY="ALIGN_BOTTOM" mOffsetY="0.042" mScaleY="0.4499" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+               </TotalTxtElem>
+               <BEST_LAP_TIMER mObjectType="OBJECT_TIMER" mStatic="0" mText="00:00:00" mFont="FONT_SMALL" mAllowNegative="0">
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.1" mScaleX="0.5" mAlignY="ALIGN_TOP" mOffsetY="-0.036" mScaleY="0.5" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+               </BEST_LAP_TIMER>
+               <TOTAL_TIMER mObjectType="OBJECT_TIMER" mStatic="0" mText="00:00:00" mFont="FONT_SMALL" mAllowNegative="0">
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.100" mScaleX="0.5" mAlignY="ALIGN_BOTTOM" mOffsetY="0.039" mScaleY="0.5" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="1"/>
+               </TOTAL_TIMER>
+            </Children>
+         </BestLapTotalFrm>
+         <START_BOARD mObjectType="OBJECT_SPRITE" mStatic="0" mTexture="HUD_StartBoard" mVisGroup="START_BOARD" mForceNippleOff="1">
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.2" mAlignY="ALIGN_TOP" mOffsetY="0.117" mScaleY="0.2" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </START_BOARD>
+         <START_FLAG mObjectType="OBJECT_SPRITE_ANIM" mStatic="0" mTexture="HUD_FlagGreen" mVisGroup="START_FLAG" mForceNippleOff="0" mNumFrames="8" mBedBoxStub="flag" mBedBox="flag_01" mFPS="16" mMirror="1" mPixelScaleRatio="1.0">
+            <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.4" mAlignY="ALIGN_TOP" mOffsetY="0.355" mScaleY="0.2" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </START_FLAG>
+         <WHITE_FLAG mObjectType="OBJECT_SPRITE_ANIM" mStatic="0" mTexture="HUD_FlagWhite" mVisGroup="WHITE_FLAG" mForceNippleOff="0" mNumFrames="8" mBedBoxStub="flag" mBedBox="flag_01" mFPS="16" mMirror="1" mPixelScaleRatio="1.0">
+            <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+            <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.091" mScaleX="0.4" mAlignY="ALIGN_BOTTOM" mOffsetY="0.355" mScaleY="0.2" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </WHITE_FLAG>
+         <CHECK_FLAG mObjectType="OBJECT_SPRITE_ANIM" mStatic="0" mTexture="HUD_Flag" mVisGroup="CHECK_FLAG" mForceNippleOff="0" mNumFrames="8" mBedBoxStub="flag" mBedBox="flag_01" mFPS="16" mMirror="1" mPixelScaleRatio="1.0">
+            <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+            <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.091" mScaleX="0.4" mAlignY="ALIGN_BOTTOM" mOffsetY="0.355" mScaleY="0.2" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </CHECK_FLAG>
+         <START_MESSAGE mObjectType="OBJECT_MESSAGE" mStatic="0" mText="Message before start flag" mTextAlignX="ALIGN_CENTRE" mVisGroup="START_MESSAGE" mQueueSize="4" mFont="FONT_MEDIUM">
+            <mColour R="1.0" G="0.2" B="0.2" A="1.0"/>
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.08" mAlignY="ALIGN_TOP" mOffsetY="0.500" mScaleY="0.08" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </START_MESSAGE>
+         <START_ERROR mObjectType="OBJECT_MESSAGE" mStatic="0" mText="Start error msg" mFont="FONT_MEDIUM" mTextAlignX="ALIGN_CENTRE" mVisGroup="START_ERROR" mQueueSize="1">
+            <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.08" mAlignY="ALIGN_TOP" mOffsetY="0.570" mScaleY="0.08" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </START_ERROR>
+         <NETWORK_DISCONNECT mObjectType="OBJECT_SPRITE_ANIM" mStatic="0" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mForceNippleOff="0" mNumFrames="2" mBedBoxStub="net" mFPS="1" mNipple="1">
+            <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.471" mScaleX="0.0625" mAlignY="ALIGN_TOP" mOffsetY="0.600" mScaleY="0.0625" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </NETWORK_DISCONNECT>
+         <TrickScoreFrm>
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0" mScaleX="0.125" mAlignY="ALIGN_TOP" mOffsetY="0.005" mScaleY="0.125" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+            <Children>
+               <TOTAL_TRICK_SCORE_LABEL mObjectType="OBJECT_TEXT" mStatic="1" mText="SCORE" mFont="FONT_SMALL" mTextAlignX="ALIGN_CENTRE">
+                  <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+                  <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0" mScaleX="0.046" mAlignY="ALIGN_TOP" mOffsetY="0" mScaleY="0.046" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+               </TOTAL_TRICK_SCORE_LABEL>
+               <TOTAL_TRICK_SCORE mObjectType="OBJECT_INTEGER" mStatic="0" mText="0000000" mFont="FONT_SMALL" mAlignCentre="1">
+                  <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+                  <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.145" mScaleX="0.0460" mAlignY="ALIGN_TOP" mOffsetY="0.33" mScaleY="0.0460" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+               </TOTAL_TRICK_SCORE>
+            </Children>
+         </TrickScoreFrm>
+         <TrickFrm>
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0" mScaleX="0.125" mAlignY="ALIGN_BOTTOM" mOffsetY="0.059" mScaleY="0.125" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+            <Children>
+               <TRICK_NAME mObjectType="OBJECT_MESSAGE" mStatic="0" mText="NACNAC" mFont="FONT_MEDIUM" mTextAlignX="ALIGN_CENTRE" mVisGroup="TRICK_MESSAGE" mQueueSize="4">
+                  <mColour R="1.0" G="0.6" B="0" A="1.0"/>
+                  <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.05" mAlignY="ALIGN_BOTTOM" mOffsetY="0.202" mScaleY="0.05" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+               </TRICK_NAME>
+               <TRICK_SCORE mObjectType="OBJECT_TEXT" mStatic="0" mText="0000000" mFont="FONT_MEDIUM" mTextAlignX="ALIGN_CENTRE" mVisGroup="TRICK_MESSAGE">
+                  <mColour R="1.0" G="1.0" B="1,0" A="1.0"/>
+                  <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.06" mAlignY="ALIGN_TOP" mOffsetY="0.778" mScaleY="0.06" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+               </TRICK_SCORE>
+            </Children>
+         </TrickFrm>
+         <SpeedoFrm mStatic="1" mObjectType="OBJECT_FRAME">
+            <Frame mAlignX="ALIGN_RIGHT" mOffsetX="-0.059" mScaleX="1" mAlignY="ALIGN_BOTTOM" mOffsetY="-0.015" mScaleY="1" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+            <Children>
+               <SPEEDO mObjectType="OBJECT_SPEEDO" mStatic="0" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mSpeedoBedBox="main_speedo" mSpeedoBaseBedBox="speedo_base" mNeedleBedBox="needle" mNeedleMinRot="-1.57" mNeedleMaxRot="3.1416" mNeedleBaseBedBox="needle_base" mPixelScaleRatio="1.0">
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.06" mScaleX="0.33" mAlignY="ALIGN_BOTTOM" mOffsetY="0.015" mScaleY="0.3" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="0"/>
+               </SPEEDO>
+               <SPEED mObjectType="OBJECT_INTEGER" mStatic="0" mText="000" mZeroPad="0" mFont="FONT_MEDIUM" mAlignCentre="1" mPixelScaleRatio="1.0">
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.145" mScaleX="0.0399" mAlignY="ALIGN_BOTTOM" mOffsetY="0.067" mScaleY="0.0399" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="1"/>
+               </SPEED>
+               <GEAR mObjectType="OBJECT_INTEGER" mStatic="0" mText="0" mZeroPad="0" mFont="FONT_MEDIUM">
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.064" mScaleX="0.055" mAlignY="ALIGN_BOTTOM" mOffsetY="0.067" mScaleY="0.04" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="1"/>
+               </GEAR>
+               <PRELOAD_BAR mObjectType="OBJECT_FILLBAR" mStatic="0" mTexture="hud_tpage_bar" mPixelScaleRatio="1.0" mBedBox="preload_bar" mFirstPaletteEntry="0" mNumBlocks="10" mEntriesPerBlock="4" mReverseEntries="0">
+                  <mActiveColour R="2.0" G="0.0" B="0.0" A="1.0"/>
+                  <mInactiveColour R="0.3" G="0.3" B="0.3" A="1.0"/>
+                  <mInactiveColour2 R="0.5" G="0.5" B="2.0" A="1.0"/>
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.247" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.029" mScaleY="1.0" mScaleMode="SCALE_RELATIVE" mOffsetAbsolute="1"/>
+               </PRELOAD_BAR>
+               <ACCEL_BAR mObjectType="OBJECT_FILLBAR" mStatic="0" mTexture="hud_tpage_bar" mPixelScaleRatio="1.0" mBedBox="accel_bar" mFirstPaletteEntry="239" mNumBlocks="16" mEntriesPerBlock="1" mReverseEntries="1">
+                  <mActiveColour R="0.0" G="1.0" B="0.0" A="1.0"/>
+                  <mInactiveColour R="0.3" G="0.3" B="0.3" A="1.0"/>
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.100" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.127" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+               </ACCEL_BAR>
+               <BRAKE_BAR mObjectType="OBJECT_FILLBAR" mStatic="0" mTexture="hud_tpage_bar" mPixelScaleRatio="1.0" mBedBox="brake_bar" mFirstPaletteEntry="255" mNumBlocks="16" mEntriesPerBlock="1" mReverseEntries="1">
+                  <mActiveColour R="2.0" G="0.0" B="0.0" A="1.0"/>
+                  <mInactiveColour R="0.3" G="0.3" B="0.3" A="1.0"/>
+                  <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.085" mScaleX="1.0" mAlignY="ALIGN_BOTTOM" mOffsetY="0.127" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+               </BRAKE_BAR>
+            </Children>
+         </SpeedoFrm>
+         <ARROW mObjectType="OBJECT_3DARROW" mStatic="0" mRenderTarget="1" mRenderTargetWidth="128" mRenderTargetHeight="128">
+            <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.15" mAlignY="ALIGN_TOP" mOffsetY="0.095" mScaleY="0.15" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </ARROW>
+         <SONG_TITLE_BKGR mObjectType="OBJECT_SPRITE" mStatic="0" mTexture="song_bkgr" mVisGroup="SONG_COMP" mHotSpot="HOTSPOT">
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="-0.064" mScaleX="0.06" mAlignY="ALIGN_BOTTOM" mOffsetY="0.0" mScaleY="0.06" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+         </SONG_TITLE_BKGR>
+         <SONG_TITLE mObjectType="OBJECT_TEXT" mStatic="0" mText="This_is_a_song_title" mFont="FONT_SMALL" mTextAlignX="ALIGN_LEFT" mVisGroup="SONG_COMP">
+            <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="0.06" mAlignY="ALIGN_BOTTOM" mOffsetY="0.025" mScaleY="0.06" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="0"/>
+         </SONG_TITLE>
+         <SONG_AUTHOR mObjectType="OBJECT_TEXT" mStatic="0" mText="Author" mFont="FONT_SMALL" mTextAlignX="ALIGN_LEFT" mVisGroup="SONG_COMP">
+            <mColour R="1.0" G="1.0" B="0.4" A="1.0"/>
+            <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="0.05" mAlignY="ALIGN_BOTTOM" mOffsetY="-0.013" mScaleY="0.05" mScaleMode="SCALE_UNIT_RELATIVE" mOffsetAbsolute="0"/>
+         </SONG_AUTHOR>
+      </Children>
+   </SafeScreen>
+   <LAP_MESSAGE mObjectType="OBJECT_MESSAGE" mStatic="0" mText="THIS IS A LAP MESSAGE" mTextAlignX="ALIGN_CENTRE" mVisGroup="LAP_MESSAGE" mQueueSize="4" mFont="FONT_SMALL">
+      <mColour R="1.0" G="1.0" B="1.0" A="1.0"/>
+      <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.317" mScaleX="0.05" mAlignY="ALIGN_TOP" mOffsetY="0.625" mScaleY="0.05" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+   </LAP_MESSAGE>
+   <ERROR_MESSAGE mObjectType="OBJECT_MESSAGE" mStatic="0" mText="THIS IS AN ERROR MESSAGE" mFont="FONT_MEDIUM" mTextAlignX="ALIGN_CENTRE" mVisGroup="ERROR_MESSAGE" mQueueSize="4">
+      <mColour R="1.0" G="1.0" B="0.2" A="1.0"/>
+      <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.06" mAlignY="ALIGN_TOP" mOffsetY="0.285" mScaleY="0.06" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+   </ERROR_MESSAGE>
+   <UNLATCHED_TRICK_MESSAGE mObjectType="OBJECT_MESSAGE" mStatic="0" mFont="FONT_MEDIUM" mTextAlignX="ALIGN_CENTRE" mVisGroup="UNLATCHED_TRICK_MESSAGE" mQueueSize="4" mText="unlatched trick message">
+      <mColour R="0.95" G="0.5" B="0" A="1.0"/>
+      <Frame mAlignX="ALIGN_CENTRE" mOffsetX="0.0" mScaleX="0.06" mAlignY="ALIGN_TOP" mOffsetY="0.7" mScaleY="0.06" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+   </UNLATCHED_TRICK_MESSAGE>
+   <RIGHT_BORDER mObjectType="OBJECT_SPRITE" mStatic="1" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mPixelScaleRatio="1.0" mBedBox="timer_border">
+      <Frame mAlignX="ALIGN_RIGHT" mOffsetX="0.015" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="0.09" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+   </RIGHT_BORDER>
+   <PLACEMENT mObjectType="OBJECT_PLACEMENT_MARKER" mStatic="0" mTexture="MainTPage/hud_tpage_rev[MAXREVS]" mScreenYStep="-0.094" mBedBox="placement_marker" mPixelScaleRatio="1.0">
+      <Frame mAlignX="ALIGN_LEFT" mOffsetX="0.0" mScaleX="1.0" mAlignY="ALIGN_TOP" mOffsetY="0.211" mScaleY="1.0" mScaleMode="SCALE_ABSOLUTE" mOffsetAbsolute="0"/>
+   </PLACEMENT>
+</Root>

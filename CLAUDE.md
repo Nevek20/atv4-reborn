@@ -38,7 +38,7 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 ## Estrutura
 
 ```
-main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 tudo / só marcha e velocidade / nada, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
+main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 tudo / só o HUD do jogo / nada, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
                      VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro/               o carro
   car.gd               a FÍSICA portada do exe (suspensão, pneus, motor, câmbio, pedais, casco,
@@ -65,7 +65,7 @@ carro/               o carro
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa),
-                     hud_basico.gd (marcha e km/h no canto, só na 3ª pessoa; NOSSO até portar o HUD do jogo)
+                     hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida)
@@ -73,7 +73,7 @@ som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
-                     truck_bonus, escort, rodas, parachoques, luzes), piloto/, pista/ (rx01, terreno), efeitos/, sons/
+                     truck_bonus, escort, rodas, parachoques, luzes), piloto/, pista/ (rx01, terreno), efeitos/, sons/, hud/
 fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
                      pneus.cpp, rodas.cpp, curvas.cpp, efeitos.cpp; visual e som: piloto.cpp,
                      suspensao.cpp, som.cpp, som_jogo.cpp; linha_ia.cpp, nuvens.cpp), SConstruct
@@ -101,7 +101,7 @@ Gerar assets no PC (fora do git; detalhes em docs/comandos.md):
 `tools/gerar_buggies.py` (carros, `--classe truck`), `tools/gerar_pintura.py`,
 `tools/fx_jogo.py` (texturas de efeito), `tools/sfx_jogo.py` (sons),
 `tools/rx01_objetos.py` (pista), `tools/piloto.py`, `tools/carro_glb.py`
-(carros extras nossos).
+(carros extras nossos), `tools/hud_jogo.py` (HUD).
 
 Na nuvem (Claude Code web) o `.claude/hooks/session-start.sh` instala o
 Godot 4.7.1 de Linux, Pillow e zstandard e já deixa `$GODOT` pronto. O
@@ -322,6 +322,13 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Som (som_jogo, motor_som) e texto do HUD da corrida andam no máximo ~75
   vezes por segundo (PASSO_SOM, PASSO_HUD): até 75 FPS igual, acima o tempo
   acumulado entra de uma vez. Não voltar pra "todo quadro".
+
+HUD (menu/hud_jogo.gd)
+- Layout = o XML do jogo (data/hud_circuit.xml) com a conta do quadro do
+  exe (0x46f7c0): não posicionar nada "no olho". Sprite com
+  mPixelScaleRatio = pixels da caixa .bed / 640 (x 0.75 em widescreen).
+  Texto na altura do quadro + kerning da fonte. Barras pela CLUT (índices
+  224..255). Cores das barras: vídeo (falta RAM).
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo
