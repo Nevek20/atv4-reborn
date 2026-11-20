@@ -12,7 +12,9 @@ extends SceneTree
 ##    no model_root na posição do ponto; de fábrica não tem; só visual: massa,
 ##    casco e motor iguais aos de fábrica. As 4 lâmpadas (light_64) do
 ##    para-choque 4 entram no farol (farol.gd, H), viradas pra frente e na
-##    frente da carroceria; Renegade e Buccaneer de fábrica não têm farol
+##    frente da carroceria; Renegade e Buccaneer de fábrica não têm farol.
+##    O 3 não tem light_64: as 2 lentes do meio são o pedaço do atlas
+##    chassis_comp03 (farol.gd LAMPADAS_ATLAS) e as 2 de fora ficam tampadas
 ## Uso: godot --headless --path . -s res://tests/teste_parachoque.gd
 
 const Main := preload("res://main.gd")
@@ -22,6 +24,7 @@ const BP := "BUMPER_04_HEAVYCLASS_LARGE"
 
 var falhas := 0
 var carros: Array = []
+var c3                              # Renegade com o para-choque 3 (lente no atlas)
 var q := 0
 
 
@@ -96,6 +99,16 @@ func _initialize() -> void:
 
 
 func _process(_d: float) -> bool:
+	if c3 == null:
+		var v: Dictionary = {}
+		for x in Main.frota():
+			if x.get("id", "") == "BUGGY_10" and v.is_empty():
+				v = x
+		c3 = Car.new()
+		Main.configurar(c3, v)
+		c3.pecas_escolhidas = {"Bumper": "BUMPER_03_HEAVYCLASS_LARGE"}
+		root.add_child(c3)
+		c3.reset_to(Vector3(-60.0, 50.0, 0.0), 0.0)
 	q += 1
 	if q < 2:
 		return false
@@ -135,6 +148,11 @@ func _process(_d: float) -> bool:
 			_falha("%s: as 4 lâmpadas do para-choque não entraram no farol" % nome)
 		elif com.farol.halos != 4 or com.parachoque_mi.get_children().filter(func(n): return n.name == "Lente_farol").size() != 1:
 			_falha("%s: lente ou brilhos do farol fora do para-choque" % nome)
+	var l3: Array = c3.farol.lampadas if c3.farol else []
+	print("  Renegade com o para-choque 3: %d lâmpadas em x %s (as do atlas chassis_comp03)" % [
+		l3.size(), ", ".join(l3.map(func(l): return "%.2f" % l.c.x))])
+	if l3.size() != 2 or not l3.all(func(l): return absf(l.c.x) < 0.3 and l.n.z > 0.5):
+		_falha("para-choque 3: as 2 lentes do meio deviam acender")
 	print("teste_parachoque: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 	quit()
 	return true

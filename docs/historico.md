@@ -942,6 +942,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   _montar_malha; lente e brilhos ficam filhos dele). 4 lâmpadas no 4 (z
   3.09-3.19 no Renegade, carroceria até 2.74; teste_parachoque); no 8 as 2
   com Lamp_cover ficam tampadas e no 7 a luz aparece pela grade (prints).
+  O 3 não acendia no PC (print do Matheus): ele não tem light_64, as 2
+  lentes do meio são o farol com refletor do atlas chassis_comp03 (u
+  0.45-0.69, v 0-0.30; 5 faces cada, só ele entre os 8 usa esse pedaço).
+  farol.gd LAMPADAS_ATLAS pega essas faces pela UV, só no para-choque (as
+  carrocerias de Inferno, Bulldog e Renegade também têm faces nesse pedaço
+  e o farol delas, FECHADO, não muda). As 2 de fora (Lamp_cover) ficam
+  tampadas.
   Renegade e Buccaneer de fábrica continuam sem farol.
 
 - Oficina do piloto (nov/2026, prints e saves gear.p2s / Paint_Shop.p2s do

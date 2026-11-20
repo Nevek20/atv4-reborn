@@ -16,6 +16,9 @@ extends Node3D
 ## pra trás e a cadilac_light do Fireball é lanterna.
 ## Para-choque comprado (carro_montagem._load_parachoque): as light_64 dele
 ## acendem junto (pedido do Matheus), procuradas na malha dele do mesmo jeito.
+## O para-choque 3 não tem light_64: as 2 lentes do meio são um pedaço do
+## atlas chassis_comp03 (LAMPADAS_ATLAS, só no para-choque: as carrocerias
+## também usam esse atlas e o farol delas não muda).
 
 const Luzes := preload("res://carro/luzes.gd")
 # nome da textura (minúsculo) das lentes. Trucks: a desert_jeep_style_light
@@ -24,6 +27,10 @@ const Luzes := preload("res://carro/luzes.gd")
 # o lado vem da normal (lanterna e relógio olham pra trás)
 const LAMPADAS := ["light_64", "headlight", "desert_jeep_style_light", "trophy_truck_light",
 	"prerunnertruck_light"]
+# lâmpada desenhada num atlas: textura -> retângulo da lente na UV (v de cima
+# pra baixo, como no Godot). chassis_comp03: o farol com refletor (u 0.45-0.69,
+# v 0-0.30); o vidro amassado do lado não é usado em lente nenhuma
+const LAMPADAS_ATLAS := {"chassis_comp03": Rect2(0.44, 0.0, 0.26, 0.31)}
 const FRENTE_MIN := 0.5      # lente conta como farol com a normal média nesse cone pra frente
 const JUNTA := 0.002         # m: vértices mais perto que isso ligam as faces (mesma lâmpada)
 const HALO_COR := Color(1.0, 0.95, 0.85)
@@ -57,7 +64,7 @@ func montar(c) -> bool:
 
 
 func _montar_malha(mi: MeshInstance3D, desloc: Vector3, z_min: float) -> void:
-	var achadas := achar_lampadas(mi, z_min - desloc.z)
+	var achadas := achar_lampadas(mi, z_min - desloc.z, mi != car.body_mi)
 	if achadas.is_empty():
 		return
 	var sh := Shader.new()
@@ -148,7 +155,8 @@ func atualizar(delta: float) -> void:
 ## lâmpada); fica o grupo virado pra frente e na frente da roda dianteira
 ## (z_min: no Goliath um pedaço da trophy_truck_light acende dentro da cabine).
 ## Centro e normal pela área, tam = maior lado da caixa. faces = [superfície, i0, i1, i2]
-static func achar_lampadas(mi: MeshInstance3D, z_min := -INF) -> Array:
+## atlas: também as faces com a UV dentro da lente de LAMPADAS_ATLAS (para-choque)
+static func achar_lampadas(mi: MeshInstance3D, z_min := -INF, atlas := false) -> Array:
 	var tris := []                 # [v0, v1, v2, normal da face, superfície, i0, i1, i2]
 	var mesh: ArrayMesh = mi.mesh
 	for s in mesh.get_surface_count():
@@ -156,15 +164,26 @@ static func achar_lampadas(mi: MeshInstance3D, z_min := -INF) -> Array:
 		if m == null or m.albedo_texture == null or m.albedo_color.a <= 0.0:
 			continue
 		var nome := m.albedo_texture.resource_path.get_file().to_lower()
+		var lente := Rect2()
 		if not LAMPADAS.any(func(x): return nome.contains(x)):
-			continue
+			if not atlas:
+				continue
+			for k in LAMPADAS_ATLAS:
+				if nome.contains(k.to_lower()):
+					lente = LAMPADAS_ATLAS[k]
+			if not lente.has_area():
+				continue
 		var a := mesh.surface_get_arrays(s)
 		var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
 		var nrs = a[Mesh.ARRAY_NORMAL]
+		var uvs = a[Mesh.ARRAY_TEX_UV]
 		var ix := PackedInt32Array(range(vs.size()))
 		if a[Mesh.ARRAY_INDEX] != null:
 			ix = a[Mesh.ARRAY_INDEX]
 		for t in range(0, ix.size(), 3):
+			if lente.has_area() and (uvs == null or not (lente.has_point(uvs[ix[t]])
+					and lente.has_point(uvs[ix[t + 1]]) and lente.has_point(uvs[ix[t + 2]]))):
+				continue
 			var v0 := vs[ix[t]]
 			var v1 := vs[ix[t + 1]]
 			var v2 := vs[ix[t + 2]]
