@@ -336,6 +336,12 @@ HUD (menu/hud_jogo.gd)
   de dentro do .p2s (a tela real do PAL; o PCSX2 estica o 4:3). Rótulos
   como na tabela (sem maiúsculas). Lista, minimapa: RAM. NOSSO: Score
   centrado, 3 dígitos x 0.8, a conta do LEAD.
+  Letras = a fonte como fica na RAM (largura arredondada, dígitos com a
+  largura do maior); tempo = células do modelo "--:--:--" com o dígito
+  espremido no traço; mAlignCentre anda 3/4 (sem a razão 4:3); lista:
+  só os nomes deslizam (1 s, freando, quem desce some no meio).
+  teste_hud confere cada letra com a RAM (re/hud_textos.py): não "acertar"
+  texto no olho. GS do PAL tem 512 de largura (x 1.25 pra 640).
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

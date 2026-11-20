@@ -21,7 +21,16 @@ extends Control
 ## Texto (0x474e08 / 0x2689c0): glifo com a altura do quadro, topo no topo,
 ## kerning da fonte. Número com mAlignCentre (0x475390): centrado na borda
 ## esquerda do quadro pela largura do "8". (RAM: POSITION com escala 1.58 =
-## 0.0725 da altura, igual à conta.)
+## 0.0725 da altura, igual à conta.) Fonte carregada (RAM, as 2 fontes):
+## largura de cada letra arredondada pro pixel e os dígitos todos com a
+## largura do maior, a caixa aberta em volta do meio (o "1" e o "7" ficam
+## centrados). Tempo (OBJECT_TIMER, 0x494fb0 / 0x495208): o jogo monta o
+## MODELO "--:--:--" (com uma célula de sinal no LEAD) e só troca a textura
+## de cada célula pelo dígito: o número fica espremido na largura do traço.
+## Lista de pilotos (0x48af80): caixas e números das posições fixos; quem
+## muda de posição tem a placa e o nome deslizando da linha velha pra nova em
+## mShuffleSpeed segundos, freando (1 - (1 - t)^2); quem desce some no meio
+## do caminho (alfa |2t - 1|).
 ## Conta-giros (OBJECT_SPEEDO, 0x4890d8 / 0x488fd0 / 0x489068): alvo =
 ## -(mNeedleMinRot + (mNeedleMaxRot - mNeedleMinRot) x clamp(rpm / MAXREVS)),
 ## o ponteiro anda até ele a 10 rad/s. MAXREVS = Max_rpm do motor (9000 em
@@ -39,8 +48,8 @@ extends Control
 ## paleta. PRELOAD_BAR: não existe nos buggies (a RAM tem o quadro mas o
 ## objeto foi liberado).
 ##
-## NOSSO / ainda não portado: o LEAD (diferença pro líder) fica 00:00:00;
-## minimapa, lista de pilotos, bandeiras, mensagens e a seta.
+## NOSSO / ainda não portado: a conta do LEAD (diferença pro líder);
+## bandeiras, mensagens e a seta.
 
 const LAYOUT := "res://data/hud_circuit.xml"
 const DIR := "res://assets/hud/"
@@ -73,7 +82,11 @@ var rpm := 1000.0
 var agulha := 1.0472       # ângulo do ponteiro (rad, como na RAM: +0x98)
 var em_corrida := false
 var lista: Array = []            # classificação: [{nome, jogador}] na ordem
+var _lista_mostrada: Array = []  # a ordem que a lista mostra (a animação vai até ela)
+var _anim_lista := {}            # nome -> [linha de onde sai, linha pra onde vai]
+var _anim_t := -1.0              # tempo da troca (s); < 0: parada
 var pontos: Array = []           # minimapa: [x do jogo, z do jogo, jogador]
+var _fonte := {}                 # fonte -> {código: [caixa na textura (px), largura (px)]}
 var _hist := {}                  # LEAD: nome -> [[progresso, tempo], ...] (subindo)
 var acel := 0.0            # pedais suavizados 0..1
 var freio := 0.0
@@ -103,8 +116,42 @@ func montar() -> bool:
 		if ResourceLoader.exists(p):
 			tex[k] = load(p)
 	raiz = _ler_layout()
+	_preparar_fontes()
 	_preparar_barras()
 	return not raiz.is_empty()
+
+
+## a fonte como o jogo deixa na RAM depois de carregar (FONT_SMALL e
+## FONT_MEDIUM conferidas, tests/ref_hud_textos.json): largura = a da caixa
+## do .bed arredondada pro pixel (6.82 -> 7, 29.66 -> 30; a textura estica);
+## dígitos com a largura do maior e a caixa aberta em volta do meio
+func _preparar_fontes() -> void:
+	for fonte in LINHA:
+		if not info.texturas.has(fonte):
+			continue
+		var g := {}
+		var wdig := 0.0
+		for k in info.texturas[fonte].caixas:
+			if not String(k).is_valid_int():
+				continue
+			var c := int(k)
+			var cx := _caixa(fonte, k)
+			g[c] = [cx, roundf(cx.size.x)]
+			if c >= 48 and c <= 57:
+				wdig = maxf(wdig, roundf(cx.size.x))
+		for c in range(48, 58):
+			if g.has(c):
+				var cx: Rect2 = g[c][0]
+				g[c] = [Rect2(cx.get_center().x - wdig * 0.5, cx.position.y, wdig, cx.size.y), wdig]
+		_fonte[fonte] = g
+
+
+## largura (px da fonte) do caractere; fora da fonte vira espaço, como no jogo
+func largura_glifo(fonte: String, c: int) -> float:
+	var g: Dictionary = _fonte.get(fonte, {})
+	if g.has(c):
+		return g[c][1]
+	return g[32][1] if g.has(32) else 0.0
 
 
 # ------------------------------------------------------------------ layout
@@ -312,7 +359,9 @@ func _desenha(no: Dictionary, pai: Rect2, a: float, passe: int) -> void:
 				var txt: String = info.get("textos", {}).get(lingua, {}).get(k, k)
 				_texto(txt, String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
 			"OBJECT_TIMER":
-				_texto(_valor(no), String(at.get("mFont", "FONT_SMALL")), r, valores.get(no.nome + "#cor", no.cor), at)
+				var tc := celulas_tempo(no, valores.get(no.nome, null))
+				_texto(tc[0], String(at.get("mFont", "FONT_SMALL")), r, valores.get(no.nome + "#cor", no.cor), at,
+					-1, NAN, 1.0, tc[1])
 			"OBJECT_INTEGER":
 				var v = valores.get(no.nome, 0)
 				if v != null:
@@ -385,124 +434,234 @@ func _sprite(t: Texture2D, src: Rect2, dst: Rect2, espelha: bool, cor: Color) ->
 	draw_texture_rect_region(t, dst, src, cor)
 
 
+## número (OBJECT_INTEGER, 0x494a78 / 0x494c10): células "0" do mText (o
+## zero à esquerda com mZeroPad), o valor da esquerda pra direita
 func _valor(no: Dictionary) -> String:
 	var v = valores.get(no.nome, null)
 	var modelo := String(no.at.get("mText", "0"))
-	if no.tipo == "OBJECT_TIMER":
-		if v == null:              # sem tempo ainda (antes do VAI, sem volta): "--:--:--" (PAL)
-			return String(no.at.get("mText", "00:00:00")).replace("0", "-")
-		var s: float = v
-		var neg := s < 0.0
-		s = absf(s)
-		var cs := int(s * 100.0)
-		var txt := "%02d:%02d:%02d" % [mini(cs / 6000, 99), (cs / 100) % 60, cs % 100]
-		return ("-" + txt) if neg and String(no.at.get("mAllowNegative", "0")) == "1" else txt
 	var n: int = v if v != null else 0
 	if String(no.at.get("mZeroPad", "0")) == "1":
 		return ("%0" + str(modelo.length()) + "d") % n
 	return str(n)
 
 
-## texto (exe 0x474e08 / 0x2689c0): glifo com a altura do quadro (escala =
-## altura do quadro / linha da fonte), topo no topo do quadro. mTextAlignX:
-## LEFT começa na borda esquerda, CENTRE no meio, RIGHT termina na direita.
-## Número com mAlignCentre (0x475390): centrado na borda ESQUERDA do quadro
-## pela largura do "8" x dígitos do valor. Avanço com o kerning da fonte.
+## tempo (OBJECT_TIMER, 0x494fb0 / 0x495208): [modelo, o que cada célula
+## mostra]. O modelo é o mText com traços ("--:--:--") e uma célula de sinal
+## na frente se mAllowNegative; cada célula mostra o dígito (ou "-" sem
+## tempo), o sinal só aparece negativo. Valor = int(t x 100 + 0.5) até
+## 5999.99 s: mm:ss:cc
+func celulas_tempo(no: Dictionary, v) -> Array:
+	var modelo := String(no.at.get("mText", "00:00:00"))
+	var sinal := String(no.at.get("mAllowNegative", "0")) == "1"
+	var tpl := "-" if sinal else ""
+	for ch in modelo:
+		tpl += "-" if ch >= "0" and ch <= "9" else ch
+	var dig := []
+	if v != null:
+		var t := minf(absf(float(v)), 5999.99)
+		var cent := modelo.length() >= 7
+		var iv := int(t * 100.0 + 0.5) if cent else int(t + 0.5)
+		var seg := iv / 100 if cent else iv
+		dig = [(seg / 60 / 10) % 10, (seg / 60) % 10, (seg % 60 / 10) % 10, seg % 60 % 10]
+		if cent:
+			dig += [(iv / 10) % 10, iv % 10]
+	var mostra := []
+	var d := 0
+	for i in tpl.length():
+		if sinal and i == 0:
+			mostra.append(45 if v != null and float(v) < 0.0 else -1)
+		elif tpl[i] == "-":
+			mostra.append(48 + dig[d] if d < dig.size() else 45)
+			d += 1
+		else:
+			mostra.append(tpl.unicode_at(i))
+	return [tpl, mostra]
+
+
 func _texto(txt: String, fonte: String, r: Rect2, cor: Color, at: Dictionary, digitos := -1,
-		centro_x := NAN, cond := 1.0) -> void:
+		centro_x := NAN, cond := 1.0, mostra: Array = []) -> void:
 	if not tex.has(fonte):
 		return
-	var cel := _tela(r)
+	for g in glifos(txt, fonte, _tela(r), at, digitos, centro_x, cond, mostra):
+		draw_texture_rect_region(tex[fonte], g[0], g[1], cor)
+
+
+## letras de um texto: [[retângulo na tela, caixa na textura], ...] (exe
+## 0x474e08 / 0x2689c0). Glifo com a altura do quadro (escala = altura do
+## quadro / linha da fonte), topo no topo do quadro, largura da fonte x
+## escala; avanço = largura - kerning. mTextAlignX: LEFT começa na borda
+## esquerda, CENTRE no meio, RIGHT termina na direita. Número com
+## mAlignCentre (0x475390): centrado na borda ESQUERDA do quadro pela largura
+## do "8" x dígitos do valor. `mostra` troca a textura de cada célula (tempo:
+## -1 = célula vazia). Espaço não desenha
+func glifos(txt: String, fonte: String, cel: Rect2, at: Dictionary, digitos := -1, centro_x := NAN,
+		cond := 1.0, mostra: Array = []) -> Array:
+	var g: Dictionary = _fonte.get(fonte, {})
+	if g.is_empty():
+		return []
 	var linha: float = LINHA.get(fonte, 22.0)
-	var esc_y := cel.size.y / linha
 	var esc_x := cel.size.x / linha * cond
-	var t: Dictionary = info.texturas[fonte]
-	var cx: Dictionary = t.caixas
-	var kern: Dictionary = t.get("kern", {})
+	var kern: Dictionary = info.texturas[fonte].get("kern", {})
 	var cods := []
 	for ch in txt:
 		var k := ch.unicode_at(0)
-		cods.append(k if cx.has(str(k)) else 32)
+		cods.append(k if g.has(k) else 32)
 	var avancos := []
 	var largura := 0.0
 	for n in cods.size():
-		var w: float = _caixa(fonte, str(cods[n])).size.x
 		var prox: int = cods[n + 1] if n + 1 < cods.size() else 0
-		var av := w - _kern(kern, cods[n], prox)
-		avancos.append(av * esc_x)
-		largura += av * esc_x
+		var av: float = (largura_glifo(fonte, cods[n]) - _kern(kern, cods[n], prox)) * esc_x
+		avancos.append(av)
+		largura += av
 	var x := cel.position.x
 	var al := String(at.get("mTextAlignX", "ALIGN_LEFT"))
 	if not is_nan(centro_x):
 		x = centro_x - largura * 0.5            # NOSSO (SCORE_CENTRADO)
 	elif digitos >= 0:
 		if String(at.get("mAlignCentre", "0")) == "1":
-			x -= _caixa(fonte, "56").size.x * esc_x * digitos * 0.5
+			# 0x475390 desconta em NDC (largura do "8" / altura da linha x escala
+			# X do quadro) sem a razão 4:3 da escala das letras: anda só 3/4 da
+			# metade do número (RAM: SPEED e SCORE). Por isso o Score do PAL é torto
+			x -= largura_glifo(fonte, 56) * esc_x * digitos * 0.5 / RAZAO_HUD
 	elif al == "ALIGN_CENTRE":
 		x = cel.position.x + cel.size.x * 0.5 - largura * 0.5
 	elif al == "ALIGN_RIGHT":
 		x = cel.end.x - largura
+	var out := []
 	for n in cods.size():
-		var c := _caixa(fonte, str(cods[n]))
-		draw_texture_rect_region(tex[fonte], Rect2(x, cel.position.y, c.size.x * esc_x, c.size.y * esc_y), c, cor)
+		var c: int = cods[n]
+		var vis: int = mostra[n] if n < mostra.size() else c
+		if c != 32 and vis >= 0 and vis != 32 and g.has(vis):
+			out.append([Rect2(x, cel.position.y, largura_glifo(fonte, c) * esc_x, cel.size.y), g[vis][0]])
 		x += avancos[n]
+	return out
 
 
 ## lista de pilotos, caixas (OBJECT_PLAYERLIST_SPRITE; RAM do save state):
 ## caixa da posição (pos_box, em pixel) no canto do quadro, a do nome
 ## (name_box) logo à direita com folga de mGapSize x a largura da caixa, da
 ## mesma altura e largura = caixa x (nome / posição) nas UV; cada linha
-## desce altura x (1 + mGapSize), a 1ª no topo do quadro
+## desce altura x (1 + mGapSize), a 1ª no topo do quadro. As caixas das
+## posições ficam; as dos nomes andam com o piloto (lista_linhas)
 func _lista_caixas(no: Dictionary, r: Rect2) -> void:
 	var tnome := _textura(String(no.at.get("mTexture", "")))
 	if not tex.has(tnome):
 		return
 	var pos := _caixa(tnome, String(no.at.get("mPosBedBox", "pos_box")))
 	var nome := _caixa(tnome, String(no.at.get("mNameBedBox", "name_box")))
-	for l in linhas_caixas(no, r, lista.size()):
-		_sprite(tex[tnome], pos, l[0], false, Color.WHITE)
-		_sprite(tex[tnome], nome, l[1], false, Color.WHITE)
+	var ll := lista_linhas()
+	for k in ll.size():
+		_sprite(tex[tnome], pos, linha_caixas(no, r, float(k))[0], false, Color.WHITE)
+	for passe in 2:                  # quem some primeiro, os inteiros por cima
+		for l in ll:
+			if (l[1] < 1.0) == (passe == 0):
+				_sprite(tex[tnome], nome, linha_caixas(no, r, l[0])[1], false, Color(1, 1, 1, l[1]))
 
 
 ## [caixa da posição, caixa do nome] de cada linha, em pixels
 func linhas_caixas(no: Dictionary, r: Rect2, n: int) -> Array:
+	var out := []
+	for k in n:
+		out.append(linha_caixas(no, r, float(k)))
+	return out
+
+
+## as 2 caixas da linha k (k fracionário: o nome andando entre 2 linhas)
+func linha_caixas(no: Dictionary, r: Rect2, k: float) -> Array:
 	var tnome := _textura(String(no.at.get("mTexture", "")))
 	var pos := _caixa(tnome, String(no.at.get("mPosBedBox", "pos_box")))
 	var nome := _caixa(tnome, String(no.at.get("mNameBedBox", "name_box")))
 	var gap := float(no.at.get("mGapSize", 0.05))
 	var q := _tela(r)                      # já do tamanho da pos_box (mPixelScaleRatio)
 	var w_nome := q.size.x * nome.size.x / pos.size.x
-	var out := []
-	for k in n:
-		var y := q.position.y + k * q.size.y * (1.0 + gap)
-		out.append([Rect2(q.position.x, y, q.size.x, q.size.y), Rect2(q.end.x + gap * q.size.x, y, w_nome, q.size.y)])
-	return out
+	var y := q.position.y + k * q.size.y * (1.0 + gap)
+	return [Rect2(q.position.x, y, q.size.x, q.size.y), Rect2(q.end.x + gap * q.size.x, y, w_nome, q.size.y)]
 
 
 ## lista de pilotos, textos (OBJECT_PLAYERLIST_TEXT; RAM): número no canto do
 ## quadro, nome mHorzSpacing x a largura à direita; cada linha desce
-## mVertSpacing x a altura. Jogador em amarelo
+## mVertSpacing x a altura. Jogador em amarelo. Os números ficam, os nomes
+## andam e somem junto com a caixa deles
 func _lista_textos(no: Dictionary, r: Rect2) -> void:
 	var fonte := String(no.at.get("mFont", "FONT_SMALL"))
-	var hx := float(no.at.get("mHorzSpacing", 1.172))
-	var vy := float(no.at.get("mVertSpacing", 1.172))
 	var esq := {"mTextAlignX": "ALIGN_LEFT"}
-	var ls := linhas_textos(no, r, lista.size())
-	for k in lista.size():
-		var e: Dictionary = lista[k]
-		_texto(str(k + 1), fonte, ls[k][0], Color.WHITE, esq)
-		_texto(String(e.nome), fonte, ls[k][1], COR_JOGADOR if e.jogador else Color.WHITE, esq)
+	var ll := lista_linhas()
+	for k in ll.size():
+		_texto(str(k + 1), fonte, linha_textos(no, r, float(k))[0], Color.WHITE, esq)
+	for passe in 2:
+		for l in ll:
+			if (l[1] < 1.0) == (passe == 0):
+				var e: Dictionary = l[2]
+				var cor := COR_JOGADOR if e.jogador else Color.WHITE
+				cor.a = l[1]
+				_texto(String(e.nome), fonte, linha_textos(no, r, l[0])[1], cor, esq)
 
 
 ## [célula do número, célula do nome] de cada linha, em fração da tela HUD
 func linhas_textos(no: Dictionary, r: Rect2, n: int) -> Array:
-	var hx := float(no.at.get("mHorzSpacing", 1.172))
-	var vy := float(no.at.get("mVertSpacing", 1.172))
 	var out := []
 	for k in n:
-		var rk := Rect2(r.position.x, r.position.y - k * r.size.y * vy, r.size.x, r.size.y)
-		out.append([rk, Rect2(rk.position.x + r.size.x * hx, rk.position.y, r.size.x, r.size.y)])
+		out.append(linha_textos(no, r, float(k)))
 	return out
+
+
+func linha_textos(no: Dictionary, r: Rect2, k: float) -> Array:
+	var hx := float(no.at.get("mHorzSpacing", 1.172))
+	var vy := float(no.at.get("mVertSpacing", 1.172))
+	var rk := Rect2(r.position.x, r.position.y - k * r.size.y * vy, r.size.x, r.size.y)
+	return [rk, Rect2(rk.position.x + r.size.x * hx, rk.position.y, r.size.x, r.size.y)]
+
+
+## [linha (fracionária), alfa, {nome, jogador}] de cada piloto na lista
+func lista_linhas() -> Array:
+	var mostrada: Array = _lista_mostrada if not _lista_mostrada.is_empty() else lista
+	var e := anim_lista_e()
+	var out := []
+	for k in mostrada.size():
+		var en: Dictionary = mostrada[k]
+		var a: Array = _anim_lista.get(en.nome, [])
+		if a.is_empty() or _anim_t < 0.0:
+			out.append([float(k), 1.0, en])
+		else:
+			out.append([lerpf(a[0], a[1], e), absf(e - 0.5) * 2.0 if a[1] > a[0] else 1.0, en])
+	return out
+
+
+## andamento da troca da lista (0x48af80): t / mShuffleSpeed, freando
+func anim_lista_e() -> float:
+	if _anim_t < 0.0:
+		return 1.0
+	var s = _no("PLAYERLIST_SPRITE")
+	var dur := float(s.at.get("mShuffleSpeed", 1.0)) if s else 1.0
+	var t := clampf(_anim_t / maxf(dur, 1e-3), 0.0, 1.0)
+	return 1.0 - (1.0 - t) * (1.0 - t)
+
+
+## nova classificação: se a lista está parada e a ordem mudou, cada piloto
+## que trocou de linha anda da velha pra nova; durante a troca a ordem nova
+## espera (o jogo enfileira e só compara de novo quando a animação acaba)
+func animar_lista(dt: float) -> void:
+	if _anim_t >= 0.0:
+		_anim_t += dt
+		if anim_lista_e() >= 1.0:
+			_anim_t = -1.0
+			_anim_lista.clear()
+		return
+	var novos := lista.map(func(e): return e.nome)
+	var velhos := _lista_mostrada.map(func(e): return e.nome)
+	if velhos.size() != novos.size() or novos.any(func(n): return not (n in velhos)):
+		_lista_mostrada = lista.duplicate()   # outra corrida, outro grid: sem animação
+		return
+	if novos == velhos:
+		_lista_mostrada = lista.duplicate()
+		return
+	_anim_lista.clear()
+	for i in novos.size():
+		var j := velhos.find(novos[i])
+		if j != i:
+			_anim_lista[novos[i]] = [float(j), float(i)]
+	_lista_mostrada = lista.duplicate()
+	_anim_t = 0.0
 
 
 ## pontos do minimapa (OBJECT_MINIMAP; MINIMAPS.xml + RAM dos 4 save states):
@@ -690,6 +849,7 @@ func atualizar(dt: float, car, corrida) -> void:
 			valores.NUM_PLAYERS = 1
 			lista.append({"nome": NOME_JOGADOR, "jogador": true})
 			pontos.append(_jogo_xz(car.global_position) + [true])
+		animar_lista(passo)
 	_pintar_barras()
 	queue_redraw()
 

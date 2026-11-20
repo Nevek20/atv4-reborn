@@ -12,6 +12,10 @@ extends SceneTree
 ## 4) kerning (0x2689c0) encurtando "POSITION"
 ## 5) lista de pilotos (caixas e textos de 8 linhas) e ponto do minimapa nas
 ##    posições da RAM (save states andando_em_linha_reta e idle_antes_do_Go)
+## 6) fonte carregada e cada letra dos textos (rótulos, números, tempos,
+##    nomes) nos vértices da RAM (tests/ref_hud_textos.json, re/hud_textos.py),
+##    0.75 px; células do tempo ("--:--:--", sinal só negativo) e a troca da
+##    lista (0x48af80: 1 s freando, quem desce some no meio)
 ## Uso: godot --headless --path . -s res://tests/teste_hud.gd
 
 var falhas := 0
@@ -81,6 +85,99 @@ func _initialize() -> void:
 		if dd > 0.6:
 			_falha("%s: %s x RAM %s" % [c[0], c[1], c[2]])
 	print("  lista de pilotos e minimapa x RAM: %d pontos, pior %.2f px" % [checa.size(), pior_l])
+	# 1c) fonte carregada e cada letra x RAM (tests/ref_hud_textos.json,
+	# re/hud_textos.py): largura e caixa de cada caractere; os quadradinhos
+	# das letras de cada texto (rótulos, números, tempos, nomes da lista)
+	var rt = JSON.parse_string(FileAccess.get_file_as_string("res://tests/ref_hud_textos.json"))
+	var pior_f := 0.0
+	var nf := 0
+	for fonte in rt.fontes:
+		var t: Dictionary = h.info.texturas[fonte]
+		for k in rt.fontes[fonte].glifos:
+			var c := int(k)
+			if c == 32 or not h._fonte[fonte].has(c):
+				continue
+			var gr: Array = rt.fontes[fonte].glifos[k]
+			var cx: Rect2 = h._fonte[fonte][c][0]
+			var d := maxf(absf(h.largura_glifo(fonte, c) - gr[0]), maxf(absf(cx.position.x - gr[1] * t.w),
+				absf(cx.end.x - gr[3] * t.w)))
+			nf += 1
+			pior_f = maxf(pior_f, d)
+			if d > 0.1:
+				_falha("%s '%c': largura %.2f caixa %s x RAM %s" % [fonte, c, h.largura_glifo(fonte, c), cx, gr])
+	print("  fonte x RAM: %d caracteres, pior %.3f px" % [nf, pior_f])
+	h.valores = {}
+	var pior_t := 0.0
+	var pior_tn := ""
+	var nt := 0
+	for e in rt.textos:
+		var nome: String = e.nome
+		var no = h._no(nome)
+		var fonte: String = e.fonte
+		var rr: Rect2 = rf[nome]
+		if nome == "PLAYERLIST_TEXT":
+			rr = h.linha_textos(no, rf[nome], float(e.linha))[e.coluna]
+		var cel: Rect2 = h._tela(rr)
+		var gl: Array
+		if e.get("classe", "") == "tempo":
+			gl = h.glifos(h.celulas_tempo(no, e.valor)[0], fonte, cel, no.at)   # todas as células
+		elif e.get("classe", "") == "numero":
+			var txt := str(int(e.valor))
+			if nome != "PLAYERLIST_TEXT":
+				h.valores[nome] = int(e.valor)
+				txt = h._valor(no)
+			gl = h.glifos(txt, fonte, cel, no.at if nome != "PLAYERLIST_TEXT" else {}, str(int(e.valor)).length())
+		elif nome == "PLAYERLIST_TEXT":
+			gl = h.glifos(e.txt, fonte, cel, {})
+		else:
+			var k := String(no.at.get("mText", ""))
+			gl = h.glifos(h.info.textos.en.get(k, k), fonte, cel, no.at)
+		if gl.size() > e.x.size() or gl.is_empty():
+			_falha("%s: %d letras x %d na RAM" % [nome, gl.size(), e.x.size()])
+			continue
+		for i in gl.size():
+			var q: Rect2 = gl[i][0]
+			var d := maxf(maxf(absf(q.position.x - e.x[i][0]), absf(q.end.x - e.x[i][1])),
+				maxf(absf(q.position.y - e.y[0]), absf(q.end.y - e.y[1])))
+			nt += 1
+			if d > pior_t:
+				pior_t = d
+				pior_tn = "%s[%d]" % [nome, i]
+			if d > 0.75:
+				_falha("%s letra %d: %s x RAM x %s y %s" % [nome, i, q, e.x[i], e.y])
+	print("  letras x RAM (640x480): %d letras em %d textos, pior %.3f px (%s)" % [nt, rt.textos.size(), pior_t, pior_tn])
+	# o tempo: células do modelo, dígito na célula, sinal só negativo
+	var tl: Array = h.celulas_tempo(h._no("LEAD_TIMER"), -1.2848)
+	var tp: Array = h.celulas_tempo(h._no("LAP_TIMER"), 7.0188)
+	var tn: Array = h.celulas_tempo(h._no("LAP_TIMER"), null)
+	var str_de := func(m: Array) -> String:
+		return "".join(m.map(func(c): return " " if c < 0 else char(c)))
+	print("  tempo: LEAD %s / %s, LAP %s, sem tempo %s" % [tl[0], str_de.call(tl[1]), str_de.call(tp[1]), str_de.call(tn[1])])
+	if str_de.call(tl[1]) != "-00:01:28" or str_de.call(tp[1]) != "00:07:02" or str_de.call(tn[1]) != "--:--:--" \
+			or tl[0] != "---:--:--":
+		_falha("células do tempo")
+	# 1d) troca na lista (0x48af80): o 2º passa o 1º; em 0.5 s (e = 0.75) quem
+	# sobe está em 0.25 inteiro, quem desce em 0.75 com alfa 0.5; depois de
+	# mShuffleSpeed (1 s) acaba
+	h.lista = [{"nome": "A", "jogador": false}, {"nome": "B", "jogador": true}, {"nome": "C", "jogador": false}]
+	h.animar_lista(0.02)
+	h.lista = [h.lista[1], h.lista[0], h.lista[2]]
+	h.animar_lista(0.02)
+	h.animar_lista(0.5)
+	var ll: Array = h.lista_linhas()
+	var em := {}
+	for l in ll:
+		em[l[2].nome] = l
+	print("  lista trocando (0.5 s): B linha %.2f alfa %.2f, A linha %.2f alfa %.2f, C %.2f" % [
+		em.B[0], em.B[1], em.A[0], em.A[1], em.C[0]])
+	if absf(em.B[0] - 0.25) > 1e-4 or em.B[1] != 1.0 or absf(em.A[0] - 0.75) > 1e-4 or absf(em.A[1] - 0.5) > 1e-4 or em.C[0] != 2.0:
+		_falha("animação da lista")
+	h.animar_lista(0.6)
+	ll = h.lista_linhas()
+	if ll[0][2].nome != "B" or ll[0][0] != 0.0 or ll[1][0] != 1.0 or ll[1][1] != 1.0:
+		_falha("a lista não terminou a troca")
+	h.lista = []
+	h._lista_mostrada = []
 	# 2) tela larga
 	h.size = Vector2(1916, 741)
 	r = h.retangulos()

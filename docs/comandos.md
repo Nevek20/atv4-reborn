@@ -151,6 +151,7 @@ python tools/hud_jogo.py <unpacked>       :: HUD do jogo -> assets/hud (texturas
 %GODOT% --headless --path . -s res://tests/teste_hud.gd             :: HUD do jogo x RAM: 50 quadros a 640x480, conta-giros em tela larga, ponteiro/barras/velocidade dos save states, kerning
 python re/hud_ram.py arquivo.p2s           :: HUD na RAM do save state: matrizes, ponteiro, números, barras x rpm/marcha/velocidade do carro
 python re/hud_ref.py arquivo.p2s           :: refaz tests/ref_hud_4x3.json (matriz de cada quadro do HUD_CIRCUIT na RAM)
+python re/hud_textos.py arquivo.p2s        :: refaz tests/ref_hud_textos.json (cada letra dos textos do HUD na RAM + a fonte carregada; sem o nome do perfil)
 %GODOT% --headless --path . -s res://tests/teste_rabo.gd             :: rabo de cavalo: comprimentos, raiz no pino, parado x correndo, balanço virando
 %GODOT% --headless --path . -s res://tests/teste_numero.gd           :: número do perfil (oficina): carro e piloto repintam e salva; rivais com o do AIPlayers
 %GODOT% --headless --path . -s res://tests/medir_escapes.gd -- BUGGY_10 TRUCK_12   :: direção do cano no modelo x ponto EXHAUST (RAIO=0.5, VERTICES=1)

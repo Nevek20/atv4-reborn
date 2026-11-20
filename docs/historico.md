@@ -2353,6 +2353,41 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   - Melhorias NOSSAS pedidas: Score centrado embaixo do rótulo (no PAL sai
     torto) e velocidade de 3 dígitos com largura x 0.8 (no PAL o "129"
     vaza da caixa pra esquerda).
+- 3ª rodada (prints do Matheus na janela larga, nov/2026): BEST LAP torto,
+  LEAD vazando à direita da caixa, TIME torto, números e nomes da lista
+  tortos, faltando a animação da lista. Tudo lido no exe e na RAM
+  (re/hud_textos.py tira a posição de CADA letra dos vértices do GS:
+  tests/ref_hud_textos.json, 132 letras em 34 textos + a tabela das 2
+  fontes; teste_hud confere tudo < 0.5 px):
+  - GS do PAL: framebuffer 512 x 512 mostrado em 640 x 480 (x = (X/16 -
+    1792) x 1.25). Achar isso custou: com 640 de largura as letras pareciam
+    0.8 mais estreitas.
+  - Fonte carregada (RAM, fonte+0x100 + c x 0x14: largura, u0, v0, u1, v1):
+    largura da caixa arredondada pro pixel (espaço 6.82 -> 7, 29.66 -> 30)
+    e os dígitos todos com a largura do maior, caixa aberta em volta do meio
+    ("1" e "7" de 10 px viram 12, centrados). Era o "torto" dos números da
+    lista.
+  - Tempo (OBJECT_TIMER, classe 0x494f10 / 0x494fb0 / 0x495208): monta o
+    MODELO "--:--:--" (com 1 célula de sinal se mAllowNegative) e só troca
+    a textura de cada célula (tabela de UV de dígitos por fonte em
+    DAT_008471e8): o número sai espremido na largura do traço (10 px em vez
+    de 12, avanço 8). Por isso o nosso era ~20% mais largo, o LEAD vazava e
+    os tracinhos do BEST LAP não alinhavam com o Total. Sinal: só aparece
+    negativo, positivo a célula fica vazia (mas ocupa o lugar). Valor =
+    int(t x 100 + 0.5), até 5999.99.
+  - Número (OBJECT_INTEGER, 0x494a78 / 0x494c10): células "0" do mText, o
+    valor da esquerda pra direita (mZeroPad enche de zero). mAlignCentre
+    (0x475390) desconta largura do "8" x dígitos x 0.5 em NDC sem a razão
+    4:3: anda só 3/4 do que centraria. É o Score torto do PAL.
+  - Lista (0x48af80, mShuffleSpeed 1.0; 0x47a3e0 empurra a ordem a cada
+    quadro): caixas e números das posições fixos; quem mudou de linha tem a
+    placa do nome (mNameBedBox) e o nome deslizando da linha velha pra nova
+    em mShuffleSpeed s, e = 1 - (1 - t)^2; quem desce tem alfa |2e - 1|
+    (some no meio), quem sobe fica inteiro. Durante a troca a ordem nova
+    espera (fila) e só é comparada quando acaba. Modo P2P (mIsP2P) não
+    portado.
+  - 16:9: os blocos encostados nos cantos, conferido a 1920x1080 (o PCSX2
+    do Matheus é 4:3 esticado; ele pediu o 16:9 "adaptado bonitinho").
 - Faltam: bandeiras, mensagens (lap message, start) e a seta.
 
 ## HUD básico (nov/2026, NOSSO)
