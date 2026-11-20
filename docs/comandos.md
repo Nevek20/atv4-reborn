@@ -64,6 +64,7 @@ set GIRO_DEBUG=1 & %GODOT% --headless --path . -s res://tests/teste_luzes.gd   :
 %GODOT% --headless --path . -s res://tests/teste_farol.gd         :: farol: lentes achadas (Hurricane 2, Storm 6, 4 trucks e o Lazarus), lente e brilho, acende e apaga
 :: + print_tela com FAROL=1/0 força o farol aceso/apagado
 :: + print_tela com FREIO=1/0 e RE=1/0 forçam lanterna e ré acesas/apagadas, COR_VERTICE=0 tira a cor do vértice
+:: + print_tela com PECAS=Bumper:BUMPER_04_HEAVYCLASS_LARGE,Alloy:WHEEL_05 monta com peças da oficina só no print
 %GODOT% --path . --write-movie motor.avi --fixed-fps 60 -s res://tests/gravar_motor.gd -- 7   :: prévia: lenta, 7000 e volta (CAM_OFF/CAM_ALVO)
 %GODOT% --path . --write-movie fumaca.avi --fixed-fps 60 -s res://tests/gravar_fumaca.gd -- 0  :: câmera presa no cano acelerando (FUMACA_COR=1 vermelha)
 %GODOT% --headless --path . -s res://tests/teste_poeira.gd        :: poeira dos pneus na largada do RX01: parado não, asfalto não, terra sim, rastro no pulo
@@ -145,6 +146,7 @@ python tools/piloto_pintura.py <unpacked>   :: textura do piloto montada como o 
 %GODOT% --headless --path . -s res://tests/teste_pneu.gd             :: pneu e aro comprados: 11 pneus e 7 aros do catálogo, roda e textura do aro trocam, atrito na terra
 %GODOT% --headless --path . -s res://tests/teste_borrao_rodas.gd     :: borrão das rodas: shader nas 4, 8 cópias por roda (escondidas parado, visíveis rápido, sem lama), BORRAO_RODAS=0 desliga
 %GODOT% --headless --path . -s res://tests/teste_ajuste.gd           :: Tune & Setup: marchas/final custom, Level0 ignora a final, amortecedor, o que cada câmbio libera, Renegade curto x longo
+%GODOT% --headless --path . -s res://tests/teste_parachoque.gd       :: para-choque: 8 do catálogo + Nenhum, no ponto BUMPER da frota toda, Storm/Chimera sem, não mexe na física
 %GODOT% --headless --path . -s res://tests/teste_rabo.gd             :: rabo de cavalo: comprimentos, raiz no pino, parado x correndo, balanço virando
 %GODOT% --headless --path . -s res://tests/teste_numero.gd           :: número do perfil (oficina): carro e piloto repintam e salva; rivais com o do AIPlayers
 %GODOT% --headless --path . -s res://tests/medir_escapes.gd -- BUGGY_10 TRUCK_12   :: direção do cano no modelo x ponto EXHAUST (RAIO=0.5, VERTICES=1)

@@ -11,6 +11,7 @@ assets/carros/buggy_01..12   o número do jogo (BUGGY_NN): buggy_10 = Renegade, 
 assets/carros/truck_01..12   trucks (TRUCK_NN), truck_bonus = Lazarus
 assets/carros/escort         carro extra nosso (tools/carro_glb.py)
 assets/carros/rodas          rodas de todos (o pecas.json aponta "../rodas/...")
+assets/carros/parachoques    para-choques compráveis, buggy e truck (pecas.json "parachoques" -> "../parachoques/...")
 assets/piloto                piloto (tools/piloto.py)
 assets/pista/rx01            objetos e céu do RX01 (tools/rx01_objetos.py)
 assets/pista/terreno         relevo, material e textura do chão (no git; hd/ fora)

@@ -7,6 +7,9 @@ extends RefCounted
 ## 0..1). Pneu (Tire): os do catálogo (componentes.xml); muda o atrito
 ## (Override do material do chão) e a roda (TYRE_<pneu>_<tamanho>, car.gd).
 ## Aro (Alloy): a textura ALLOY da roda (IG_WHEEL_HEAVYCLASS_0N, carro_montagem).
+## Para-choque (Bumper): só visual (mIsPhysical="false"), o modelo
+## FrontBumper no ponto BUMPER do carro (carro_montagem._load_parachoque);
+## de fábrica NOT_INSTALLED; o RallyCompMap (Storm, Chimera) não tem.
 ## Shocks, GearRatios, BrakeBalanceController e GearboxType ficam pro Tune &
 ## Setup. NOSSO: a tela e salvar em user://oficina.json (chave
 ## "pecas" -> carro -> {slot: peça}); só o carro do jogador.
@@ -17,7 +20,7 @@ const SALVAS := "user://oficina.json"
 const COMPONENTES := "res://data/componentes.xml"   # catálogo de peças do jogo (xml 14882)
 const MATERIAIS := "res://data/materials_rx01.xml"
 const SLOTS := ["EngineInternals", "EngineManagement", "EngineHeader", "Exhaust", "IntakeKit",
-	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass", "Tire", "Alloy"]
+	"GearboxLevel", "Clutch", "Brake", "Suspension", "BodyMass", "Tire", "Alloy", "Bumper"]
 # Tune & Setup do jogo (TUNE_AND_SETUP: GEARBOX, SHOCKS, GEAR RATIOS, FINAL DRIVE;
 # o balanço de freio não aparece no menu de buggy/truck, fica o 0.5 do perfil)
 const AJUSTE_SLOTS := ["GearboxType", "Shocks"]
@@ -26,7 +29,9 @@ const PASSO_AJUSTE := 0.05       # NOSSO: passo das marchas e da final (0..1)
 const NOMES := {"EngineInternals": "Motor (interno)", "EngineManagement": "Injeção",
 	"EngineHeader": "Coletor", "Exhaust": "Escape", "IntakeKit": "Admissão",
 	"GearboxLevel": "Câmbio", "Clutch": "Embreagem", "Brake": "Freio",
-	"Suspension": "Suspensão", "BodyMass": "Peso", "Tire": "Pneu", "Alloy": "Aro"}
+	"Suspension": "Suspensão", "BodyMass": "Peso", "Tire": "Pneu", "Alloy": "Aro",
+	"Bumper": "Para-choque"}
+const VISUAIS := ["Alloy", "Bumper"]   # só aparência: o "Tudo no máximo" não mexe
 
 
 ## {slot: [peça, ...]} da classe, na ordem do XML; e {peça: {efeito: valor}}
@@ -62,7 +67,8 @@ static func opcoes(classe: String) -> Dictionary:
 
 ## pneus da classe (catálogo, slot Tire, na ordem do jogo) e o atrito de cada
 ## um na terra comum do RX01 (materials_rx01.xml, COMMON_1: Override FRICTION
-## TYRE <pneu> <valor>; é o que a física usa, terrain.atrito)
+## TYRE <pneu> <valor>; é o que a física usa, terrain.atrito); aros (Alloy) e
+## para-choques (Bumper) do catálogo, sem efeito
 static func _pneus(classe: String, out: Dictionary) -> void:
 	var x := XMLParser.new()
 	if x.open(COMPONENTES) != OK:
@@ -87,7 +93,7 @@ static func _pneus(classe: String, out: Dictionary) -> void:
 			var n := x.get_node_name()
 			if n == classe:
 				dentro = true
-			elif dentro and (n == "Tire" or n == "Alloy"):
+			elif dentro and n in ["Tire", "Alloy", "Bumper"]:
 				no_tire = n == "Tire"
 				slot = n
 				lista = []
@@ -98,7 +104,7 @@ static func _pneus(classe: String, out: Dictionary) -> void:
 				out.efeitos[c] = {"atrito na terra": atrito.get(c, "?")} if no_tire else {}
 		elif t == XMLParser.NODE_ELEMENT_END:
 			var n := x.get_node_name()
-			if n == "Tire" or n == "Alloy":
+			if n in ["Tire", "Alloy", "Bumper"]:
 				slot = ""
 			elif n == classe and dentro:
 				break
@@ -140,8 +146,12 @@ static func ajuste_libera(gearbox_level: String) -> Dictionary:
 
 
 ## "EngineInternals_Level3" -> "Nível 3"; pneu "MUD_PREMIUM" -> "Lama Premium";
-## aro "WHEEL_03" -> "Aro 3"
+## aro "WHEEL_03" -> "Aro 3"; "BUMPER_03_HEAVYCLASS_LARGE" -> "Para-choque 3"
 static func rotulo(peca: String) -> String:
+	if peca == "NOT_INSTALLED":
+		return "Nenhum"
+	if peca.begins_with("BUMPER_"):
+		return "Para-choque %d" % peca.get_slice("_", 1).to_int()
 	if peca.begins_with("WHEEL_"):
 		return "Aro %d%s" % [peca.substr(6).to_int(), " (extra)" if peca == "WHEEL_08" else ""]
 	if not peca.contains("_Level") and not peca.contains("_Prototype") and peca.to_upper() == peca:

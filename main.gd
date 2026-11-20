@@ -127,6 +127,8 @@ var car  # instância de car.gd (sem tipo estático de propósito: métodos pró
 var cam: Camera3D
 var hud: Label
 var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
+var hud_basico                           # menu/hud_basico.gd: marcha e velocidade (NOSSO)
+var hud_texto := true                    # F1: tudo -> só o HUD básico -> nada
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
 var terrain
 var corrida                              # pista/corrida.gd (Enter começa, Backspace volta pro treino)
@@ -196,6 +198,8 @@ func _ready() -> void:
 	fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	fps_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(fps_label)
+	hud_basico = preload("res://menu/hud_basico.gd").new(self)
+	layer.add_child(hud_basico)
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 	_make_menu(layer)
 	oficina = preload("res://menu/oficina.gd").new(self)   # O: pintura (provisório até ter a Garagem)
@@ -378,7 +382,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_F1:
-				hud.visible = not hud.visible
+				# tudo -> só marcha e velocidade -> nada (os testes de print põem
+				# hud.visible = false e somem os dois)
+				if hud.visible and hud_texto:
+					hud_texto = false
+					hud.text = ""
+				elif hud.visible:
+					hud.visible = false
+				else:
+					hud.visible = true
+					hud_texto = true
+					_hud_t = 0.0
 			KEY_F2:
 				fps_label.visible = not fps_label.visible
 				# mede o tempo de desenho na CPU e na GPU (só com o F2 ligado)
@@ -544,7 +558,8 @@ func _process(delta: float) -> void:
 		fps_label.text = "%d FPS" % f + _medidor(delta)
 		fps_label.add_theme_color_override("font_color",
 			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
-	if not hud.visible:
+	hud_basico.atualizar(delta, car, hud.visible and cam_mode <= 1 and not (corrida and corrida.pode_pular()))
+	if not hud.visible or not hud_texto:
 		return
 	# CPU: o texto grande do HUD 10x por segundo (era a cada quadro)
 	_hud_t -= delta
@@ -558,7 +573,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   O: pintura   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   O: pintura   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: HUD (tudo / só marcha e velocidade / nada)   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]

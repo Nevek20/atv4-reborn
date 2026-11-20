@@ -33,6 +33,7 @@ func _ready() -> void:
 	_load_model()                 # antes da física: define model_offset
 	_marca("modelo")
 	_load_physics()
+	_load_parachoque()            # depois da física: precisa do ponto BUMPER
 	_load_piloto()                # depois da física: precisa do ponto ARSE
 	_marca("física+piloto")
 	_load_painel()

@@ -287,6 +287,7 @@ var luzes: Node = null
 const FAROL := true
 var farol: Node = null
 var body_mi: MeshInstance3D = null
+var parachoque_mi: MeshInstance3D = null   # para-choque comprado (carro_montagem._load_parachoque)
 # sujeira do jogo (0x223e68, _sujeira_passo) e desenho dela (sujeira.gd, com a
 # textura GEN_DIRT_DIRT em assets/efeitos: tools/fx_jogo.py). false = carro limpo
 const SUJEIRA := true

@@ -38,7 +38,7 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 ## Estrutura
 
 ```
-main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 esconde, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
+main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 tudo / só marcha e velocidade / nada, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
                      VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro/               o carro
   car.gd               a FÍSICA portada do exe (suspensão, pneus, motor, câmbio, pedais, casco,
@@ -64,7 +64,8 @@ carro/               o carro
   batida_carros.gd     carro com carro (esferas do VehicleVehicle.hsc, lasquinha e som)
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
-menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa)
+menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa),
+                     hud_basico.gd (marcha e km/h no canto, só na 3ª pessoa; NOSSO até portar o HUD do jogo)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida)
@@ -72,7 +73,7 @@ som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
-                     truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
+                     truck_bonus, escort, rodas, parachoques), piloto/, pista/ (rx01, terreno), efeitos/, sons/
 fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
                      pneus.cpp, rodas.cpp, curvas.cpp, efeitos.cpp; visual e som: piloto.cpp,
                      suspensao.cpp, som.cpp, som_jogo.cpp; linha_ia.cpp, nuvens.cpp), SConstruct
@@ -147,7 +148,9 @@ Arquivos, modelos e pintura
   só a textura ALLOY da roda (IG_WHEEL_HEAVYCLASS_0N; a de fábrica é a 01;
   o 8 é extra NOSSO, fora do catálogo). Tune & Setup (aba Ajuste): câmbio,
   amortecedor, marchas e final (GearRatioTuning 0..1, liberados pelo nível
-  do câmbio como o 0x3ec5d0: Level2 final, Level3+ marchas).
+  do câmbio como o 0x3ec5d0: Level2 final, Level3+ marchas). Para-choque
+  = só visual (mIsPhysical false): FrontBumper no ponto BUMPER do .pts
+  (assets/carros/parachoques); RallyCompMap (Storm, Chimera) não tem.
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
 - Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os

@@ -2227,6 +2227,35 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   extremo curto a 1ª bate no limitador e são 4 trocas até 100 (1 com as
   longas): o "marcha alta acelera mais" do texto do jogo vale pra ajuste
   moderado. NOSSO: a tela e o passo 0.05. tests/teste_ajuste.gd.
+  Para-choque FEITO (nov/2026, slot Bumper na aba Upgrade): os 8 do
+  catálogo (BUMPER_01..08_HEAVYCLASS_LARGE, Nenhum de fábrica; mesmos 8 pra
+  buggy e truck, malhas da classe em Models_4K/Bumper/<peça>/FrontBumper).
+  Só visual: mIsPhysical="false" e nenhum efeito no upgrades.xml (massa,
+  casco e motor iguais, teste_parachoque). O component map põe o
+  FrontBumper na posição BUMPER, que é um ponto do Body.pts de cada carro
+  com matriz identidade; a malha já vem deslocada (z de 1.9 a 2.8). Na frota
+  toda a frente do para-choque fica de -0.03 a 0.55 m à frente da
+  carroceria e acima do fundo dela (conferido em print no Renegade,
+  Mosquito e Buccaneer; o 7 tem a grade mesh_grey com furo). O RallyCompMap
+  (Storm, Chimera) não tem Bumper nem o ponto: lá a linha nem aparece. O
+  gerar_buggies exporta pra assets/carros/parachoques/ (pecas.json
+  "parachoques" e "ponto_parachoque"); suja como a carroceria (_camada.obj).
+  "Tudo no máximo" não mexe em aro e para-choque (aparência, NOSSO; antes
+  punha o Aro 8). Falta: as lâmpadas do para-choque acenderem com o farol
+  (H), se o jogo fizer isso.
+
+## HUD básico (nov/2026, NOSSO)
+
+- Pedido do Matheus: marcha e velocidade no canto inferior direito, só na
+  terceira pessoa (câmeras perto e longe), provisório até portar o HUD do
+  jogo (menu/hud_basico.gd). Some na introdução e na descida da câmera da
+  corrida (corrida.pode_pular). Velocidade = a do velocímetro do jogo, 1.06
+  x a velocidade pra frente (a mesma do painel.gd; ver Referências: no
+  Buccaneer o vídeo mostrou direto, o 1.06 saiu de save states
+  derrapando). Marcha = gear_label ("-" trocando, N, R). F1 agora tem 3
+  estados: tudo / só marcha e velocidade / nada (os testes que põem
+  hud.visible = false somem com os dois). Texto até ~75 vezes por segundo
+  (PASSO, como o PASSO_HUD).
 
 - Modelos que o jogo não usa (docs/assets.md): CHASSIS_Truck_04 (pré-runner,
   o "Lazarus", nome escolhido pelo Matheus), CHASSIS_ATV_03..08 e os de IA

@@ -157,6 +157,10 @@ def mapear(unpacked, classe="buggy"):
                     continue
                 c["rodas"][model] = b
                 c.setdefault("posicoes_roda", []).append(pos)
+            elif tipo == "Bumper":
+                # para-choque comprado (Models_4K/Bumper/<peça>/FrontBumper) vai
+                # no ponto BUMPER do Body.pts; o RallyCompMap (Storm, Chimera) não tem
+                c["parachoque"] = pos
         # física: o arquivo do jogo pelo caminho (vazio = só a base)
         c["fisica"] = arqs.get(("Setup/VehicleParams/%s/%s.xml" % (k["pasta"], vid)).lower(), (None,))[0]
         carros.append(c)
@@ -246,6 +250,26 @@ def aros(unpacked, texturas, pasta, rodas_dir):
     return out
 
 
+# para-choques compráveis (catálogo, Bumper: BUMPER_0N_HEAVYCLASS_LARGE, só
+# visual, mIsPhysical="false"): /Vehicles/<classe>/Models_4K/Bumper/<modelo>/
+# FrontBumper.pingu, já no frame do ponto BUMPER (matriz identidade no .pts)
+def parachoques(arqs, unpacked, pasta):
+    """{componente: bloco} dos para-choques da classe (sem o NOT_INSTALLED)"""
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(pasta)
+    bp = c.find("Bumper") if c is not None else None
+    out = {}
+    for e in (bp if bp is not None else []):
+        comp, modelo = e.get("mComponentName"), e.get("mInGameModelName")
+        if comp == "NOT_INSTALLED":
+            continue
+        b = bloco(arqs, "Vehicles/%s/%s/Bumper/%s/FrontBumper.pingu" % (pasta, LOD, modelo))
+        if b is not None:
+            out[comp] = b
+    return out
+
+
 def pingu(unpacked, tex, bloco_, out, split=()):
     cmd = [sys.executable, os.path.join(AQUI, "pingu2obj.py"),
            os.path.join(unpacked, "other", "%d_bloco.bin" % bloco_),
@@ -290,6 +314,13 @@ def main():
     rodas_dir = os.path.join(a.assets, "rodas")
     feitas = set()
     lista_aros = aros(a.unpacked, a.texturas, CLASSES[a.classe]["pasta"], rodas_dir)
+    # para-choques da classe: uma pasta só pra todos os carros (como as rodas)
+    pc_dir = os.path.join(a.assets, "parachoques")
+    lista_pc = parachoques(ler_arquivos(), a.unpacked, CLASSES[a.classe]["pasta"])
+    if lista_pc:
+        os.makedirs(pc_dir, exist_ok=True)
+        for b in lista_pc.values():
+            pingu(a.unpacked, a.texturas, b, pc_dir)
     falhas_pintura = []
     dados = os.path.join(PROJ, "data", "vehicles")
     for c in carros:
@@ -335,6 +366,8 @@ def main():
             "rodas": {k: "../rodas/%d_bloco.obj" % b for k, b in c["rodas"].items()},
             "pneus": {p: {k: "../rodas/%d_bloco.obj" % b for k, b in r.items()} for p, r in pneus.items()},
             "aros": {k: "../rodas/" + v for k, v in lista_aros.items()},
+            "parachoques": {k: "../parachoques/%d_bloco.obj" % b for k, b in lista_pc.items()} if c.get("parachoque") else {},
+            "ponto_parachoque": c.get("parachoque", ""),
             # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio)
             "rally": any(p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
             "estepe": [p for p in pos_rodas if p.startswith("SpareWheel")],

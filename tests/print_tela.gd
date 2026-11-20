@@ -39,6 +39,7 @@ extends SceneTree
 ##   PASTA=res://assets/carros/buggy_02 (pasta com o pecas.json)  PONTOS=res://...
 ##   RODA_F=res://...  RODA_T=res://...
 ##                              troca pasta/pontos/rodas sem mexer no main.gd
+##   PECAS=Bumper:BUMPER_03_HEAVYCLASS_LARGE,Alloy:WHEEL_05   peças da oficina só neste print
 ##                              (teste de hipótese)
 ## Frames: as vistas (OFFS) e as medidas (MEDIR) estão no frame do carro do
 ## JOGO (mão esquerda, esquerda do jogo = x < 0); o car.gd põe no Godot pelo
@@ -110,7 +111,7 @@ func _initialize() -> void:
 
 
 func _overrides() -> bool:
-	for k in ["PASTA", "PONTOS", "RODA_F", "RODA_T", "DESLIGAR"]:
+	for k in ["PASTA", "PONTOS", "RODA_F", "RODA_T", "DESLIGAR", "PECAS"]:
 		if OS.has_environment(k):
 			return true
 	return false
@@ -131,6 +132,9 @@ func _spawn(i: int) -> void:
 		c.wheel_front_file = OS.get_environment("RODA_F")
 	if OS.has_environment("RODA_T"):
 		c.wheel_rear_file = OS.get_environment("RODA_T")
+	if OS.has_environment("PECAS"):             # PECAS=Bumper:BUMPER_03_HEAVYCLASS_LARGE,Tire:MUD_PREMIUM
+		for par in OS.get_environment("PECAS").split(",", false):
+			c.pecas_escolhidas[par.get_slice(":", 0)] = par.get_slice(":", 1)
 	if OS.has_environment("DESLIGAR"):          # DESLIGAR=volante_nosso,luzes: melhorias fora só neste print
 		c.desligadas = c.desligadas + Array(OS.get_environment("DESLIGAR").split(","))
 	c.terrain = main.terrain

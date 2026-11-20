@@ -105,7 +105,8 @@ func montar(car) -> bool:
 			aviso = "sem _camada.obj: rode o gerar_buggies"
 	var rodas: Array = [car.wheel_front_file, car.wheel_rear_file]
 	for mi in _malhas(car):
-		var path: String = mi.mesh.resource_path
+		# malha refeita (acertar_giro do para-choque) guarda o caminho no meta
+		var path: String = String(mi.get_meta("malha_path", mi.mesh.resource_path))
 		if mi == car.body_mi or path == "" or path.ends_with("_camada.obj"):
 			continue
 		if path in rodas:
