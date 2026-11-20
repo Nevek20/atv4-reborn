@@ -949,6 +949,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   carrocerias de Inferno, Bulldog e Renegade também têm faces nesse pedaço
   e o farol delas, FECHADO, não muda). As 2 de fora (Lamp_cover) ficam
   tampadas.
+  O Matheus testou os 8 no PC, com farol: "agr foi!!!" (nov/2026).
   Renegade e Buccaneer de fábrica continuam sem farol.
 
 - Oficina do piloto (nov/2026, prints e saves gear.p2s / Paint_Shop.p2s do
