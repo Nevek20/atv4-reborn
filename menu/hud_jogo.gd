@@ -66,6 +66,7 @@ const NOME_JOGADOR := "PLAYER"            # o nome do perfil do jogo (NOSSO: ain
 # melhorias NOSSAS (pedido do Matheus; no PAL o número sai torto/vaza da caixa):
 const SCORE_CENTRADO := true              # o SCORE embaixo do meio do rótulo
 const VELOCIDADE_CABE := 0.8              # 3 dígitos: largura x 0.8 (cabem na caixa)
+const BEST_LAP_ALINHADO := true           # "BEST LAP" termina onde o "Total" termina (no PAL fica longe do tempo)
 # LEAD: atrás do líder vermelho com "-" (print do PAL: 248,44,44); na frente
 # verde (vídeo NTSC ~30,208,24; o par do vermelho). NOSSO: a conta (o tempo
 # que o outro passou no mesmo ponto da pista; o exe não foi lido)
@@ -355,9 +356,12 @@ func _desenha(no: Dictionary, pai: Rect2, a: float, passe: int) -> void:
 			"OBJECT_FILLBAR":
 				_barra(no, r)
 			"OBJECT_TEXT":
-				var k := String(at.get("mText", ""))
-				var txt: String = info.get("textos", {}).get(lingua, {}).get(k, k)
-				_texto(txt, String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
+				var dx := desvio_rotulo(no, pai, a)
+				if dx != 0.0:
+					draw_set_transform(Vector2(dx, 0.0))
+				_texto(rotulo(no), String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
+				if dx != 0.0:
+					draw_set_transform(Vector2.ZERO)
 			"OBJECT_TIMER":
 				var tc := celulas_tempo(no, valores.get(no.nome, null))
 				_texto(tc[0], String(at.get("mFont", "FONT_SMALL")), r, valores.get(no.nome + "#cor", no.cor), at,
@@ -432,6 +436,29 @@ func _sprite(t: Texture2D, src: Rect2, dst: Rect2, espelha: bool, cor: Color) ->
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
 	draw_texture_rect_region(t, dst, src, cor)
+
+
+## texto de um OBJECT_TEXT (mText é a chave da tabela de tradução)
+func rotulo(no: Dictionary) -> String:
+	var k := String(no.at.get("mText", ""))
+	return info.get("textos", {}).get(lingua, {}).get(k, k)
+
+
+## NOSSO (BEST_LAP_ALINHADO, pedido do Matheus): px pra direita que o
+## "BEST LAP" anda pra terminar junto com o "Total" logo embaixo (os 2 com o
+## tempo do lado). No PAL ele começa na borda do quadro e fica longe do tempo
+func desvio_rotulo(no: Dictionary, pai: Rect2, a: float) -> float:
+	if not BEST_LAP_ALINHADO or no.nome != "BestLapTxtElem":
+		return 0.0
+	var tot = _no("TotalTxtElem")
+	if tot == null:
+		return 0.0
+	var fonte := String(no.at.get("mFont", "FONT_SMALL"))
+	var gb := glifos(rotulo(no), fonte, _tela(_rect(no.frame, pai, a)), no.at)
+	var gt := glifos(rotulo(tot), String(tot.at.get("mFont", "FONT_SMALL")), _tela(_rect(tot.frame, pai, a)), tot.at)
+	if gb.is_empty() or gt.is_empty():
+		return 0.0
+	return (gt[-1][0] as Rect2).end.x - (gb[-1][0] as Rect2).end.x
 
 
 ## número (OBJECT_INTEGER, 0x494a78 / 0x494c10): células "0" do mText (o

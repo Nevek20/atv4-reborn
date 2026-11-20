@@ -335,7 +335,8 @@ HUD (menu/hud_jogo.gd)
   Conferir mudança com re/hud_ram.py nos save states e com o Screenshot.png
   de dentro do .p2s (a tela real do PAL; o PCSX2 estica o 4:3). Rótulos
   como na tabela (sem maiúsculas). Lista, minimapa: RAM. NOSSO: Score
-  centrado, 3 dígitos x 0.8, a conta do LEAD.
+  centrado, 3 dígitos x 0.8, a conta do LEAD, BEST LAP terminando junto
+  com o Total.
   Letras = a fonte como fica na RAM (largura arredondada, dígitos com a
   largura do maior); tempo = células do modelo "--:--:--" com o dígito
   espremido no traço; mAlignCentre anda 3/4 (sem a razão 4:3); lista:

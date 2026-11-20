@@ -2388,6 +2388,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     portado.
   - 16:9: os blocos encostados nos cantos, conferido a 1920x1080 (o PCSX2
     do Matheus é 4:3 esticado; ele pediu o 16:9 "adaptado bonitinho").
+- Depois da 3ª rodada o Matheus aprovou ("tá tudo quase perfeito") e pediu
+  o BEST LAP mais pra direita, alinhado: NOSSO BEST_LAP_ALINHADO, o rótulo
+  anda até terminar junto com o "Total" de baixo (32.5 px a 640x480; no PAL
+  ele começa na borda do quadro e fica longe do tempo). O teste_hud confere
+  a posição do PAL sem o desvio e o alinhamento com ele.
 - Faltam: bandeiras, mensagens (lap message, start) e a seta.
 
 ## HUD básico (nov/2026, NOSSO)

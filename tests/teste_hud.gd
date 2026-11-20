@@ -146,6 +146,16 @@ func _initialize() -> void:
 			if d > 0.75:
 				_falha("%s letra %d: %s x RAM x %s y %s" % [nome, i, q, e.x[i], e.y])
 	print("  letras x RAM (640x480): %d letras em %d textos, pior %.3f px (%s)" % [nt, rt.textos.size(), pior_t, pior_tn])
+	# NOSSO (BEST_LAP_ALINHADO): o "BEST LAP" anda pra direita e termina junto
+	# com o "Total" (o teste acima confere a posição do PAL, sem o desvio)
+	var nb = h._no("BestLapTxtElem")
+	var nto = h._no("TotalTxtElem")
+	var dxb: float = h.desvio_rotulo(nb, rf.BestLapTotalFrm, 640.0 / 480.0)
+	var fim_b: float = (h.glifos(h.rotulo(nb), "FONT_SMALL", h._tela(rf.BestLapTxtElem), nb.at)[-1][0] as Rect2).end.x + dxb
+	var fim_t: float = (h.glifos(h.rotulo(nto), "FONT_SMALL", h._tela(rf.TotalTxtElem), nto.at)[-1][0] as Rect2).end.x
+	print("  BEST LAP alinhado (NOSSO): anda %.1f px, termina em %.2f, Total em %.2f" % [dxb, fim_b, fim_t])
+	if dxb <= 0.0 or absf(fim_b - fim_t) > 0.01:
+		_falha("BEST LAP não alinhou com o Total")
 	# o tempo: células do modelo, dígito na célula, sinal só negativo
 	var tl: Array = h.celulas_tempo(h._no("LEAD_TIMER"), -1.2848)
 	var tp: Array = h.celulas_tempo(h._no("LAP_TIMER"), 7.0188)
