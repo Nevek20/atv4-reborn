@@ -962,6 +962,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   as lentes no atlas chassis_comp03 (mesma regra do para-choque 3);
   light2_64 é a carcaça escura, não acende. Sem o z_min da carroceria
   (a barra fica atrás da roda da frente). teste_parachoque.
+  O Matheus testou no PC: "tudo funcionando certinho" (nov/2026).
   Renegade e Buccaneer de fábrica continuam sem farol.
 
 - Oficina do piloto (nov/2026, prints e saves gear.p2s / Paint_Shop.p2s do
