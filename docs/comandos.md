@@ -146,7 +146,7 @@ python tools/piloto_pintura.py <unpacked>   :: textura do piloto montada como o 
 %GODOT% --headless --path . -s res://tests/teste_pneu.gd             :: pneu e aro comprados: 11 pneus e 7 aros do catálogo, roda e textura do aro trocam, atrito na terra
 %GODOT% --headless --path . -s res://tests/teste_borrao_rodas.gd     :: borrão das rodas: shader nas 4, 8 cópias por roda (escondidas parado, visíveis rápido, sem lama), BORRAO_RODAS=0 desliga
 %GODOT% --headless --path . -s res://tests/teste_ajuste.gd           :: Tune & Setup: marchas/final custom, Level0 ignora a final, amortecedor, o que cada câmbio libera, Renegade curto x longo
-%GODOT% --headless --path . -s res://tests/teste_parachoque.gd       :: para-choque: 8 do catálogo + Nenhum, no ponto BUMPER da frota toda, Storm/Chimera sem, não mexe na física
+%GODOT% --headless --path . -s res://tests/teste_parachoque.gd       :: para-choque: 8 do catálogo + Nenhum, no ponto BUMPER da frota toda, Storm/Chimera sem, não mexe na física, lâmpadas no farol
 %GODOT% --headless --path . -s res://tests/teste_rabo.gd             :: rabo de cavalo: comprimentos, raiz no pino, parado x correndo, balanço virando
 %GODOT% --headless --path . -s res://tests/teste_numero.gd           :: número do perfil (oficina): carro e piloto repintam e salva; rivais com o do AIPlayers
 %GODOT% --headless --path . -s res://tests/medir_escapes.gd -- BUGGY_10 TRUCK_12   :: direção do cano no modelo x ponto EXHAUST (RAIO=0.5, VERTICES=1)

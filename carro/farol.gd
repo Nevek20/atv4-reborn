@@ -14,6 +14,8 @@ extends Node3D
 ## outros não têm farol no modelo. Trucks: Shockwave, Jericho, Goliath e
 ## Chimera (2 cada), Lazarus nos 2 redondos do para-choque; no Shinto e no Punisher a light_64 é luz de teto virada
 ## pra trás e a cadilac_light do Fireball é lanterna.
+## Para-choque comprado (carro_montagem._load_parachoque): as light_64 dele
+## acendem junto (pedido do Matheus), procuradas na malha dele do mesmo jeito.
 
 const Luzes := preload("res://carro/luzes.gd")
 # nome da textura (minúsculo) das lentes. Trucks: a desert_jeep_style_light
@@ -31,7 +33,7 @@ const MODO := 1              # máscara branca do luzes.gd (a da luz de ré)
 static var ligado := true    # H no jogo (main.gd); vale pra todos os carros
 
 var car = null
-var lampadas := []           # [{c, n, tam, faces}] no frame do jogo
+var lampadas := []           # [{c, n, tam, faces}] no frame do jogo (c), faces na malha delas
 var faces := 0
 var halos := 0
 var aceso := 0.0
@@ -39,26 +41,32 @@ var _mats := []
 var _nos := []                  # lente e brilhos (escondidos apagados, como no luzes.gd)
 
 
-## acha as lâmpadas na carroceria e monta a lente acesa e o brilho de cada uma.
-## false = carro sem farol
+## acha as lâmpadas na carroceria e no para-choque comprado e monta a lente
+## acesa e o brilho de cada uma. false = carro sem farol
 func montar(c) -> bool:
 	car = c
-	var mi: MeshInstance3D = car.body_mi
-	if mi == null or not (mi.mesh is ArrayMesh):
-		return false
 	var z_min := -INF
 	if car.points.has("WHEEL_FRONT_LEFT"):
 		z_min = car.points["WHEEL_FRONT_LEFT"].z
-	lampadas = achar_lampadas(mi, z_min)
-	if lampadas.is_empty():
-		return false
+	for mi in [car.body_mi, car.parachoque_mi]:
+		if mi != null and mi.mesh is ArrayMesh:
+			# frame da malha -> frame do jogo (o para-choque fica no ponto BUMPER)
+			_montar_malha(mi, mi.position - car.model_offset, z_min)
+	lampadas.sort_custom(func(x, y): return x.c.x < y.c.x)
+	return not lampadas.is_empty()
+
+
+func _montar_malha(mi: MeshInstance3D, desloc: Vector3, z_min: float) -> void:
+	var achadas := achar_lampadas(mi, z_min - desloc.z)
+	if achadas.is_empty():
+		return
 	var sh := Shader.new()
 	sh.code = Luzes.SHADER % Luzes.GLSL_MASCARA
 	var sh_halo := Shader.new()
 	sh_halo.code = Luzes.SHADER_HALO
 	# lente: as faces das lâmpadas por superfície, com o shader da lanterna
 	var por_sup := {}
-	for l in lampadas:
+	for l in achadas:
 		for f in l.faces:
 			if not por_sup.has(f[0]):
 				por_sup[f[0]] = PackedInt32Array()
@@ -91,7 +99,7 @@ func montar(c) -> bool:
 	lente.visible = false
 	_nos.append(lente)
 	# brilho: um por lâmpada, no centro, do tamanho dela (os limites do freio)
-	for l in lampadas:
+	for l in achadas:
 		var q := QuadMesh.new()
 		var mat := ShaderMaterial.new()
 		mat.shader = sh_halo
@@ -111,7 +119,9 @@ func montar(c) -> bool:
 		_nos.append(h)
 		_mats.append(mat)
 		halos += 1
-	return true
+	for l in achadas:
+		l.c += desloc
+		lampadas.append(l)
 
 
 ## liga e desliga como a lâmpada do freio (Luzes.ACENDE / APAGA)

@@ -936,6 +936,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   Punisher a light_64 é luz de teto virada pra trás. Lazarus (bônus): os 2
   faróis redondos da barra do para-choque (preRunnerTruck_light); os da
   grade são pintados na preRunnerTruck_front e ficam apagados.
+  Para-choque comprado (nov/2026, pedido do Matheus: "nunca curti elas no
+  jogo, mas estão bonitinhas aqui"): as light_64 dele entram no mesmo farol,
+  procuradas na malha do para-choque do mesmo jeito (farol.gd
+  _montar_malha; lente e brilhos ficam filhos dele). 4 lâmpadas no 4 (z
+  3.09-3.19 no Renegade, carroceria até 2.74; teste_parachoque); no 8 as 2
+  com Lamp_cover ficam tampadas e no 7 a luz aparece pela grade (prints).
+  Renegade e Buccaneer de fábrica continuam sem farol.
 
 - Oficina do piloto (nov/2026, prints e saves gear.p2s / Paint_Shop.p2s do
   Matheus; no jogo Garage -> Rider: Gear e Paint Shop): a textura do piloto
@@ -2241,8 +2248,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   gerar_buggies exporta pra assets/carros/parachoques/ (pecas.json
   "parachoques" e "ponto_parachoque"); suja como a carroceria (_camada.obj).
   "Tudo no máximo" não mexe em aro e para-choque (aparência, NOSSO; antes
-  punha o Aro 8). Falta: as lâmpadas do para-choque acenderem com o farol
-  (H), se o jogo fizer isso.
+  punha o Aro 8). Lâmpadas do para-choque no farol (H): ver Farol.
 
 ## HUD básico (nov/2026, NOSSO)
 

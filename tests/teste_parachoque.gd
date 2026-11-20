@@ -10,7 +10,9 @@ extends SceneTree
 ##    do carro ou no chão)
 ## 3) carro montado (Renegade, Buccaneer, Storm): o para-choque escolhido entra
 ##    no model_root na posição do ponto; de fábrica não tem; só visual: massa,
-##    casco e motor iguais aos de fábrica
+##    casco e motor iguais aos de fábrica. As 4 lâmpadas (light_64) do
+##    para-choque 4 entram no farol (farol.gd, H), viradas pra frente e na
+##    frente da carroceria; Renegade e Buccaneer de fábrica não têm farol
 ## Uso: godot --headless --path . -s res://tests/teste_parachoque.gd
 
 const Main := preload("res://main.gd")
@@ -123,6 +125,16 @@ func _process(_d: float) -> bool:
 			cascos.call(com), cascos.call(fab), com.TUNE_ENGINE, fab.TUNE_ENGINE])
 		if com.mass != fab.mass or cascos.call(com) != cascos.call(fab) or com.TUNE_ENGINE != fab.TUNE_ENGINE:
 			_falha("%s: o para-choque mexeu na física (é só visual no jogo)" % nome)
+		# farol (H): as lâmpadas do para-choque
+		var frente_corpo: float = com.body_mi.mesh.get_aabb().end.z
+		var lamp: Array = com.farol.lampadas if com.farol else []
+		print("  %s: farol de fábrica %s, com o para-choque %d lâmpadas em z %s (carroceria até %.2f)" % [
+			nome, "sim" if fab.farol else "não", lamp.size(),
+			", ".join(lamp.map(func(l): return "%.2f" % l.c.z)), frente_corpo])
+		if fab.farol != null or lamp.size() != 4 or not lamp.all(func(l): return l.n.z > 0.5 and l.c.z > frente_corpo - 0.1):
+			_falha("%s: as 4 lâmpadas do para-choque não entraram no farol" % nome)
+		elif com.farol.halos != 4 or com.parachoque_mi.get_children().filter(func(n): return n.name == "Lente_farol").size() != 1:
+			_falha("%s: lente ou brilhos do farol fora do para-choque" % nome)
 	print("teste_parachoque: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 	quit()
 	return true

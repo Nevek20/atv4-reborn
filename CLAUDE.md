@@ -150,7 +150,8 @@ Arquivos, modelos e pintura
   amortecedor, marchas e final (GearRatioTuning 0..1, liberados pelo nível
   do câmbio como o 0x3ec5d0: Level2 final, Level3+ marchas). Para-choque
   = só visual (mIsPhysical false): FrontBumper no ponto BUMPER do .pts
-  (assets/carros/parachoques); RallyCompMap (Storm, Chimera) não tem.
+  (assets/carros/parachoques); RallyCompMap (Storm, Chimera) não tem. As
+  light_64 dele acendem no H (farol.gd procura na carroceria e nele).
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
 - Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os
