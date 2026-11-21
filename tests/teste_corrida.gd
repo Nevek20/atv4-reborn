@@ -169,13 +169,24 @@ func _physics_process(_dt: float) -> bool:
 				_falha("texto provisório na chegada: '%s'" % c.hud.text.left(30))
 			if quadros == 3 and (not r.visible or not r.linhas.is_empty()):
 				_falha("a tela não entrou vazia na chegada (visível %s, %d linhas)" % [r.visible, r.linhas.size()])
-			if quadros < 50 * 4:
+			if quadros == 50 * 4:
+				print("resultados aos 4 s: %d linha(s)" % r.linhas.size())
+				if r.linhas.size() < 1 or not r.linhas[0].jogador:
+					_falha("tela de resultados aos 4 s")
+			if quadros < 50 * 18:
 				return false
+			# 15 s depois da chegada o evento fecha (0x15fae8): quem falta
+			# entra com o tempo projetado; a tabela mostra os 8
 			var v: float = car.linear_velocity.length()
-			print("resultados: na tela %s; aos 4 s %d linha(s), jogador em %s; IA pilotando a %.1f km/h" % [r.visible,
-				r.linhas.size(), r.linhas.filter(func(l): return l.jogador).map(func(l): return l.pos), v * 3.6])
-			if not r.visible or r.linhas.size() < 1 or not r.linhas[0].jogador:
-				_falha("tela de resultados")
+			var tempos: Array = r.linhas.map(func(l): return l.total)
+			var ordem := true
+			for k in range(1, tempos.size()):
+				ordem = ordem and tempos[k] >= tempos[k - 1]
+			print("resultados aos 18 s: na tela %s, %d linhas, jogador em %s, tempos %s; IA pilotando a %.1f km/h" % [
+				r.visible, r.linhas.size(), r.linhas.filter(func(l): return l.jogador).map(func(l): return l.pos),
+				tempos.map(func(x): return snappedf(x, 0.01)), v * 3.6])
+			if not r.visible or r.linhas.size() != 8 or not r.linhas[0].jogador or not ordem:
+				_falha("tela de resultados (os 8 depois do fim do evento)")
 			if v < 3.0:
 				_falha("depois da chegada a IA não pilotou o carro")
 			main._continuar_resultados()

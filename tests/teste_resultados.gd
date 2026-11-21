@@ -135,4 +135,10 @@ func _fluxo() -> void:
 		ch.map(func(e): return e.nome), c.RESULTADO_INI, c.RESULTADO_PASSO])
 	if p0 or not p1 or ch.size() != 2 or ch[0].nome != "Você" or ch[1].nome != "A":
 		_falha("quando a tela aparece / quem entra na tabela")
+	# 0x4d1768: projetado = tempo x total / andado, no mínimo o tempo até agora
+	var a: float = c.tempo_projetado(100.0, 1855.0, 3675.6)
+	var b: float = c.tempo_projetado(100.0, 4000.0, 3675.6)
+	print("  tempo projetado: metade do caminho em 100 s -> %.2f; já passou -> %.2f" % [a, b])
+	if absf(a - 100.0 * 3675.6 / 1855.0) > 0.01 or b != 100.0:
+		_falha("tempo projetado")
 	c.free()

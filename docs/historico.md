@@ -2595,9 +2595,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   só com quem já chegou, na ordem da classificação: a 1ª vez aos 3 s, e
   ela vai crescendo conforme os rivais cruzam a linha. A IA pilota o seu
   carro (ia.gd pilotar_jogador, como um rival sem catchup, com a reposição
-  do jogo). Não portado: o 0x4c1ad8 (com um relógio do dono > 15 s fecha
-  o evento, 0x4c2690, e troca de estado). A 1ª versão (esperar todos ou 30
-  s e projetar o tempo de quem faltava) era NOSSA e saiu.
+  do jogo). A 1ª versão (esperar todos ou 30 s) era NOSSA e saiu.
+- "Mostra o restinho do pessoal" (o Matheus, com print do nosso: só 2
+  linhas). No exe o estado da tabela, com um relógio do dono > 15 s, chama
+  o 0x4c1ad8: recordes (0x4c2690: melhor volta, Score por volta/minuto) e
+  troca de estado; o fim do evento (0x15fae8, também no 0x4ccf80) termina
+  quem não chegou pelo 0x4d1820: tempo projetado (0x4d1768) = tempo até
+  agora x distância da corrida (0x4d27b0) / distância andada (progresso
+  +0x44 - +0x18), no mínimo o tempo até agora, e grava como chegada
+  (0x4d10b0). Portado (corrida.gd _fechar_evento): 15 s depois da sua
+  chegada (qual relógio do exe não foi achado: o objeto do estado já não
+  existe no save state). O 0x4d1820 também refaz o Score da IA (ceil(Score
+  / tempo x projetado x 0.02) x 50, com o gerente desligado): não portado,
+  porque no placar_final os Scores não são múltiplos de 50 (a condição não
+  fecha com a RAM). Achado na RAM: relógio da corrida de todos parado em
+  90.01 s (a sua chegada, 89.99).
 - NOSSO: Continue (Enter, Start, A) volta pro treino livre (as páginas
   Records e Race Finished ainda não existem). Na tela larga os sprites da
   largura toda esticam; o resto fica no 4:3.
