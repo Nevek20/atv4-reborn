@@ -2603,13 +2603,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   quem não chegou pelo 0x4d1820: tempo projetado (0x4d1768) = tempo até
   agora x distância da corrida (0x4d27b0) / distância andada (progresso
   +0x44 - +0x18), no mínimo o tempo até agora, e grava como chegada
-  (0x4d10b0). Portado (corrida.gd _fechar_evento): 15 s depois da sua
-  chegada (qual relógio do exe não foi achado: o objeto do estado já não
-  existe no save state). O 0x4d1820 também refaz o Score da IA (ceil(Score
-  / tempo x projetado x 0.02) x 50, com o gerente desligado): não portado,
-  porque no placar_final os Scores não são múltiplos de 50 (a condição não
-  fecha com a RAM). Achado na RAM: relógio da corrida de todos parado em
-  90.01 s (a sua chegada, 89.99).
+  (0x4d10b0). O 0x4d1820 também refaz o Score da IA (ceil(Score / tempo x
+  projetado x 0.02) x 50, com o gerente desligado), mas no placar_final os
+  Scores não são múltiplos de 50: a condição não fecha com a RAM. Achado
+  na RAM: relógio da corrida de todos parado em 90.01 s (a sua chegada,
+  89.99).
+- Decisão do Matheus (nov/2026, depois de ver a projeção): "tudo tem que
+  aparecer junto" e, em vez da conta, o tempo em traços pra quem não
+  chegou. NOSSO: a tabela tem os 8 desde a 1ª vez (aos 3 s), na ordem da
+  classificação (quem chegou pelo tempo, depois pela distância); quem não
+  chegou fica com o tempo total "--:--.--" (cada traço na célula de um
+  dígito, como o "--:--:--" do HUD) e ganha o tempo quando cruza a linha
+  (a tabela é refeita a cada 2 s). Melhor volta sem volta fechada também em
+  traços. A projeção (0x15fae8 / 0x4d1768) e os 15 s saíram.
 - NOSSO: Continue (Enter, Start, A) volta pro treino livre (as páginas
   Records e Race Finished ainda não existem). Na tela larga os sprites da
   largura toda esticam; o resto fica no 4:3.

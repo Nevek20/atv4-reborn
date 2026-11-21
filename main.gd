@@ -887,7 +887,7 @@ func _passo_resultados() -> void:
 		_resultado_t += get_process_delta_time()
 		if _resultado_t >= corrida.RESULTADO_PASSO:
 			_resultado_t = 0.0
-			resultados.linhas_de(corrida.chegados())
+			resultados.linhas_de(corrida.tabela())
 
 
 ## Continue (Enter, Start ou A): NOSSO até ter as páginas seguintes do jogo

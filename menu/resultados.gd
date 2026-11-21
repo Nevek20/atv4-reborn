@@ -135,10 +135,12 @@ func esconder() -> void:
 	visible = false
 
 
-## "mm:ss.cc" (como a tela: 01:29.98); sem tempo, o modelo "00:00.00"
+## "mm:ss.cc" (como a tela: 01:29.98); sem tempo (não chegou, ou sem volta
+## fechada) em traços (NOSSO, pedido do Matheus; no jogo offline quem não
+## chegou nem entra na tabela)
 static func tempo(s: float) -> String:
 	if s < 0.0:
-		return "00:00.00"
+		return "--:--.--"
 	var c := mini(int(s * 100.0 + 0.5), 5999 * 100 + 99)
 	return "%02d:%02d.%02d" % [c / 6000, (c / 100) % 60, c % 100]
 
@@ -310,7 +312,9 @@ func _texto_no(no: Dictionary, r: Rect2, a: float) -> void:
 
 ## letras de um texto: [[retângulo na referência 640 x 480, caixa na textura], ...]
 ## e o tamanho (largura pelos avanços, altura da linha x escala)
-func glifos(s: String, fonte: String, esc: float, aspecto := 1.0) -> Array:
+## traco_digito: o "-" ocupa a célula de um dígito (centrado), como o "--:--:--"
+## do HUD: o tempo em traços fica da largura de um tempo
+func glifos(s: String, fonte: String, esc: float, aspecto := 1.0, traco_digito := false) -> Array:
 	var g: Dictionary = _fonte.get(fonte, {})
 	if g.is_empty():
 		return [[], Vector2.ZERO]
@@ -326,9 +330,13 @@ func glifos(s: String, fonte: String, esc: float, aspecto := 1.0) -> Array:
 		var c: int = cods[n]
 		var prox: int = cods[n + 1] if n + 1 < cods.size() else 0
 		var wg: float = g[c][1] if g.has(c) else 0.0
+		var cel := wg
+		if traco_digito and c == 45 and g.has(48):
+			cel = g[48][1]
+			prox = 48 if prox == 45 else prox          # o kerning de dígito com dígito
 		if c != 32 and g.has(c):
-			out.append([Rect2(x, 0.0, wg * esc * aspecto, alt), g[c][0]])
-		x += (wg - _kern_de(kern, c, prox)) * esc * aspecto
+			out.append([Rect2(x + (cel - wg) * 0.5 * esc * aspecto, 0.0, wg * esc * aspecto, alt), g[c][0]])
+		x += (cel - _kern_de(kern, 48 if traco_digito and c == 45 else c, prox)) * esc * aspecto
 	return [out, Vector2(x, alt)]
 
 
@@ -348,7 +356,7 @@ static func _kern_de(kern: Dictionary, c: int, prox: int) -> float:
 ## cima à esquerda. Devolve o canto de cima à esquerda (NDC)
 func texto(s: String, fonte: String, r: Rect2, esc: float, just: int, c1: Color, c2: Color,
 		rot := 0.0, aspecto := 1.0) -> Vector2:
-	var gl: Array = glifos(s, fonte, esc, aspecto)
+	var gl: Array = glifos(s, fonte, esc, aspecto, s == tempo(-1.0))
 	var tam: Vector2 = gl[1]
 	# tamanho na referência 640 x 480 -> NDC
 	var w_ndc := tam.x / 320.0

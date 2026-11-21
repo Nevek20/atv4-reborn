@@ -7,8 +7,8 @@ extends SceneTree
 ##     esquerda): os 4 cantos da 1ª letra (< 1 px), e a sombra 0.02 NDC à
 ##     esquerda;
 ##  3. tempo "mm:ss.cc";
-##  4. quando aparece (pista/corrida.gd, estado 0x4c18e0): na sua chegada, e
-##     a tabela só com quem já chegou, na ordem de chegada.
+##  4. quando aparece (pista/corrida.gd, estado 0x4c18e0): na sua chegada, com
+##     todos (NOSSO: quem não chegou com o tempo em traços).
 ## Uso: godot --headless --path . -s res://tests/teste_resultados.gd
 
 const CL := [
@@ -112,7 +112,7 @@ func _tempo(r) -> void:
 	var b: String = r.tempo(-1.0)
 	var c: String = r.tempo(59.996)
 	print("  tempo: %s, %s, %s" % [a, b, c])
-	if a != "01:29.98" or b != "00:00.00" or c != "01:00.00":
+	if a != "01:29.98" or b != "--:--.--" or c != "01:00.00":
 		_falha("formato do tempo")
 
 
@@ -130,15 +130,9 @@ func _fluxo() -> void:
 	var p0: bool = c.resultados_prontos()
 	c.estado = c.CHEGOU
 	var p1: bool = c.resultados_prontos()
-	var ch: Array = c.chegados()
+	var ch: Array = c.tabela()
 	print("  aparece: correndo %s, na chegada %s; na tabela %s (relógio %.0f, a cada %.0f s)" % [p0, p1,
 		ch.map(func(e): return e.nome), c.RESULTADO_INI, c.RESULTADO_PASSO])
-	if p0 or not p1 or ch.size() != 2 or ch[0].nome != "Você" or ch[1].nome != "A":
+	if p0 or not p1 or ch.size() != 3 or ch[0].nome != "Você":
 		_falha("quando a tela aparece / quem entra na tabela")
-	# 0x4d1768: projetado = tempo x total / andado, no mínimo o tempo até agora
-	var a: float = c.tempo_projetado(100.0, 1855.0, 3675.6)
-	var b: float = c.tempo_projetado(100.0, 4000.0, 3675.6)
-	print("  tempo projetado: metade do caminho em 100 s -> %.2f; já passou -> %.2f" % [a, b])
-	if absf(a - 100.0 * 3675.6 / 1855.0) > 0.01 or b != 100.0:
-		_falha("tempo projetado")
 	c.free()

@@ -50,12 +50,6 @@ const Truques := preload("res://pista/truques.gd")
 # começa em RESULTADO_INI: a 1ª vez em 3 s) é refeita com quem já chegou
 const RESULTADO_PASSO := 2.0
 const RESULTADO_INI := -1.0
-# o estado da tabela fecha o evento passados FIM_EVENTO s (0x4c18e0 ->
-# 0x4c1ad8); o fim do evento (0x15fae8) termina quem falta com o tempo
-# projetado (0x4d1820 / 0x4d1768): tempo até agora x distância da corrida /
-# distância andada (nunca menos que o tempo até agora). Qual relógio do exe
-# conta os 15 s não foi achado: aqui, desde a sua chegada
-const FIM_EVENTO := 15.0
 const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
 enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
@@ -257,7 +251,6 @@ func comecar() -> void:
 	tempos.clear()
 	avanco = 0
 	_k_volta = -1
-	_evento_fechado = false
 	link = _mais_perto(main.car.global_position)
 	_lado_ant = _lado(main.car.global_position)
 	main.car.test_input = null
@@ -399,8 +392,6 @@ func _physics_process(dt: float) -> void:
 	if estado == CHEGOU:
 		t_conta += dt
 		t += dt                     # os rivais ainda chegando
-		if t_conta >= FIM_EVENTO and not _evento_fechado:
-			_fechar_evento()
 		return
 	t += dt
 	_caixas()
@@ -438,45 +429,20 @@ func _cruzou() -> void:
 	_passou_linha()
 
 
-## 0x15fae8: quem não chegou ganha o tempo projetado (0x4d1768) e a
-## corrida dele fecha (o Score fica como está; o 0x4d1820 ainda projeta o
-## Score da IA, não portado: a condição dele não bate com a RAM)
-var _evento_fechado := false
-func _fechar_evento() -> void:
-	_evento_fechado = true
-	if ia == null:
-		return
-	var antes := float(dados.get("primeira_volta", 54.8))
-	var total := voltas * float(ia.comp) + antes
-	for x in ia.rivais:
-		if float(x.r.fim) >= 0.0:
-			continue
-		x.r.fim = tempo_projetado(t, float(x.r.prog) + antes, total)
-		x.truques.parar()
-		if float(x.melhor) < 0.0:
-			x.melhor = x.r.fim / float(voltas)   # sem volta fechada (raro): a média
-
-
-## 0x4d1768: tempo até agora / distância andada x distância da corrida, no
-## mínimo o tempo até agora
-static func tempo_projetado(agora: float, andado: float, total: float) -> float:
-	return maxf(agora * total / maxf(andado, 0.1), agora)
-
-
 ## a tela de resultados: na hora da sua chegada (o Matheus: "é instantâneo")
 func resultados_prontos() -> bool:
 	return estado == CHEGOU
 
 
-## quem já chegou, na ordem de chegada (0x4c1998: só os corredores com a
-## corrida fechada entram na tabela, na ordem da classificação)
-func chegados() -> Array:
+## as linhas da tabela: todos os corredores na ordem da classificação (quem
+## chegou pelo tempo, depois pela distância). NOSSO (pedido do Matheus: "tudo
+## tem que aparecer junto"): no jogo offline o 0x4c1998 só põe quem já
+## chegou; quem não chegou fica com o tempo total em traços (fim < 0)
+func tabela() -> Array:
 	if ia == null or ia.rivais.is_empty():
 		return [{"nome": "Você", "jogador": true, "fim": t_fim, "melhor": melhor if melhor != INF else -1.0,
 			"score": truques.total if truques else 0}]
-	var cl: Array = ia.classificacao().filter(func(e): return float(e.fim) >= 0.0)
-	cl.sort_custom(func(a, b): return float(a.fim) < float(b.fim))
-	return cl
+	return ia.classificacao()
 
 
 ## passou pela linha: a 1ª vez começa a volta 1, depois fecha uma volta
