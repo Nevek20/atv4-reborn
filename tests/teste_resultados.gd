@@ -7,9 +7,8 @@ extends SceneTree
 ##     esquerda): os 4 cantos da 1ª letra (< 1 px), e a sombra 0.02 NDC à
 ##     esquerda;
 ##  3. tempo "mm:ss.cc";
-##  4. quando aparece (pista/corrida.gd resultados_prontos): só com todos
-##     chegados ou passados RESULTADO_MAX s (NOSSO), e quem não chegou ganha
-##     o tempo projetado pelo ritmo.
+##  4. quando aparece (pista/corrida.gd, estado 0x4c18e0): na sua chegada, e
+##     a tabela só com quem já chegou, na ordem de chegada.
 ## Uso: godot --headless --path . -s res://tests/teste_resultados.gd
 
 const CL := [
@@ -125,25 +124,15 @@ func _fluxo() -> void:
 	c.voltas = 2
 	ia.rivais = [{"r": {"fim": 100.0, "prog": 3620.8}}, {"r": {"fim": -1.0, "prog": 1800.0}}]
 	ia.lista = [{"nome": "Você", "jogador": true, "fim": 90.0, "prog": 3620.8, "score": 5, "melhor": 44.0},
-		{"nome": "A", "fim": 100.0, "prog": 3620.8, "score": 1, "melhor": 47.0},
-		{"nome": "B", "fim": -1.0, "prog": 1800.0, "score": 2, "melhor": 60.0}]
+		{"nome": "B", "fim": -1.0, "prog": 1800.0, "score": 2, "melhor": 60.0},
+		{"nome": "A", "fim": 100.0, "prog": 3620.8, "score": 1, "melhor": 47.0}]
 	c.estado = c.CORRENDO
 	var p0: bool = c.resultados_prontos()
 	c.estado = c.CHEGOU
-	c.t = 110.0
-	c.t_conta = 5.0
 	var p1: bool = c.resultados_prontos()
-	c.t_conta = c.RESULTADO_MAX
-	var p2: bool = c.resultados_prontos()
-	var cl: Array = c.classificacao_final()
-	var proj: float = cl[2].fim
-	var esp := 110.0 * (2 * 1810.4 + 54.8) / (1800.0 + 54.8)
-	print("  aparece: correndo %s, falta um %s, depois de %.0f s %s; projetado %.2f s (ritmo %.2f)" % [p0, p1,
-		c.RESULTADO_MAX, p2, proj, esp])
-	if p0 or p1 or not p2 or absf(proj - esp) > 0.01 or cl[0].nome != "Você":
-		_falha("quando a tela aparece")
-	ia.rivais[1].r.fim = 120.0
-	c.t_conta = 1.0
-	if not c.resultados_prontos():
-		_falha("todos chegaram e não apareceu")
+	var ch: Array = c.chegados()
+	print("  aparece: correndo %s, na chegada %s; na tabela %s (relógio %.0f, a cada %.0f s)" % [p0, p1,
+		ch.map(func(e): return e.nome), c.RESULTADO_INI, c.RESULTADO_PASSO])
+	if p0 or not p1 or ch.size() != 2 or ch[0].nome != "Você" or ch[1].nome != "A":
+		_falha("quando a tela aparece / quem entra na tabela")
 	c.free()

@@ -540,12 +540,24 @@ func posicionar() -> void:
 
 
 func limpar() -> void:
+	piloto_jogador = null
 	for x in rivais:
 		if is_instance_valid(x.car):
 			x.car.queue_free()
 	rivais.clear()
 	if main and main.objetos:
 		main.objetos.rivais.clear()
+
+
+## depois da sua chegada a IA pilota o seu carro (o Matheus: no jogo o carro
+## continua andando sozinho), como um rival sem catchup
+var piloto_jogador = null
+func pilotar_jogador() -> void:
+	var p: Vector3 = main.car.global_position
+	piloto_jogador = {"car": main.car, "nome": "Você", "skill": 1.0, "r": jogador, "preso": 0.0,
+		"desvio": 0.0, "repostos": 0, "res": 0, "lod": 5, "lat": _lateral(p, jogador.prog + s_linha)
+		- lat_zero(jogador.prog + s_linha), "bonus": 0.0, "cu": 0.0, "comp": 0, "viz": {},
+		"vigia": vigia_jogador}
 
 
 func soltar() -> void:
@@ -616,6 +628,11 @@ func _physics_process(dt: float) -> void:
 			_repor(x)
 			continue
 		_dirigir(x, car, dt)
+	if piloto_jogador != null and est == corrida.CHEGOU:
+		if piloto_jogador.vigia.passo(jogador, main.car, dt):
+			_repor(piloto_jogador)
+		else:
+			_dirigir(piloto_jogador, main.car, dt)
 	_carros_laco = null
 
 

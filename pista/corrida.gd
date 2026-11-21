@@ -45,10 +45,11 @@ const DESCIDA := 5.0
 const DESCIDA_ALTURA := 5.0
 const AVANCO_MIN := 60          # dos 75 links
 const Truques := preload("res://pista/truques.gd")
-# tela de resultados (menu/resultados.gd): aparece quando todos chegaram.
-# NOSSO (o exe ainda não foi lido nisso): passou RESULTADO_MAX s da sua
-# chegada, mostra assim mesmo com o tempo de quem falta projetado pelo ritmo
-const RESULTADO_MAX := 30.0
+# tela de resultados (menu/resultados.gd, estado 0x4c18e0 do exe): entra na
+# sua chegada; a tabela começa vazia e a cada RESULTADO_PASSO s (o relógio
+# começa em RESULTADO_INI: a 1ª vez em 3 s) é refeita com quem já chegou
+const RESULTADO_PASSO := 2.0
+const RESULTADO_INI := -1.0
 const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
 enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
@@ -428,31 +429,18 @@ func _cruzou() -> void:
 	_passou_linha()
 
 
-## a tela de resultados já pode aparecer (você chegou e os rivais também, ou
-## passou RESULTADO_MAX)
+## a tela de resultados: na hora da sua chegada (o Matheus: "é instantâneo")
 func resultados_prontos() -> bool:
-	if estado != CHEGOU:
-		return false
-	if ia == null or ia.rivais.is_empty() or t_conta >= RESULTADO_MAX:
-		return true
-	for x in ia.rivais:
-		if float(x.r.fim) < 0.0:
-			return false
-	return true
+	return estado == CHEGOU
 
 
-## classificação pra tela de resultados; quem não chegou ganha um tempo
-## projetado pelo ritmo (NOSSO)
-func classificacao_final() -> Array:
+## quem já chegou, na ordem de chegada (0x4c1998: só os corredores com a
+## corrida fechada entram na tabela, na ordem da classificação)
+func chegados() -> Array:
 	if ia == null or ia.rivais.is_empty():
 		return [{"nome": "Você", "jogador": true, "fim": t_fim, "melhor": melhor if melhor != INF else -1.0,
 			"score": truques.total if truques else 0}]
-	var cl: Array = ia.classificacao()
-	var total := voltas * float(ia.comp) + float(dados.get("primeira_volta", 54.8))
-	for e in cl:
-		if float(e.fim) < 0.0:
-			var feito := float(e.prog) + float(dados.get("primeira_volta", 54.8))
-			e.fim = t * total / maxf(feito, 1.0)
+	var cl: Array = ia.classificacao().filter(func(e): return float(e.fim) >= 0.0)
 	cl.sort_custom(func(a, b): return float(a.fim) < float(b.fim))
 	return cl
 
@@ -475,8 +463,12 @@ func _passou_linha() -> void:
 		t_fim = t
 		if truques:
 			truques.parar()         # 0x1596d8: na chegada o combo aberto se perde
-		# solta tudo: o carro para sozinho (segurar o freio parado engata a ré)
-		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
+		# no jogo a IA passa a pilotar o seu carro (o Matheus); sem rivais
+		# (reserva) solta tudo e ele para sozinho
+		if ia and not ia.rivais.is_empty():
+			ia.pilotar_jogador()
+		else:
+			main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		return
 	volta += 1
 

@@ -114,14 +114,20 @@ func _txt(k: String) -> String:
 ## monta as linhas a partir da classificação (pista/ia.gd classificacao()):
 ## [{nome, fim, jogador, score, melhor}]
 func mostrar(cl: Array) -> void:
+	linhas_de(cl)
+	t = 0.0
+	visible = true
+	queue_redraw()
+
+
+## troca as linhas sem recomeçar a tela (os quadriculados seguem andando)
+func linhas_de(cl: Array) -> void:
 	linhas.clear()
 	for i in cl.size():
 		var e: Dictionary = cl[i]
 		linhas.append({"pos": i + 1, "nome": NOME_JOGADOR if e.get("jogador", false) else String(e.nome),
 			"total": float(e.get("fim", -1.0)), "melhor": float(e.get("melhor", -1.0)),
 			"score": int(e.get("score", 0)), "jogador": bool(e.get("jogador", false))})
-	t = 0.0
-	visible = true
 	queue_redraw()
 
 

@@ -160,18 +160,24 @@ func _physics_process(_dt: float) -> bool:
 				_falha("não chegou (volta %d, estado %d)" % [c.volta, c.estado])
 				fase = 9
 		5:
-			# tela de resultados (menu/resultados.gd): vem quando todos chegam
-			# ou 30 s depois (os rivais ficam longe: o jogador anda 300 m/s);
-			# o texto provisório de chegada não aparece junto
+			# tela de resultados (menu/resultados.gd): entra na chegada, vazia;
+			# aos 3 s mostra quem chegou (aqui só o jogador: anda 300 m/s e os
+			# rivais ficam longe); a IA pilota o carro do jogador; sem o texto
+			# provisório de chegada
 			var r = main.resultados
 			if c.hud.text != "":
 				_falha("texto provisório na chegada: '%s'" % c.hud.text.left(30))
-			if not r.visible and quadros < 50 * 40:
+			if quadros == 3 and (not r.visible or not r.linhas.is_empty()):
+				_falha("a tela não entrou vazia na chegada (visível %s, %d linhas)" % [r.visible, r.linhas.size()])
+			if quadros < 50 * 4:
 				return false
-			print("resultados: na tela %s depois de %.1f s, %d linhas, jogador em %s" % [r.visible, quadros / 50.0,
-				r.linhas.size(), r.linhas.filter(func(l): return l.jogador).map(func(l): return l.pos)])
-			if not r.visible or r.linhas.size() != 8 or r.linhas[0].jogador != true:
+			var v: float = car.linear_velocity.length()
+			print("resultados: na tela %s; aos 4 s %d linha(s), jogador em %s; IA pilotando a %.1f km/h" % [r.visible,
+				r.linhas.size(), r.linhas.filter(func(l): return l.jogador).map(func(l): return l.pos), v * 3.6])
+			if not r.visible or r.linhas.size() < 1 or not r.linhas[0].jogador:
 				_falha("tela de resultados")
+			if v < 3.0:
+				_falha("depois da chegada a IA não pilotou o carro")
 			main._continuar_resultados()
 			if r.visible or c.estado != c.LIVRE:
 				_falha("Continue não voltou pro treino livre")

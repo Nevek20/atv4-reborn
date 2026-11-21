@@ -377,8 +377,9 @@ Tela de resultados (menu/resultados.gd)
   NewPause LAYER_PAUSE_BACKGROUND). rect em NDC y pra cima, filho no NDC do
   pai; texto centrado (mJustify 17), fonte/kerning do HUD, giro do texto em
   rad e do sprite em graus. teste_resultados confere com a RAM do
-  placar_final.p2s (< 0.5 px): não posicionar no olho. Quando aparece e o
-  Continue: NOSSO até ler o exe.
+  placar_final.p2s (< 0.5 px): não posicionar no olho. Entra na sua
+  chegada (0x4c18e0), tabela vazia, refeita a cada 2 s (1ª aos 3 s) só com
+  quem já chegou; a IA pilota o seu carro. Continue: NOSSO (volta pro livre).
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

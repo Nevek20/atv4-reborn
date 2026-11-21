@@ -2588,11 +2588,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   posição da RAM. Sobrepondo com o Screenshot do .p2s: igual.
 - Rivais agora guardam as voltas (melhor volta na tela), com a mesma regra
   do jogador.
-- NOSSO, até ler o exe / o Matheus responder: a tela aparece quando os 8
-  chegaram; passados 30 s da sua chegada aparece assim mesmo, com o tempo
-  de quem falta projetado pelo ritmo. Continue (Enter, Start, A) volta pro
-  treino livre (as páginas Records e Race Finished ainda não existem). Na
-  tela larga os sprites da largura toda esticam; o resto fica no 4:3.
+- Quando aparece (o Matheus: "é instantâneo, e o carro continua dirigindo,
+  a IA pilota ele"; o exe: estado 0x4c18e0, vtable 0x5e80c0): entra na sua
+  chegada com a tabela vazia (0x4c1730 limpa as linhas); o relógio começa
+  em -1 (construtor 0x4c16e8) e a cada 2 s a tabela é refeita (0x4c1998)
+  só com quem já chegou, na ordem da classificação: a 1ª vez aos 3 s, e
+  ela vai crescendo conforme os rivais cruzam a linha. A IA pilota o seu
+  carro (ia.gd pilotar_jogador, como um rival sem catchup, com a reposição
+  do jogo). Não portado: o 0x4c1ad8 (com um relógio do dono > 15 s fecha
+  o evento, 0x4c2690, e troca de estado). A 1ª versão (esperar todos ou 30
+  s e projetar o tempo de quem faltava) era NOSSA e saiu.
+- NOSSO: Continue (Enter, Start, A) volta pro treino livre (as páginas
+  Records e Race Finished ainda não existem). Na tela larga os sprites da
+  largura toda esticam; o resto fica no 4:3.
 - 1º teste do Matheus: "apareceu o menu antigo". Era o texto provisório de
   chegada (CHEGADA! / Enter: correr de novo) aparecendo enquanto a tela
   espera os rivais; com Enter a corrida recomeçava antes dela. Agora, com a

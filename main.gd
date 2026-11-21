@@ -130,6 +130,7 @@ var fps_label: Label                     # contador de FPS (F2 liga e desliga); 
 var hud_basico                           # menu/hud_basico.gd: marcha e velocidade (NOSSO, sem assets/hud)
 var resultados                           # menu/resultados.gd: tela de resultados da corrida (PostRace.fex)
 var _resultado_visto := false            # já mostrou nesta chegada
+var _resultado_t := 0.0                  # relógio da tabela (0x4c18e0: refaz a cada 2 s)
 var hud_jogo                             # menu/hud_jogo.gd: o HUD do jogo (HUD_CIRCUIT.xml)
 var hud_texto := true                    # F1: tudo -> só o HUD básico -> nada
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
@@ -867,8 +868,8 @@ func _passo_tremida(delta: float, j, s: Dictionary) -> void:
 		j.passo(GameCamera.STEP, s.speed, s.chao, s.batida)
 
 
-## tela de resultados: aparece quando a corrida diz que dá (todos chegaram);
-## some se a corrida recomeçar ou parar
+## tela de resultados: entra na sua chegada, a tabela com quem já chegou
+## (a 1ª vez em 3 s, depois a cada 2 s); some se a corrida recomeçar ou parar
 func _passo_resultados() -> void:
 	if resultados == null:
 		return
@@ -880,7 +881,13 @@ func _passo_resultados() -> void:
 		return
 	if not _resultado_visto and corrida.resultados_prontos():
 		_resultado_visto = true
-		resultados.mostrar(corrida.classificacao_final())
+		resultados.mostrar([])                  # entra vazia (0x4c1730 limpa as linhas)
+		_resultado_t = corrida.RESULTADO_INI
+	if resultados.visible:
+		_resultado_t += get_process_delta_time()
+		if _resultado_t >= corrida.RESULTADO_PASSO:
+			_resultado_t = 0.0
+			resultados.linhas_de(corrida.chegados())
 
 
 ## Continue (Enter, Start ou A): NOSSO até ter as páginas seguintes do jogo
