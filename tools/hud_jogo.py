@@ -156,8 +156,10 @@ def main():
     chaves = set(re.findall(rb'mText="([^"]*)"', lay or b""))
     # mensagens da corrida (chaves que o exe passa pelos ids de texto:
     # largada 0x4796c0, voltas e avisos 0x47bb58; menu/hud_jogo.gd TEXTOS_CORRIDA)
+    # e os nomes dos truques do Score
     chaves |= {b"Get_Ready", b"Go_", b"GET_ON_THE_GAS", b"Lap_Complete", b"Final_Lap", b"Race_Complete",
-               b"Too_Fast_For_Respot", b"WRONG_WAY", b"Off_Track_Go_Back", b"MISSED_CHECKPOINT", b"Rolling_Start"}
+               b"Too_Fast_For_Respot", b"WRONG_WAY", b"Off_Track_Go_Back", b"MISSED_CHECKPOINT", b"Rolling_Start",
+               b"Slide", b"AirTime"}       # nomes dos truques (0x1b5d08; pista/truques.gd)
     info["textos"] = {}
     for lingua, arq in (("en", "15205_en.txt"), ("pt", "15212_pt.txt")):
         t = {}

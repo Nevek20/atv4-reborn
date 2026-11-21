@@ -68,7 +68,7 @@ menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla
                      hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
-                     reposicao.gd (reposição automática do jogo, R na corrida)
+                     reposicao.gd (reposição automática do jogo, R na corrida), truques.gd (Score: Slide e AirTime)
 som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
@@ -357,6 +357,14 @@ HUD (menu/hud_jogo.gd)
   o aviso e aponta 10 m à frente do último progresso aceito, no plano da
   câmera (0.2 da direção e 0.1 do alfa por quadro de 50 Hz). Modelo sem
   textura: cor do vértice direto (byte / 255), não o x2 dos com textura.
+- Score (pista/truques.gd, HUD passo_truques): porta do gerente de truques
+  (corredor+0x15c). Buggy/truck só têm Slide (estados 4 e 5, esquerda e
+  direita contam separado) e AirTime (6), do data/tricks.xml. Pontos =
+  taxa crescendo (Accel) x tempo, truncados; banca combo x truques
+  diferentes 0.5 + 0.75 s depois de parar; chegada com combo aberto perde.
+  Troca direta de truque não zera os pontos (0x522550): o jogo é assim,
+  não "consertar". Batida do casco (car.contatos) segura o começo e zera o
+  tempo no ar. Holeshot não existe no RX01 (sem cHoleshotBox).
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

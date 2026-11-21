@@ -44,6 +44,7 @@ const GET_READY := 2.25
 const DESCIDA := 5.0
 const DESCIDA_ALTURA := 5.0
 const AVANCO_MIN := 60          # dos 75 links
+const Truques := preload("res://pista/truques.gd")
 const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
 enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
@@ -71,6 +72,7 @@ var _cp_lado := Vector3.ZERO
 var _cp_meia := Vector3.ZERO
 var hud: Label
 var ia                          # rivais (pista/ia.gd)
+var truques                     # Score do jogador (pista/truques.gd)
 var t_fim := 0.0                # tempo total do jogador na chegada
 var t_desce := 0.0              # descida da câmera que falta (s)
 var caixas: Array = []          # cInstantRespotBox: [inversa da caixa, meia caixa]
@@ -220,6 +222,7 @@ func comecar() -> void:
 	_lado_ant = _lado(main.car.global_position)
 	main.car.test_input = null
 	main.car.largada_presa = true
+	truques = Truques.new(Truques.grupo_do(main.car))
 	hud.visible = true
 	if ia and RIVAIS:
 		ia.criar()
@@ -253,6 +256,7 @@ func camera_descida(cam: Camera3D, car: Node3D) -> void:
 
 func parar() -> void:
 	estado = LIVRE
+	truques = null
 	hud.visible = false
 	if ia:
 		ia.limpar()
@@ -339,6 +343,8 @@ func _physics_process(dt: float) -> void:
 		if t_conta <= 0.0:
 			estado = CORRENDO
 			car.largada_presa = false
+			if truques:
+				truques.ligado = true   # 0x523a20: os truques contam desde a largada
 			if ia:
 				ia.soltar()
 		return
@@ -348,6 +354,8 @@ func _physics_process(dt: float) -> void:
 		return
 	t += dt
 	_caixas()
+	if truques:
+		truques.passo(dt, car)
 	var p: Vector3 = car.global_position
 	if ia and not ia.rivais.is_empty() and ia.vigia_jogador:
 		var k := int(floor(float(ia.vigia_jogador.aceito) / float(ia.comp)))
@@ -396,6 +404,8 @@ func _passou_linha() -> void:
 		estado = CHEGOU
 		t_conta = 0.0
 		t_fim = t
+		if truques:
+			truques.parar()         # 0x1596d8: na chegada o combo aberto se perde
 		# solta tudo: o carro para sozinho (segurar o freio parado engata a ré)
 		main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 		return

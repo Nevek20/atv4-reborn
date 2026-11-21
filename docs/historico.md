@@ -2298,6 +2298,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   "parachoques" e "ponto_parachoque"); suja como a carroceria (_camada.obj).
   "Tudo no máximo" não mexe em aro e para-choque (aparência, NOSSO; antes
   punha o Aro 8). Lâmpadas do para-choque no farol (H): ver Farol.
+- Score: os rivais ainda sem gerente de truques (o HUD só mostra o do
+  jogador); Holeshot (cHoleshotBox) quando tiver pista que tenha; recordes
+  do combo (+0x19c..) quando tiver tela de resultado.
 
 ## HUD do jogo (nov/2026)
 
@@ -2441,7 +2444,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     posto a cada quadro). ERROR_MESSAGE pelo estado do progresso: 1 "Wrong
     Way", 2 "Off Track, Go Back!", 3 "Missed Checkpoint", com " - %d" da
     contagem (o reposicao.gd já montava igual). "Too Fast For Respot" vai
-    no START_ERROR. NETWORK_MESSAGE (online) e as de truque não entram.
+    no START_ERROR. NETWORK_MESSAGE (online) não entra; as de truque
+    estão no Score, logo abaixo.
   - Bandeiras (0x47e560): branca quando a volta muda e é a última; a
     quadriculada uma vez por corrida quando falta < 100 m (distância da
     corrida - andada); as 2 ficam 3 s inteiras e somem em 1 s. Animação
@@ -2473,6 +2477,63 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     O vão entre a ponta e o bloco de trás é do modelo. Sem luz, sem
     descartar face. Na circuit o 0x47ec40 zera a seta (0x490dc0) na
     largada.
+- Score (nov/2026, pedido do Matheus: "nenhum dos três, e sim o Score!"),
+  pista/truques.gd + hud_jogo passo_truques, tudo do exe:
+  - Gerente de truques por corredor (corredor+0x15c, passo 0x522c18 por
+    quadro). Total em +4 (o SCORE do HUD, até 9999999). Os 4 rodas (classes
+    2 buggy e 3 truck, vtables 0x5fa2d8/0x5fa298) só têm os GroundTricks do
+    Setup/TRICKS.xml (data/tricks.xml): Slide e AirTime, Score 500, Accel
+    0.25, Max 99999 nos dois grupos. O enum de nomes (RAM 0x7f64a8) põe
+    Slide nos estados 4 E 5 e AirTime no 6.
+  - Estado (0x524980): sem roda no chão (corpo+0x8a8) é 6 com o tempo no ar
+    (corpo+0x3d0) >= 0.4 s, senão 9; no chão, |derrapagem 0x6c0| >= 17° (>
+    89° vale 0) e |v| (0xe0) >= 10 m/s: 4 (derrapagem < 0) ou 5; senão 8.
+    O 0x3d0 zera com batida do casco (0x215248), que também conta o
+    corpo+0x5a4 (contatos no quadro; o carro guarda em car.contatos).
+  - Truque (0x5220d8, tabela de casos 0x5f9630): começa saindo do 8 sem
+    batida e com a velocidade no plano do chão (0x440) >= 2.2347 m/s
+    (tempo = dt, taxa = Score, pontos 0: igual à RAM do seta.p2s no 1º
+    quadro); no mesmo estado soma taxa += taxa x Accel x dt e pontos +=
+    taxa x dt (cresce 0.5% por quadro); passou 0.2 s, aparece (0x5234f8,
+    abre o combo) e fecha (0x5230b0) com int(pontos) (o 0x7801e8 trunca).
+    Troca direta (4 <-> 5 <-> 6) fecha o anterior e começa o novo com tempo
+    0.1 e SEM zerar os pontos (0x522550, o novo herda): portado igual. 51
+    quadros com batida no mesmo truque encerram. No ar curto (9) nada
+    muda: pulinho no meio da derrapagem não corta (o giro 0x521828 só anda
+    nos ATVs, 0x521d98).
+  - Combo: fechou um truque -> fase 1 (espera pousar) -> fase 2; no chão,
+    passada a folga de 0.5 s do fim do truque, 0.75 s com 3+ rodas no chão
+    (ou 5 s com menos) sem truque andando -> banca (0x523718): total +=
+    combo x truques diferentes (esquerda e direita contam separado:
+    "Slide left then right for a combo", TRAINING_TEXT_HEAVY_5). No ar
+    0.75 s zera os relógios. Conferido: seta.p2s tem total 6512 = último
+    banco 3256 x 2 (RAM +0x3d0/+0x3d4, tipo 4); andando_em_linha_reta 5391.
+  - Chegada (0x1596d8 -> 0x523ff0 -> 0x523570): o combo aberto se perde
+    (com o truque que estava aparecendo) e mostra vermelho. Na batida ou
+    capotando os 4 rodas não perdem (vtable +0x1c dá 0).
+  - HUD (0x47cf00): o evento (+0x338, lido e apagado no 0x524038) tem
+    nome, pontos, multiplicador e tipo (0 ao vivo, 2 fechou, 3 perdeu, 4
+    bancou). Bancou/perdeu mostram combo x multiplicador sozinho. O nome
+    (text/15205_en.txt: "Slide", "Air Time") entra na fila do TRICK_NAME
+    (substitui, 2 s; perdeu 3 s com a última cadeia) só quando muda; do
+    2º truque diferente em diante "%s + %s" com o anterior; TRICK_SCORE
+    "%u" ou "%u X%u". Cor da RAM trocada no objeto (0x4749d0): amarela
+    (0.8745, 0.8644, 0.0171) ou vermelha; com o combo aberto o relógio do
+    texto e da fila param em 1.1 s, depois some em 0.9 s (perdeu 1.9 s).
+    O TRICK_SCORE (OBJECT_TEXT do grupo TRICK_MESSAGE) aparece com a fila
+    do TRICK_NAME.
+  - Não entram no RX01: Holeshot (+1000 no combo pro 1º a entrar na
+    cHoleshotBox, 0x546d08 -> 0x523338; o evento Rallycross do RX01 não
+    tem a caixa, outras pistas têm), multiplicador por posição
+    (RaceStuntMultipliers, só no tipo de evento 0xc; o RX01 é 0) e os
+    recordes (+0x19c..). Só o jogador tem gerente aqui (o HUD só mostra o
+    dele).
+  - Diferença conhecida (física, não mexida): no jogo a batida do casco
+    zera também o tempo no ar que o motor usa (0x3d0, "mais de 1 s no
+    ar"); o car.air_time não zera. O truques.gd tem o dele.
+  - tests/teste_truques.gd: estados, 1º quadro da RAM, fórmulas, combo,
+    batida, chegada, HUD e o carro de verdade (reto sem encostar o casco,
+    caindo de 4 m = AirTime, derrapando = Slide).
 
 ## HUD básico (nov/2026, NOSSO)
 

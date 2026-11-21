@@ -97,7 +97,7 @@ const COR_FRENTE := Color8(44, 248, 44)
 # grava em hud.json "textos"; sem ela, o inglês do text/15205_en.txt)
 const TEXTOS_CORRIDA := {"Get_Ready": "Get Ready", "Go_": "Go!", "GET_ON_THE_GAS": "GET ON THE GAS!",
 	"Lap_Complete": "Lap Complete", "Final_Lap": "Final Lap", "Race_Complete": "Race Complete",
-	"Too_Fast_For_Respot": "Too Fast For Respot"}
+	"Too_Fast_For_Respot": "Too Fast For Respot", "Slide": "Slide", "AirTime": "Air Time"}
 const T_GET_READY := 2.5          # DAT_00567758 (0x479688)
 const T_GO := 4.0                 # 0x4796c0 caso 6: bandeira verde e "Go!"
 const T_BANDEIRA := 3.0           # 0x47e560: inteira 3 s, depois some em 1 s
@@ -110,6 +110,14 @@ const SETA_FRENTE := 10.0         # 0x4d4cd0: m à frente do último aceito
 const SETA_CAM_POS := Vector3(0.0, 14.2979, 20.9302)
 const SETA_CAM_DIR := Vector3(0.0, -0.6282, -0.7781)
 const QUADRO_PAL := 0.02          # as taxas do exe são por quadro de 50 Hz
+# truques (0x47cf00): nome e pontos na cor da RAM (0x83d270; perdeu 0x83d260),
+# 2 s na fila (perdeu 3 s); com o combo aberto o tempo para em 1.1 s e depois
+# some em 0.9 s (perdeu: 1.9 s)
+const COR_TRUQUE := Color(0.8745, 0.8644, 0.0171)
+const COR_PERDEU := Color(1.0, 0.0, 0.0)
+const T_TRUQUE := 2.0
+const T_PERDEU := 3.0
+const TRUQUE_SEGURA := 1.1
 
 var info := {}
 var raiz := {}
@@ -133,6 +141,7 @@ var seta_dir := Vector2(0, 1)    # direção mostrada (x = direita, y = frente d
 var seta_alvo := Vector2(0, 1)
 var seta_alfa := 0.0             # +0xf4
 var _seta_vp: SubViewport
+var _tr := {"ant": "", "cadeia": "", "dc": 0.0, "perdeu": false, "cor": COR_TRUQUE}   # +8, +0x50, +0xdc, +0xd8, +0xf0
 var _seta_no: Node3D
 var _hist := {}                  # LEAD: nome -> [[progresso, tempo], ...] (subindo)
 var acel := 0.0            # pedais suavizados 0..1
@@ -393,6 +402,8 @@ func _visivel(no: Dictionary) -> bool:
 		return _band.has(no.nome) and _band[no.nome].t >= 0.0
 	if no.tipo == "OBJECT_3DARROW":
 		return seta_alfa > 0.0 and _seta_vp != null
+	if no.tipo == "OBJECT_TEXT" and no.at.has("mVisGroup"):
+		return grupo_visivel(String(no.at.mVisGroup))
 	if no.at.has("mVisGroup") or no.tipo in NAO_PORTADOS:
 		return false               # grupos que só aparecem em hora certa e objetos ainda não portados
 	return em_corrida or not (no.nome in SO_CORRIDA)
@@ -419,7 +430,9 @@ func _desenha(no: Dictionary, pai: Rect2, a: float, passe: int) -> void:
 				var dx := desvio_rotulo(no, pai, a)
 				if dx != 0.0:
 					draw_set_transform(Vector2(dx, 0.0))
-				_texto(rotulo(no), String(at.get("mFont", "FONT_SMALL")), r, no.cor, at)
+				var txt = valores.get(no.nome, null) if not fixo else null
+				_texto(rotulo(no) if txt == null else String(txt), String(at.get("mFont", "FONT_SMALL")), r,
+					valores.get(no.nome + "#cor", no.cor), at)
 				if dx != 0.0:
 					draw_set_transform(Vector2.ZERO)
 			"OBJECT_TIMER":
@@ -448,7 +461,7 @@ func _desenha(no: Dictionary, pai: Rect2, a: float, passe: int) -> void:
 			"OBJECT_MESSAGE":
 				var f: Array = _msgs.get(no.nome, [])
 				if not f.is_empty():
-					var cor: Color = no.cor
+					var cor: Color = valores.get(no.nome + "#cor", no.cor)
 					cor.a *= alfa_mensagem(f[0])
 					_texto(String(f[0][0]), String(at.get("mFont", "FONT_SMALL")), r, cor, at)
 			"OBJECT_3DARROW":
@@ -955,6 +968,7 @@ func atualizar(dt: float, car, corrida) -> void:
 	_passo_mensagens(passo)
 	if corrida != null:
 		_eventos(passo, car, corrida)
+		passo_truques(passo, corrida.get("truques"))
 	_pintar_barras()
 	queue_redraw()
 
@@ -1061,14 +1075,31 @@ func mensagem_atual(nome: String) -> String:
 ## 0x48a3b0: só o da frente conta o tempo; acabou, sai da fila
 func _passo_mensagens(dt: float) -> void:
 	for k in _msgs.keys():
-		var f: Array = _msgs[k]
-		if f.is_empty():
-			continue
-		var e: Array = f[0]
-		if e[1] >= 0.0:
-			e[1] -= dt
-			if e[1] <= 0.0:
-				f.pop_front()
+		if k != "TRICK_NAME":       # essa anda no passo_truques
+			_passo_fila(k, dt)
+
+
+## anda a fila de um OBJECT_MESSAGE (0x48a5c8); false = vazia
+func _passo_fila(k: String, dt: float) -> bool:
+	var f: Array = _msgs.get(k, [])
+	if f.is_empty():
+		return false
+	var e: Array = f[0]
+	if e[1] >= 0.0:
+		e[1] -= dt
+		if e[1] <= 0.0:
+			f.pop_front()
+	return not f.is_empty()
+
+
+## o grupo (mVisGroup) aparece com a fila de uma mensagem dele cheia
+func grupo_visivel(g: String) -> bool:
+	for k in _msgs:
+		if not (_msgs[k] as Array).is_empty():
+			var no = _no(k)
+			if no and String(no.at.get("mVisGroup", "")) == g:
+				return true
+	return false
 
 
 ## alfa do texto da frente (0x48a5c8, fase 0x48a320 = 1 - falta / duração):
@@ -1087,6 +1118,64 @@ static func alfa_mensagem(e: Array) -> float:
 
 func _txt(k: String) -> String:
 	return String(info.get("textos", {}).get(lingua, {}).get(k, TEXTOS_CORRIDA.get(k, k)))
+
+
+# ------------------------------------------------------------------ truques
+## 0x47cf00: o Score (corredor+0x15c +4, até 9999999) e o truque da vez. tr:
+## pista/truques.gd. Evento novo (0x524038): bancou / perdeu mostram combo x
+## multiplicador sozinho; o nome (tabela de textos do jogo) entra na fila do
+## TRICK_NAME só quando muda ("%s + %s" com o anterior a partir do 2º truque
+## diferente) ou perdeu (a última cadeia, vermelha); TRICK_SCORE "%u" ou
+## "%u X%u". Com o combo aberto o relógio do texto para em 1.1 s (a fila
+## também); depois some.
+func passo_truques(dt: float, tr) -> void:
+	if tr == null:
+		valores.TOTAL_TRICK_SCORE = 0
+		if _msgs.has("TRICK_NAME"):
+			limpar_mensagem("TRICK_NAME")
+			_tr = {"ant": "", "cadeia": "", "dc": 0.0, "perdeu": false, "cor": COR_TRUQUE}
+		return
+	valores.TOTAL_TRICK_SCORE = clampi(int(tr.total), 0, 9999999)
+	var ev: Dictionary = tr.ler_evento()
+	if not ev.is_empty():
+		var tipo := int(ev.tipo)
+		var perdeu: bool = tipo == tr.PERDEU
+		var pontos := int(ev.pontos)
+		var mult := int(ev.mult)
+		if perdeu or tipo == tr.BANCOU:
+			pontos *= mult
+			mult = 1
+		var nome := _txt(String(ev.nome)) if String(ev.nome) != "" else ""
+		var txt := nome if mult < 2 else "%s + %s" % [_tr.ant, nome]
+		var novo: bool = perdeu or (nome != "" and nome != _tr.ant)
+		_tr.ant = nome
+		if novo:
+			if perdeu:
+				txt = _tr.cadeia
+			else:
+				_tr.cadeia = txt
+			mensagem("TRICK_NAME", txt, T_PERDEU if perdeu else T_TRUQUE, true)
+			_tr.dc = 0.0
+		valores.TRICK_SCORE = ("%d" % pontos) if (perdeu or mult < 2) else ("%d X%d" % [pontos, mult])
+		_tr.cor = COR_PERDEU if perdeu else COR_TRUQUE
+		_tr.perdeu = perdeu
+		if perdeu:
+			_tr.ant = ""
+			_tr.dc = 0.6
+	# alfa: inteiro até 1.1 s, some em 0.9 s (perdeu: 1.9 s)
+	var a := 1.0
+	if _tr.dc > TRUQUE_SEGURA:
+		a = 1.0 - clampf((_tr.dc - TRUQUE_SEGURA) / (1.9 if _tr.perdeu else 0.9), 0.0, 1.0)
+	var cor: Color = _tr.cor
+	cor.a = a
+	valores["TRICK_NAME#cor"] = cor
+	valores["TRICK_SCORE#cor"] = cor
+	var d := dt
+	if tr.ligado and tr.combo_ativo and _tr.dc + dt > TRUQUE_SEGURA:
+		d = 0.0                     # 0x523c48: combo aberto segura o texto
+	_tr.dc += d
+	if not _passo_fila("TRICK_NAME", d):
+		_tr = {"ant": "", "cadeia": "", "dc": 0.0, "perdeu": false, "cor": COR_TRUQUE}
 
 
 # ------------------------------------------------------------------ bandeiras

@@ -1744,3 +1744,38 @@ JSON "interativos"). tests/teste_quebra.gd.
   0x23eb88 guarda a massa em +0x78 e 1/m em +0xc0. A cerca (Mass 0) é
   parada; o 0x141640 (soma dos contatos) só age em corpo com massa, então
   quem quebra a cerca é o 0x153390.
+
+## Truques (Score)
+
+- Gerente por corredor: corredor+0x15c (criado pelo 0x5213a0 pela classe
+  do veículo, +0xc4 → +0x38: 0 ATV, 1 moto, 2 buggy 0x524a78, 3 truck
+  0x524ab8). Objeto de estado em +0x3dc: +8 rodas no chão (corpo+0x8a8),
+  +0xc.. contato por roda, vtable +0x24 = estado (0x524980 nos 4 rodas),
+  +0x2c truque do piloto (-1), +0x14 giro (0), +0x1c falhou (0).
+- Campos: +4 total, +8 parado (chegou), +0xbc estado anterior, +0x16c tempo
+  do truque, +0x170 taxa, +0x174 pontos, +0x274 quadros com batida, +0x84 +
+  4 x estado vezes no combo, +0x1f4 truques diferentes (multiplicador),
+  +0x1f8 combo, +0x1fc combo aberto, +0x200 truques no combo, +0x204 tempo
+  do combo, +0x208..+0x214 truque mostrado (nome, pontos, mostrado, novo),
+  +0x278 / +0x27c / +0x280 / +0x284 relógios do fim do combo, +0x288 folga
+  (0.5 s), +0x294 ligado, +0x338 evento novo pro HUD, +0x388 nome, +0x3d0
+  pontos, +0x3d4 multiplicador, +0x3d8 tipo (0 ao vivo, 1 truque do piloto,
+  2 fechou, 3 perdeu, 4 bancou, 5 holeshot, 6 giro), +0x3e0 fase do combo.
+- Funções: 0x522c18 passo; 0x5220d8 truques de chão (casos 0x5f9630: 0
+  nada, 1 começa 0x522378, 2 soma 0x5223d0, 4 fecha e começa 0x522550, 5
+  fecha 0x522648); 0x5234f8 mostra; 0x5230b0 fecha; 0x523e18 fim do
+  combo; 0x523718 banca (total += combo x multiplicador; x 0x4c3e48 só no
+  tipo de evento 0xc); 0x523570 perde; 0x523ff0 para (chegada 0x1596d8);
+  0x523338 holeshot (0x546d08, cHoleshotBox); 0x524038 HUD lê e apaga.
+- Tabela: 0x1a43a8 acha o grupo pelo nome da classe (DAT_007f4720); +0xc
+  GroundTricks 7 x {Score int, Max int, Accel float} pelo enum 0x7f64a8
+  (0 Wheelie, 1/2 Bicycle, 3 Endo, 4 e 5 Slide, 6 AirTime); 0x1a35d0 dá o
+  nome; 0x1b5d08 traduz pela tabela de textos.
+- Corpo: +0x5a4 contatos no quadro (0x215248 soma e zera o +0x3d0;
+  0x212988 zera no começo do passo), +0x440 velocidade no plano do chão,
+  +0xe0 |v|, +0x6c0 derrapagem (0x20da90: asin(lateral / |v| no plano) com
+  rodas no chão, 0 no ar ou abaixo de sqrt(0.1) m/s).
+- HUD 0x47cf00: formatos 0x5dd828 "%u", 0x5dd830 "%u X%u", 0x5dd820 "%s
+  + %s"; cores em RAM 0x83d270 (amarela) e 0x83d260 (vermelha); fila
+  0x48a118 (2 s / 3 s) depois de limpar (0x492608 → 0x48a358); cor no
+  objeto 0x48a138 / 0x4749d0 (troca, não multiplica).

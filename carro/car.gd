@@ -1143,8 +1143,10 @@ func _rodas_gd(dt: float, space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 func _batida_passo() -> void:
 	batida = 0.0
 	contato_som = {}
+	contatos = 0
 	var st := PhysicsServer3D.body_get_direct_state(get_rid())
 	if st:
+		contatos = st.get_contact_count()
 		var com := global_transform * center_of_mass
 		for i in st.get_contact_count():
 			var vp := _v_antes + _w_antes.cross(st.get_contact_local_position(i) - com)
@@ -1163,6 +1165,7 @@ func _batida_passo() -> void:
 				lascas.batida(p, n, _v_antes)
 	# outro carro (carro/batida_carros.gd): som com o patch Vehicle e tremida
 	if not _contato_carro.is_empty():
+		contatos += 1
 		batida = maxf(batida, _contato_carro.vn)
 		if contato_som.is_empty() or _contato_carro.vn > contato_som.vn:
 			contato_som = _contato_carro
