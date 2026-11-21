@@ -343,6 +343,14 @@ HUD (menu/hud_jogo.gd)
   só os nomes deslizam (1 s, freando, quem desce some no meio).
   teste_hud confere cada letra com a RAM (re/hud_textos.py): não "acertar"
   texto no olho. GS do PAL tem 512 de largura (x 1.25 pra 640).
+  Mensagens = fila do jogo (mQueueSize, duração, modo de alfa) disparada
+  pelos eventos do exe (hud_jogo _eventos: Get Ready 2.5 s, Go! + bandeira
+  verde 4 s, Lap Complete / Final Lap 1 s, Race Complete, avisos no
+  ERROR_MESSAGE); bandeira branca na última volta, quadriculada a 100 m,
+  3 s + 1 s sumindo. Com o HUD do jogo o label da corrida não repete isso.
+  Seta 3D = ARROW.pingu numa SubViewport com a câmera da RAM; aparece com
+  o aviso e aponta 10 m à frente do último progresso aceito, no plano da
+  câmera (0.2 da direção e 0.1 do alfa por quadro de 50 Hz).
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

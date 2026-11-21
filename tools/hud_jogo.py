@@ -154,6 +154,10 @@ def main():
     # textos do layout (mText é a chave da tabela de tradução: LEAD, BEST_LAP_S...)
     import re
     chaves = set(re.findall(rb'mText="([^"]*)"', lay or b""))
+    # mensagens da corrida (chaves que o exe passa pelos ids de texto:
+    # largada 0x4796c0, voltas e avisos 0x47bb58; menu/hud_jogo.gd TEXTOS_CORRIDA)
+    chaves |= {b"Get_Ready", b"Go_", b"GET_ON_THE_GAS", b"Lap_Complete", b"Final_Lap", b"Race_Complete",
+               b"Too_Fast_For_Respot", b"WRONG_WAY", b"Off_Track_Go_Back", b"MISSED_CHECKPOINT", b"Rolling_Start"}
     info["textos"] = {}
     for lingua, arq in (("en", "15205_en.txt"), ("pt", "15212_pt.txt")):
         t = {}
@@ -174,6 +178,16 @@ def main():
             at = dict(_re.findall(r'(\w+)="([^"]*)"', b.group(1)))
             info["minimapa"] = {k: float(v) for k, v in at.items()}
             print("[+] minimapa RX_01: %s" % info["minimapa"])
+    # seta 3D (OBJECT_3DARROW): o modelo UI_PS2/InGame/Models/ARROW.pingu (só
+    # cor de vértice, ponta em -z) desenhado numa textura pelo HUD
+    seta = ler(unpacked, arqs, "UI_PS2/InGame/Models/ARROW.pingu")
+    if seta:
+        from pingu2obj import parse, to_obj
+        tiras = parse(seta)
+        if tiras:
+            txt, nv, nf = to_obj(tiras, "seta")
+            open(os.path.join(out_dir, "seta.obj"), "w").write(txt)
+            print("[+] seta.obj: %d vértices, %d triângulos" % (nv, nf))
     json.dump(info, open(os.path.join(out_dir, "hud.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     if lay:
         open(os.path.join(PROJ, "data", "hud_circuit.xml"), "wb").write(lay.replace(b"\r\n", b"\n"))

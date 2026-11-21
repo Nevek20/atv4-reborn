@@ -2393,7 +2393,53 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   anda até terminar junto com o "Total" de baixo (32.5 px a 640x480; no PAL
   ele começa na borda do quadro e fica longe do tempo). O teste_hud confere
   a posição do PAL sem o desvio e o alinhamento com ele.
-- Faltam: bandeiras, mensagens (lap message, start) e a seta.
+- Mensagens e bandeiras (nov/2026, pedido do Matheus), tudo do exe:
+  - Fila do OBJECT_MESSAGE (0x48a160 põe, 0x48a3b0 conta, 0x48a5c8
+    desenha): mQueueSize textos, só o da frente conta o tempo (-1 = até
+    limpar), "substitui" limpa antes; fila cheia solta o mais velho. Alfa
+    pelo modo: 1/2 piscam (sen(fase x 2 ou 4 pi) + 1) / 2 (0x6891f8 é o
+    sen), 3 aparece, 4 some; 0 inteiro. O grupo aparece com a fila cheia.
+  - Ids de texto: tabela de ponteiros em 0x54d838 (id x 4) -> chave do
+    text/15205_en.txt (Get_Ready = 771).
+  - Largada (0x4796c0, componente no gerente +0xa4): "Get Ready" (-1) e
+    some em 2.5 s (DAT_00567758; o vídeo NTSC deu 2.25); nesse tempo,
+    acelerador cru < 0.5 -> "GET ON THE GAS!" 0.2 s no START_ERROR (só com
+    1 jogador humano, modo 0: RAM dos save states). No Go! (0x4796a0):
+    bandeira verde do 1º quadro + "Go!" por 4 s (vermelho como o Get Ready:
+    a cor é do START_MESSAGE; o verde do vídeo é a bandeira). Rolling_Start
+    (2 s) é da largada em movimento, não entra.
+  - Voltas (0x47bb58): ao fechar uma volta "Lap Complete" 1 s; ao entrar
+    na última "Final Lap" 1 s; chegou: "Race Complete" o tempo todo (0.1 s
+    posto a cada quadro). ERROR_MESSAGE pelo estado do progresso: 1 "Wrong
+    Way", 2 "Off Track, Go Back!", 3 "Missed Checkpoint", com " - %d" da
+    contagem (o reposicao.gd já montava igual). "Too Fast For Respot" vai
+    no START_ERROR. NETWORK_MESSAGE (online) e as de truque não entram.
+  - Bandeiras (0x47e560): branca quando a volta muda e é a última; a
+    quadriculada uma vez por corrida quando falta < 100 m (distância da
+    corrida - andada); as 2 ficam 3 s inteiras e somem em 1 s. Animação
+    (0x473a00 / 0x473dd0 / 0x473e60): mNumFrames quadros a mFPS (8 a 16),
+    com mMirror a textura vira de lado a cada volta da animação (só os UV
+    mudam). Tamanho na RAM: 63 x 63 px (o flag_01 do .bed tem 63.5 x 64 e
+    a conta do 0x472778 com os UV do sprite na RAM daria 63 x 64; origem do
+    63 não achada): o menor quadro, teste_hud confere com a RAM.
+  - O label NOSSO da corrida não mostra mais Get Ready, Go! e avisos com o
+    HUD do jogo (fica a intro e o resultado).
+  - Seta (OBJECT_3DARROW, componente 0x47eca8, classe 0x490a88..0x491118):
+    aparece com o aviso (estado do progresso != 0, o mesmo do
+    ERROR_MESSAGE) e aponta pro alvo do progresso (0x4d4cd0): o ponto da
+    rota 10 m à frente do último aceito (50 m no tipo de jogo 0xd; com
+    checkpoint perdido, o checkpoint). A direção vai pro referencial da
+    câmera do jogador no plano e anda 0.2 por quadro (+0xf0); o alfa anda
+    0.1 por quadro pro 1 ou 0 (+0xfc); aparecendo do zero ela já nasce
+    apontando (0x491078). Modelo UI_PS2/InGame/Models/ARROW.pingu (ponta
+    em -z, só cor de vértice; tools/hud_jogo.py -> assets/hud/seta.obj)
+    numa textura própria (render target "ARROW_RT"); câmera da RAM em (0,
+    14.3, 20.93) olhando (0, -0.628, -0.778), projeção x 2.0 / y 2.667:
+    aqui uma SubViewport 128 x 96 com a meia-altura 0.375, esticada no
+    quadro de 72 x 72 como no jogo. NOSSO: sem luz (só a cor do vértice,
+    sem descartar face) e a textura pura no quadro (o exe põe cor preta
+    com alfa nos vértices do quadro: o modo do GS não foi lido). Na
+    circuit o 0x47ec40 zera a seta (0x490dc0) na largada.
 
 ## HUD básico (nov/2026, NOSSO)
 

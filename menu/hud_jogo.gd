@@ -48,8 +48,30 @@ extends Control
 ## paleta. PRELOAD_BAR: não existe nos buggies (a RAM tem o quadro mas o
 ## objeto foi liberado).
 ##
-## NOSSO / ainda não portado: a conta do LEAD (diferença pro líder);
-## bandeiras, mensagens e a seta.
+## Mensagens (OBJECT_MESSAGE, fila 0x48a160 / 0x48a3b0 / 0x48a5c8): cada
+## objeto tem uma fila de mQueueSize textos com duração (-1 = até limpar); o
+## da frente aparece, com alfa pelo modo (1/2 piscam, 3 aparece, 4 some). Os
+## eventos da corrida (_eventos): largada 0x4796c0 ("Get Ready" 2.5 s, "GET ON
+## THE GAS!" se o acelerador < 0.5 nesse tempo, "Go!" + bandeira verde 4 s),
+## voltas e chegada 0x47bb58 ("Lap Complete" / "Final Lap" 1 s, "Race
+## Complete"; contramão e fora da pista no ERROR_MESSAGE), bandeiras 0x47e560
+## (branca ao entrar na última volta, quadriculada a 100 m da chegada: 3 s
+## inteiras e 1 s sumindo). Bandeira (OBJECT_SPRITE_ANIM, 0x473a00 /
+## 0x473dd0): mNumFrames quadros a mFPS; com mMirror a cada volta da animação
+## a textura vira de lado.
+##
+## Seta (OBJECT_3DARROW, 0x47eca8 / 0x491118, câmera da RAM): aparece com o
+## aviso (contramão / fora da pista) e aponta pro ponto da rota 10 m à frente
+## do último progresso aceito (0x4d4cd0), no plano, no referencial da câmera
+## do jogador. Direção anda 0.2 e alfa 0.1 por quadro de 50 Hz (+0xf0 /
+## +0xfc); aparecendo do zero ela já nasce na direção (0x491078). O modelo
+## UI_PS2/InGame/Models/ARROW.pingu é desenhado numa textura ("ARROW_RT")
+## por uma câmera em (0, 14.3, 20.93) olhando (0, -0.628, -0.778), projeção x
+## 2.0 / y 2.667 (aqui 128 x 96 com a meia-altura 0.375) esticada no quadro.
+##
+## NOSSO / ainda não portado: a conta do LEAD (diferença pro líder); a cor
+## dos vértices do quadro da seta (o exe põe preto com alfa: modo do GS não
+## lido, aqui a textura pura); seta sem luz (só a cor do vértice).
 
 const LAYOUT := "res://data/hud_circuit.xml"
 const DIR := "res://assets/hud/"
@@ -57,7 +79,7 @@ const LINHA := {"FONT_SMALL": 22.0, "FONT_MEDIUM": 30.0}   # altura da linha (px
 const ALTURA_REF := 480.0          # pixel do sprite = altura / 480
 const AGULHA_VEL := 10.0           # rad/s (0x489068)
 const PASSO := 1.0 / 75.0          # como o PASSO_HUD
-const NAO_PORTADOS := ["OBJECT_MESSAGE", "OBJECT_3DARROW", "OBJECT_PLACEMENT_MARKER", "OBJECT_SPRITE_ANIM"]
+const NAO_PORTADOS := ["OBJECT_PLACEMENT_MARKER"]
 # treino livre: só o conta-giros (NOSSO: o treino do jogo não foi lido)
 const SO_CORRIDA := ["LEFT_BORDER", "RIGHT_BORDER", "LeadPosFrm", "LapTimeFrm", "BestLapTotalFrm",
 	"TrickScoreFrm", "MINIMAP_SPRITE", "MINIMAP_CIRCUIT", "PLAYERLIST_SPRITE", "PLAYERLIST_TEXT"]
@@ -72,6 +94,23 @@ const BEST_LAP_ALINHADO := true           # "BEST LAP" termina onde o "Total" te
 # que o outro passou no mesmo ponto da pista; o exe não foi lido)
 const COR_ATRAS := Color8(248, 44, 44)
 const COR_FRENTE := Color8(44, 248, 44)
+# mensagens da corrida: chave da tabela de textos do jogo (o tools/hud_jogo.py
+# grava em hud.json "textos"; sem ela, o inglês do text/15205_en.txt)
+const TEXTOS_CORRIDA := {"Get_Ready": "Get Ready", "Go_": "Go!", "GET_ON_THE_GAS": "GET ON THE GAS!",
+	"Lap_Complete": "Lap Complete", "Final_Lap": "Final Lap", "Race_Complete": "Race Complete",
+	"Too_Fast_For_Respot": "Too Fast For Respot"}
+const T_GET_READY := 2.5          # DAT_00567758 (0x479688)
+const T_GO := 4.0                 # 0x4796c0 caso 6: bandeira verde e "Go!"
+const T_BANDEIRA := 3.0           # 0x47e560: inteira 3 s, depois some em 1 s
+const QUADRICULADA_M := 100.0     # 0x47e560: falta < 100 m pra chegada
+const T_VOLTA_MSG := 1.0          # 0x47bb58: "Lap Complete" / "Final Lap"
+# seta (construtor 0x490a88 e a câmera do render target na RAM)
+const SETA_GIRO := 0.2            # +0xf0: fração da direção nova por quadro
+const SETA_ALFA := 0.1            # +0xfc: fração do alfa por quadro
+const SETA_FRENTE := 10.0         # 0x4d4cd0: m à frente do último aceito
+const SETA_CAM_POS := Vector3(0.0, 14.2979, 20.9302)
+const SETA_CAM_DIR := Vector3(0.0, -0.6282, -0.7781)
+const QUADRO_PAL := 0.02          # as taxas do exe são por quadro de 50 Hz
 
 var info := {}
 var raiz := {}
@@ -88,6 +127,14 @@ var _anim_lista := {}            # nome -> [linha de onde sai, linha pra onde va
 var _anim_t := -1.0              # tempo da troca (s); < 0: parada
 var pontos: Array = []           # minimapa: [x do jogo, z do jogo, jogador]
 var _fonte := {}                 # fonte -> {código: [caixa na textura (px), largura (px)]}
+var _msgs := {}                  # OBJECT_MESSAGE -> fila [[texto, falta (s), duração, modo], ...]
+var _band := {}                  # OBJECT_SPRITE_ANIM -> {t, q (quadro), acc, vira, alfa}; t < 0 escondida
+var _ev := {}                    # eventos da corrida já disparados (largada, volta, quadriculada, aviso)
+var seta_dir := Vector2(0, 1)    # direção mostrada (x = direita, y = frente da câmera)
+var seta_alvo := Vector2(0, 1)
+var seta_alfa := 0.0             # +0xf4
+var _seta_vp: SubViewport
+var _seta_no: Node3D
 var _hist := {}                  # LEAD: nome -> [[progresso, tempo], ...] (subindo)
 var acel := 0.0            # pedais suavizados 0..1
 var freio := 0.0
@@ -118,6 +165,7 @@ func montar() -> bool:
 			tex[k] = load(p)
 	raiz = _ler_layout()
 	_preparar_fontes()
+	_preparar_seta()
 	_preparar_barras()
 	return not raiz.is_empty()
 
@@ -312,10 +360,17 @@ func _px(no: Dictionary) -> Vector2:
 	if no.tipo == "OBJECT_FILLBAR":
 		tnome = "hud_tpage_bar"
 	var caixa := String(at.get("mBedBox", at.get("mSpeedoBedBox", at.get("mPosBedBox", ""))))
-	if no.tipo == "OBJECT_SPRITE_ANIM" and at.has("mBedBoxStub"):
-		caixa = String(at.mBedBoxStub) + "_01"
-	if not tex.has(tnome) or caixa == "":
+	if not tex.has(tnome) or (caixa == "" and not at.has("mBedBoxStub")):
 		return Vector2.ZERO
+	if no.tipo == "OBJECT_SPRITE_ANIM" and at.has("mBedBoxStub"):
+		# RAM (as 3 bandeiras): 63 x 63 px, o menor quadro (o flag_01 do .bed
+		# tem 63.5 x 64 e a conta do 0x472778 com ele daria 63 x 64; de onde
+		# o jogo tira o 63 não foi achado)
+		var m := Vector2(INF, INF)
+		for k in int(at.get("mNumFrames", 1)):
+			var ck := _caixa(tnome, "%s_%02d" % [at.mBedBoxStub, k + 1]).size
+			m = Vector2(minf(m.x, ck.x), minf(m.y, ck.y))
+		return Vector2(int(m.x * razao), int(m.y * razao))
 	var c := _caixa(tnome, caixa).size * razao
 	return Vector2(int(c.x), int(c.y))
 
@@ -333,6 +388,12 @@ func _draw() -> void:
 
 
 func _visivel(no: Dictionary) -> bool:
+	if no.tipo == "OBJECT_MESSAGE":
+		return not _msgs.get(no.nome, []).is_empty()      # o grupo aparece com a fila cheia (0x48a5c8)
+	if no.tipo == "OBJECT_SPRITE_ANIM":
+		return _band.has(no.nome) and _band[no.nome].t >= 0.0
+	if no.tipo == "OBJECT_3DARROW":
+		return seta_alfa > 0.0 and _seta_vp != null
 	if no.at.has("mVisGroup") or no.tipo in NAO_PORTADOS:
 		return false               # grupos que só aparecem em hora certa e objetos ainda não portados
 	return em_corrida or not (no.nome in SO_CORRIDA)
@@ -385,6 +446,21 @@ func _desenha(no: Dictionary, pai: Rect2, a: float, passe: int) -> void:
 				_lista_textos(no, r)
 			"OBJECT_MINIMAP":
 				_mapa_pontos(no, r)
+			"OBJECT_MESSAGE":
+				var f: Array = _msgs.get(no.nome, [])
+				if not f.is_empty():
+					var cor: Color = no.cor
+					cor.a *= alfa_mensagem(f[0])
+					_texto(String(f[0][0]), String(at.get("mFont", "FONT_SMALL")), r, cor, at)
+			"OBJECT_3DARROW":
+				draw_texture_rect(_seta_vp.get_texture(), _tela(r), false, Color(1, 1, 1, seta_alfa))
+			"OBJECT_SPRITE_ANIM":
+				var b = _band.get(no.nome)
+				if b and tex.has(tnome):
+					var cx := _caixa(tnome, "%s_%02d" % [at.get("mBedBoxStub", "flag"), int(b.q) + 1])
+					var cor: Color = no.cor
+					cor.a *= b.alfa
+					_sprite(tex[tnome], cx, _tela(r), bool(b.vira) and String(at.get("mMirror", "0")) == "1", cor)
 	var dx := _dx
 	for f in no.filhos:
 		_dx = _dx_filho(no, f)
@@ -877,6 +953,9 @@ func atualizar(dt: float, car, corrida) -> void:
 			lista.append({"nome": NOME_JOGADOR, "jogador": true})
 			pontos.append(_jogo_xz(car.global_position) + [true])
 		animar_lista(passo)
+	_passo_mensagens(passo)
+	if corrida != null:
+		_eventos(passo, car, corrida)
 	_pintar_barras()
 	queue_redraw()
 
@@ -952,3 +1031,261 @@ func _busca(no: Dictionary, nome: String):
 		if r:
 			return r
 	return null
+
+
+# ------------------------------------------------------------------ mensagens
+## põe um texto na fila do OBJECT_MESSAGE (0x48a160): dur -1 = até limpar;
+## substitui limpa a fila antes; fila cheia (mQueueSize) solta o mais velho
+func mensagem(nome: String, txt: String, dur := -1.0, substitui := false, modo := 0) -> void:
+	var no = _no(nome)
+	if no == null:
+		return
+	var f: Array = _msgs.get(nome, [])
+	if substitui:
+		f.clear()
+	elif f.size() >= int(no.at.get("mQueueSize", 1)):
+		f.pop_front()
+	f.append([txt, dur, dur, modo])
+	_msgs[nome] = f
+
+
+func limpar_mensagem(nome: String) -> void:
+	_msgs.erase(nome)
+
+
+## o texto da frente da fila ("" = nada na tela)
+func mensagem_atual(nome: String) -> String:
+	var f: Array = _msgs.get(nome, [])
+	return String(f[0][0]) if not f.is_empty() else ""
+
+
+## 0x48a3b0: só o da frente conta o tempo; acabou, sai da fila
+func _passo_mensagens(dt: float) -> void:
+	for k in _msgs.keys():
+		var f: Array = _msgs[k]
+		if f.is_empty():
+			continue
+		var e: Array = f[0]
+		if e[1] >= 0.0:
+			e[1] -= dt
+			if e[1] <= 0.0:
+				f.pop_front()
+
+
+## alfa do texto da frente (0x48a5c8, fase 0x48a320 = 1 - falta / duração):
+## modos 1 e 2 piscam (sen(fase x 2 ou 4 pi) + 1) / 2, 3 aparece, 4 some
+static func alfa_mensagem(e: Array) -> float:
+	var fase: float = 1.0 - float(e[1]) / float(e[2]) if float(e[2]) != 0.0 else 0.0
+	match int(e[3]):
+		1, 2:
+			return (sin(fase * (2.0 if int(e[3]) == 1 else 4.0) * PI) + 1.0) * 0.5
+		3:
+			return fase
+		4:
+			return 1.0 - fase
+	return 1.0
+
+
+func _txt(k: String) -> String:
+	return String(info.get("textos", {}).get(lingua, {}).get(k, TEXTOS_CORRIDA.get(k, k)))
+
+
+# ------------------------------------------------------------------ bandeiras
+## mostra do 1º quadro (0x473d50: zera quadro e tempo; o lado do espelho fica)
+func mostrar_bandeira(nome: String) -> void:
+	var b: Dictionary = _band.get(nome, {"vira": false})
+	b.t = 0.0
+	b.q = 0
+	b.acc = 0.0
+	b.alfa = 1.0
+	_band[nome] = b
+
+
+func esconder_bandeira(nome: String) -> void:
+	if _band.has(nome):
+		_band[nome].t = -1.0
+
+
+func bandeira_visivel(nome: String) -> bool:
+	return _band.has(nome) and _band[nome].t >= 0.0
+
+
+## 0x473dd0: um quadro a cada 1/mFPS; passou do último, volta pro 1º e (com
+## mMirror) vira a textura de lado
+func _anima_bandeira(nome: String, dt: float) -> void:
+	var b: Dictionary = _band[nome]
+	var no = _no(nome)
+	var per := 1.0 / float(no.at.get("mFPS", 10.0))
+	var n := int(no.at.get("mNumFrames", 1))
+	b.acc += dt
+	while b.acc > per:
+		b.q += 1
+		if b.q >= n:
+			b.q = 0
+			b.vira = not b.vira
+		b.acc -= per
+
+
+# ------------------------------------------------------------------ eventos
+## o que o HUD da corrida do jogo dispara (corrida: pista/corrida.gd). Câmera
+## descendo / intro: zera tudo (corrida nova)
+func _eventos(dt: float, car, corrida) -> void:
+	var est: int = corrida.estado
+	if est == corrida.INTRO or (est == corrida.CONTANDO and corrida.t_desce > 0.0) or est == 0:
+		if not _ev.is_empty():
+			_ev.clear()
+			_msgs.clear()
+			seta_alfa = 0.0
+			for k in _band:
+				_band[k].t = -1.0
+		return
+	# largada (0x4796c0): caso 3/4 "Get Ready" por 2.5 s; enquanto ele está na
+	# tela, acelerador cru < 0.5 -> "GET ON THE GAS!" (0.2 s, START_ERROR)
+	if not _ev.get("pronto", false):
+		_ev.pronto = true
+		_ev.t_pronto = T_GET_READY
+		mensagem("START_MESSAGE", _txt("Get_Ready"), -1.0, true)
+	if _ev.t_pronto > 0.0:
+		_ev.t_pronto -= dt
+		if _ev.t_pronto <= 0.0:
+			limpar_mensagem("START_MESSAGE")
+		if est == corrida.CONTANDO and car != null and float(car.thr_cx) < 0.5:
+			mensagem("START_ERROR", _txt("GET_ON_THE_GAS"), 0.2)
+	if est == corrida.CONTANDO:
+		return
+	# Go! (casos 6/7): bandeira verde do 1º quadro e "Go!" por 4 s; no fim
+	# some a bandeira e limpa START_MESSAGE e START_ERROR
+	if not _ev.get("vai", false):
+		_ev.vai = true
+		_ev.t_vai = T_GO
+		_ev.t_pronto = 0.0
+		mostrar_bandeira("START_FLAG")
+		mensagem("START_MESSAGE", _txt("Go_"), -1.0, true)
+	elif _ev.t_vai > 0.0:
+		_anima_bandeira("START_FLAG", dt)
+		_ev.t_vai -= dt
+		if _ev.t_vai <= 0.0:
+			esconder_bandeira("START_FLAG")
+			limpar_mensagem("START_MESSAGE")
+			limpar_mensagem("START_ERROR")
+	# voltas (0x47bb58): ao fechar uma volta, "Lap Complete" 1 s; ao entrar na
+	# última, "Final Lap" 1 s e a bandeira branca (0x47e560); chegou: "Race
+	# Complete" o tempo todo
+	var v: int = corrida.volta
+	var va: int = _ev.get("volta", v)
+	if est == corrida.CORRENDO and v > va and va >= 1:
+		if v == corrida.voltas:
+			mensagem("LAP_MESSAGE", _txt("Final_Lap"), T_VOLTA_MSG)
+			mostrar_bandeira("WHITE_FLAG")
+		else:
+			mensagem("LAP_MESSAGE", _txt("Lap_Complete"), T_VOLTA_MSG)
+	_ev.volta = v
+	if est == corrida.CHEGOU:
+		mensagem("LAP_MESSAGE", _txt("Race_Complete"), 0.1, true)
+	# quadriculada: na última volta, faltando < 100 m (distância da corrida -
+	# a andada; aqui o progresso da IA: a chegada é voltas x volta da linha)
+	var ia = corrida.ia
+	if est == corrida.CORRENDO and v == corrida.voltas and not _ev.get("quadriculada", false) \
+			and ia != null and ia.jogador != null and float(ia.comp) > 0.0:
+		if corrida.voltas * float(ia.comp) - float(ia.jogador.prog) < QUADRICULADA_M:
+			_ev.quadriculada = true
+			mostrar_bandeira("CHECK_FLAG")
+	for nome in ["WHITE_FLAG", "CHECK_FLAG"]:
+		if not bandeira_visivel(nome):
+			continue
+		var b: Dictionary = _band[nome]
+		if b.t > T_BANDEIRA:
+			if b.t - T_BANDEIRA < 1.0:
+				b.alfa = 1.0 - (b.t - T_BANDEIRA)
+			else:
+				b.t = -1.0
+				continue
+		b.t += dt
+		_anima_bandeira(nome, dt)
+	# avisos (0x47bb58, ERROR_MESSAGE): contramão / fora da pista com a
+	# contagem (pista/reposicao.gd texto(): "Off Track, Go Back! - 3"); troca
+	# = limpa e põe de novo. Botão de reposição rápido demais: START_ERROR
+	var aviso := ""
+	if est == corrida.CORRENDO and ia != null and ia.get("vigia_jogador") != null:
+		aviso = ia.vigia_jogador.texto()
+	if aviso != String(_ev.get("aviso", "")):
+		limpar_mensagem("ERROR_MESSAGE")
+		if aviso != "":
+			mensagem("ERROR_MESSAGE", aviso, -1.0)
+		_ev.aviso = aviso
+	if est == corrida.CORRENDO and float(corrida.t_rapido) > 0.0:
+		mensagem("START_ERROR", _txt("Too_Fast_For_Respot"), 0.2)
+	# seta (0x47eca8): com aviso, aponta pro ponto da rota 10 m à frente do
+	# último progresso aceito; sem aviso, alfa vai pra 0
+	var alvo = null
+	if aviso != "" and ia.has_method("ponto"):
+		alvo = ia.ponto(float(ia.vigia_jogador.aceito) + float(ia.s_linha) + SETA_FRENTE)
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	passo_seta(dt, alvo, cam.global_transform if cam else Transform3D())
+
+
+# ------------------------------------------------------------------ seta
+## a cena da seta numa textura própria (o render target do jogo). Sem o
+## assets/hud/seta.obj (tools/hud_jogo.py antigo) a seta não aparece
+func _preparar_seta() -> void:
+	var p := DIR + "seta.obj"
+	if not ResourceLoader.exists(p):
+		return
+	_seta_vp = SubViewport.new()
+	_seta_vp.size = Vector2i(128, 96)
+	_seta_vp.transparent_bg = true
+	_seta_vp.own_world_3d = true
+	_seta_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(_seta_vp)
+	var cam := Camera3D.new()
+	cam.keep_aspect = Camera3D.KEEP_HEIGHT
+	cam.fov = rad_to_deg(2.0 * atan(0.375))   # y 2.667 (RAM); a 128 x 96 o x dá 2.0
+	cam.near = 0.5
+	cam.far = 1000.0
+	cam.transform = Transform3D(Basis.looking_at(SETA_CAM_DIR, Vector3.UP), SETA_CAM_POS)
+	_seta_vp.add_child(cam)
+	_seta_no = Node3D.new()
+	_seta_vp.add_child(_seta_no)
+	var mi := MeshInstance3D.new()
+	mi.mesh = load(p)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.vertex_color_use_as_albedo = true
+	m.vertex_color_is_srgb = true
+	var k := 255.0 / 128.0                    # cor do vértice: 0x80 = 1 (pingu2obj COR_K)
+	m.albedo_color = Color(k, k, k)
+	# os modelos do jogo têm tira com giro trocado (o _acertar_giro dos
+	# carros): sem descartar face, como o PS2 desenha o HUD
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mi.material_override = m
+	_seta_no.add_child(mi)
+
+
+## um passo da seta (0x491118): alvo (mundo) ou null; a direção vai pro
+## referencial da câmera no plano (x = direita da tela, y = frente) e anda
+## SETA_GIRO por quadro de 50 Hz; o alfa anda SETA_ALFA pro 1 (com alvo) ou
+## 0. Aparecendo do zero (alfa < 0.01) a direção nasce certa (0x491078)
+func passo_seta(dt: float, alvo, cam: Transform3D) -> void:
+	var quadros := dt / QUADRO_PAL
+	if alvo != null:
+		var d: Vector3 = (alvo as Vector3) - cam.origin
+		var direita := Vector3(cam.basis.x.x, 0.0, cam.basis.x.z).normalized()
+		var frente := Vector3(-cam.basis.z.x, 0.0, -cam.basis.z.z).normalized()
+		var l := Vector2(d.dot(direita), d.dot(frente))
+		if l.length() > 1e-3:
+			seta_alvo = l.normalized()
+			if seta_alfa < 0.01:
+				seta_dir = seta_alvo
+	var f := 1.0 - pow(1.0 - SETA_GIRO, quadros)
+	var nd := seta_dir.lerp(seta_alvo, f)
+	seta_dir = nd.normalized() if nd.length() > 1e-6 else seta_alvo
+	var meta := 1.0 if alvo != null else 0.0
+	var fa := 1.0 - pow(1.0 - SETA_ALFA, quadros)
+	seta_alfa = lerpf(seta_alfa, meta, fa)
+	if absf(seta_alfa - meta) <= 0.01:
+		seta_alfa = meta
+	if _seta_no:
+		# ponta do modelo em -z; a câmera da textura olha pra -z: frente = -z
+		var dir3 := Vector3(seta_dir.x, 0.0, -seta_dir.y)
+		_seta_no.basis = Basis.looking_at(dir3, Vector3.UP)
+		_seta_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if seta_alfa > 0.0 else SubViewport.UPDATE_DISABLED

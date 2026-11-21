@@ -425,9 +425,10 @@ func _process(dt: float) -> void:
 		INTRO:
 			hud.text = "Enter / A: pular"
 		CONTANDO:
-			hud.text = "Get Ready" if t_desce <= 0.0 and t_conta > CONTAGEM - GET_READY else ""
+			# com o HUD do jogo, "Get Ready" e "Go!" são as mensagens dele
+			hud.text = "Get Ready" if t_desce <= 0.0 and t_conta > CONTAGEM - GET_READY and not main.hud_jogo else ""
 		CORRENDO:
-			if t < 1.0:
+			if t < 1.0 and not main.hud_jogo:
 				hud.text = "Go!"
 				return
 			var txt := "Volta %d/%d   %s" % [maxi(volta, 1), voltas, relogio(t)]
@@ -442,6 +443,7 @@ func _process(dt: float) -> void:
 				aviso = "Too Fast For Respot"
 			if main.hud_jogo:
 				txt = ""                 # posição, volta e tempos: o HUD do jogo (menu/hud_jogo.gd)
+				aviso = ""               # avisos: ERROR_MESSAGE / START_ERROR do HUD do jogo
 			if aviso != "":
 				txt = aviso + ("\n" + txt if txt != "" else "")
 				_cor_hud(Color(0.9, 0.1, 0.1))

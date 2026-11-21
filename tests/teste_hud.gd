@@ -16,11 +16,14 @@ extends SceneTree
 ##    nomes) nos vértices da RAM (tests/ref_hud_textos.json, re/hud_textos.py),
 ##    0.75 px; células do tempo ("--:--:--", sinal só negativo) e a troca da
 ##    lista (0x48af80: 1 s freando, quem desce some no meio)
+## 7) mensagens e bandeiras (0x48a160, 0x4796c0, 0x47bb58, 0x47e560) com uma
+##    corrida de mentira: Get Ready 2.5 s + GET ON THE GAS!, Go! com a bandeira
+##    verde 4 s, Lap Complete / Final Lap 1 s, bandeira branca 3 s + 1 s
+##    sumindo, quadriculada a < 100 m, Race Complete, aviso de contramão
 ## Uso: godot --headless --path . -s res://tests/teste_hud.gd
 
 var falhas := 0
-# bandeiras (OBJECT_SPRITE_ANIM) ainda não portadas: o 1º quadro dá 1 px a mais
-const AINDA_NAO := ["START_FLAG", "WHITE_FLAG", "CHECK_FLAG"]
+const AINDA_NAO := []
 
 
 func _falha(t: String) -> void:
@@ -188,6 +191,7 @@ func _initialize() -> void:
 		_falha("a lista não terminou a troca")
 	h.lista = []
 	h._lista_mostrada = []
+	_mensagens(h)
 	# 2) tela larga
 	h.size = Vector2(1916, 741)
 	r = h.retangulos()
@@ -233,6 +237,150 @@ func _initialize() -> void:
 	quit()
 
 
+## 7) fila, alfa e os eventos da corrida
+func _mensagens(h) -> void:
+	h.mensagem("LAP_MESSAGE", "a", 1.0)
+	h.mensagem("LAP_MESSAGE", "b", 1.0)
+	h._passo_mensagens(0.6)
+	var m1: String = h.mensagem_atual("LAP_MESSAGE")
+	h._passo_mensagens(0.5)
+	var m2: String = h.mensagem_atual("LAP_MESSAGE")
+	h.mensagem("START_ERROR", "x", 0.2)
+	h.mensagem("START_ERROR", "y", 0.2)          # mQueueSize 1: o novo empurra o velho
+	var fila_err: int = h._msgs.START_ERROR.size()
+	print("  fila: %s -> %s depois de 1.1 s; START_ERROR (fila 1) com %d; alfa modo 4 na metade %.2f, modo 1 em 1/4 %.2f" % [
+		m1, m2, fila_err, h.alfa_mensagem(["", 0.5, 1.0, 4]), h.alfa_mensagem(["", 0.75, 1.0, 1])])
+	if m1 != "a" or m2 != "b" or fila_err != 1 or h.mensagem_atual("START_ERROR") != "y" \
+			or absf(h.alfa_mensagem(["", 0.5, 1.0, 4]) - 0.5) > 1e-6 or absf(h.alfa_mensagem(["", 0.75, 1.0, 1]) - 1.0) > 1e-6:
+		_falha("fila de mensagens")
+	h._msgs.clear()
+	var c := Corrida.new()
+	var car := Carro.new()
+	var passo := func(seg: float) -> void:
+		var n := int(roundf(seg / 0.02))
+		for i in n:
+			h._passo_mensagens(0.02)
+			h._eventos(0.02, car, c)
+	# câmera descendo: nada
+	c.estado = Corrida.CONTANDO
+	c.t_desce = 1.0
+	passo.call(0.1)
+	var nada: bool = h._msgs.is_empty()
+	c.t_desce = 0.0
+	car.thr_cx = 0.0
+	passo.call(0.02)
+	var r1: String = h.mensagem_atual("START_MESSAGE")
+	var gas: String = h.mensagem_atual("START_ERROR")
+	car.thr_cx = 1.0
+	passo.call(2.5)
+	var r2: String = h.mensagem_atual("START_MESSAGE")
+	var gas2: String = h.mensagem_atual("START_ERROR")
+	print("  largada: descendo %s; Get Ready '%s' + '%s' sem acelerar; depois de 2.5 s '%s', acelerando '%s'" % [
+		"vazio" if nada else "COM TEXTO", r1, gas, r2, gas2])
+	if not nada or r1 != "Get Ready" or gas != "GET ON THE GAS!" or r2 != "" or gas2 != "":
+		_falha("Get Ready")
+	c.estado = Corrida.CORRENDO
+	passo.call(0.02)
+	var go: String = h.mensagem_atual("START_MESSAGE")
+	var verde: bool = h.bandeira_visivel("START_FLAG")
+	passo.call(1.0)
+	var q: int = h._band.START_FLAG.q
+	passo.call(3.0)
+	print("  Go!: '%s', bandeira verde %s, quadro %d em 1 s (16 fps, 8 quadros: 0 e virada), some em 4 s: %s" % [
+		go, verde, q, not h.bandeira_visivel("START_FLAG") and h.mensagem_atual("START_MESSAGE") == ""])
+	if go != "Go!" or not verde or h.bandeira_visivel("START_FLAG") or h.mensagem_atual("START_MESSAGE") != "":
+		_falha("Go! e bandeira verde")
+	c.volta = 1
+	passo.call(0.02)
+	c.volta = 2
+	passo.call(0.02)
+	var lc: String = h.mensagem_atual("LAP_MESSAGE")
+	passo.call(1.0)
+	var lc2: String = h.mensagem_atual("LAP_MESSAGE")
+	c.volta = 5
+	passo.call(0.02)
+	var fl: String = h.mensagem_atual("LAP_MESSAGE")
+	var branca: bool = h.bandeira_visivel("WHITE_FLAG")
+	passo.call(3.5)
+	var alfa_b: float = h._band.WHITE_FLAG.alfa
+	passo.call(0.6)
+	print("  voltas: '%s' (some em 1 s: '%s'), '%s' + branca %s, alfa em 3.5 s %.2f, some em 4 s: %s" % [
+		lc, lc2, fl, branca, alfa_b, not h.bandeira_visivel("WHITE_FLAG")])
+	if lc != "Lap Complete" or lc2 != "" or fl != "Final Lap" or not branca or absf(alfa_b - 0.5) > 0.03 \
+			or h.bandeira_visivel("WHITE_FLAG"):
+		_falha("mensagens de volta e bandeira branca")
+	c.ia.jogador.prog = 5.0 * c.ia.comp - 150.0
+	passo.call(0.02)
+	var q1: bool = h.bandeira_visivel("CHECK_FLAG")
+	c.ia.jogador.prog = 5.0 * c.ia.comp - 99.0
+	passo.call(0.02)
+	var q2: bool = h.bandeira_visivel("CHECK_FLAG")
+	c.ia.vigia_jogador.txt = "Off Track, Go Back! - 3"
+	passo.call(0.02)
+	var av: String = h.mensagem_atual("ERROR_MESSAGE")
+	c.ia.vigia_jogador.txt = ""
+	passo.call(0.02)
+	var av2: String = h.mensagem_atual("ERROR_MESSAGE")
+	c.estado = Corrida.CHEGOU
+	passo.call(0.5)
+	var rc: String = h.mensagem_atual("LAP_MESSAGE")
+	print("  quadriculada: a 150 m %s, a 99 m %s; aviso '%s' -> '%s'; chegada '%s'" % [q1, q2, av, av2, rc])
+	if q1 or not q2 or av != "Off Track, Go Back! - 3" or av2 != "" or rc != "Race Complete":
+		_falha("quadriculada, aviso ou chegada")
+	# seta (0x491118): câmera olhando -z (direita +x); aparece do zero já
+	# apontando (alvo à direita), alfa 0.1 por quadro de 50 Hz; o alvo vai pra
+	# frente: a direção anda 0.2 por quadro; sem alvo o alfa volta a 0
+	h.seta_alfa = 0.0
+	h.passo_seta(0.02, Vector3(20, 0, 0), Transform3D())
+	var d0: Vector2 = h.seta_dir
+	var a0: float = h.seta_alfa
+	h.passo_seta(0.02, Vector3(0, 0, -20), Transform3D())
+	var d1: Vector2 = h.seta_dir
+	for i in 100:
+		h.passo_seta(0.02, Vector3(0, 0, -20), Transform3D())
+	var a1: float = h.seta_alfa
+	var d2: Vector2 = h.seta_dir
+	for i in 100:
+		h.passo_seta(0.02, null, Transform3D())
+	var esp := Vector2(0.8, 0.2).normalized()
+	print("  seta: nasce %s alfa %.2f; 1 quadro pra frente %s (esperado %s); depois %s alfa %.2f; sem aviso alfa %.2f" % [
+		d0, a0, d1, esp, d2, a1, h.seta_alfa])
+	if d0.distance_to(Vector2(1, 0)) > 1e-4 or absf(a0 - 0.1) > 1e-4 or d1.distance_to(esp) > 1e-4 \
+			or d2.distance_to(Vector2(0, 1)) > 1e-3 or a1 != 1.0 or h.seta_alfa != 0.0:
+		_falha("seta")
+
+
+class Vigia:
+	extends RefCounted
+	var txt := ""
+	func texto() -> String:
+		return txt
+
+
+class Jog:
+	extends RefCounted
+	var prog := 0.0
+
+
+class IaFalsa:
+	extends RefCounted
+	var comp := 1000.0
+	var jogador := Jog.new()
+	var vigia_jogador := Vigia.new()
+
+
+## corrida de mentira com o que o _eventos lê (pista/corrida.gd)
+class Corrida:
+	extends RefCounted
+	enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
+	var estado := 0
+	var t_desce := 0.0
+	var volta := 0
+	var voltas := 5
+	var t_rapido := 0.0
+	var ia := IaFalsa.new()
+
+
 ## carro de mentira com o que o HUD lê
 class Carro:
 	extends RefCounted
@@ -241,5 +389,6 @@ class Carro:
 	var throttle := 0.0
 	var brake_in := 0.0
 	var gear := 1
+	var thr_cx := 0.0
 	var linear_velocity := Vector3.ZERO
 	var global_transform := Transform3D()
