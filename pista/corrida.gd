@@ -546,6 +546,11 @@ func _process(dt: float) -> void:
 				_cor_hud(Color(0.9, 0.1, 0.1))
 			hud.text = txt
 		CHEGOU:
+			if main.get("resultados") != null:
+				# com a tela de resultados do jogo (menu/resultados.gd): o HUD
+				# mostra "Race Complete" e a tela vem quando todos chegarem
+				hud.text = ""
+				return
 			var txt := "CHEGADA!   %s\nmelhor volta %s" % [relogio(t_fim), relogio(melhor)]
 			if ia and not ia.rivais.is_empty():
 				var cl: Array = ia.classificacao()

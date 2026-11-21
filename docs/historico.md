@@ -2593,6 +2593,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   de quem falta projetado pelo ritmo. Continue (Enter, Start, A) volta pro
   treino livre (as páginas Records e Race Finished ainda não existem). Na
   tela larga os sprites da largura toda esticam; o resto fica no 4:3.
+- 1º teste do Matheus: "apareceu o menu antigo". Era o texto provisório de
+  chegada (CHEGADA! / Enter: correr de novo) aparecendo enquanto a tela
+  espera os rivais; com Enter a corrida recomeçava antes dela. Agora, com a
+  tela de resultados, esse texto não aparece (fica o "Race Complete" do
+  HUD). teste_corrida vai até a tela (30 s, 8 linhas) e o Continue.
 - Achado pro próximo passo: os rivais do jogo somam 10..15 mil de Score em
   2 voltas com combos pequenos (melhor combo 289..1466); o nosso teste_ia
   deu 580..2430 em 1 volta. A IA daqui derrapa/pula menos: ver.

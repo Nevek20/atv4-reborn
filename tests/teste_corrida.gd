@@ -154,11 +154,28 @@ func _physics_process(_dt: float) -> bool:
 				print("chegada: %d voltas, %s total, melhor %s, tempos %s" % [c.tempos.size(), c.relogio(c.t), c.relogio(c.melhor), c.tempos.map(func(x): return snappedf(x, 0.01))])
 				if c.tempos.size() != c.voltas:
 					_falha("%d voltas contadas (esperado %d)" % [c.tempos.size(), c.voltas])
-				fase = 3
+				fase = 5 if main.resultados else 3
 				quadros = 0
 			elif quadros > 50 * 60 * 3:
 				_falha("não chegou (volta %d, estado %d)" % [c.volta, c.estado])
 				fase = 9
+		5:
+			# tela de resultados (menu/resultados.gd): vem quando todos chegam
+			# ou 30 s depois (os rivais ficam longe: o jogador anda 300 m/s);
+			# o texto provisório de chegada não aparece junto
+			var r = main.resultados
+			if c.hud.text != "":
+				_falha("texto provisório na chegada: '%s'" % c.hud.text.left(30))
+			if not r.visible and quadros < 50 * 40:
+				return false
+			print("resultados: na tela %s depois de %.1f s, %d linhas, jogador em %s" % [r.visible, quadros / 50.0,
+				r.linhas.size(), r.linhas.filter(func(l): return l.jogador).map(func(l): return l.pos)])
+			if not r.visible or r.linhas.size() != 8 or r.linhas[0].jogador != true:
+				_falha("tela de resultados")
+			main._continuar_resultados()
+			if r.visible or c.estado != c.LIVRE:
+				_falha("Continue não voltou pro treino livre")
+			fase = 3
 		3:
 			# atalho: começa de novo e passa pela linha indo e voltando
 			c.comecar()
