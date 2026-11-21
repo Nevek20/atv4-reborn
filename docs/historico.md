@@ -1616,7 +1616,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   da câmera de corrida já calculada; a altura de saída (5 m) é NOSSA,
   estimada no quadro. Enter/A na intro vai pra descida, na descida pula
   pro Get Ready.
-- Abertura, bugs do Matheus (nov/2026):
+- Abertura, bugs do Matheus (nov/2026; FECHADO: "agora ta tudo perfeito"):
   - "Travadinha com flicadas": a câmera andava pela fração de cada trecho
     reto entre os nós, e no Catmull-Rom a velocidade pulava de 27 pra 50
     m/s e de 64 pra 24 m/s na passagem dos nós (conta em Python com os nós
