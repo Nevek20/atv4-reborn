@@ -128,6 +128,8 @@ var cam: Camera3D
 var hud: Label
 var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
 var hud_basico                           # menu/hud_basico.gd: marcha e velocidade (NOSSO, sem assets/hud)
+var resultados                           # menu/resultados.gd: tela de resultados da corrida (PostRace.fex)
+var _resultado_visto := false            # já mostrou nesta chegada
 var hud_jogo                             # menu/hud_jogo.gd: o HUD do jogo (HUD_CIRCUIT.xml)
 var hud_texto := true                    # F1: tudo -> só o HUD básico -> nada
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
@@ -208,6 +210,12 @@ func _ready() -> void:
 	else:
 		hud_jogo.free()
 		hud_jogo = null
+	resultados = preload("res://menu/resultados.gd").new()
+	if resultados.montar():
+		layer.add_child(resultados)
+	else:
+		resultados.free()
+		resultados = null
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 	_make_menu(layer)
 	oficina = preload("res://menu/oficina.gd").new(self)   # O: pintura (provisório até ter a Garagem)
@@ -424,6 +432,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				car.limpar_sujeira()        # recomeço da corrida: o jogo zera (0x223db0)
 				reset_camera()
 			KEY_ENTER, KEY_KP_ENTER:
+				if _continuar_resultados():
+					return
 				if corrida:
 					corrida.comecar()
 			KEY_BACKSPACE:
@@ -458,6 +468,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A \
 			and corrida and corrida.pode_pular():
 		corrida.comecar()
+	# Start / A na tela de resultados: Continue
+	if event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_START, JOY_BUTTON_A]:
+		_continuar_resultados()
 	# olhar livre na câmera do piloto e órbita nas de corrida: botão direito
 	# do mouse apertado
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -566,7 +579,9 @@ func _process(delta: float) -> void:
 		fps_label.text = "%d FPS" % f + _medidor(delta)
 		fps_label.add_theme_color_override("font_color",
 			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
-	var mostra_hud: bool = hud.visible and not (corrida and corrida.pode_pular())
+	_passo_resultados()
+	var mostra_hud: bool = hud.visible and not (corrida and corrida.pode_pular()) \
+		and not (resultados and resultados.visible)
 	if hud_jogo:
 		# o HUD do jogo vale em todas as câmeras, como no PS2
 		hud_jogo.visible = mostra_hud
@@ -850,3 +865,30 @@ func _passo_tremida(delta: float, j, s: Dictionary) -> void:
 	while jit_acc >= GameCamera.STEP:
 		jit_acc -= GameCamera.STEP
 		j.passo(GameCamera.STEP, s.speed, s.chao, s.batida)
+
+
+## tela de resultados: aparece quando a corrida diz que dá (todos chegaram);
+## some se a corrida recomeçar ou parar
+func _passo_resultados() -> void:
+	if resultados == null:
+		return
+	var chegou: bool = corrida != null and corrida.estado == corrida.CHEGOU
+	if not chegou:
+		_resultado_visto = false
+		if resultados.visible:
+			resultados.esconder()
+		return
+	if not _resultado_visto and corrida.resultados_prontos():
+		_resultado_visto = true
+		resultados.mostrar(corrida.classificacao_final())
+
+
+## Continue (Enter, Start ou A): NOSSO até ter as páginas seguintes do jogo
+## (cRecordsPage, cRaceFinishedPage): volta pro treino livre
+func _continuar_resultados() -> bool:
+	if resultados == null or not resultados.visible:
+		return false
+	resultados.esconder()
+	if corrida:
+		corrida.parar()
+	return true

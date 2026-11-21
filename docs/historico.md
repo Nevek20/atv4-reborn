@@ -2559,6 +2559,44 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     batida, chegada, HUD e o carro de verdade (reto sem encostar o casco,
     caindo de 4 m = AirTime, derrapando = Slide).
 
+## Tela de resultados (nov/2026)
+
+- Pedido do Matheus, com o save state placar_final.p2s e a print (corrida
+  de 2 voltas no RX01, os 8 chegaram). Na RAM o Stunt Score de cada um é o
+  total do gerente de truques (+4), sem bônus.
+- Telas do menu = arquivos .fex do UI_PS2 (binário: blocos f0 0d ab cd +
+  tamanho + tipo, pares chave/valor, chave = CRC32 sem o xor final do
+  nome; tools/fex_jogo.py). Ingame.fpj: fontes 0 FE_FontSmall, 1
+  FE_FontMedium, 2 FE_FontLarge. Os nomes dos arquivos no archive são hash:
+  PostRace.fex = other/16698, Common.fex = 16690, NewPause.fex = 16696.
+- Depois da corrida (tipo de evento 0, 0x465a38): cSRResultsPage (0x45a390,
+  LAYER_RESULTS), cRecordsPage, cRaceFinishedPage. As colunas vêm da
+  tabela 0x553070 (Player_%d_Position / Name / Total_Time / Best_Lap /
+  Stunt_Score). A tela = LAYER_RESULTS + LAYER_FAKE_HISTORY (título "Race
+  Results" na FE_FontLarge, girado, com o fundo LAYER_PAUSE_BACKGROUND:
+  degradê e quadriculados andando) + LAYER_IG_BUTTON_BAR (START Continue).
+- Conta (menu/resultados.gd), conferida com a RAM (re/resultados_ram.py ->
+  tests/ref_resultados.json; teste_resultados: 45 textos, pior 0.47 px;
+  título girado 0.09 px): rect (X, Y, W, H) em NDC y pra cima, o filho no
+  NDC do pai; texto com altura linha (30 / 35 px) x mScale, larguras e
+  kerning do HUD, mJustify 17 = centrado nos dois eixos, mFlags 16 =
+  maiúsculas, mColour1 em cima e mColour2 embaixo; mRotation do texto em
+  rad em volta do canto de cima à esquerda, a do sprite em graus em volta
+  do mHotspot; UV do sprite: V0 = baixo, V1 = cima da caixa do .bed.
+  Linha do jogador com o Player_N_Highlight. Tempo "mm:ss.cc". O botão
+  START e o "Continue" (o código do jogo põe na barra): retângulo e
+  posição da RAM. Sobrepondo com o Screenshot do .p2s: igual.
+- Rivais agora guardam as voltas (melhor volta na tela), com a mesma regra
+  do jogador.
+- NOSSO, até ler o exe / o Matheus responder: a tela aparece quando os 8
+  chegaram; passados 30 s da sua chegada aparece assim mesmo, com o tempo
+  de quem falta projetado pelo ritmo. Continue (Enter, Start, A) volta pro
+  treino livre (as páginas Records e Race Finished ainda não existem). Na
+  tela larga os sprites da largura toda esticam; o resto fica no 4:3.
+- Achado pro próximo passo: os rivais do jogo somam 10..15 mil de Score em
+  2 voltas com combos pequenos (melhor combo 289..1466); o nosso teste_ia
+  deu 580..2430 em 1 volta. A IA daqui derrapa/pula menos: ver.
+
 ## HUD básico (nov/2026, NOSSO)
 
 - Agora só quando falta o assets/hud (o HUD do jogo toma o lugar).

@@ -455,7 +455,10 @@ func criar() -> void:
 			# Score do rival: o mesmo gerente de truques do jogador (no jogo
 			# cada corredor tem o seu, corredor+0x15c; a RAM mostra os 8
 			# contando). Aparece na tela de resultados
-			"truques": Truques.new(Truques.grupo_do(c))})
+			"truques": Truques.new(Truques.grupo_do(c)),
+			# voltas do rival (tela de resultados): como as do jogador, a 1ª
+			# passagem pela linha começa a volta 1 e cada passagem fecha uma
+			"k_volta": -1, "t_volta": 0.0, "melhor": -1.0})
 	posicionar()
 
 
@@ -572,6 +575,14 @@ func _physics_process(dt: float) -> void:
 	# carro (Ultrapassar.dados_carro), feitos 1 vez e lidos por quem olha
 	for x in rivais:
 		rastrear(x.r, x.car.global_position)
+		if est == corrida.CORRENDO or est == corrida.CHEGOU:
+			var kv := int(floor(float(x.r.prog) / float(comp)))
+			if kv > int(x.k_volta) and int(x.k_volta) < corrida.voltas:
+				if int(x.k_volta) >= 0:
+					var lap: float = corrida.t - float(x.t_volta)
+					x.melhor = lap if float(x.melhor) < 0.0 else minf(float(x.melhor), lap)
+				x.k_volta = kv
+				x.t_volta = corrida.t
 	_carros_laco = _monta_carros()
 	_catchup()
 	for x in rivais:
@@ -1003,10 +1014,11 @@ func repor_em(car: Node3D, s: float) -> void:
 func classificacao() -> Array:
 	var todos: Array = [{"nome": "Você", "prog": jogador.get("prog", -INF),
 		"fim": corrida.t_fim if corrida.estado == corrida.CHEGOU else -1.0, "jogador": true,
-		"score": corrida.truques.total if corrida.truques else 0}]
+		"score": corrida.truques.total if corrida.truques else 0,
+		"melhor": corrida.melhor if corrida.melhor != INF else -1.0}]
 	for x in rivais:
 		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro, "no": x.car,
-			"score": x.truques.total})
+			"score": x.truques.total, "melhor": x.melhor})
 	todos.sort_custom(func(a, b):
 		if (a.fim >= 0.0) != (b.fim >= 0.0):
 			return a.fim >= 0.0

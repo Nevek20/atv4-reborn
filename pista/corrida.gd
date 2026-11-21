@@ -45,6 +45,10 @@ const DESCIDA := 5.0
 const DESCIDA_ALTURA := 5.0
 const AVANCO_MIN := 60          # dos 75 links
 const Truques := preload("res://pista/truques.gd")
+# tela de resultados (menu/resultados.gd): aparece quando todos chegaram.
+# NOSSO (o exe ainda não foi lido nisso): passou RESULTADO_MAX s da sua
+# chegada, mostra assim mesmo com o tempo de quem falta projetado pelo ritmo
+const RESULTADO_MAX := 30.0
 const RIVAIS := true            # 7 rivais da IA (pista/ia.gd)
 
 enum { LIVRE, INTRO, CONTANDO, CORRENDO, CHEGOU }
@@ -422,6 +426,35 @@ func _cruzou() -> void:
 	if volta > 0 and avanco < AVANCO_MIN:
 		return                  # atalho ou deu ré pela linha
 	_passou_linha()
+
+
+## a tela de resultados já pode aparecer (você chegou e os rivais também, ou
+## passou RESULTADO_MAX)
+func resultados_prontos() -> bool:
+	if estado != CHEGOU:
+		return false
+	if ia == null or ia.rivais.is_empty() or t_conta >= RESULTADO_MAX:
+		return true
+	for x in ia.rivais:
+		if float(x.r.fim) < 0.0:
+			return false
+	return true
+
+
+## classificação pra tela de resultados; quem não chegou ganha um tempo
+## projetado pelo ritmo (NOSSO)
+func classificacao_final() -> Array:
+	if ia == null or ia.rivais.is_empty():
+		return [{"nome": "Você", "jogador": true, "fim": t_fim, "melhor": melhor if melhor != INF else -1.0,
+			"score": truques.total if truques else 0}]
+	var cl: Array = ia.classificacao()
+	var total := voltas * float(ia.comp) + float(dados.get("primeira_volta", 54.8))
+	for e in cl:
+		if float(e.fim) < 0.0:
+			var feito := float(e.prog) + float(dados.get("primeira_volta", 54.8))
+			e.fim = t * total / maxf(feito, 1.0)
+	cl.sort_custom(func(a, b): return float(a.fim) < float(b.fim))
+	return cl
 
 
 ## passou pela linha: a 1ª vez começa a volta 1, depois fecha uma volta

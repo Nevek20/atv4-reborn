@@ -87,6 +87,11 @@ func _physics_process(dt: float) -> bool:
 				print("Score dos rivais: %s" % [scores])
 				if scores.max() <= 0:
 					_falha("nenhum rival fez Score")
+				# melhor volta de cada rival (tela de resultados)
+				var melhores: Array = ia.rivais.map(func(x): return snappedf(x.melhor, 0.01))
+				print("melhor volta dos rivais: %s" % [melhores])
+				if melhores.min() <= 0.0:
+					_falha("rival sem melhor volta")
 				print("jogador (IA): andou %.0f m, repostos %d, ré %d; classificação %s" % [
 					eu.r.prog, eu.repostos, eu.res, ia.classificacao().map(func(e): return e.nome)])
 				fase = 9

@@ -86,6 +86,35 @@ def ler_bed(d):
     return out
 
 
+def kerning(unpacked, arqs, cam):
+    """kerning de uma fonte (cam sem extensão): o bloco Fonts/#hash logo
+    depois do .bog dela (exe 0x2689c0, flag 0x40): cabeçalho (f32 ?, u32
+    linhas, f32 base, f32 passo, f32 ?, f32 ?, u32 0), mapa de 192 bytes
+    (caractere 0x40.. -> linha, 0xff = sem) e linhas de 0x60 bytes com um
+    nibble por 2º caractere (0x40..). Avanço = largura do glifo - (base +
+    nibble x passo); antes de '@' só a base. Unidade 1/320 = 1 pixel na
+    referência de 640. None sem o bloco"""
+    linhas = [ln.rstrip("\n").split("\t") for ln in open(os.path.join(PROJ, "data", "arquivos.tsv"), encoding="utf-8")
+              if not ln.startswith("#")]
+    bog = [l for l in linhas if l[0].lower() == (cam + ".bog").lower()]
+    if not bog:
+        return None
+    off = int(bog[0][1])
+    prox = sorted((int(l[1]), l) for l in linhas if l[0].startswith("Fonts/#") and int(l[1]) > off and l[4])
+    if not prox:
+        return None
+    d = ler(unpacked, arqs, prox[0][1][0])
+    if not d or len(d) < 0x1c + 192:
+        return None
+    _, nl, base, passo = struct.unpack_from("<fIff", d, 0)
+    mapa = list(d[0x1c:0x1c + 192])
+    tab = []
+    for r in range(nl):
+        row = d[0x1c + 192 + r * 0x60: 0x1c + 192 + (r + 1) * 0x60]
+        tab.append([(row[c // 2] >> 4) if c & 1 else (row[c // 2] & 0xF) for c in range(192)])
+    return {"base": round(base * 320.0, 3), "passo": round(passo * 320.0, 3), "mapa": mapa, "tabela": tab}
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
@@ -120,36 +149,13 @@ def main():
                                   "caixas": ler_bed(b) if b else {}}
         print("[+] %s %dx%d, %d caixas" % (nome, im.width, im.height, len(info["texturas"][nome]["caixas"])))
     os.remove(tmp)
-    # kerning das fontes: o bloco Fonts/#hash logo depois do .bog de cada uma
-    # (exe 0x2689c0, flag 0x40): cabeçalho (f32 ?, u32 linhas, f32 base, f32
-    # passo, f32 ?, f32 ?, u32 0), mapa de 192 bytes (caractere 0x40.. -> linha,
-    # 0xff = sem) e linhas de 0x60 bytes com um nibble por 2º caractere
-    # (0x40..). Avanço = largura do glifo - (base + nibble x passo); antes de
-    # '@' só a base. Unidade 1/320 = 1 pixel na referência de 640
-    linhas = [ln.rstrip("\n").split("\t") for ln in open(os.path.join(PROJ, "data", "arquivos.tsv"), encoding="utf-8")
-              if not ln.startswith("#")]
     for nome, cam in TEXTURAS.items():
         if not nome.startswith("FONT_") or nome not in info["texturas"]:
             continue
-        bog = [l for l in linhas if l[0].lower() == (cam + ".bog").lower()]
-        if not bog:
-            continue
-        off = int(bog[0][1])
-        prox = sorted((int(l[1]), l) for l in linhas if l[0].startswith("Fonts/#") and int(l[1]) > off and l[4])
-        if not prox:
-            continue
-        d = ler(unpacked, arqs, prox[0][1][0])
-        if not d or len(d) < 0x1c + 192:
-            continue
-        _, nl, base, passo = struct.unpack_from("<fIff", d, 0)
-        mapa = list(d[0x1c:0x1c + 192])
-        tab = []
-        for r in range(nl):
-            row = d[0x1c + 192 + r * 0x60: 0x1c + 192 + (r + 1) * 0x60]
-            tab.append([(row[c // 2] >> 4) if c & 1 else (row[c // 2] & 0xF) for c in range(192)])
-        info["texturas"][nome]["kern"] = {"base": round(base * 320.0, 3), "passo": round(passo * 320.0, 3),
-                                         "mapa": mapa, "tabela": tab}
-        print("[+] kerning %s: base %.2f px, passo %.2f px, %d linhas" % (nome, base * 320, passo * 320, nl))
+        k = kerning(unpacked, arqs, cam)
+        if k:
+            info["texturas"][nome]["kern"] = k
+            print("[+] kerning %s: base %.2f px, passo %.2f px, %d linhas" % (nome, k["base"], k["passo"], len(k["tabela"])))
     lay = ler(unpacked, arqs, LAYOUT)
     # textos do layout (mText é a chave da tabela de tradução: LEAD, BEST_LAP_S...)
     import re

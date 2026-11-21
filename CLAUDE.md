@@ -65,7 +65,8 @@ carro/               o carro
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa),
-                     hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud)
+                     hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud),
+                     resultados.gd (tela de resultados da corrida, PostRace.fex)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida), truques.gd (Score: Slide e AirTime)
@@ -101,7 +102,7 @@ Gerar assets no PC (fora do git; detalhes em docs/comandos.md):
 `tools/gerar_buggies.py` (carros, `--classe truck`), `tools/gerar_pintura.py`,
 `tools/fx_jogo.py` (texturas de efeito), `tools/sfx_jogo.py` (sons),
 `tools/rx01_objetos.py` (pista), `tools/piloto.py`, `tools/carro_glb.py`
-(carros extras nossos), `tools/hud_jogo.py` (HUD).
+(carros extras nossos), `tools/hud_jogo.py` (HUD), `tools/fex_jogo.py` (telas do menu).
 
 Na nuvem (Claude Code web) o `.claude/hooks/session-start.sh` instala o
 Godot 4.7.1 de Linux, Pillow e zstandard e já deixa `$GODOT` pronto. O
@@ -369,6 +370,15 @@ HUD (menu/hud_jogo.gd)
   tempo no ar. Rivais têm o deles igual (ia.gd x.truques, classificacao
   "score"). Holeshot é só de ATV e moto (o Matheus
   confirmou no jogo; o RX01 nem tem cHoleshotBox). FECHADO pelo Matheus.
+
+Tela de resultados (menu/resultados.gd)
+- Layout = os .fex do jogo (tools/fex_jogo.py -> data/fex_resultados.json:
+  PostRace LAYER_RESULTS + Common LAYER_FAKE_HISTORY e LAYER_IG_BUTTON_BAR +
+  NewPause LAYER_PAUSE_BACKGROUND). rect em NDC y pra cima, filho no NDC do
+  pai; texto centrado (mJustify 17), fonte/kerning do HUD, giro do texto em
+  rad e do sprite em graus. teste_resultados confere com a RAM do
+  placar_final.p2s (< 0.5 px): não posicionar no olho. Quando aparece e o
+  Continue: NOSSO até ler o exe.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

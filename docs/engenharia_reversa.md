@@ -1779,3 +1779,22 @@ JSON "interativos"). tests/teste_quebra.gd.
   + %s"; cores em RAM 0x83d270 (amarela) e 0x83d260 (vermelha); fila
   0x48a118 (2 s / 3 s) depois de limpar (0x492608 → 0x48a358); cor no
   objeto 0x48a138 / 0x4749d0 (troca, não multiplica).
+
+## Telas do menu (.fex) e resultados
+
+- .fex (UI_PS2): 00 00 03 00 + bloco raiz; bloco = f0 0d ab cd, tamanho
+  (depois dele), tipo (hash) e filhos ou pares (chave hash, valor). Hash =
+  CRC32 sem o xor final. Valor: 4 bytes, string (tamanho + bytes + 0 e 0xcd
+  até múltiplo de 4; múltiplo de 4 sem o 0) ou bloco; 0xbadcadde fecha
+  lista. Classes cDisplayLayer, cDisplayReferenceLayer, cDOSprite
+  (mpDSSprite U0 U1 V0 V1), cDOMovingSprite, cDOString.
+- Objeto de texto na RAM (vtable 0x588158): fonte +8, string +0xc, flags
+  +0x20 (0x40, 0x80 = maiúsculas do mFlags 16), canto de cima à esquerda
+  em NDC +0x30, escala +0x40/+0x44, cor de cima +0x50 e de baixo +0x60,
+  vértices +0x74 (0x30 por vértice: cor, st, xyz; 2 por letra, 4 girado).
+  Sprite: rect atual no objeto (o cDOMovingSprite anda nele), textura e
+  caixa por nome.
+- Pós-corrida (0x465a38, tipo de evento 0/1/6/0xf): cSRResultsPage (0x45a390,
+  vtable 0x5dbbb8, LAYER_RESULTS), cRecordsPage, cRaceFinishedPage; colunas
+  na tabela 0x553070 (id, "Player_%d_Position" / Name / Total_Time /
+  Best_Lap / Stunt_Score / Best_Combo...).
