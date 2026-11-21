@@ -20,9 +20,14 @@ extends Node
 ## Os links do arquivo vêm na ordem contrária à da corrida (a direção de cada
 ## um aponta pro de índice menor): a lista é invertida ao carregar.
 ##
-## Atalho: a volta só conta se o carro passou pelos links do traçado (anda pelo
-## link mais perto, só pros vizinhos) e avançou pelo menos AVANCO_MIN links
-## desde a última passagem.
+## Volta do jogador (nov/2026): pelo progresso ACEITO do vigia
+## (pista/reposicao.gd, o objeto de progresso do jogo) passando de múltiplos
+## da volta a partir da linha, como o checkpoint do jogo (AILink 50 + fração,
+## pela rota, não pela caixa). Até nov/2026 era cruzar a caixa de 15.8 m numa
+## pista de 24.8 m na linha: passando aberto (desviando de retardatário) a
+## volta não contava e o Matheus terminou em 1º e ficou em 5º. O aceito não
+## anda com atalho (mCheatingProgress) nem pra trás. Sem a IA (reserva): a
+## caixa e o atalho pelos links (AVANCO_MIN links desde a última passagem).
 
 const ARQ := "res://data/rx01_corrida.json"
 # largada do vídeo do speedrun (Amateur National, Hunter Valley; a intro
@@ -59,6 +64,7 @@ var tempos: Array = []
 var link := 0
 var avanco := 0
 var _lado_ant := 0.0
+var _k_volta := -1               # voltas inteiras do progresso aceito (-1 = antes da linha)
 var _cp_pos := Vector3.ZERO
 var _cp_frente := Vector3.ZERO
 var _cp_lado := Vector3.ZERO
@@ -209,6 +215,7 @@ func comecar() -> void:
 	ultima = INF
 	tempos.clear()
 	avanco = 0
+	_k_volta = -1
 	link = _mais_perto(main.car.global_position)
 	_lado_ant = _lado(main.car.global_position)
 	main.car.test_input = null
@@ -342,6 +349,12 @@ func _physics_process(dt: float) -> void:
 	t += dt
 	_caixas()
 	var p: Vector3 = car.global_position
+	if ia and not ia.rivais.is_empty() and ia.vigia_jogador:
+		var k := int(floor(float(ia.vigia_jogador.aceito) / float(ia.comp)))
+		while _k_volta < k and estado == CORRENDO:
+			_k_volta += 1
+			_passou_linha()
+		return
 	# avança pelo traçado: só pros vizinhos (não pula pra outro trecho da pista)
 	var n := links.size()
 	for _i in 3:
@@ -362,13 +375,18 @@ func _physics_process(dt: float) -> void:
 
 
 func _cruzou() -> void:
+	if volta > 0 and avanco < AVANCO_MIN:
+		return                  # atalho ou deu ré pela linha
+	_passou_linha()
+
+
+## passou pela linha: a 1ª vez começa a volta 1, depois fecha uma volta
+func _passou_linha() -> void:
 	if volta == 0:
 		volta = 1
 		t_volta = t
 		avanco = 0
 		return
-	if avanco < AVANCO_MIN:
-		return                  # atalho ou deu ré pela linha
 	ultima = t - t_volta
 	tempos.append(ultima)
 	melhor = minf(melhor, ultima)

@@ -2155,6 +2155,24 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   lado meio carro à frente 1.4 m/s (up.y 0.98); caindo em cima (1.2 m) só
   relatório: 1.4 a 5.8 m/s conforme o estado de antes, sem virar de cabeça
   pra baixo. Batida de trás empurra a 25 km/h (a correção ficou certa).
+- Volta do jogador pelo progresso (nov/2026, bug do Matheus: "terminei em
+  primeiro e fiquei em quinto", "passar retardatário te faz cair uma
+  posição"). A volta contava cruzando a CAIXA do checkpoint (15.8 m de
+  largura) e a pista na linha tem 24.8 m (link 50, ±12.4): passando aberto
+  (desviando de retardatário) a volta não contava, ele fazia uma volta a
+  mais e os rivais chegavam antes. O jogo conta pela rota (checkpoint com
+  AILink 50 + fração, mCircuitLength), não pela caixa. Agora, com a IA, a
+  volta do jogador conta quando o progresso ACEITO do vigia
+  (reposicao.gd) passa de um múltiplo da volta desde a linha: não anda com
+  atalho (mCheatingProgress) nem pra trás, e fica igual ao progresso que dá
+  a posição. A caixa + AVANCO_MIN links fica de reserva sem a IA.
+  teste_corrida cruza a linha 10 m fora do centro (com a caixa: "não
+  chegou, volta 0"). Os testes com retardatários (rival travado ou lento,
+  IA pilotando o jogador) não perdiam posição: a IA passa pelo meio da
+  linha. Isso também explica as bandeiras trocadas que ele viu: com a
+  volta atrasada, o "Final Lap" vinha com o progresso já na última volta
+  de verdade e a quadriculada (falta < 100 m) aparecia junto, por cima da
+  branca, e não no fim.
 
 ## Borrão de movimento nas rodas (nov/2026, NOSSO)
 
@@ -2436,10 +2454,15 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     numa textura própria (render target "ARROW_RT"); câmera da RAM em (0,
     14.3, 20.93) olhando (0, -0.628, -0.778), projeção x 2.0 / y 2.667:
     aqui uma SubViewport 128 x 96 com a meia-altura 0.375, esticada no
-    quadro de 72 x 72 como no jogo. NOSSO: sem luz (só a cor do vértice,
-    sem descartar face) e a textura pura no quadro (o exe põe cor preta
-    com alfa nos vértices do quadro: o modo do GS não foi lido). Na
-    circuit o 0x47ec40 zera a seta (0x490dc0) na largada.
+    quadro de 72 x 72 como no jogo. Conferida com o save state seta.p2s do
+    Matheus (Off Track, Go Back! - 2): direção (-0.64, -0.77) aponta pra
+    baixo e pra esquerda (alvo atrás à esquerda), igual ao nosso desenho;
+    o quadro tem cor 0x80808080 (a textura pura). O modelo não tem textura
+    e o PS2 pinta a cor do vértice direto (byte / 255, sem o x2 de quando
+    tem textura): creme 188, vermelho 190, borda quase preta, como a print.
+    O vão entre a ponta e o bloco de trás é do modelo. Sem luz, sem
+    descartar face. Na circuit o 0x47ec40 zera a seta (0x490dc0) na
+    largada.
 
 ## HUD básico (nov/2026, NOSSO)
 

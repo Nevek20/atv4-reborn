@@ -4,7 +4,8 @@ extends SceneTree
 ## por passo) por 5 voltas. Confere: introdução, carro preso na espera com
 ## acelerador e freio (o motor sobe, não anda, não engata a ré), sai pra
 ## frente no VAI, volta 0 até
-## cruzar a linha, 5 voltas contadas, chegada; e que ir e voltar pela linha
+## cruzar a linha, 5 voltas contadas (cruzando a linha 10 m fora do centro,
+## além da caixa do checkpoint), chegada; e que ir e voltar pela linha
 ## (atalho) não conta volta.
 ## Uso: godot --headless --path . -s res://tests/teste_corrida.gd
 
@@ -125,7 +126,13 @@ func _physics_process(_dt: float) -> bool:
 		2:
 			s += 6.0
 			var p := _ponto(s)
-			_por(car, p, _ponto(s + 3.0) - p)
+			# perto da linha passa 10 m pro lado do centro: fora da caixa de
+			# 15.8 m do checkpoint, dentro da pista (24.8 m): tem que contar
+			# (bug do Matheus, nov/2026: passando aberto a volta não contava)
+			var fr := _ponto(s + 3.0) - p
+			if p.distance_to(c._cp_pos) < 25.0:
+				p += Vector3(fr.z, 0.0, -fr.x).normalized() * 10.0
+			_por(car, p, fr)
 			if c.estado == c.CHEGOU:
 				print("chegada: %d voltas, %s total, melhor %s, tempos %s" % [c.tempos.size(), c.relogio(c.t), c.relogio(c.melhor), c.tempos.map(func(x): return snappedf(x, 0.01))])
 				if c.tempos.size() != c.voltas:

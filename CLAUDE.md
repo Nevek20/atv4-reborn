@@ -277,6 +277,10 @@ Pista RX01
   de evento; o #1 de 7.5 mph é da largada em movimento.
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
   depois; você larga em 8º.
+- Volta do jogador = progresso ACEITO do vigia passando de múltiplos da
+  volta (rota, como o checkpoint do jogo), não a caixa de 15.8 m da linha
+  (a pista lá tem 24.8 m: passando aberto a volta sumia). Mesma régua da
+  posição; teste_corrida cruza 10 m fora do centro.
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
   o ponto segue o Respotting do TrackSetup (chão >= 0.93, sem água, 8 m de
   folga). Volta pro último ponto conhecido na linha, não pro mais perto.
@@ -350,7 +354,8 @@ HUD (menu/hud_jogo.gd)
   3 s + 1 s sumindo. Com o HUD do jogo o label da corrida não repete isso.
   Seta 3D = ARROW.pingu numa SubViewport com a câmera da RAM; aparece com
   o aviso e aponta 10 m à frente do último progresso aceito, no plano da
-  câmera (0.2 da direção e 0.1 do alfa por quadro de 50 Hz).
+  câmera (0.2 da direção e 0.1 do alfa por quadro de 50 Hz). Modelo sem
+  textura: cor do vértice direto (byte / 255), não o x2 dos com textura.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

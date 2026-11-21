@@ -69,9 +69,8 @@ extends Control
 ## por uma câmera em (0, 14.3, 20.93) olhando (0, -0.628, -0.778), projeção x
 ## 2.0 / y 2.667 (aqui 128 x 96 com a meia-altura 0.375) esticada no quadro.
 ##
-## NOSSO / ainda não portado: a conta do LEAD (diferença pro líder); a cor
-## dos vértices do quadro da seta (o exe põe preto com alfa: modo do GS não
-## lido, aqui a textura pura); seta sem luz (só a cor do vértice).
+## NOSSO / ainda não portado: a conta do LEAD (diferença pro líder); seta
+## sem luz (só a cor do vértice, como a print do PAL no seta.p2s).
 
 const LAYOUT := "res://data/hud_circuit.xml"
 const DIR := "res://assets/hud/"
@@ -1252,8 +1251,12 @@ func _preparar_seta() -> void:
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.vertex_color_use_as_albedo = true
 	m.vertex_color_is_srgb = true
-	var k := 255.0 / 128.0                    # cor do vértice: 0x80 = 1 (pingu2obj COR_K)
-	m.albedo_color = Color(k, k, k)
+	# sem textura o PS2 pinta a cor do vértice direto (byte / 255; com
+	# textura é textura x byte / 128): o .obj guarda srgb(lin(c/128) / COR_K)
+	# (pingu2obj), então o multiplicador linear é COR_K x lin(c/255) / lin(c/128)
+	# ~ COR_K x 0.5^2.2 (print do PAL no seta.p2s: creme 188, vermelho 190)
+	var k := pow((255.0 / 128.0 + 0.055) / 1.055, 2.4) * pow(0.5, 2.2)
+	m.albedo_color = Color(k, k, k).linear_to_srgb()
 	# os modelos do jogo têm tira com giro trocado (o _acertar_giro dos
 	# carros): sem descartar face, como o PS2 desenha o HUD
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
