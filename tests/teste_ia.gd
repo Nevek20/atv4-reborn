@@ -82,6 +82,11 @@ func _physics_process(dt: float) -> bool:
 						piores += 1
 				if piores > 1:
 					_falha("%d rivais repostos demais" % piores)
+				# Score dos rivais (pista/truques.gd, um por rival como no jogo)
+				var scores: Array = ia.rivais.map(func(x): return x.truques.total)
+				print("Score dos rivais: %s" % [scores])
+				if scores.max() <= 0:
+					_falha("nenhum rival fez Score")
 				print("jogador (IA): andou %.0f m, repostos %d, ré %d; classificação %s" % [
 					eu.r.prog, eu.repostos, eu.res, ia.classificacao().map(func(e): return e.nome)])
 				fase = 9

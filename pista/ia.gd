@@ -54,6 +54,7 @@ const Reposicao := preload("res://pista/reposicao.gd")
 const SomJogo := preload("res://som/som_jogo.gd")
 const VehicleData := preload("res://carro/vehicle_data.gd")
 const Ultrapassar := preload("res://pista/ia_ultrapassar.gd")
+const Truques := preload("res://pista/truques.gd")
 const N_RIVAIS := 7
 # save state com rivais (objeto do piloto, vtable 0x5ae0d0): o alvo (+0x30)
 # fica 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s) e a direção crua
@@ -450,7 +451,11 @@ func criar() -> void:
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
 			"carro": v.name, "r": {}, "preso": 0.0,
 			"desvio": desvio_skill(float(pl.skill)), "repostos": 0, "res": 0, "lod": 0, "lat": 0.0,
-			"bonus": maxf(float(pl.skill) - 0.5, 0.0) * BONUS_SKILL, "cu": 0.0})
+			"bonus": maxf(float(pl.skill) - 0.5, 0.0) * BONUS_SKILL, "cu": 0.0,
+			# Score do rival: o mesmo gerente de truques do jogador (no jogo
+			# cada corredor tem o seu, corredor+0x15c; a RAM mostra os 8
+			# contando). Aparece na tela de resultados
+			"truques": Truques.new(Truques.grupo_do(c))})
 	posicionar()
 
 
@@ -543,6 +548,7 @@ func limpar() -> void:
 func soltar() -> void:
 	for x in rivais:
 		x.car.largada_presa = false
+		x.truques.ligado = true
 
 
 func _physics_process(dt: float) -> void:
@@ -587,6 +593,9 @@ func _physics_process(dt: float) -> void:
 			continue
 		if x.r.fim < 0.0 and x.r.prog >= corrida.voltas * comp:
 			x.r.fim = corrida.t
+			x.truques.parar()          # 0x1596d8: na chegada o combo aberto se perde
+		if x.r.fim < 0.0:
+			x.truques.passo(dt, car)
 		if x.r.fim >= 0.0:
 			car.test_input = {"thr": 0.0, "brk": 0.0, "steer": _direcao(x, car)}
 			continue
@@ -993,9 +1002,11 @@ func repor_em(car: Node3D, s: float) -> void:
 ## colocação: quem chegou (pelo tempo) e depois pela distância de corrida
 func classificacao() -> Array:
 	var todos: Array = [{"nome": "Você", "prog": jogador.get("prog", -INF),
-		"fim": corrida.t_fim if corrida.estado == corrida.CHEGOU else -1.0, "jogador": true}]
+		"fim": corrida.t_fim if corrida.estado == corrida.CHEGOU else -1.0, "jogador": true,
+		"score": corrida.truques.total if corrida.truques else 0}]
 	for x in rivais:
-		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro, "no": x.car})
+		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro, "no": x.car,
+			"score": x.truques.total})
 	todos.sort_custom(func(a, b):
 		if (a.fim >= 0.0) != (b.fim >= 0.0):
 			return a.fim >= 0.0

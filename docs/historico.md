@@ -2315,8 +2315,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   "Tudo no máximo" não mexe em aro e para-choque (aparência, NOSSO; antes
   punha o Aro 8). Lâmpadas do para-choque no farol (H): ver Farol.
 - Score (FECHADO pelo Matheus, nov/2026: "tudo perfeitamente certinho"):
-  os rivais ainda sem gerente de truques (o HUD só mostra o do
-  jogador); recordes
+  falta a tela de resultados (mostra o Score de todos; o Matheus vai mandar
+  save state dela); recordes
   do combo (+0x19c..) quando tiver tela de resultado.
 
 ## HUD do jogo (nov/2026)
@@ -2545,8 +2545,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     holeshot é só de ATV e moto, mesmo com o Prestige no XML do Buggy e
     do Truck), multiplicador por posição
     (RaceStuntMultipliers, só no tipo de evento 0xc; o RX01 é 0) e os
-    recordes (+0x19c..). Só o jogador tem gerente aqui (o HUD só mostra o
-    dele).
+    recordes (+0x19c..).
+  - Rivais (nov/2026): no jogo os 8 corredores têm gerente (lista
+    0x7f48d4, corredor+0x15c) contando igual (RAM: andando_em_linha_reta,
+    rivais com 2372..3952; tentando_ultrapassar, 324..1899). Aqui cada
+    rival tem o seu truques.gd (ia.gd x.truques): liga no Go!, passa a cada
+    passo até a chegada dele, e na chegada perde o combo aberto. A
+    classificacao() leva o "score". teste_ia (1 volta): 580..2430.
   - Diferença conhecida (física, não mexida): no jogo a batida do casco
     zera também o tempo no ar que o motor usa (0x3d0, "mais de 1 s no
     ar"); o car.air_time não zera. O truques.gd tem o dele.

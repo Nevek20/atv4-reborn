@@ -366,7 +366,8 @@ HUD (menu/hud_jogo.gd)
   diferentes 0.5 + 0.75 s depois de parar; chegada com combo aberto perde.
   Troca direta de truque não zera os pontos (0x522550): o jogo é assim,
   não "consertar". Batida do casco (car.contatos) segura o começo e zera o
-  tempo no ar. Holeshot é só de ATV e moto (o Matheus
+  tempo no ar. Rivais têm o deles igual (ia.gd x.truques, classificacao
+  "score"). Holeshot é só de ATV e moto (o Matheus
   confirmou no jogo; o RX01 nem tem cHoleshotBox). FECHADO pelo Matheus.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
