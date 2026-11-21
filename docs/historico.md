@@ -2258,6 +2258,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   IG_WHEEL_HEAVYCLASS_08 está pronta no archive (buggy e truck, 6 raios, no
   mesmo padrão dos outros) mas o catálogo não lista; entra no fim da lista.
   O Matheus testou pneus e aros no PC: "deu tudo certo".
+  Cravos no Dirt Budget (nov/2026, NOSSO, pedido do Matheus): no jogo o pneu
+  de fábrica na corrida é a TYRE_GENERIC sem cravos (textura TYRE de
+  frisos; na RAM do andando_em_linha_reta a TYRE genérica está em 68 de 72
+  pedaços e a UI_TYRE_DIRT_BUDGET não aparece); a TYRE_DIRT_BUDGET com
+  cravos (UI_TYRE_DIRT_BUDGET lateral + UI_TYRE_TREAD_DIRT_BUDGET banda,
+  1373/1747 triângulos contra 180) é a da tela de seleção. O Matheus
+  confirmou que no jogo fica sem e pediu os cravos: o gerar_buggies exporta
+  a DIRT_BUDGET no pecas.json "pneus" e o carro de fábrica usa ela
+  (carro_base DIRT_BUDGET_CRAVOS; sem ela no pecas.json, a genérica). Só
+  visual: atrito e física do DIRT_BUDGET iguais. teste_pneu confere.
   Tune & Setup FEITO (nov/2026, oficina aba Ajuste): os itens do menu do
   jogo (textos TUNE_AND_SETUP: GEARBOX, SHOCKS, GEAR RATIOS, FINAL DRIVE;
   balanço de freio não aparece pra buggy/truck, fica o 0.5 do perfil).

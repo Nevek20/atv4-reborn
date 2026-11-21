@@ -144,7 +144,8 @@ Arquivos, modelos e pintura
   DefaultConfig nessa mesma conta; trocar = salvar e remontar o carro
   (main.remontar_carro), não recarregar a física no lugar. Pneu = roda
   inteira TYRE_<pneu>_<tamanho> (pecas.json "pneus") + atrito do Override do
-  material; de fábrica é a TYRE_GENERIC (RAM), não a TYRE_DIRT_BUDGET. Aro =
+  material; de fábrica é a TYRE_GENERIC (RAM), não a TYRE_DIRT_BUDGET, mas
+  aparece a DIRT_BUDGET com cravos (NOSSO, DIRT_BUDGET_CRAVOS). Aro =
   só a textura ALLOY da roda (IG_WHEEL_HEAVYCLASS_0N; a de fábrica é a 01;
   o 8 é extra NOSSO, fora do catálogo). Tune & Setup (aba Ajuste): câmbio,
   amortecedor, marchas e final (GearRatioTuning 0..1, liberados pelo nível

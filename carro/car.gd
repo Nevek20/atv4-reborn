@@ -175,9 +175,15 @@ func _load_pecas() -> void:
 		model_path = asset_dir.path_join(pc.Body)
 	var rd: Dictionary = pecas.get("rodas", {})
 	# pneu comprado (oficina, Upgrade): a roda inteira TYRE_<pneu>_<tamanho>
-	# do jogo; de fábrica (DIRT_BUDGET) fica a TYRE_GENERIC (como na RAM)
+	# do jogo. De fábrica (DIRT_BUDGET) o jogo põe a TYRE_GENERIC (RAM: sem
+	# cravos); aqui vai a TYRE_DIRT_BUDGET com cravos, a da tela de seleção
+	# (melhoria NOSSA, DIRT_BUDGET_CRAVOS; sem ela no pecas.json, a genérica)
 	var pn: Dictionary = pecas.get("pneus", {})
 	var tire := String(pecas_escolhidas.get("Tire", ""))
+	if tire == "" and DIRT_BUDGET_CRAVOS:
+		tire = "DIRT_BUDGET"            # o de fábrica dos 48 (vehicles.xml DefaultConfig)
+	if tire == "DIRT_BUDGET" and not DIRT_BUDGET_CRAVOS:
+		tire = ""
 	if pn.has(tire):
 		rd = pn[tire]
 	if wheel_front_file == "" and rd.has("FrontWheel"):

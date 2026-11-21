@@ -191,7 +191,9 @@ def copiar(dados, dst):
 # cada um é uma roda inteira por tamanho, na pasta TYRE_<modelo>_<tamanho>
 # (o nome só existe como #crc no archive). De fábrica (DIRT_BUDGET) o jogo
 # carrega a TYRE_GENERIC_<tamanho> (conferido na RAM: bulldog, inferno,
-# phantom e storm), então o DIRT_BUDGET fica de fora daqui.
+# phantom e storm; e a textura TYRE dela, sem cravos, no andando_em_linha_reta).
+# A TYRE_DIRT_BUDGET (com cravos, a da tela de seleção) entra também: o carro
+# de fábrica usa ela como melhoria NOSSA (pedido do Matheus, nov/2026).
 def catalogo_pneus(unpacked, classe):
     """{componente: modelo da corrida} dos pneus da classe (Buggy, Truck)"""
     import xml.etree.ElementTree as ET
@@ -207,8 +209,6 @@ def pneus_da_roda(arqs, unpacked, pasta, roda):
     tam = "RALLY" if roda.lower() == "wheel_rally" else roda.upper().replace("TYRE_GENERIC_", "")
     out = {}
     for comp, modelo in catalogo_pneus(unpacked, pasta).items():
-        if comp == "DIRT_BUDGET":
-            continue
         h = "%08x" % (zlib.crc32(("%s_%s" % (modelo, tam)).lower().encode()) ^ 0xFFFFFFFF)
         r = {}
         for lado in ("FrontWheel", "RearWheel"):

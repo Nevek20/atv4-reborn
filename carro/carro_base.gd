@@ -74,6 +74,10 @@ const REAR_DRIVE := true      # tração só atrás (o XML não diz; buggy de mo
 var SURFACE_MU := 0.8          # pneu DIRT_BUDGET na terra comum do RX_01
 var SURFACE_AMORT := 0.0       # Damping da terra comum (COMMON_1)
 var pneu := "DIRT_BUDGET"      # classe do pneu (vehicles.xml DefaultConfig Tire)
+# NOSSO (pedido do Matheus, nov/2026): o pneu de fábrica DIRT_BUDGET aparece
+# com a roda TYRE_DIRT_BUDGET do jogo (cravos, a da tela de seleção); na
+# corrida o jogo põe a TYRE_GENERIC sem cravos (RAM). Só visual
+const DIRT_BUDGET_CRAVOS := true
 var mu_medio := 0.8            # 0x780: atrito médio das rodas no chão
 var amort_medio := 0.0         # 0x788: Damping médio das rodas no chão
 var TUNE_FRONT_BIAS := 0.5    # DefaultConfig/CustomTunings FrontBrakeBias

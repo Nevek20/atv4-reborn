@@ -3,7 +3,9 @@ extends SceneTree
 ## do catálogo (componentes.xml) pra buggy e truck; cada um troca a roda pelo
 ## modelo TYRE_<pneu>_<tamanho> do jogo (pecas.json "pneus", gerar_buggies) e
 ## o atrito na terra pelo Override do material (terrain.atrito). De fábrica
-## (DIRT_BUDGET) fica a TYRE_GENERIC, como na RAM. Aro (Alloy): os 7 do
+## (DIRT_BUDGET) o jogo põe a TYRE_GENERIC (RAM); aqui a TYRE_DIRT_BUDGET com
+## cravos (NOSSO, carro_base DIRT_BUDGET_CRAVOS) quando o pecas.json tem ela
+## (gerar_buggies novo). Aro (Alloy): os 7 do
 ## catálogo; troca a textura ALLOY da roda pela IG_WHEEL_HEAVYCLASS_0N.
 ## Uso: godot --headless --path . -s res://tests/teste_pneu.gd
 
@@ -39,6 +41,14 @@ func _process(_d: float) -> bool:
 	if q == 40:               # carro de fábrica assentado no chão
 		fab = _medir()
 		print("  de fábrica: %s, roda %s, atrito %s" % [fab.pneu, fab.roda.get_file(), fab.mu])
+		var pjf = JSON.parse_string(FileAccess.get_file_as_string(main.car.asset_dir.path_join("pecas.json")))
+		if pjf.get("pneus", {}).has("DIRT_BUDGET"):
+			var cravos: String = String(pjf.pneus.DIRT_BUDGET.FrontWheel).get_file()
+			print("  de fábrica com cravos (NOSSO): roda %s (a do pecas.json %s)" % [fab.roda.get_file(), cravos])
+			if not fab.roda.ends_with(cravos):
+				_falha("de fábrica devia usar a TYRE_DIRT_BUDGET com cravos")
+		else:
+			print("  (pecas.json sem DIRT_BUDGET: rode o gerar_buggies; fica a genérica)")
 		main.car.queue_free()
 		var c = main.car
 		var p: Vector3 = c.global_position
