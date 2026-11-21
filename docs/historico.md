@@ -2298,8 +2298,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   "parachoques" e "ponto_parachoque"); suja como a carroceria (_camada.obj).
   "Tudo no máximo" não mexe em aro e para-choque (aparência, NOSSO; antes
   punha o Aro 8). Lâmpadas do para-choque no farol (H): ver Farol.
-- Score: os rivais ainda sem gerente de truques (o HUD só mostra o do
-  jogador); Holeshot (cHoleshotBox) quando tiver pista que tenha; recordes
+- Score (FECHADO pelo Matheus, nov/2026: "tudo perfeitamente certinho"):
+  os rivais ainda sem gerente de truques (o HUD só mostra o do
+  jogador); recordes
   do combo (+0x19c..) quando tiver tela de resultado.
 
 ## HUD do jogo (nov/2026)
@@ -2524,7 +2525,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     do TRICK_NAME.
   - Não entram no RX01: Holeshot (+1000 no combo pro 1º a entrar na
     cHoleshotBox, 0x546d08 -> 0x523338; o evento Rallycross do RX01 não
-    tem a caixa, outras pistas têm), multiplicador por posição
+    tem a caixa, outras pistas têm; o Matheus confirmou no jogo que
+    holeshot é só de ATV e moto, mesmo com o Prestige no XML do Buggy e
+    do Truck), multiplicador por posição
     (RaceStuntMultipliers, só no tipo de evento 0xc; o RX01 é 0) e os
     recordes (+0x19c..). Só o jogador tem gerente aqui (o HUD só mostra o
     dele).
