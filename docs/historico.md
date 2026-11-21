@@ -1616,6 +1616,22 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   da câmera de corrida já calculada; a altura de saída (5 m) é NOSSA,
   estimada no quadro. Enter/A na intro vai pra descida, na descida pula
   pro Get Ready.
+- Abertura, bugs do Matheus (nov/2026):
+  - "Travadinha com flicadas": a câmera andava pela fração de cada trecho
+    reto entre os nós, e no Catmull-Rom a velocidade pulava de 27 pra 50
+    m/s e de 64 pra 24 m/s na passagem dos nós (conta em Python com os nós
+    do IntroCameras). Agora a curva é amostrada a cada 0.25 m e a câmera
+    anda pelo comprimento dela, 35 m/s constante (teste_corrida: 0.700 m
+    por passo do começo ao fim; a abertura fica 14.4 s). E a posição era a
+    do passo de 50 Hz: com a tela a 144 FPS repetia 2 ou 3 quadros e pulava;
+    agora interpola entre os passos (fração da física, como os carros).
+  - Pular a abertura agora pula a descida também (Enter/A na abertura vai
+    direto pra câmera de corrida e o Get Ready, como no speedrun que pula a
+    intro). Na descida o Enter continua pulando ela.
+  - Na abertura o carro não se ouve (Matheus: no jogo não se ouve): o
+    jogador e os rivais ficam com longe_som (motor e pneus calados) até a
+    abertura acabar. O som do jogador aqui não é posicional, por isso
+    tocava cheio com a câmera a ~130 m.
 - IA, 3ª rodada, pelo save state com rivais (corrida_no_normal, buggy
   Normal; docs/engenharia_reversa.md): os rivais andam a 123..139 km/h de
   acelerador cheio, 1.15..1.40 x o +0x24 do AIT (que NÃO é a velocidade-

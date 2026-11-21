@@ -277,7 +277,9 @@ Pista RX01
   demora. O contador por posição do 0x352c98 é da chegada, em outros tipos
   de evento; o #1 de 7.5 mph é da largada em movimento.
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
-  depois; você larga em 8º.
+  depois; você larga em 8º. Intro anda pelo comprimento da curva (35 m/s
+  constante, interpolada entre passos); pular a intro pula a descida; na
+  intro os carros ficam mudos.
 - Volta do jogador = progresso ACEITO do vigia passando de múltiplos da
   volta (rota, como o checkpoint do jogo), não a caixa de 15.8 m da linha
   (a pista lá tem 24.8 m: passando aberto a volta sumia). Mesma régua da

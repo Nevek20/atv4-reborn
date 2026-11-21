@@ -83,6 +83,8 @@ var _intro_alvo: Array = []
 var _intro_s := 0.0             # metros andados no caminho
 var _intro_comp := 0.0
 var _intro_comp_alvo := 0.0
+var _arco_cam: Array = []       # [pontos, metros acumulados] da curva (andar a 35 m/s de verdade)
+var _arco_alvo: Array = []
 
 
 ## jogo (x, y, z) -> mundo do Godot (z - 1024, y, x)
@@ -130,8 +132,10 @@ func montar(m) -> bool:
 			_intro_cam.append(mundo(q))
 		for q in dados.intro.alvo:
 			_intro_alvo.append(mundo(q))
-		_intro_comp = _comprimento(_intro_cam)
-		_intro_comp_alvo = _comprimento(_intro_alvo)
+		_arco_cam = _tabela_arco(_intro_cam)
+		_arco_alvo = _tabela_arco(_intro_alvo)
+		_intro_comp = (_arco_cam[1] as PackedFloat32Array)[-1]
+		_intro_comp_alvo = (_arco_alvo[1] as PackedFloat32Array)[-1]
 	ia = preload("res://pista/ia.gd").new()
 	ia.name = "IA"
 	add_child(ia)
@@ -162,35 +166,58 @@ func largada(n: int) -> Array:
 	return [p, atan2(d.x, d.z)]
 
 
-static func _comprimento(pts: Array) -> float:
-	var l := 0.0
-	for i in pts.size() - 1:
-		l += pts[i].distance_to(pts[i + 1])
-	return l
-
-
-## ponto a s metros num caminho Catmull-Rom pelos nós (o jogo não foi lido:
-## a curva entre os nós é NOSSA)
-static func _no_caminho(pts: Array, s: float) -> Vector3:
+## a curva pelos nós amostrada a cada ~0.25 m com os metros acumulados: a
+## câmera anda pelo comprimento da CURVA. Até nov/2026 andava pelo nó (fração
+## do trecho reto): a velocidade pulava de 27 pra 50 m/s e de 64 pra 24 m/s
+## na passagem dos nós, as "flicadas" que o Matheus viu
+static func _tabela_arco(pts: Array) -> Array:
+	var ps := PackedVector3Array()
+	var acc := PackedFloat32Array()
 	var n := pts.size()
+	var total := 0.0
 	for i in n - 1:
-		var l: float = pts[i].distance_to(pts[i + 1])
-		if s <= l or i == n - 2:
-			var f := clampf(s / maxf(l, 1e-4), 0.0, 1.0)
-			var p0: Vector3 = pts[maxi(i - 1, 0)]
-			var p3: Vector3 = pts[mini(i + 2, n - 1)]
-			return (pts[i] as Vector3).cubic_interpolate(pts[i + 1], p0, p3, f)
-		s -= l
-	return pts[n - 1]
+		var l: float = (pts[i] as Vector3).distance_to(pts[i + 1])
+		var k := maxi(ceili(l / 0.25), 1)
+		var p0: Vector3 = pts[maxi(i - 1, 0)]
+		var p3: Vector3 = pts[mini(i + 2, n - 1)]
+		for j in k:
+			var q := (pts[i] as Vector3).cubic_interpolate(pts[i + 1], p0, p3, float(j) / float(k))
+			if not ps.is_empty():
+				total += q.distance_to(ps[ps.size() - 1])
+			ps.append(q)
+			acc.append(total)
+	var fim: Vector3 = pts[n - 1]
+	total += fim.distance_to(ps[ps.size() - 1])
+	ps.append(fim)
+	acc.append(total)
+	return [ps, acc]
+
+
+## ponto a s metros (de curva) na tabela
+static func _no_arco(tab: Array, s: float) -> Vector3:
+	var ps: PackedVector3Array = tab[0]
+	var acc: PackedFloat32Array = tab[1]
+	if s <= 0.0:
+		return ps[0]
+	if s >= acc[acc.size() - 1]:
+		return ps[ps.size() - 1]
+	var i := acc.bsearch(s)
+	var a := acc[i - 1]
+	return ps[i - 1].lerp(ps[i], (s - a) / maxf(acc[i] - a, 1e-6))
 
 
 ## a câmera de introdução, se estiver nela (o main não mexe na câmera)
 func camera_intro(cam: Camera3D) -> bool:
 	if estado != INTRO or _intro_cam.is_empty():
 		return false
-	var p := _no_caminho(_intro_cam, _intro_s)
+	# o _intro_s anda no passo de 50 Hz; a tela desenha entre dois passos
+	# (como os carros interpolados): sem isso a câmera andava aos trancos
+	var vel := float(dados.intro.vel)
+	var f := Engine.get_physics_interpolation_fraction()
+	var s := maxf(_intro_s - vel * (1.0 - f) / float(Engine.physics_ticks_per_second), 0.0)
+	var p := _no_arco(_arco_cam, s)
 	# os 2 a 35 m/s: o alvo anda o mesmo tanto no caminho dele
-	var alvo := _no_caminho(_intro_alvo, _intro_s * float(dados.intro.vel_alvo) / float(dados.intro.vel))
+	var alvo := _no_arco(_arco_alvo, s * float(dados.intro.vel_alvo) / vel)
 	cam.near = 0.1
 	cam.global_position = p
 	cam.look_at(alvo, Vector3.UP)
@@ -200,7 +227,8 @@ func camera_intro(cam: Camera3D) -> bool:
 ## Enter: reinicia tudo e começa a corrida (pela introdução)
 func comecar() -> void:
 	if estado == INTRO:
-		_fim_intro()            # Enter de novo pula a introdução
+		_fim_intro()            # Enter de novo pula a introdução E a descida
+		t_desce = 0.0           # (speedrun: pulando, entra a câmera de corrida com o Get Ready)
 		return
 	if estado == CONTANDO and t_desce > 0.0:
 		t_desce = 0.0           # e de novo pula a descida da câmera
@@ -230,6 +258,7 @@ func comecar() -> void:
 
 func _fim_intro() -> void:
 	estado = CONTANDO
+	main.car.longe_som = false  # o som do carro volta (a ia.gd religa os rivais)
 	t_conta = CONTAGEM
 	t_desce = DESCIDA
 	main.reset_camera()
@@ -256,6 +285,8 @@ func camera_descida(cam: Camera3D, car: Node3D) -> void:
 
 func parar() -> void:
 	estado = LIVRE
+	if main.car:
+		main.car.longe_som = false
 	truques = null
 	hud.visible = false
 	if ia:
@@ -331,6 +362,11 @@ func _physics_process(dt: float) -> void:
 		return
 	var car = main.car
 	if estado == INTRO:
+		# na abertura o carro não se ouve (Matheus: no jogo não se ouve; a
+		# câmera está a ~130 m e o som do jogador não é posicional aqui)
+		if not car.longe_som:
+			car.calar_som()
+			car.longe_som = true
 		_intro_s += float(dados.intro.vel) * dt
 		if _intro_s >= _intro_comp:
 			_fim_intro()

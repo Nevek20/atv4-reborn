@@ -22,6 +22,10 @@ var t_intro := 0
 var rpm_max := 0.0
 var andou := 0.0
 var fase_vai := 0
+var cam_ant := Vector3.INF      # câmera da introdução no passo anterior
+var passo_min := INF            # metros por passo da câmera (35 m/s = 0.7)
+var passo_max := 0.0
+var mudo := true                # carro calado na introdução
 
 
 func _initialize() -> void:
@@ -84,6 +88,13 @@ func _physics_process(_dt: float) -> bool:
 				car.test_input = {"thr": 1.0, "brk": 1.0, "steer": 0.0}
 				if c.estado == c.INTRO:
 					t_intro += 1
+					var pc: Vector3 = c._no_arco(c._arco_cam, c._intro_s)
+					if cam_ant != Vector3.INF and c._intro_s < c._intro_comp:
+						passo_min = minf(passo_min, pc.distance_to(cam_ant))
+						passo_max = maxf(passo_max, pc.distance_to(cam_ant))
+					cam_ant = pc
+					if t_intro > 2 and not car.longe_som:
+						mudo = false
 				rpm_max = maxf(rpm_max, car.rpm)
 				if p_largada != Vector3.INF:
 					var dd: Vector3 = car.global_position - p_largada
@@ -99,6 +110,12 @@ func _physics_process(_dt: float) -> bool:
 			var vf: float = car.linear_velocity.dot(car.global_transform.basis.z)
 			print("introdução %.1f s; na espera rpm até %.0f, andou %.2f m; 2 s depois do VAI: %.1f km/h pra frente, marcha %s" % [
 				t_intro / 50.0, rpm_max, andou, vf * 3.6, car.gear_label()])
+			print("câmera da introdução: %.3f a %.3f m por passo (35 m/s = 0.700); carro calado: %s; som depois: %s" % [
+				passo_min, passo_max, mudo, not car.longe_som])
+			if passo_min < 0.68 or passo_max > 0.72:
+				_falha("câmera da introdução muda de velocidade")
+			if not mudo or car.longe_som:
+				_falha("som do carro na introdução")
 			if t_intro < 50 * 10:
 				_falha("introdução curta (%.1f s)" % (t_intro / 50.0))
 			if andou > 0.5:
@@ -148,7 +165,10 @@ func _physics_process(_dt: float) -> bool:
 			fase = 4
 		4:
 			if c.estado == c.INTRO:
-				c.comecar()             # Enter pula a introdução
+				c.comecar()             # Enter pula a introdução (e a descida)
+				print("pulou a introdução: estado %d, descida %.1f s" % [c.estado, c.t_desce])
+				if c.estado != c.CONTANDO or c.t_desce > 0.0:
+					_falha("pular a introdução tem que pular a descida")
 				return false
 			if c.estado == c.CONTANDO:
 				quadros = 0
