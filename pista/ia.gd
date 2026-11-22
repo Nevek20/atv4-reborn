@@ -426,6 +426,11 @@ func criar() -> void:
 		func(p): return p.rivalry == "POTENTIAL" and classe in p.classes)
 	pilotos.shuffle()
 	frota.shuffle()
+	# diagnóstico (docs/comandos.md): RIVAL_CARRO=nome põe os 7 no mesmo carro
+	if OS.has_environment("RIVAL_CARRO"):
+		var so: Array = frota.filter(func(v): return v.name == OS.get_environment("RIVAL_CARRO"))
+		if not so.is_empty():
+			frota = so
 	var n := mini(N_RIVAIS, mini(pilotos.size(), corrida.dados.grid.size() - 1))
 	for k in n:
 		var v: Dictionary = frota[k % frota.size()]
