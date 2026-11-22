@@ -2630,6 +2630,33 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 - Achado pro próximo passo: os rivais do jogo somam 10..15 mil de Score em
   2 voltas com combos pequenos (melhor combo 289..1466); o nosso teste_ia
   deu 580..2430 em 1 volta. A IA daqui derrapa/pula menos: ver.
+- Investigado (nov/2026, re/truques_ram.py nos 4 saves de corrida x
+  tests/medir_truques_ia.gd):
+  - Com você no meio do bolo o jogo dá 1300..2100 pontos por minuto pros
+    rivais (andando_em_linha_reta aos 108 s; tentando_ultrapassar e
+    tentando_passar_2: 360..2100); o nosso, nas mesmas condições (o jogador
+    pilotado pela IA, no bolo): 1100..3000. Bate.
+  - O placar_final é o diferente: todos fizeram mais (rivais 6800..10200
+    por minuto, você 7400; nos outros saves você fez 2900..4800). Nessa
+    corrida você abriu muita vantagem (melhor volta 42.6 s x 51..60 dos
+    rivais) e a RAM mostra o catchup ligado nos rivais (corpo+0x720 1.04..1.32,
+    subesterço +0x724 1.37..1.91, mais solto). Os combos deles são quase
+    todos de 1 truque (maior combo 347..431 em 5 dos 7, combo mais longo
+    1.72..1.86 s): umas 30 derrapadas curtas (~0.6 s) por corrida.
+  - No nosso, catchup fixo em 0.3 (CU=0.3): 4 dos 7 rivais vão a
+    3600..7200 por minuto (derrapam 5..12 s por corrida), os outros 3 ficam
+    em 1200..1650. Mesma direção do jogo, um pouco mais fraco e mais
+    espalhado; as nossas derrapadas são menos e mais longas (~1 s).
+  - Pulos batem: os 2 grandes por volta (prog ~1025 e ~1627) dão AirTime de
+    0.5..0.9 s, 250..500 pontos, igual ao último truque dos rivais na RAM
+    (Air Time 244..347).
+  - Achado: no jogo o Score dos rivais para na SUA chegada. RAM do
+    placar_final: os 8 gerentes parados (+8 = 1) com o mesmo relógio +0x334
+    (rivais 2 quadros depois de você; 0x1596d8 -> 0x523ff0 por corredor) e o
+    relógio da corrida parado em 90.01. O 0x4d1820 (fim do evento) só
+    refaria o Score se o rival chegou na metade da corrida, e aí sairia
+    múltiplo de 50 (0x527f78 é vazia): não é o caso. O nosso conta até a
+    chegada de cada rival.
 
 ## HUD básico (nov/2026, NOSSO)
 

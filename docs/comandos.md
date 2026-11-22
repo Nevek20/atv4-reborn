@@ -16,6 +16,7 @@ python tests/rodar_testes.py accel --veh 0 --hz 60                 :: passo NTSC
 python tools/ler_savestate.py arquivo.p2s
 python tools/ler_savestate.py arquivo.p2s --json estado.json   :: estado do carro pro remake
 python re/ia_alvo_ram.py arquivo.p2s     :: save com rivais: velocidade-alvo e pedais do jogo x a nossa conta (coluna exe = arco 2 do 0x35a150)
+python re/truques_ram.py a.p2s b.p2s     :: Score de cada corredor na RAM: pontos por minuto, maior combo, combo mais longo, catchup do corpo
 python re/ia_vizinhos_ram.py arquivo.p2s :: save com rivais: a percepção de cada um (vizinhos, setor, distâncias, tempo até bater)
 
 :: print do carro parado (na nuvem: xvfb-run -a ... --rendering-driver opengl3)
@@ -102,6 +103,7 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 %GODOT% --path . --write-movie corrida.avi --fixed-fps 30 -s res://tests/gravar_corrida.gd  :: vídeo da largada: intro, acelerando preso, VAI (DEPOIS=6 s, PULAR=1 pula a intro, CHECA_NAN=1 acha nó com NaN)
 %GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
 %GODOT% --headless --path . -s res://tests/teste_batida_carros.gd   :: rival a VEL km/h (50) na traseira do jogador: cascos do VehicleVehicle, empurrão, lasquinhas, som Vehicle
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_truques_ia.gd   :: Score dos rivais em 2 voltas: slides, AirTime (onde), bancos, catchup médio; CU=s fixa o catchup, SEMENTE, VOLTAS
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro), quadro real e cada nó
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_ordem_fx.gd   :: efeitos transparentes que se cruzam na tela trocando de ordem (pisca): trocas por par, PASSOS=n
 godot --path . --resolution 480x270 --rendering-method forward_plus --rendering-driver vulkan --fixed-fps 50 -s res://tests/medir_pisca_fx.gd   :: pixels piscando na imagem (sobe e desce num quadro); ORDEM_FX=0 sem a ordem pelo carro, SAIDA=pasta grava os PNG, INICIO/QUADROS/LIMIAR
