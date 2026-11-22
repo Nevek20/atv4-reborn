@@ -2657,6 +2657,10 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     refaria o Score se o rival chegou na metade da corrida, e aí sairia
     múltiplo de 50 (0x527f78 é vazia): não é o caso. O nosso conta até a
     chegada de cada rival.
+  - Decisão do Matheus: deixar rodando ("ficaria legal mostrando lá no
+    placar"). NOSSO: o Score dos rivais segue contando até a chegada de
+    cada um e o placar mostra (refeito a cada 2 s). Custo: 1.5 us por
+    rival por passo, 0.5 ms por segundo com os 7.
 
 ## HUD básico (nov/2026, NOSSO)
 
