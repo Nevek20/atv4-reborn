@@ -46,6 +46,11 @@ func _physics_process(dt: float) -> bool:
 				_falha("rivais: %d" % (0 if ia == null else ia.rivais.size()))
 				fase = 9
 				return false
+			# carro só do jogador (Sphinx speedrun, NOSSO) não vai pros rivais
+			var so: Array = main.VEHICLES.filter(func(v): return v.get("so_jogador", false)).map(func(v): return v.name)
+			for x in ia.rivais:
+				if x.carro in so:
+					_falha("rival %s com o carro só do jogador %s" % [x.nome, x.carro])
 			eu = {"nome": "Você", "car": main.car, "r": ia.jogador, "desvio": 0.0, "desvio0": ia._lateral(main.car.global_position, ia.jogador.prog + ia.s_linha) - ia.lat_zero(ia.jogador.prog + ia.s_linha), "prog0": ia.jogador.prog, "skill": 1.0, "preso": 0.0,
 				"re": 0.0, "capotado": 0.0, "repostos": 0, "res": 0}
 			fase = 1

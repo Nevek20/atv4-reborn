@@ -2673,7 +2673,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     carro. Diferença que sobra: o rival do jogo faz ~30 derrapadas curtas
     (~0.6 s, quase sempre 1 truque por combo); o nosso faz menos e mais
     longas (~1 s). Pra achar o porquê falta ver um rival do jogo derrapando
-    (save states seguidos ou vídeo).
+    (save states seguidos ou vídeo). O Matheus acha que são vários fatores e
+    que save state não vai resolver: parado aqui.
+- Sphinx speedrun fora dos rivais (nov/2026, pedido do Matheus: "é só o
+  Sphinx com tudo no máximo"). Era sorteado como carro de rival (o Sphinx
+  podia sair 2 vezes, um com peças no máximo). main.gd "so_jogador": true,
+  ia.criar filtra; teste_ia confere.
 
 ## HUD básico (nov/2026, NOSSO)
 

@@ -411,7 +411,8 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
 
 Frota
 - 12 buggies, 12 trucks, o bônus Lazarus (CHASSIS_Truck_04, física própria
-  NOSSA) e extras nossos de .glb (Escort, x 1.25). Tabelas por carro usam
+  NOSSA) e extras nossos de .glb (Escort, x 1.25). Sphinx speedrun = Sphinx
+  com tudo no máximo, só do jogador ("so_jogador", rival não sorteia). Tabelas por carro usam
   car.chave() (o Lazarus tem o id do Jericho).
 
 ## Pendente / ideias

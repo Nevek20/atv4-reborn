@@ -24,7 +24,8 @@ const VEHICLES := [
 	# custom (0.61; o Level0 de fábrica dá 0.45, vehicle_data.factory_tuning)
 	{"name": "Sphinx speedrun", "id": "BUGGY_04", "cams": "BuggyCamSet_04", "dir": "res://assets/carros/buggy_04",
 		"data": "res://data/vehicles/buggy_04.xml", "points": "res://data/vehicles/buggy_04_points.bin", "fp": [0.35, 0.48, 0.00],
-		"livery": "pintura_speedrun.png", "tune": {"engine": 1.0, "mass": 1.0, "shift": 1.0, "final": 0.61, "tire": "DIRT_PREMIUM"}},
+		"livery": "pintura_speedrun.png", "tune": {"engine": 1.0, "mass": 1.0, "shift": 1.0, "final": 0.61, "tire": "DIRT_PREMIUM"},
+		"so_jogador": true},             # NOSSO (referência do speedrun): rival não usa
 	# os outros buggies, na ordem da lista do jogo (tools/gerar_buggies.py)
 	{"name": "Mosquito", "id": "BUGGY_01", "cams": "BuggyCamSet_01", "dir": "res://assets/carros/buggy_01",
 		"data": "res://data/vehicles/buggy_01.xml", "points": "res://data/vehicles/buggy_01_points.bin", "fp": [0.35, 0.46, 0.00]},

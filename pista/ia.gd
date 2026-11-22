@@ -421,7 +421,7 @@ func criar() -> void:
 	var truck: bool = main.car.vehicle_id.begins_with("TRUCK")
 	var classe := "Truck" if truck else "Buggy"
 	var frota: Array = (main.TRUCKS if truck else main.VEHICLES).filter(
-		func(v): return v.id != main.car.vehicle_id)
+		func(v): return v.id != main.car.vehicle_id and not v.get("so_jogador", false))
 	var pilotos: Array = dados.pilotos.filter(
 		func(p): return p.rivalry == "POTENTIAL" and classe in p.classes)
 	pilotos.shuffle()
