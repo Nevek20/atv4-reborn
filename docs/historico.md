@@ -2616,6 +2616,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   dígito, como o "--:--:--" do HUD) e ganha o tempo quando cruza a linha
   (a tabela é refeita a cada 2 s). Melhor volta sem volta fechada também em
   traços. A projeção (0x15fae8 / 0x4d1768) e os 15 s saíram.
+  Depois: "o placar não mostra na hora da tela" -> a tabela já entra
+  cheia na chegada (NOSSO; no jogo entra vazia e vem aos 3 s), e segue
+  refeita a cada 2 s.
 - NOSSO: Continue (Enter, Start, A) volta pro treino livre (as páginas
   Records e Race Finished ainda não existem). Na tela larga os sprites da
   largura toda esticam; o resto fica no 4:3.

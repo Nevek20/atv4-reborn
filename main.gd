@@ -868,8 +868,8 @@ func _passo_tremida(delta: float, j, s: Dictionary) -> void:
 		j.passo(GameCamera.STEP, s.speed, s.chao, s.batida)
 
 
-## tela de resultados: entra na sua chegada, a tabela com quem já chegou
-## (a 1ª vez em 3 s, depois a cada 2 s); some se a corrida recomeçar ou parar
+## tela de resultados: entra na sua chegada já com a tabela, refeita a cada
+## 2 s; some se a corrida recomeçar ou parar
 func _passo_resultados() -> void:
 	if resultados == null:
 		return
@@ -881,8 +881,10 @@ func _passo_resultados() -> void:
 		return
 	if not _resultado_visto and corrida.resultados_prontos():
 		_resultado_visto = true
-		resultados.mostrar([])                  # entra vazia (0x4c1730 limpa as linhas)
-		_resultado_t = corrida.RESULTADO_INI
+		# NOSSO (pedido do Matheus): já entra com a tabela; no jogo entra vazia
+		# (0x4c1730 limpa as linhas) e a 1ª vez vem aos 3 s (relógio em -1)
+		resultados.mostrar(corrida.tabela())
+		_resultado_t = 0.0
 	if resultados.visible:
 		_resultado_t += get_process_delta_time()
 		if _resultado_t >= corrida.RESULTADO_PASSO:

@@ -380,8 +380,8 @@ Tela de resultados (menu/resultados.gd)
   placar_final.p2s (< 0.5 px): não posicionar no olho. Entra na sua
   chegada (0x4c18e0), tabela vazia, refeita a cada 2 s (1ª aos 3 s); no jogo só com
   quem já chegou; a IA pilota o seu carro. NOSSO (o Matheus quis): os 8
-  juntos desde o começo, quem não chegou com "--:--.--" (sem projeção de
-  tempo); Continue volta pro livre.
+  juntos e já na entrada da tela, quem não chegou com "--:--.--" (sem
+  projeção de tempo); Continue volta pro livre.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

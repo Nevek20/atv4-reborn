@@ -160,14 +160,14 @@ func _physics_process(_dt: float) -> bool:
 				_falha("não chegou (volta %d, estado %d)" % [c.volta, c.estado])
 				fase = 9
 		5:
-			# tela de resultados (menu/resultados.gd): entra na chegada, vazia
-			# (0x4c1730); aos 3 s a tabela; a IA pilota o carro do jogador; sem
-			# o texto provisório de chegada
+			# tela de resultados (menu/resultados.gd): entra na chegada já com
+			# os 8 (NOSSO); a IA pilota o carro do jogador; sem o texto
+			# provisório de chegada
 			var r = main.resultados
 			if c.hud.text != "":
 				_falha("texto provisório na chegada: '%s'" % c.hud.text.left(30))
-			if quadros == 3 and (not r.visible or not r.linhas.is_empty()):
-				_falha("a tela não entrou vazia na chegada (visível %s, %d linhas)" % [r.visible, r.linhas.size()])
+			if quadros == 3 and (not r.visible or r.linhas.size() != 8):
+				_falha("a tela não entrou com a tabela na chegada (visível %s, %d linhas)" % [r.visible, r.linhas.size()])
 			if quadros < 50 * 4:
 				return false
 			# aos 4 s os 8 na tabela (NOSSO: todos juntos), quem não chegou
