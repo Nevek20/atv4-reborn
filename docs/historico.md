@@ -2661,6 +2661,19 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     placar"). NOSSO: o Score dos rivais segue contando até a chegada de
     cada um e o placar mostra (refeito a cada 2 s). Custo: 1.5 us por
     rival por passo, 0.5 ms por segundo com os 7.
+  - Corrida do Matheus no nosso (5 voltas, ganhou com folga: 3:16, melhor
+    volta 37.3 s): rivais 3199..37197, pelo tempo de cada um 740..9110 por
+    minuto (média ~4100; o jogo no placar_final: 6800..10200, média ~8100,
+    contando só até a sua chegada). Os 2 melhores batem com o jogo, a média
+    é ~metade e o espalhamento é muito maior (12x contra 1.5x).
+  - Varredura por carro (RIVAL_CARRO, CU=0.3, os 7 no mesmo carro): média
+    3100..4800 por minuto em 10 dos 12 buggies, Storm 6500, Hurricane 9200.
+    Dentro do mesmo carro os 7 variam de 2x a 9x (Kraken V8 970..8690): o
+    espalhamento é do piloto e da corrida (batidas, ultrapassagens), não do
+    carro. Diferença que sobra: o rival do jogo faz ~30 derrapadas curtas
+    (~0.6 s, quase sempre 1 truque por combo); o nosso faz menos e mais
+    longas (~1 s). Pra achar o porquê falta ver um rival do jogo derrapando
+    (save states seguidos ou vídeo).
 
 ## HUD básico (nov/2026, NOSSO)
 
