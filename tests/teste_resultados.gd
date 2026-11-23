@@ -57,6 +57,7 @@ func _initialize() -> void:
 	print("  race again (finish_2.p2s):")
 	_layout(r, "res://tests/ref_de_novo.json", "Race again")
 	_seletor(r)
+	_fundo(r)
 	r.mostrar(CL)
 	_tempo(r)
 	r.free()
@@ -122,6 +123,28 @@ func _layout(r, arq: String, titulo: String) -> void:
 	print("  título girado: pior canto %.2f px" % pior_t)
 	if pior_t > 1.0:
 		_falha("título")
+
+
+## o fundo da pausa (LAYER_PAUSE_BACKGROUND: 2 gradient, 6 big_mesh e um
+## mud_02, que também aparece mais 2 vezes no título e na barra) uma vez em
+## cada tela (o Matheus: "o menu tá transparente" quando ele sumiu)
+func _fundo(r) -> void:
+	var contas := {}
+	for pag in ["resultados", "pausa", "de_novo", "confirma"]:
+		if pag == "resultados":
+			r.mostrar(CL)
+		elif pag == "confirma":
+			r.abrir_menu("pausa", ["Resume", "RESTART"])
+			r.abrir_confirma("RESTART", "RESTART", "SURE_RESTART")
+		else:
+			r.abrir_menu(pag, ["RESTART", "EXIT"])
+		r.medir()
+		var sp: Array = r.sprites_medidos
+		contas[pag] = [sp.count("gradient"), sp.count("big_mesh"), sp.count("mud_02")]
+	print("  fundo (gradient, big_mesh, mud_02) por tela: %s" % contas)
+	for pag in contas:
+		if contas[pag] != [2, 6, 3]:
+			_falha("fundo da tela %s: %s (tem que ser 1 de cada camada)" % [pag, contas[pag]])
 
 
 ## seletor (0x2d1280): não passa das pontas, não anda no meio da troca; as

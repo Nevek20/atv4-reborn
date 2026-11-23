@@ -119,6 +119,7 @@ var ultimo_som := ""              # testes
 var _a := Rect2()                 # área 4:3 na tela
 var _cheia := Rect2()             # a tela toda
 var _medindo = null               # medir(): junta os textos em vez de desenhar
+var sprites_medidos: Array = []   # medir(): as caixas dos sprites desenhados (testes)
 
 
 func montar() -> bool:
@@ -241,7 +242,7 @@ func voltar_pausa() -> void:
 ## um som do banco Menu_IG (sem os sons extraídos, nada)
 func tocar(nome: String) -> void:
 	ultimo_som = nome
-	if not SomJogo.existe("Menu_IG", nome):
+	if not is_inside_tree() or not SomJogo.existe("Menu_IG", nome):
 		return
 	if _som == null:
 		_som = SomJogo.new()
@@ -354,6 +355,7 @@ func _draw() -> void:
 ## [{txt, letras: [Rect2 sem giro], rot}]
 func medir() -> Array:
 	_medindo = []
+	sprites_medidos = []
 	_a = Rect2(0, 0, 640, 480)
 	_cheia = _a
 	_desenha(lay.camadas.get(CAMADA.get(pagina, "LAYER_RESULTS"), {}), Rect2(-1, -1, 2, 2))
@@ -379,7 +381,8 @@ static func filho(pai: Rect2, r: Array) -> Rect2:
 		float(r[2]) * 0.5 * pai.size.x, float(r[3]) * 0.5 * pai.size.y)
 
 
-func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0) -> void:
+## prof = profundidade (0 = a camada da página)
+func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0, prof := 0) -> void:
 	var nome := String(no.get("nome", ""))
 	var vis := int(no.get("mVisible", 1)) == 1
 	if nome.ends_with("_Highlight"):
@@ -392,8 +395,11 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0) -> void:
 		vis = int(nome.trim_prefix("ID_PLAYER_")) <= linhas.size()
 	elif nome in ESCONDIDOS:
 		vis = false
-	elif nome in ["REF_LAYER_PAUSE_BACKGROUND", "REF_LAYER_FAKE_HISTORY"]:
-		vis = false                 # o ID_FAKE_HISTORY_FRAME já traz os dois
+	elif prof == 1 and pagina == "confirma" and nome in ["REF_LAYER_PAUSE_BACKGROUND", "REF_LAYER_FAKE_HISTORY"]:
+		# a LAYER_CONFIRM traz os 2 visíveis E o ID_FAKE_HISTORY_FRAME: só
+		# um fundo (o do título, como nas outras telas; dentro dele o
+		# REF_LAYER_PAUSE_BACKGROUND fica, é o fundo de todas)
+		vis = false
 	if not vis:
 		return
 	var r := filho(pai, no.get("rect", [-1, -1, 2, 2]))
@@ -406,11 +412,11 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0) -> void:
 		"ref":
 			var ref: Array = no.get("ref", [])
 			if ref.size() == 2 and lay.camadas.has(ref[1]):
-				_desenha(lay.camadas[ref[1]], r, a)
+				_desenha(lay.camadas[ref[1]], r, a, prof + 1)
 	for f in no.get("filhos", []):
-		_desenha(f, r, a)
+		_desenha(f, r, a, prof + 1)
 	if nome == "ID_FAKE_HISTORY_FRAME" and lay.camadas.has("LAYER_FAKE_HISTORY"):
-		_desenha(lay.camadas.LAYER_FAKE_HISTORY, r, a)
+		_desenha(lay.camadas.LAYER_FAKE_HISTORY, r, a, prof + 1)
 	elif nome == "ID_SELECTOR_FRAME" and not opcoes.is_empty():
 		_seletor(r, a)
 	elif nome == "ID_BUTTON_BAR_FRAME":
@@ -543,6 +549,7 @@ func _sprite(no: Dictionary, r: Rect2, a: float) -> void:
 	var larga := float(no.rect[2]) >= 1.99 if no.has("rect") else false
 	var p := _px(r, larga)
 	if _medindo != null:
+		sprites_medidos.append(String(no.get("BoxName", "")))
 		return
 	var cs := []
 	for k in ["mColourTL", "mColourTR", "mColourBR", "mColourBL"]:

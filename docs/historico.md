@@ -2748,7 +2748,15 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     mesma opção. Layout pelo .fex, conferido no olho com o quadro do vídeo
     (falta save state pra RAM).
   - Falta: Game options (a lista Vibration / Music volume / SFX volume /
-    HUD que aparece embaixo com a opção marcada) e Photographer.
+    HUD que aparece embaixo com a opção marcada) e Photographer. O Matheus
+    quer fazer os dois com calma depois.
+  - O Matheus confirmou o Restart (com o ARE YOU SURE?) no jogo: "tá
+    certinho". Bug achado por ele ("agora o menu tá transparente"): pra a
+    confirmação não ter 2 fundos eu escondi o REF_LAYER_PAUSE_BACKGROUND em
+    toda parte, inclusive dentro do LAYER_FAKE_HISTORY, que é de onde as
+    telas tiram o fundo. Agora só na LAYER_CONFIRM (os 2 refs dela), e o
+    teste_resultados conta os sprites do fundo em cada tela (2 gradient, 6
+    big_mesh, 3 mud_02 nas 4).
 - Achado e NÃO portado: depois de repor o carro pisca ((1 - cos(178 t)) / 2
   por 0.3 s) e repete enquanto encosta em outro carro, com o veículo+0xb28
   zerado nesse tempo (deve ser a batida com os outros desligada: fantasma).
