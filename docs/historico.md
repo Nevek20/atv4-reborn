@@ -2268,6 +2268,12 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   importante. Decidido cedo de propósito: câmera, HUD, som (ouvinte),
   fader, pausa e desempenho têm que aceitar 2 jogadores; código novo não
   deve supor um jogador só (main.car, vigia_jogador etc. vão virar lista).
+- Online (o Matheus, nov/2026): depois de tudo, multiplayer pela internet
+  pra ele e um amigo correrem juntos. Cada um precisa ter os próprios
+  arquivos do jogo (os assets não vão no git nem no download). Quando
+  chegar a hora: a física a 50 Hz em passo fixo ajuda (mandar comandos e
+  conferir estado); o "2 jogadores" do multiplayer local já deixa o caminho
+  pronto.
 
 - Lazarus: física própria feita (lazarus.xml); peças, mapa e decalques
   ainda são os do Jericho. Não suja: a CHASSIS_Truck_04 do jogo não tem a 2ª textura (sem _camada.obj
