@@ -438,6 +438,7 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: checkpoint perdido, carro piscando
   (fantasma) depois de repor.
-- Pausa: Game options, Photographer; Records e Race Finished.
+- Pausa: Game options (vai ter vídeo, áudio e controle: só quando essas
+  configurações existirem), Photographer; Records e Race Finished.
 - IA: LOD com os modelos 2K/1K/500 do jogo.
 - Piloto: LOD, nome no menu.

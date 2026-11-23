@@ -2749,7 +2749,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     (falta save state pra RAM).
   - Falta: Game options (a lista Vibration / Music volume / SFX volume /
     HUD que aparece embaixo com a opção marcada) e Photographer. O Matheus
-    quer fazer os dois com calma depois.
+    quer fazer os dois com calma depois: o Game options vai juntar as
+    configurações de vídeo, áudio e controle (NOSSO, além das 4 do jogo),
+    então só quando essas configurações existirem.
   - O Matheus confirmou o Restart (com o ARE YOU SURE?) no jogo: "tá
     certinho". Bug achado por ele ("agora o menu tá transparente"): pra a
     confirmação não ter 2 fundos eu escondi o REF_LAYER_PAUSE_BACKGROUND em
