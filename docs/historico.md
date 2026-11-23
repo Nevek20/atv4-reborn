@@ -2268,6 +2268,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   importante. Decidido cedo de propósito: câmera, HUD, som (ouvinte),
   fader, pausa e desempenho têm que aceitar 2 jogadores; código novo não
   deve supor um jogador só (main.car, vigia_jogador etc. vão virar lista).
+- Launcher (o Matheus, nov/2026): um programa que pede a ISO do jogo UMA
+  vez, roda toda a extração (hoje são os passos do README: gob_tex2png,
+  gerar_buggies buggy e truck, piloto, sfx_jogo, fx_jogo, rx01_objetos,
+  hud_jogo, fex_jogo e a importação do Godot) e põe tudo na pasta do jogo;
+  das próximas vezes o atalho abre o jogo direto. Encaixa no modelo legal:
+  cada um usa a própria cópia e nada do jogo vai no download. Antes dele:
+  ler a ISO direto (o archive.imp e o stream/RX01.000 saem dela; hoje o
+  unpacked vem de uma ferramenta de fora, o repo não tem o desempacotador),
+  os tools sem Python instalado (empacotados) e conferir a ISO (PAL
+  SCES_546.88; NTSC?). Vem antes do online (o amigo precisa instalar).
 - Online (o Matheus, nov/2026): depois de tudo, multiplayer pela internet
   pra ele e um amigo correrem juntos. Cada um precisa ter os próprios
   arquivos do jogo (os assets não vão no git nem no download). Quando

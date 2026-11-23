@@ -145,7 +145,9 @@ cada decisão.
 3. Todas as pistas
 4. Todos os modos de jogo, depois a carreira
 5. Opções gráficas (modo "fiel" e modo "melhorado"), depois polimento
-6. Multiplayer local (tela dividida) pensado desde já; online no fim
+6. Um launcher: escolhe a ISO uma vez, ele extrai tudo pra pasta do jogo
+   e depois o atalho abre o jogo direto
+7. Multiplayer local (tela dividida) pensado desde já; online no fim
 
 ## Aviso legal
 

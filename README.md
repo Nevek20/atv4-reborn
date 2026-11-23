@@ -145,7 +145,9 @@ and the reasoning behind each decision.
 3. Every track
 4. Every game mode, then the career
 5. Graphics options (a "faithful" and an "enhanced" mode), then polish
-6. Local split-screen multiplayer is planned from the start; online
+6. A launcher: pick your ISO once, it extracts everything into the game
+   folder, and from then on the shortcut opens the game directly
+7. Local split-screen multiplayer is planned from the start; online
    multiplayer comes last
 
 ## Legal
