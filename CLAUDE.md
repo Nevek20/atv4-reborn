@@ -285,7 +285,7 @@ Pista RX01
 - Volta do jogador = passar pela caixa do checkpoint com ele pendente
   (vigia.voltas, 0x4d43f0 / 0x4d50d0). O tamanho do XML JÁ É a meia medida
   (RAM: ±15.83 m, cobre a pista de 24.8 m): não dividir por 2. teste_corrida
-  cruza 10 m fora do centro. Rivais contam pelo progresso.
+  cruza 10 m fora do centro. Rivais iguais (x.vigia.voltas).
 - Checkpoint perdido (tipo 3): pendente e o rastreio 5 m depois da face de
   entrada (ou fora do link 50) sem a caixa -> aceito para, "Missed
   Checkpoint" 0.2 / 1 / 3 s, passa por cima de um 1/2 andando (fase 2).
@@ -438,6 +438,14 @@ Frota
   car.chave() (o Lazarus tem o id do Jericho).
 
 ## Pendente / ideias
+
+Ordem combinada com o Matheus (nov/2026): fechar o RX01 -> ATV e moto numa
+pista com Holeshot (save state dele) até fechar 100% os veículos -> menu
+(esqueleto pelos .fex, opções de vídeo/áudio/controle, perfil e save) ->
+todos os mapas (LOD e carregamento entram aqui) -> todos os modos ->
+carreira -> gráficos (chave "fiel x melhorado") -> polimento. Multiplayer
+local (2 na mesma tela) é obrigatório: câmera, HUD e som têm que aceitar 2
+jogadores (não amarrar nada novo a "um jogador só").
 
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: carro piscando (fantasma) depois de

@@ -2156,7 +2156,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   cima do 2. A volta do jogador voltou a contar pela caixa
   (vigia.voltas), como o jogo; os rivais seguem pelo progresso (passam pela
   linha da IA). Não portado: o ponto salvo de 0.5 em 0.5 s (0x4d44c0; o
-  nosso repõe no aceito, como antes).
+  nosso repõe no aceito, como antes). Depois os rivais também passaram a
+  contar a volta e a chegada pela caixa (x.vigia.voltas), como no jogo
+  (cada corredor tem o mesmo objeto de progresso).
 - Batida carro com carro (nov/2026, carro/batida_carros.gd,
   teste_batida_carros): o casco é o VehicleVehicle.hsc (o outro casco que o
   0x1fed48 carrega; tools/casco.py grava esferas_carro, 25 no Renegade
@@ -2251,6 +2253,21 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   roda estão ótimos agora". FECHADO.
 
 ## Pendente / ideias
+
+- Ordem do projeto (o Matheus, nov/2026): fechar o RX01 (carro piscando
+  depois de repor; voltas dos rivais pela caixa feito) -> ATV e moto numa
+  pista com Holeshot (ele manda o save state) até fechar 100% os veículos
+  (piloto que cai, peso do piloto, truques do tricks.xml, Holeshot) -> menu
+  (esqueleto pelos .fex, Game options com vídeo/áudio/controle, perfil e
+  save no lugar do oficina.json) -> todos os mapas (LOD e carregamento por
+  partes nessa fase, não nos gráficos) -> todos os modos -> carreira ->
+  gráficos (com chave "fiel x melhorado": poeira x 0.6, sem tonemap e névoa
+  foram calibrados em prints do PS2) -> polimento. Música = do jogo, lida
+  dos arquivos dele (licenciada, fora do git).
+- Multiplayer local (2 jogadores na mesma tela): o Matheus quer, é
+  importante. Decidido cedo de propósito: câmera, HUD, som (ouvinte),
+  fader, pausa e desempenho têm que aceitar 2 jogadores; código novo não
+  deve supor um jogador só (main.car, vigia_jogador etc. vão virar lista).
 
 - Lazarus: física própria feita (lazarus.xml); peças, mapa e decalques
   ainda são os do Jericho. Não suja: a CHASSIS_Truck_04 do jogo não tem a 2ª textura (sem _camada.obj

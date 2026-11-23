@@ -462,7 +462,7 @@ func criar() -> void:
 			# contando). Aparece na tela de resultados
 			"truques": Truques.new(Truques.grupo_do(c)),
 			# voltas do rival (tela de resultados): como as do jogador, a 1ª
-			# passagem pela linha começa a volta 1 e cada passagem fecha uma
+			# passagem pela caixa do checkpoint começa a volta 1 e cada uma fecha
 			"k_volta": -1, "t_volta": 0.0, "melhor": -1.0})
 	posicionar()
 
@@ -598,7 +598,9 @@ func _physics_process(dt: float) -> void:
 	for x in rivais:
 		rastrear(x.r, x.car.global_position)
 		if est == corrida.CORRENDO or est == corrida.CHEGOU:
-			var kv := int(floor(float(x.r.prog) / float(comp)))
+			# como o jogador: a volta conta passando pela caixa do checkpoint
+			# (reposicao.gd voltas; a 1ª passagem começa a volta 1)
+			var kv: int = int(x.vigia.voltas) - 1
 			if kv > int(x.k_volta) and int(x.k_volta) < corrida.voltas:
 				if int(x.k_volta) >= 0:
 					var lap: float = corrida.t - float(x.t_volta)
@@ -624,7 +626,7 @@ func _physics_process(dt: float) -> void:
 				and corrida.t_conta <= ESPERA_T else 0.0
 			car.test_input = {"thr": thr, "brk": 0.0, "steer": 0.0}
 			continue
-		if x.r.fim < 0.0 and x.r.prog >= corrida.voltas * comp:
+		if x.r.fim < 0.0 and int(x.vigia.voltas) > corrida.voltas:
 			x.r.fim = corrida.t
 			x.truques.parar()          # 0x1596d8: na chegada o combo aberto se perde
 		if x.r.fim < 0.0:
