@@ -2131,6 +2131,32 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   opção chama corrida.botao_repor). Teste: fora 3.24 s, contramão 5.24 s (1 passo de 50 Hz
   além do jogo pela soma de 0.02). NOSSO: a mensagem do "Too Fast" fica
   1.5 s (o jogo mostra enquanto o botão está apertado), cor vermelha, o R.
+- Checkpoint perdido, reposição tipo 3 (nov/2026, o Matheus: "vai no 2";
+  pista/reposicao.gd, teste_reposicao_auto parte 5; docs/engenharia_reversa.md,
+  Reposição automática). Achado na RAM do pause.p2s: a caixa do checkpoint
+  tem 15.83 m PRA CADA LADO (o tamanho do XML já é a meia medida; a gente
+  dividia por 2 e ela ficava com 15.8 m de largura numa pista de 24.8 m).
+  Isso era o "passando aberto a volta não conta" lá de baixo (Volta do
+  jogador pelo progresso): não era a regra do jogo, era a caixa pela
+  metade. Regra do exe: o aceito entrar no link 50 deixa o checkpoint
+  pendente; passar pela caixa (dentro dela e de frente pro sentido da
+  pista) apaga e conta a volta (se andou mais de 1/4 de volta desde a
+  última); com pendente, o rastreio passar 5 m da face de entrada da caixa
+  (ou sair do link) sem ela = perdido: o aceito para e vem "Missed
+  Checkpoint" a 0.2 s, 3-2-1 de 1.2 s, repõe aos 4.2 s. Se um "Off Track"
+  ou "Wrong Way" já estava andando, o tipo 3 entra por cima direto na fase
+  2 (mensagem na hora). Repõe no começo do link 50 (5.5 m antes do centro
+  da caixa) quando o aceito já passou do centro: no jogo o ponto salvo
+  volta pra antes da caixa (senão repunha depois dela pra sempre). No RX01
+  só acontece pulando por cima (mais de 5.94 m acima do centro) ou passando
+  a mais de 15.83 m do centro (aí o Off Track já estaria contando).
+  Teste: 10 m fora do centro conta a volta; por cima, perde a 3.7 m do
+  centro (5 m da face de entrada), mensagem 0.20 s, contagem 1.20 s, repõe
+  4.20 s em -5.52 m e aí passar conta; 18 m fora, o 3 entra na fase 2 por
+  cima do 2. A volta do jogador voltou a contar pela caixa
+  (vigia.voltas), como o jogo; os rivais seguem pelo progresso (passam pela
+  linha da IA). Não portado: o ponto salvo de 0.5 em 0.5 s (0x4d44c0; o
+  nosso repõe no aceito, como antes).
 - Batida carro com carro (nov/2026, carro/batida_carros.gd,
   teste_batida_carros): o casco é o VehicleVehicle.hsc (o outro casco que o
   0x1fed48 carrega; tools/casco.py grava esferas_carro, 25 no Renegade
@@ -2182,6 +2208,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   (reposicao.gd) passa de um múltiplo da volta desde a linha: não anda com
   atalho (mCheatingProgress) nem pra trás, e fica igual ao progresso que dá
   a posição. A caixa + AVANCO_MIN links fica de reserva sem a IA.
+  ATUALIZADO (nov/2026, Checkpoint perdido acima): a caixa estava pela
+  metade (o XML já dá a meia medida: ±15.83 m cobre a pista toda); a volta
+  voltou pra caixa, como o jogo, e errar a caixa é o "Missed Checkpoint".
   teste_corrida cruza a linha 10 m fora do centro (com a caixa: "não
   chegou, volta 0"). Os testes com retardatários (rival travado ou lento,
   IA pilotando o jogador) não perdiam posição: a IA passa pelo meio da
@@ -2798,9 +2827,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
-- Reposição: falta o pedido tipo 3 (checkpoint perdido), as 2 flags do
-  corredor+0x120, o carro piscando / fantasma depois de repor e os 0.3 s
-  dos rivais (seção Menu de pausa, tela preta feita).
+- Reposição: falta as 2 flags do corredor+0x120, o carro piscando /
+  fantasma depois de repor, os 0.3 s dos rivais (seção Menu de pausa, tela
+  preta feita) e o ponto salvo de 0.5 em 0.5 s (o tipo 3 foi feito).
 - Pausa: Game options, Photographer, a confirmação (LAYER_CONFIRM) e a
   animação do seletor; Records e Race Finished depois dos resultados.
 - RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).

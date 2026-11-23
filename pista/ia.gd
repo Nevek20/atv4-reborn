@@ -979,9 +979,10 @@ func _lateral(p: Vector3, s: float) -> float:
 	return _plano(p - q).dot(Vector3(adiante.z, 0.0, -adiante.x))
 
 
-## volta pro último progresso aceito (o jogo repõe sempre lá: 0x4d3538)
+## volta pro último progresso aceito (o jogo repõe sempre lá: 0x4d3538; com
+## checkpoint pendente, antes da caixa: reposicao.gd ponto_repor)
 func _repor(x: Dictionary) -> void:
-	x.r.prog = x.vigia.aceito
+	x.r.prog = x.vigia.ponto_repor()
 	repor_em(x.car, x.r.prog + s_linha)
 	x.vigia.recomecar(x.r.prog)
 	x.preso = 0.0
@@ -1028,7 +1029,7 @@ func _passo_pedido() -> void:
 
 
 func repor_jogador() -> void:
-	jogador.prog = vigia_jogador.aceito
+	jogador.prog = vigia_jogador.ponto_repor()
 	repor_em(main.car, jogador.prog + s_linha)
 	vigia_jogador.recomecar(jogador.prog)
 	main.reset_camera()

@@ -282,10 +282,14 @@ Pista RX01
   depois; você larga em 8º. Intro anda pelo comprimento da curva (35 m/s
   constante, interpolada entre passos); pular a intro pula a descida; na
   intro os carros ficam mudos.
-- Volta do jogador = progresso ACEITO do vigia passando de múltiplos da
-  volta (rota, como o checkpoint do jogo), não a caixa de 15.8 m da linha
-  (a pista lá tem 24.8 m: passando aberto a volta sumia). Mesma régua da
-  posição; teste_corrida cruza 10 m fora do centro.
+- Volta do jogador = passar pela caixa do checkpoint com ele pendente
+  (vigia.voltas, 0x4d43f0 / 0x4d50d0). O tamanho do XML JÁ É a meia medida
+  (RAM: ±15.83 m, cobre a pista de 24.8 m): não dividir por 2. teste_corrida
+  cruza 10 m fora do centro. Rivais contam pelo progresso.
+- Checkpoint perdido (tipo 3): pendente e o rastreio 5 m depois da face de
+  entrada (ou fora do link 50) sem a caixa -> aceito para, "Missed
+  Checkpoint" 0.2 / 1 / 3 s, passa por cima de um 1/2 andando (fase 2).
+  Repõe no começo do link 50 se o aceito passou do centro (0x4d3fe0).
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
   o ponto segue o Respotting do TrackSetup (chão >= 0.93, sem água, 8 m de
   folga). Volta pro último ponto conhecido na linha, não pro mais perto.
@@ -436,8 +440,8 @@ Frota
 ## Pendente / ideias
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: LOD das árvores. Reposição: checkpoint perdido, carro piscando
-  (fantasma) depois de repor.
+- RX01: LOD das árvores. Reposição: carro piscando (fantasma) depois de
+  repor.
 - Pausa: Game options (vai ter vídeo, áudio e controle: só quando essas
   configurações existirem), Photographer; Records e Race Finished.
 - IA: LOD com os modelos 2K/1K/500 do jogo.

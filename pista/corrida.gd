@@ -20,14 +20,14 @@ extends Node
 ## Os links do arquivo vêm na ordem contrária à da corrida (a direção de cada
 ## um aponta pro de índice menor): a lista é invertida ao carregar.
 ##
-## Volta do jogador (nov/2026): pelo progresso ACEITO do vigia
-## (pista/reposicao.gd, o objeto de progresso do jogo) passando de múltiplos
-## da volta a partir da linha, como o checkpoint do jogo (AILink 50 + fração,
-## pela rota, não pela caixa). Até nov/2026 era cruzar a caixa de 15.8 m numa
-## pista de 24.8 m na linha: passando aberto (desviando de retardatário) a
-## volta não contava e o Matheus terminou em 1º e ficou em 5º. O aceito não
-## anda com atalho (mCheatingProgress) nem pra trás. Sem a IA (reserva): a
-## caixa e o atalho pelos links (AVANCO_MIN links desde a última passagem).
+## Volta do jogador (nov/2026): como o jogo, na passagem pela caixa do
+## checkpoint com ele pendente (pista/reposicao.gd voltas, 0x4d43f0 /
+## 0x4d50d0). A caixa tem 15.83 m PRA CADA LADO (o tamanho do XML já é a meia
+## medida, RAM): a pista na linha tem 24.8 m. Até nov/2026 a gente dividia por
+## 2, passando aberto a volta não contava (o Matheus terminou em 1º e ficou em
+## 5º) e a volta foi pro progresso aceito; agora errar a caixa é o "Missed
+## Checkpoint" (reposição tipo 3). Sem a IA (reserva): a caixa e o atalho
+## pelos links (AVANCO_MIN links desde a última passagem).
 
 const ARQ := "res://data/rx01_corrida.json"
 # largada do vídeo do speedrun (Amateur National, Hunter Valley; a intro
@@ -70,7 +70,7 @@ var tempos: Array = []
 var link := 0
 var avanco := 0
 var _lado_ant := 0.0
-var _k_volta := -1               # voltas inteiras do progresso aceito (-1 = antes da linha)
+var _k_volta := -1               # passagens pela caixa do checkpoint - 1 (-1 = antes da linha)
 var _cp_pos := Vector3.ZERO
 var _cp_frente := Vector3.ZERO
 var _cp_lado := Vector3.ZERO
@@ -122,7 +122,9 @@ func montar(m) -> bool:
 	# a frente da linha = o sentido da corrida (o grid olha pra ela)
 	if _cp_frente.dot(dir_mundo(dados.grid[0].dir)) < 0.0:
 		_cp_frente = -_cp_frente
-	_cp_meia = Vector3(cp.tamanho[0], cp.tamanho[1], cp.tamanho[2]) * 0.5
+	# o tamanho do XML já é a meia medida (RAM do pause.p2s: 15.83 x 5.94 x
+	# 1.44 m pros lados da posição; até nov/2026 a gente dividia por 2)
+	_cp_meia = Vector3(cp.tamanho[0], cp.tamanho[1], cp.tamanho[2])
 	# caixas de reposição na hora (RALLYCROSS.bin): centradas em pos, Z = dir
 	# (bate com o eixo Z do modelo da arquibancada embaixo), tamanho inteiro
 	for c in dados.get("reposicao", {}).get("caixas", []):
@@ -359,7 +361,7 @@ func _lado(p: Vector3) -> float:
 
 func _na_linha(p: Vector3) -> bool:
 	var r := p - _cp_pos
-	return absf(r.dot(_cp_lado)) <= _cp_meia.x and absf(r.y) <= _cp_meia.y + 2.0
+	return absf(r.dot(_cp_lado)) <= _cp_meia.x and absf(r.y) <= _cp_meia.y
 
 
 func _physics_process(dt: float) -> void:
@@ -399,7 +401,9 @@ func _physics_process(dt: float) -> void:
 		truques.passo(dt, car)
 	var p: Vector3 = car.global_position
 	if ia and not ia.rivais.is_empty() and ia.vigia_jogador:
-		var k := int(floor(float(ia.vigia_jogador.aceito) / float(ia.comp)))
+		# a volta conta na passagem pela caixa do checkpoint (0x4d43f0 /
+		# 0x4d50d0, pista/reposicao.gd voltas); a 1ª passagem começa a volta 1
+		var k: int = int(ia.vigia_jogador.voltas) - 1
 		while _k_volta < k and estado == CORRENDO:
 			_k_volta += 1
 			_passou_linha()

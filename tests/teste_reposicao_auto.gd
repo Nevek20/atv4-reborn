@@ -8,6 +8,11 @@ extends SceneTree
 ##  3. contramão (velocidade pra trás na pista): "Wrong Way" a partir de
 ##     0.2 s, vira "Off Track" aos 2.2 s e repõe aos 5.2 s;
 ##  4. botão (R): a 25 m/s mostra "Too Fast For Respot"; parado repõe.
+##  5. checkpoint (tipo 3, 0x4d5188 / 0x4d43f0): passar 10 m fora do centro
+##     conta a volta; pular por cima da caixa dá "Missed Checkpoint" 5 m depois
+##     da face de entrada, repõe 4.2 s depois no começo do link (antes da
+##     caixa) e aí passar conta; largo demais (18 m) com "Off Track" andando,
+##     o tipo 3 passa na frente direto na fase 2.
 ## Uso: godot --headless --path . -s res://tests/teste_reposicao_auto.gd
 
 const DT := 0.02
@@ -191,8 +196,121 @@ func _physics_process(_dt: float) -> bool:
 					_falha("tela preta: máx %.2f, aos 0.8 s %.2f" % [marcas.alfa, main.fader.alfa])
 				if marcas.antes != c.ia.vigia_jogador.repostos:
 					_falha("o botão contou como reposição automática")
-				fase = 9
+				fase = 7
+		7:
+			_teste_checkpoint()
+			fase = 9
 		9:
 			print("teste_reposicao_auto: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 			return true
 	return false
+
+
+## 5. checkpoint com um vigia novo e um corpo parado (sem física): anda na
+## mão pela linha de chegada a 15 m/s (0.3 m por passo)
+func _teste_checkpoint() -> void:
+	var R = load("res://pista/reposicao.gd")
+	var x := RigidBody3D.new()
+	x.freeze = true
+	root.add_child(x)
+	var d: Vector3 = c._cp_frente
+	var y_cp: float = c._cp_pos.y
+	# A. passando 10 m fora do centro (o tamanho do XML é a meia medida: 15.83 m)
+	var r := _r_em(x, -20.0, 10.0, 0.0, d)
+	var w = R.new(ia, r.prog)
+	var tipo3 := false
+	for k in 170:
+		_mover(x, r, -20.0 + 0.3 * k, 10.0, 0.0, d)
+		w.passo(r, x, DT)
+		tipo3 = tipo3 or w.tipo == 3
+	print("  checkpoint 10 m fora do centro: voltas %d, pendente %s, tipo 3 %s" % [w.voltas, w.pendente, tipo3])
+	if w.voltas != 1 or w.pendente or tipo3:
+		_falha("passar 10 m fora do centro não contou a volta")
+	# B. por cima da caixa (7 m acima do centro, a meia altura é 5.94 m)
+	r = _r_em(x, -20.0, 0.0, 0.0, d)
+	w = R.new(ia, r.prog)
+	var t_perdeu := -1.0
+	var t_msg := -1.0
+	var t_3 := -1.0
+	var t_repos := -1.0
+	var tt := 0.0
+	var al := -20.0
+	for k in 400:
+		tt += DT
+		if al < 12.0:
+			al += 0.3
+		var alto := 7.0 if al > -4.0 and al < 4.0 else 0.0
+		_mover(x, r, al, 0.0, alto, d)
+		var repos: bool = w.passo(r, x, DT)
+		if w.estado == 1 and t_perdeu < 0.0:
+			t_perdeu = tt
+			print("  por cima: perdeu a %.2f m do centro (face de entrada %.2f m antes)" % [
+				al, fposmod(float(ia.s_linha), float(ia.comp)) - w._cp_ent])
+		var txt: String = w.texto()
+		if txt == "Missed Checkpoint" and t_msg < 0.0:
+			t_msg = tt
+		if txt == "Missed Checkpoint - 3" and t_3 < 0.0:
+			t_3 = tt
+		if repos:
+			t_repos = tt
+			break
+	if t_perdeu < 0.0:
+		_falha("por cima da caixa não perdeu o checkpoint")
+	else:
+		_perto(t_msg - t_perdeu, 0.2, 0.03, "por cima: Missed Checkpoint")
+		_perto(t_3 - t_perdeu, 1.2, 0.03, "por cima: contagem 3")
+		_perto(t_repos - t_perdeu, 4.2, 0.03, "por cima: reposição")
+	if w.voltas != 0:
+		_falha("por cima da caixa contou a volta")
+	var pr: float = w.ponto_repor()
+	var ini: float = float(ia.acc[w._cp_seg]) - fposmod(float(ia.s_linha), float(ia.comp))
+	print("  por cima: aceito %.2f m, repõe em %.2f m (começo do link %.2f m)" % [w.aceito, pr, ini])
+	if absf(pr - ini) > 0.05:
+		_falha("repor com checkpoint pendente não voltou pro começo do link")
+	# reposto antes da caixa: passar agora conta
+	w.recomecar(pr)
+	r = _r_em(x, pr, 0.0, 0.0, d)
+	for k in 80:
+		_mover(x, r, pr + 0.3 * k, 0.0, 0.0, d)
+		w.passo(r, x, DT)
+	print("  depois de repor: voltas %d, pendente %s, tipo %d" % [w.voltas, w.pendente, w.tipo])
+	if w.voltas != 1 or w.pendente or w.tipo != 0:
+		_falha("depois de repor, passar pela caixa não contou")
+	# C. largo demais (18 m): fora da pista andando e o tipo 3 passa na frente
+	var lado := 18.0
+	r = _r_em(x, -20.0, lado, 0.0, d)
+	w = R.new(ia, r.prog)
+	var fase_3 := -1
+	var tipo_antes := 0
+	for k in 120:
+		_mover(x, r, -20.0 + 0.3 * k, lado, 0.0, d)
+		var antes: int = w.tipo
+		w.passo(r, x, DT)
+		if w.tipo == 3 and fase_3 < 0:
+			fase_3 = w.fase
+			tipo_antes = antes
+	print("  18 m fora: tipo 3 entrou na fase %d (antes tipo %d), voltas %d" % [fase_3, tipo_antes, w.voltas])
+	if fase_3 < 0 or w.voltas != 0:
+		_falha("18 m fora do centro não deu Missed Checkpoint")
+	elif tipo_antes != 0 and fase_3 != 2:
+		_falha("tipo 3 por cima do %d não foi direto pra fase 2" % tipo_antes)
+	x.free()
+
+
+func _pos(al: float, lat: float, alto: float) -> Vector3:
+	var p: Vector3 = c._cp_pos + c._cp_frente * al + c._cp_lado * lat
+	# alto > 0: acima do centro da caixa (o chão ali fica ~1.5 m abaixo dele)
+	p.y = c._cp_pos.y + alto if alto > 0.0 else main.terrain.height_at(p.x, p.z) + 0.6
+	return p
+
+
+func _r_em(x: RigidBody3D, al: float, lat: float, alto: float, d: Vector3) -> Dictionary:
+	var p := _pos(al, lat, alto)
+	x.global_transform = Transform3D(Basis(Vector3.UP, atan2(d.x, d.z)), p)
+	return ia.novo_rastreio(p)
+
+
+func _mover(x: RigidBody3D, r: Dictionary, al: float, lat: float, alto: float, d: Vector3) -> void:
+	var p := _pos(al, lat, alto)
+	x.global_transform = Transform3D(Basis(Vector3.UP, atan2(d.x, d.z)), p)
+	ia.rastrear(r, p)

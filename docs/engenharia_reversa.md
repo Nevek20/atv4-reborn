@@ -1459,8 +1459,8 @@ vazios). Tudo vem do evento:
   corpo = veículo+0x60, velocidade em +0x20, |v| em +0x70) -> tipo 1;
   trapaça ou fora > WarningStray -> tipo 2; senão apaga o pedido.
 - Parâmetros por tipo (vtable +0x34 = 0x4d4808): (a, b, c) = 1: 0.2, 2, 3;
-  2: 0.2, 0, 3; 3: 0.2, 1, 3. 0x4d4ef0 só grava se não tem pedido (o 3
-  passa por cima). 0x4d4f60 conta: fase 1 até a, fase 2 até b (tipo 1 vira
+  2: 0.2, 0, 3; 3: 0.2, 1, 3. 0x4d4ef0 só grava se não tem pedido; o 3
+  passa por cima de um 1/2 andando e vai direto pra fase 2 com (0, 1, 3). 0x4d4f60 conta: fase 1 até a, fase 2 até b (tipo 1 vira
   2; vai pra 3 só com reposição ligada, 0x4d2d88), fase 3 até c -> devolve 4.
   0x4d35d0 com 4 chama 0x4d3538: se [0x7f4744]+0x3c == 0, 0x15bd28 repõe e o
   rastreio volta pro último aceito.
@@ -1470,6 +1470,33 @@ vazios). Tudo vem do evento:
   (0x329620 / 0x329680 -> 0x32a6c8 / 0x32a708: nó+0x44 = o registro do AIT,
   +0x20 / +0x24; sem ele, -+ nó+0x40 / 2). O link vai do nó do AIT i pro i-1
   (o sentido da corrida, = a direção +0x0c do AIT).
+- Checkpoint (tipo 3, nov/2026). Registro aceito +0x40: link, progresso
+  (+0x44), +0x48, CHECKPOINT PENDENTE (+0x4c), voltas (+0x50); +0x54..+0x64
+  = cópia salva (com o ponto de reposição). 0x4d50a8 grava o aceito e, se o
+  link mudou, +0x4c = 0x4d3168(link) (o checkpoint cuja lista de links,
+  cp+0xd4 / +0xe0 pares {link, fração}, tem esse link; 0x4d69c0). No update,
+  antes do aceite: com +0x4c, posição do veículo (vtable +0x54) na caixa
+  (cp+0x10 posição, +0x20/+0x30/+0x40 eixos, +0x50/+0x54/+0x58 MEIAS
+  medidas) e a linha 2 da matriz do link aceito . o eixo z do corpo
+  (veículo+0x60 +0x20) > 0 -> 0x4d43f0: +0x1c = cp, +0x30 = 0, copia o
+  aceito pro salvo e 0x4d50d0 apaga o +0x4c e, se o cp é tipo 2..4 e
+  0x4d2b30 = (progresso - D(voltas)) / (D(voltas + 1) - D(voltas)) > 0.25
+  (D = 0x4d2800, começo de cada volta), voltas + 1. Com avanço > 0: +0x30 =
+  0x4d5188 (pendente e rastreio noutro link, ou no mesmo e (t - fração do
+  cp) x comprimento > 5 m -> 1); trapaça não aceita; com +0x30 = 0,
+  0x4d31f0 / 0x4d32c8 andam do link aceito ao do rastreio (profundidade
+  Logic... +0x38 +0xc): achar um link com checkpoint no caminho (o aceito
+  só se pendente; o do rastreio não conta) -> 1 = +0x30 = 1 sem aceitar; 2
+  = aceita. RX01 (RAM do pause.p2s): 1 cp tipo 2, pos (536.267, 203.952,
+  1538.95), eixo de lado (-0.416, 0, 0.909), meias 15.83 / 5.94 / 1.44 m
+  (o tamanho do XML #7c14cf48 já é a meia medida), link 50 fração 0.0954 =
+  a face de entrada (o centro cai em 0.129 do link de 42.6 m).
+- Ponto de reposição (0x4d44c0, de 0.5 em 0.5 s aceitando, se +0x3c):
+  0x4d3fe0 projeta o veículo no link aceito e, com checkpoint pendente e o
+  ponto além do centro da caixa ((cp - ponto) . frente do link <= 0), usa
+  o começo do link; chão por raio (+0.1 m); 0x15bab8 grava no objeto de
+  reposição (+0x20 posição, +0x30..+0x50 base). O registro valer
+  (0x4d52b8) depende de uma flag do link (+0x20 +0x44 +8).
 - HUD 0x47bb58 (fases 2 e 3): tipo 1 WRONG_WAY (texto 0xa39), 2
   Off_Track_Go_Back (0x617), 3 MISSED_CHECKPOINT (0x526) e na fase 3 " - %d"
   com int(c - tempo) + 1. Índice do texto = posição na tabela de nomes
