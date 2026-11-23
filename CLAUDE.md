@@ -399,7 +399,8 @@ Tela de resultados (menu/resultados.gd)
   exe (0.2537 s, nova 0.8 -> 1.4, 2 fantasmas em 1.5; não anda no meio).
   Sons do Menu_IG (sfx_jogo): trocar Scroll, ponta Back, abrir / voltar
   ScrollVert, escolher sem som. Restart e Quit: "ARE YOU SURE?"
-  (LAYER_CONFIRM, começa no NO). teste_resultados confere as 3 telas com a
+  (LAYER_CONFIRM, começa no NO; a faixa dela fica no lugar da da pausa,
+  NOSSO: no jogo pula 2.7 px). teste_resultados confere as 3 telas com a
   RAM, teste_pausa o fluxo e os sons. Fora da corrida o Esc fecha o jogo.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)

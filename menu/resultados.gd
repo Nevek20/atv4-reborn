@@ -119,7 +119,7 @@ var ultimo_som := ""              # testes
 var _a := Rect2()                 # área 4:3 na tela
 var _cheia := Rect2()             # a tela toda
 var _medindo = null               # medir(): junta os textos em vez de desenhar
-var sprites_medidos: Array = []   # medir(): as caixas dos sprites desenhados (testes)
+var sprites_medidos: Array = []   # medir(): [caixa, Rect2 em px] dos sprites desenhados (testes)
 
 
 func montar() -> bool:
@@ -404,6 +404,14 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0, prof := 0) -> void:
 		return
 	var r := filho(pai, no.get("rect", [-1, -1, 2, 2]))
 	var a := alfa * float(no.get("mAlpha", 1.0))
+	if pagina == "confirma" and nome == "ID_SELECTOR_SPRITE":
+		# NOSSO (o Matheus): a faixa da confirmação é outro sprite, 2.7 px
+		# (640) à esquerda e 0.8 px mais alta que a da pausa; no jogo ela
+		# pula igual (vídeo: 7 px em 1080p), aqui fica no lugar da da pausa
+		var fp := _faixa_pausa()
+		if not fp.is_empty():
+			_sprite(fp[0], fp[1], a)
+			return
 	match String(no.get("tipo", "quadro")):
 		"sprite", "sprite_movel":
 			_sprite(no, r, a)
@@ -421,6 +429,18 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0, prof := 0) -> void:
 		_seletor(r, a)
 	elif nome == "ID_BUTTON_BAR_FRAME":
 		_barra(r, a)
+
+
+## a faixa do seletor da pausa: [nó, rect em NDC] (LAYER_SELECTOR no
+## ID_SELECTOR_FRAME, que cobre a tela)
+func _faixa_pausa() -> Array:
+	var lf := _no(lay.camadas.get("LAYER_SELECTOR", {}), "ID_LAYER_FRAME")
+	var sel := _no(lf, "ID_SELECTOR")
+	var faixa := _no(sel, "ID_SELECTOR_SPRITE")
+	if faixa.is_empty():
+		return []
+	var rs := filho(filho(Rect2(-1, -1, 2, 2), lf.get("rect", [-1, -1, 2, 2])), sel.get("rect", [-1, -1, 2, 2]))
+	return [faixa, filho(rs, faixa.rect)]
 
 
 static func _no(pai: Dictionary, nome: String) -> Dictionary:
@@ -549,7 +569,7 @@ func _sprite(no: Dictionary, r: Rect2, a: float) -> void:
 	var larga := float(no.rect[2]) >= 1.99 if no.has("rect") else false
 	var p := _px(r, larga)
 	if _medindo != null:
-		sprites_medidos.append(String(no.get("BoxName", "")))
+		sprites_medidos.append([String(no.get("BoxName", "")), p])
 		return
 	var cs := []
 	for k in ["mColourTL", "mColourTR", "mColourBR", "mColourBL"]:

@@ -2757,6 +2757,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     telas tiram o fundo. Agora só na LAYER_CONFIRM (os 2 refs dela), e o
     teste_resultados conta os sprites do fundo em cada tela (2 gradient, 6
     big_mesh, 3 mud_02 nas 4).
+  - "A listra branca das opções muda de lugar quando clica em Restart ou
+    Quit": a faixa da LAYER_CONFIRM é outro sprite, 0.0083 NDC (2.7 px em
+    640) à esquerda e 0.8 px mais alta que a do seletor. No jogo ela pula
+    igual (vídeo do Matheus, borda rasgada comparada: 7 px à esquerda e 2
+    px pra cima em 1080p); aqui a tela larga esticava o pulo pra ~2x.
+    Decisão do Matheus: faixa parada (NOSSO): a confirmação desenha a
+    faixa da pausa no lugar dela (teste_resultados confere o mesmo rect).
 - Achado e NÃO portado: depois de repor o carro pisca ((1 - cos(178 t)) / 2
   por 0.3 s) e repete enquanto encosta em outro carro, com o veículo+0xb28
   zerado nesse tempo (deve ser a batida com os outros desligada: fantasma).

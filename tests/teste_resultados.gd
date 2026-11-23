@@ -130,6 +130,7 @@ func _layout(r, arq: String, titulo: String) -> void:
 ## cada tela (o Matheus: "o menu tá transparente" quando ele sumiu)
 func _fundo(r) -> void:
 	var contas := {}
+	var faixas := {}
 	for pag in ["resultados", "pausa", "de_novo", "confirma"]:
 		if pag == "resultados":
 			r.mostrar(CL)
@@ -139,12 +140,19 @@ func _fundo(r) -> void:
 		else:
 			r.abrir_menu(pag, ["RESTART", "EXIT"])
 		r.medir()
-		var sp: Array = r.sprites_medidos
+		var sp: Array = r.sprites_medidos.map(func(x): return x[0])
 		contas[pag] = [sp.count("gradient"), sp.count("big_mesh"), sp.count("mud_02")]
+		var fx: Array = r.sprites_medidos.filter(func(x): return x[0] == "selector_line")
+		faixas[pag] = fx[-1][1] if not fx.is_empty() else Rect2()
 	print("  fundo (gradient, big_mesh, mud_02) por tela: %s" % contas)
 	for pag in contas:
 		if contas[pag] != [2, 6, 3]:
 			_falha("fundo da tela %s: %s (tem que ser 1 de cada camada)" % [pag, contas[pag]])
+	# a faixa das opções não pula na confirmação (NOSSO, pedido do Matheus)
+	var dif: Vector2 = (faixas.confirma as Rect2).position - (faixas.pausa as Rect2).position
+	print("  faixa das opções: pausa %s, confirmação %s" % [faixas.pausa, faixas.confirma])
+	if dif.length() > 0.01 or (faixas.confirma as Rect2).size != (faixas.pausa as Rect2).size:
+		_falha("a faixa das opções pula na confirmação")
 
 
 ## seletor (0x2d1280): não passa das pontas, não anda no meio da troca; as
