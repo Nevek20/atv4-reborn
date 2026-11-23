@@ -11,6 +11,9 @@ assets/carros/buggy_01..12   o número do jogo (BUGGY_NN): buggy_10 = Renegade, 
 assets/carros/truck_01..12   trucks (TRUCK_NN), truck_bonus = Lazarus
 assets/carros/escort         carro extra nosso (tools/carro_glb.py)
 assets/carros/rodas          rodas de todos (o pecas.json aponta "../rodas/...")
+assets/carros/parachoques    para-choques compráveis, buggy e truck (pecas.json "parachoques" -> "../parachoques/...")
+assets/carros/luzes          barras de luz do teto, LARGE e SMALL (pecas.json "luzes" -> "../luzes/...")
+assets/hud                   HUD do jogo: texturas com alfa, hud.json (caixas, kerning, textos en/pt) (tools/hud_jogo.py)
 assets/piloto                piloto (tools/piloto.py)
 assets/pista/rx01            objetos e céu do RX01 (tools/rx01_objetos.py)
 assets/pista/terreno         relevo, material e textura do chão (no git; hd/ fora)
@@ -160,9 +163,10 @@ carro fantasma do replay: o jogo usa.
   animações por classe, AtV e Bike) = braços da câmera de guidão. O exe
   carrega ("Rider POV Skeleton/Animation/Instance", HANDLEBAR): é usado, serve
   pra câmera de primeira pessoa do ATV.
-- Rodas: 56 pastas sem nome com roda completa (Front/RearWheel, ALLOY, TYRE)
-  nos buggies e 45 nos trucks. 56 = 8 pneus x 7 aros do catálogo: devem ser
-  as rodas compráveis (pendente "pneu e aro comprados"). Nome não achado.
+- Rodas: as pastas sem nome são os pneus compráveis, TYRE_<modelo do
+  pneu>_<tamanho> (crc32 do nome; 11 pneus x 5 tamanhos nos buggies, x 3 nos
+  trucks; TYRE_GENERIC_RALLY = #0678de18). Usadas pelo slot Pneu da oficina
+  (pecas.json "pneus"; docs/historico.md, Peças compradas).
 - Prints: modelos convertidos com o pingu2obj num projeto Godot à parte;
   as peças da suspensão saem fora do lugar porque no jogo quem posiciona
   é o cCompPlace.

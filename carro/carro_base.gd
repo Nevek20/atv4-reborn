@@ -43,6 +43,11 @@ var som_pasta := ""            # pasta dos loops do motor, se não for a do id (
 var tuning_id := ""
 var motor_escondido := false
 var _cena_glb: Node = null     # cena do .glb enquanto monta carroceria, rodas e volante
+# borrão de movimento nas rodas (NOSSO, carro/roda_borrao.gd; BORRAO_RODAS=0 desliga)
+var BORRAO_RODAS := OS.get_environment("BORRAO_RODAS") != "0"
+const RodaBorrao := preload("res://carro/roda_borrao.gd")
+var rodas_fantasma := true    # cópias pro borrão da forma das rodas (só o jogador; ia.gd desliga)
+var pecas_escolhidas := {}   # peças compradas {slot: peça} (oficina, aba Upgrade; carro/pecas.gd)
 var tune_override := {}       # ex.: {"engine": 0.3} pra simular peças compradas
 var TUNE_ENGINE := 0.81       # Internals L3 + Management L2 + Header L2 + Intake L3 + Exhaust L3
 var TUNE_BRAKE := 0.9         # Brake_Level2
@@ -69,6 +74,10 @@ const REAR_DRIVE := true      # tração só atrás (o XML não diz; buggy de mo
 var SURFACE_MU := 0.8          # pneu DIRT_BUDGET na terra comum do RX_01
 var SURFACE_AMORT := 0.0       # Damping da terra comum (COMMON_1)
 var pneu := "DIRT_BUDGET"      # classe do pneu (vehicles.xml DefaultConfig Tire)
+# NOSSO (pedido do Matheus, nov/2026): o pneu de fábrica DIRT_BUDGET aparece
+# com a roda TYRE_DIRT_BUDGET do jogo (cravos, a da tela de seleção); na
+# corrida o jogo põe a TYRE_GENERIC sem cravos (RAM). Só visual
+const DIRT_BUDGET_CRAVOS := true
 var mu_medio := 0.8            # 0x780: atrito médio das rodas no chão
 var amort_medio := 0.0         # 0x788: Damping médio das rodas no chão
 var TUNE_FRONT_BIAS := 0.5    # DefaultConfig/CustomTunings FrontBrakeBias
@@ -178,17 +187,35 @@ var pedras: Node3D = null
 # base da pintura; lascas.gd): o casco batendo no chão ou parede a >= 30 mph
 const LASCAS := true
 var lascas: Node3D = null
+# oficina de pintura (carro/pintura.gd): base, primária e secundária. {} = as
+# de fábrica (pintura.png); o main põe as salvas do jogador antes do _ready
+var cores_pintura := {}
+var _pintura = null               # camadas (carro/pintura.gd), na 1ª vez que precisa
+var _mats_pintura: Array[StandardMaterial3D] = []   # materiais com a pintura ("white")
+# oficina (aba Piloto, carro/piloto_pintura.gd): roupa, capacete, óculos,
+# luva, bota e as cores. {} = a textura do piloto.png (perfil padrão); o main
+# põe as salvas do jogador antes do _ready (os rivais ficam no padrão)
+var piloto_escolhas := {}
+var _piloto_pintura = null
+var piloto_sexo := "m"            # modelo carregado agora (piloto.json ou piloto_f.json)
 # melhoria nossa: escapes no lugar dos pontos EXHAUST do jogo (que ele não
 # usa). Storm (BUGGY_12), o único buggy sem ponto: medido no modelo, boca das
 # duas ponteiras cromadas (peças de 46 faces na traseira, embaixo), viradas
-# 27° pra fora. Chimera (TRUCK_12): pontos do jogo, mas o EXHAUST2 (esquerda)
-# tem a matriz copiada do da direita e soltava fumaça pra dentro do carro:
-# espelhado. Só a fumaça e o escape tremendo usam (frame do jogo: [ponto, direção])
+# 27° pra fora. Só a fumaça e o escape tremendo usam (frame do jogo: [ponto, direção])
+# (nov/2026, Matheus: "a do Renegade ta meio torta e a do Chimera pros lados")
+# medidos no modelo com o tests/medir_escapes.gd (a peça do cano ligada ao
+# ponto, centro do anel da ponta e eixo entre os anéis): Renegade, o ponto do
+# jogo fica 33 cm à frente e 11 cm acima da boca, o cano sobe 4.3°; Chimera,
+# o cano é reto pra trás (a matriz do jogo apontava pro lado, pela curva que
+# liga o abafador), boca no anel de trás
+var escape_jogo := {}              # os EXHAUST do _points.bin trocados pelo ESCAPE_NOSSO (o motor_treme separa as peças por eles, como antes)
 const ESCAPE_NOSSO := {
+	"BUGGY_10": [[Vector3(-0.605, 0.759, -3.053), Vector3(0.0, 0.0754, -0.997)],
+		[Vector3(0.605, 0.759, -3.053), Vector3(0.0, 0.0754, -0.997)]],
 	"BUGGY_12": [[Vector3(0.569, 0.644, -2.489), Vector3(0.45, 0.0, -0.89)],
 		[Vector3(-0.580, 0.644, -2.489), Vector3(-0.45, 0.0, -0.89)]],
-	"TRUCK_12": [[Vector3(0.5535, 0.6811, -2.1867), Vector3(1.0, 0.0, 0.0)],
-		[Vector3(-0.5531, 0.6811, -2.1867), Vector3(-1.0, 0.0, 0.0)]],
+	"TRUCK_12": [[Vector3(0.559, 0.690, -2.190), Vector3(0.0, 0.0, -1.0)],
+		[Vector3(-0.546, 0.695, -2.192), Vector3(0.0, 0.0, -1.0)]],
 }
 # melhoria nossa: pontos de luz no lugar dos do jogo (frame do jogo; troca
 # todos os pontos que começam com o nome). Pedidos do Matheus (out/2026), lentes
@@ -264,6 +291,8 @@ var luzes: Node = null
 const FAROL := true
 var farol: Node = null
 var body_mi: MeshInstance3D = null
+var parachoque_mi: MeshInstance3D = null   # para-choque comprado (carro_montagem._load_acessorios)
+var luzes_mi: MeshInstance3D = null        # barra de luz do teto comprada (idem)
 # sujeira do jogo (0x223e68, _sujeira_passo) e desenho dela (sujeira.gd, com a
 # textura GEN_DIRT_DIRT em assets/efeitos: tools/fx_jogo.py). false = carro limpo
 const SUJEIRA := true
@@ -455,6 +484,7 @@ var jitter_chao := 0.0        # veículo+0xac0: média do WheelJitter embaixo de
 # contato. No save state da batida (crash_Storm): parede de pedra, outro corpo
 # nenhum, 4.86 m/s num registro velho e 0.08 m/s encostado.
 var batida := 0.0             # corpo+0x7a0: maior velocidade de contato do último passo (m/s)
+var contatos := 0             # corpo+0x5a4: contatos do casco no último passo (pista/truques.gd)
 # o contato com o mundo fixo mais forte do passo, pro som da batida (0x36e7a8):
 # {vn, r (ponto - centro), mat}; vazio sem contato
 var contato_som := {}

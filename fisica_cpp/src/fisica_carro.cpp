@@ -14,6 +14,8 @@ void FisicaCarro::_bind_methods() {
 	ClassDB::bind_static_method("FisicaCarro", D_METHOD("trio", "t", "mu"), &FisicaCarro::trio);
 	ClassDB::bind_static_method("FisicaCarro", D_METHOD("fcurvas", "c", "mu", "x"), &FisicaCarro::fcurvas);
 	ClassDB::bind_static_method("FisicaCarro", D_METHOD("contatos_esferas", "xa", "ca", "ra", "xb", "cb", "rb"), &FisicaCarro::contatos_esferas);
+	ClassDB::bind_static_method("FisicaCarro", D_METHOD("compor_pintura", "masc", "det", "logos", "cores"), &FisicaCarro::compor_pintura);
+	ClassDB::bind_static_method("FisicaCarro", D_METHOD("compor_piloto", "tam", "partes", "cores"), &FisicaCarro::compor_piloto);
 	ClassDB::bind_method(D_METHOD("configurar", "car"), &FisicaCarro::configurar);
 	ClassDB::bind_method(D_METHOD("drivetrain", "dt", "v_f", "driven_on_ground", "forced_open"), &FisicaCarro::drivetrain);
 	ClassDB::bind_method(D_METHOD("razao_patinada", "v_f"), &FisicaCarro::razao_patinada);

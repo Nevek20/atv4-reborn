@@ -1,0 +1,197 @@
+<Root FileVersion="1.0000000" mStalePercentage="0.8" mTerminalStalePercentage="0.1" mFSStuntMultiplier="0.05">
+   <RaceStuntMultipliers POS_1="0.1" POS_2="0.09" POS_3="0.08" POS_4="0.07" POS_5="0.06" POS_6="0.05" POS_7="0.04" POS_8="0.03"/>
+   <Group Name="ATV">
+      <AirTricks>
+         <Trick Name="BarHop_Starfish" ControlCombo="TriangleHeld,StickLeft" ScorePoints="1000" HoldPoints="300">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="BarHop_Starfish_Into" ExitClip="BarHop_Starfish_Into" TrickSpeedFactor="1.3" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="Heel_Clicker" ControlCombo="TriangleHeld,StickRight" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="HeelClicker" ExitClip="HeelClicker" TrickSpeedFactor="1.1" ReturnSpeedFactor="1" LoopFrame="23" ReturnFrame="23" TrickFrame="23" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="6"/>
+         </Trick>
+         <Trick Name="Nac_Nac" ControlCombo="TriangleHeld,StickUp" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="NacNac_Into" ExitClip="NacNac_Out" TrickSpeedFactor="1.5" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="No_Hander" ControlCombo="TriangleHeld,StickDown" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="No_Hander_Into" ExitClip="No_Hander_Into" TrickSpeedFactor="1.25" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="12"/>
+         </Trick>
+         <Trick Name="Indian_Air" ControlCombo="TriangleHeld,StickDownLeft" ScorePoints="1000" HoldPoints="300">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Indian_Air_Into" ExitClip="Indian_Air_Out" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="15" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="Nothing" ControlCombo="TriangleHeld,StickUpRight" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Nothing_Into" ExitClip="Nothing_Into" TrickSpeedFactor="1.15" ReturnSpeedFactor="1.15" LoopFrame="15" ReturnFrame="15" TrickFrame="15" BlendFrame="4" ReverseOut="1" SafeFrame="8"/>
+         </Trick>
+         <Trick Name="Point_Back" ControlCombo="TriangleHeld,StickUpLeft" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="PointBack_Into" ExitClip="PointBack_Into" TrickSpeedFactor="1.3" ReturnSpeedFactor="0.6" LoopFrame="10" ReturnFrame="10" TrickFrame="10" BlendFrame="4" ReverseOut="1" SafeFrame="6"/>
+         </Trick>
+         <Trick Name="Rodeo" ControlCombo="TriangleHeld,StickDownRight" ScorePoints="750" HoldPoints="250">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Rodeo_Into" ExitClip="Rodeo_Out" TrickSpeedFactor="1.5" ReturnSpeedFactor="1.5" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="12"/>
+         </Trick>
+         <Trick Name="Superman" ControlCombo="CircleHeld,StickLeft" ScorePoints="1000" HoldPoints="250">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Superman_Into" ExitClip="Superman_Out" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="15" ReturnFrame="0" TrickFrame="15" BlendFrame="4" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="No_Footed_Nac" ControlCombo="CircleHeld,StickRight" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="NoFooted_Nac_Into" ExitClip="NoFooted_Nac_Out" TrickSpeedFactor="1.25" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="7"/>
+         </Trick>
+         <Trick Name="Pendulum" ControlCombo="CircleHeld,StickUp" ScorePoints="1500" HoldPoints="500">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Pendulum" ExitClip="Pendulum" TrickSpeedFactor="1.0" ReturnSpeedFactor="1.0" LoopFrame="33" ReturnFrame="33" TrickFrame="33" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="HartAttack" ControlCombo="CircleHeld,StickDown" ScorePoints="1500" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="HartAttack_Into" ExitClip="HartAttack_Out" TrickSpeedFactor="1.25" ReturnSpeedFactor="1" LoopFrame="25" ReturnFrame="0" TrickFrame="25" BlendFrame="4" ReverseOut="0" SafeFrame="12"/>
+         </Trick>
+         <Trick Name="Cliffhanger" ControlCombo="CircleHeld,StickDownRight" ScorePoints="2000" HoldPoints="500">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Cliffhanger_Into" ExitClip="Cliffhanger_Into" TrickSpeedFactor="1.25" ReturnSpeedFactor="1" LoopFrame="25" ReturnFrame="25" TrickFrame="25" BlendFrame="4" ReverseOut="1" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="LazyBoy" ControlCombo="CircleHeld,StickDownLeft" ScorePoints="2000" HoldPoints="500">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="LazyBoy_Into" ExitClip="LazyBoy_Into" TrickSpeedFactor="1.15" ReturnSpeedFactor="1.0" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="10"/>
+         </Trick>
+         <Trick Name="Saran_Wrap" ControlCombo="CircleHeld,StickUpLeft" ScorePoints="750" HoldPoints="250">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Saran_Wrap" ExitClip="Saran_Wrap" TrickSpeedFactor="1.0" ReturnSpeedFactor="1.0" LoopFrame="33" ReturnFrame="33" TrickFrame="33" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="10"/>
+         </Trick>
+         <Trick Name="Stripper" ControlCombo="CircleHeld,StickUpRight" ScorePoints="1000" HoldPoints="250">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Stripper_Into" ExitClip="Stripper_Into" TrickSpeedFactor="1.5" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="3"/>
+         </Trick>
+         <Trick Name="Holyman" ControlCombo="TriangleCircleHeld,StickLeft" ScorePoints="2000" HoldPoints="500">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="HolyMan_Into" ExitClip="HolyMan_Out" TrickSpeedFactor="1.4" ReturnSpeedFactor="1.25" LoopFrame="30" ReturnFrame="0" TrickFrame="30" BlendFrame="4" ReverseOut="0" SafeFrame="6"/>
+         </Trick>
+         <Trick Name="Tsunami" ControlCombo="TriangleCircleHeld,StickRight" ScorePoints="1500" HoldPoints="400">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Tsunami_Into" ExitClip="Tsunami_Out" TrickSpeedFactor="1.5" ReturnSpeedFactor="1" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="8"/>
+         </Trick>
+         <Trick Name="Three60_Body_Varial" ControlCombo="TriangleCircleHeld,StickUp" ScorePoints="2000" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Carothers_Varial" ExitClip="Carothers_Varial" TrickSpeedFactor="1.25" ReturnSpeedFactor="1" LoopFrame="50" ReturnFrame="50" TrickFrame="50" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="9"/>
+         </Trick>
+         <Trick Name="DeadBody" ControlCombo="TriangleCircleHeld,StickDown" ScorePoints="2000" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="DeadBody_Into" ExitClip="DeadBody_Into" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="7"/>
+         </Trick>
+         <Trick Name="Front_Varial" ControlCombo="TriangleCircleHeld,StickDownLeft" ScorePoints="2000" HoldPoints="200">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="Front_Varial" ExitClip="Front_Varial" TrickSpeedFactor="1.1" ReturnSpeedFactor="1" LoopFrame="33" ReturnFrame="33" TrickFrame="33" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="7"/>
+         </Trick>
+         <Trick Name="Running_Man" ControlCombo="TriangleCircleHeld,StickDownRight" ScorePoints="1500" HoldPoints="250">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="RunningMan" ExitClip="RunningMan" TrickSpeedFactor="1.25" ReturnSpeedFactor="1.0" LoopFrame="45" ReturnFrame="45" TrickFrame="45" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="10"/>
+         </Trick>
+         <Trick Name="Rock_Solid" ControlCombo="TriangleCircleHeld,StickUpRight" ScorePoints="1500" HoldPoints="250">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="RockSolid_Into" ExitClip="RockSolid_Into" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="0" ReverseOut="1" SafeFrame="4"/>
+         </Trick>
+         <Trick Name="Tweak_Air" ControlCombo="TriangleCircleHeld,StickUpLeft" ScorePoints="1500" HoldPoints="400">
+            <AnimData AnimGroup="ATV_Stunts" MainClip="OneHander_CatNac_Into" ExitClip="OneHander_CatNac_Out" TrickSpeedFactor="1.15" ReturnSpeedFactor="1.1" LoopFrame="25" ReturnFrame="0" TrickFrame="25" BlendFrame="0" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+      </AirTricks>
+      <GroundTricks>
+         <Wheelie Score="150" Accel="0" Max="1000"/>
+         <Bicycle_Left Score="150" Accel="0" Max="1000"/>
+         <Bicycle_Right Score="150" Accel="0" Max="1000"/>
+         <Endo Score="150" Accel="0" Max="1000"/>
+      </GroundTricks>
+      <SpinTricks>
+         <Backward_Flip Score="1750"/>
+         <Forward_Flip Score="2500"/>
+      </SpinTricks>
+      <Prestige>
+         <Holeshot Score="1000"/>
+      </Prestige>
+   </Group>
+   <Group Name="Bike">
+      <AirTricks>
+         <Trick Name="BarHop_Starfish" ControlCombo="TriangleHeld,StickLeft" ScorePoints="1000" HoldPoints="300">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="BarHop_Starfish_Into" ExitClip="BarHop_Starfish_Into" TrickSpeedFactor="1.3" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="Heel_Clicker" ControlCombo="TriangleHeld,StickRight" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Heel_Clicker" ExitClip="Heel_Clicker" TrickSpeedFactor="1.1" ReturnSpeedFactor="1" LoopFrame="23" ReturnFrame="23" TrickFrame="23" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="6"/>
+         </Trick>
+         <Trick Name="Nac_Nac" ControlCombo="TriangleHeld,StickUp" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="NacNac_Into" ExitClip="NacNac_Out" TrickSpeedFactor="1.5" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="No_Hander" ControlCombo="TriangleHeld,StickDown" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="No_Hander_Into" ExitClip="No_Hander_Into" TrickSpeedFactor="1.25" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="12"/>
+         </Trick>
+         <Trick Name="Indian_Air" ControlCombo="TriangleHeld,StickDownLeft" ScorePoints="1000" HoldPoints="300">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Indian_Air_Into" ExitClip="Indian_Air_Out" TrickSpeedFactor="1.1" ReturnSpeedFactor="1.25" LoopFrame="15" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="Nothing" ControlCombo="TriangleHeld,StickUpRight" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Nothing_Into" ExitClip="Nothing_Into" TrickSpeedFactor="1.15" ReturnSpeedFactor="1.15" LoopFrame="15" ReturnFrame="15" TrickFrame="15" BlendFrame="0" ReverseOut="1" SafeFrame="8"/>
+         </Trick>
+         <Trick Name="Point_Back" ControlCombo="TriangleHeld,StickUpLeft" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="PointBack_Into" ExitClip="PointBack_Into" TrickSpeedFactor="1.3" ReturnSpeedFactor="0.61" LoopFrame="10" ReturnFrame="10" TrickFrame="10" BlendFrame="4" ReverseOut="1" SafeFrame="6"/>
+         </Trick>
+         <Trick Name="Rodeo" ControlCombo="TriangleHeld,StickDownRight" ScorePoints="750" HoldPoints="250">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Rodeo_Into" ExitClip="Rodeo_Out" TrickSpeedFactor="1.5" ReturnSpeedFactor="1.5" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="12"/>
+         </Trick>
+         <Trick Name="Superman" ControlCombo="CircleHeld,StickLeft" ScorePoints="1000" HoldPoints="250">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Superman_Into" ExitClip="Superman_Out" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="15" ReturnFrame="0" TrickFrame="15" BlendFrame="4" ReverseOut="0" SafeFrame="4"/>
+         </Trick>
+         <Trick Name="No_Footed_Nac" ControlCombo="CircleHeld,StickRight" ScorePoints="500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="NoFooted_Nac_Into" ExitClip="NoFooted_Nac_Out" TrickSpeedFactor="1.25" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="7"/>
+         </Trick>
+         <Trick Name="Pendulum" ControlCombo="CircleHeld,StickUp" ScorePoints="1500" HoldPoints="500">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Pendulum" ExitClip="Pendulum" TrickSpeedFactor="1.0" ReturnSpeedFactor="1.0" LoopFrame="33" ReturnFrame="33" TrickFrame="33" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="HartAttack" ControlCombo="CircleHeld,StickDown" ScorePoints="1500" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="HartAttack_Into" ExitClip="HartAttack_Out" TrickSpeedFactor="1.25" ReturnSpeedFactor="1" LoopFrame="29" ReturnFrame="0" TrickFrame="29" BlendFrame="4" ReverseOut="0" SafeFrame="12"/>
+         </Trick>
+         <Trick Name="Cliffhanger" ControlCombo="CircleHeld,StickDownRight" ScorePoints="2000" HoldPoints="500">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Cliffhanger_Into" ExitClip="Cliffhanger_Into" TrickSpeedFactor="1.25" ReturnSpeedFactor="1" LoopFrame="25" ReturnFrame="25" TrickFrame="25" BlendFrame="4" ReverseOut="1" SafeFrame="5"/>
+         </Trick>
+         <Trick Name="LazyBoy" ControlCombo="CircleHeld,StickDownLeft" ScorePoints="2000" HoldPoints="500">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="LazyBoy_Into" ExitClip="LazyBoy_Into" TrickSpeedFactor="1.15" ReturnSpeedFactor="1.0" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="10"/>
+         </Trick>
+         <Trick Name="Saran_Wrap" ControlCombo="CircleHeld,StickUpLeft" ScorePoints="750" HoldPoints="250">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Saran_Wrap" ExitClip="Saran_Wrap" TrickSpeedFactor="1.0" ReturnSpeedFactor="1.0" LoopFrame="33" ReturnFrame="33" TrickFrame="33" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="10"/>
+         </Trick>
+         <Trick Name="Stripper" ControlCombo="CircleHeld,StickUpRight" ScorePoints="1000" HoldPoints="250">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Stripper_Into" ExitClip="Stripper_Into" TrickSpeedFactor="1.5" ReturnSpeedFactor="1.25" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="3"/>
+         </Trick>
+         <Trick Name="Holyman" ControlCombo="TriangleCircleHeld,StickLeft" ScorePoints="2000" HoldPoints="500">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="HolyMan_Into" ExitClip="HolyMan_Out" TrickSpeedFactor="1.4" ReturnSpeedFactor="1.25" LoopFrame="30" ReturnFrame="0" TrickFrame="30" BlendFrame="4" ReverseOut="0" SafeFrame="6"/>
+         </Trick>
+         <Trick Name="Tsunami" ControlCombo="TriangleCircleHeld,StickRight" ScorePoints="1500" HoldPoints="400">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Tsunami_Into" ExitClip="Tsunami_Out" TrickSpeedFactor="1.5" ReturnSpeedFactor="1" LoopFrame="20" ReturnFrame="0" TrickFrame="20" BlendFrame="4" ReverseOut="0" SafeFrame="8"/>
+         </Trick>
+         <Trick Name="Three60_Body_Varial" ControlCombo="TriangleCircleHeld,StickUp" ScorePoints="2000" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Carothers_Varial" ExitClip="Carothers_Varial" TrickSpeedFactor="1.25" ReturnSpeedFactor="1" LoopFrame="50" ReturnFrame="50" TrickFrame="50" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="9"/>
+         </Trick>
+         <Trick Name="DeadBody" ControlCombo="TriangleCircleHeld,StickDown" ScorePoints="2000" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="DeadBody_Into" ExitClip="DeadBody_Into" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="4" ReverseOut="1" SafeFrame="7"/>
+         </Trick>
+         <Trick Name="Front_Varial" ControlCombo="TriangleCircleHeld,StickDownLeft" ScorePoints="2000" HoldPoints="200">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="Front_Varial" ExitClip="Front_Varial" TrickSpeedFactor="1.1" ReturnSpeedFactor="1" LoopFrame="33" ReturnFrame="33" TrickFrame="33" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="7"/>
+         </Trick>
+         <Trick Name="Running_Man" ControlCombo="TriangleCircleHeld,StickDownRight" ScorePoints="1500" HoldPoints="250">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="RunningMan" ExitClip="RunningMan" TrickSpeedFactor="1.25" ReturnSpeedFactor="1.0" LoopFrame="45" ReturnFrame="45" TrickFrame="45" BlendFrame="0" ReverseOut="0" HoldTrick="0" SafeFrame="10"/>
+         </Trick>
+         <Trick Name="RockSolid" ControlCombo="TriangleCircleHeld,StickUpRight" ScorePoints="1500" HoldPoints="250">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="RockSolid_Into" ExitClip="RockSolid_Into" TrickSpeedFactor="1" ReturnSpeedFactor="1" LoopFrame="20" ReturnFrame="20" TrickFrame="20" BlendFrame="0" ReverseOut="1" SafeFrame="4"/>
+         </Trick>
+         <Trick Name="Tweak_Air" ControlCombo="TriangleCircleHeld,StickUpLeft" ScorePoints="1500" HoldPoints="400">
+            <AnimData AnimGroup="Bike_Stunts" MainClip="OneHander_CatNac_Into" ExitClip="OneHander_CatNac_Out" TrickSpeedFactor="1.15" ReturnSpeedFactor="1.1" LoopFrame="25" ReturnFrame="0" TrickFrame="25" BlendFrame="0" ReverseOut="0" SafeFrame="5"/>
+         </Trick>
+      </AirTricks>
+      <GroundTricks>
+         <Wheelie Score="150" Accel="0" Max="1000"/>
+         <Endo Score="150" Accel="0" Max="1000"/>
+      </GroundTricks>
+      <SpinTricks>
+         <Backward_Flip Score="1750"/>
+         <Forward_Flip Score="2500"/>
+      </SpinTricks>
+      <Prestige>
+         <Holeshot Score="1000"/>
+      </Prestige>
+   </Group>
+   <Group Name="Buggy">
+      <GroundTricks>
+         <Slide Score="500" Accel="0.25" Max="99999"/>
+         <AirTime Score="500" Accel="0.25" Max="99999"/>
+      </GroundTricks>
+      <Prestige>
+         <Holeshot Score="1000"/>
+      </Prestige>
+   </Group>
+   <Group Name="Truck">
+      <GroundTricks>
+         <Slide Score="500" Accel="0.25" Max="99999"/>
+         <AirTime Score="500" Accel="0.25" Max="99999"/>
+      </GroundTricks>
+      <Prestige>
+         <Holeshot Score="1000"/>
+      </Prestige>
+   </Group>
+</Root>

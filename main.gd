@@ -24,7 +24,8 @@ const VEHICLES := [
 	# custom (0.61; o Level0 de fábrica dá 0.45, vehicle_data.factory_tuning)
 	{"name": "Sphinx speedrun", "id": "BUGGY_04", "cams": "BuggyCamSet_04", "dir": "res://assets/carros/buggy_04",
 		"data": "res://data/vehicles/buggy_04.xml", "points": "res://data/vehicles/buggy_04_points.bin", "fp": [0.35, 0.48, 0.00],
-		"livery": "pintura_speedrun.png", "tune": {"engine": 1.0, "mass": 1.0, "shift": 1.0, "final": 0.61, "tire": "DIRT_PREMIUM"}},
+		"livery": "pintura_speedrun.png", "tune": {"engine": 1.0, "mass": 1.0, "shift": 1.0, "final": 0.61, "tire": "DIRT_PREMIUM"},
+		"so_jogador": true},             # NOSSO (referência do speedrun): rival não usa
 	# os outros buggies, na ordem da lista do jogo (tools/gerar_buggies.py)
 	{"name": "Mosquito", "id": "BUGGY_01", "cams": "BuggyCamSet_01", "dir": "res://assets/carros/buggy_01",
 		"data": "res://data/vehicles/buggy_01.xml", "points": "res://data/vehicles/buggy_01_points.bin", "fp": [0.35, 0.46, 0.00]},
@@ -127,6 +128,13 @@ var car  # instância de car.gd (sem tipo estático de propósito: métodos pró
 var cam: Camera3D
 var hud: Label
 var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
+var hud_basico                           # menu/hud_basico.gd: marcha e velocidade (NOSSO, sem assets/hud)
+var resultados                           # menu/resultados.gd: tela de resultados da corrida (PostRace.fex)
+var fader                                # menu/fader.gd: tela preta da reposição do jogador
+var _resultado_visto := false            # já mostrou nesta chegada
+var _resultado_t := 0.0                  # relógio da tabela (0x4c18e0: refaz a cada 2 s)
+var hud_jogo                             # menu/hud_jogo.gd: o HUD do jogo (HUD_CIRCUIT.xml)
+var hud_texto := true                    # F1: tudo -> só o HUD básico -> nada
 var cam_mode := 0                        # 0 perto, 1 longe, 2 capô, 3 para-choque, 4 piloto
 var terrain
 var corrida                              # pista/corrida.gd (Enter começa, Backspace volta pro treino)
@@ -174,6 +182,9 @@ func _ready() -> void:
 	# a câmera é posta no _process a partir do carro interpolado
 	cam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	cam.global_position = spawn_point() + Vector3(-8, 4, 0)
+	# ordem de desenho dos efeitos transparentes pelo carro (efeitos/ordem_fx.gd,
+	# NOSSO): a poeira e a água não trocam de ordem entre si e piscam
+	add_child(preload("res://efeitos/ordem_fx.gd").new(self))
 
 	var layer := CanvasLayer.new()
 	add_child(layer)
@@ -193,8 +204,31 @@ func _ready() -> void:
 	fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	fps_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(fps_label)
+	hud_basico = preload("res://menu/hud_basico.gd").new(self)
+	layer.add_child(hud_basico)
+	hud_jogo = preload("res://menu/hud_jogo.gd").new()
+	if hud_jogo.montar():
+		layer.add_child(hud_jogo)
+		layer.move_child(hud_jogo, 0)         # embaixo do texto de depuração e dos menus
+	else:
+		hud_jogo.free()
+		hud_jogo = null
+	# tela preta da reposição (fader da câmera do jogo), embaixo do HUD
+	fader = preload("res://menu/fader.gd").new()
+	layer.add_child(fader)
+	layer.move_child(fader, 0)
+	resultados = preload("res://menu/resultados.gd").new()
+	if resultados.montar():
+		layer.add_child(resultados)
+		resultados.dono = self
+		resultados.process_mode = Node.PROCESS_MODE_ALWAYS   # a pausa congela o resto
+	else:
+		resultados.free()
+		resultados = null
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), fps_label.visible)
 	_make_menu(layer)
+	oficina = preload("res://menu/oficina.gd").new(self)   # O: pintura (provisório até ter a Garagem)
+	layer.add_child(oficina)
 	cam_piloto = CameraPiloto.new()
 	cam_piloto.name = "CameraPiloto"
 	add_child(cam_piloto)
@@ -242,12 +276,19 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 	var v: Dictionary = frota()[i]
 	car = Car.new()
 	configurar(car, v)
+	car.cores_pintura = preload("res://carro/pintura.gd").salvas(car.chave())   # oficina (só o jogador)
+	car.piloto_escolhas = preload("res://carro/piloto_pintura.gd").salvas()
+	car.pecas_escolhidas = preload("res://carro/pecas.gd").salvas(car.chave())     # oficina, Upgrade
 	car.terrain = terrain
 	car.objetos = objetos
 	if objetos:
 		objetos.carro = car
 	add_child(car)
 	car.manual = manual
+	# Tune & Setup (GearboxType): o câmbio escolhido vale ao montar; o M troca na hora (NOSSO)
+	var gt := String(car.pecas_escolhidas.get("GearboxType", ""))
+	if gt != "":
+		car.manual = gt.ends_with("Manual")
 	car.reset_to(pos, yaw)
 	gcams.clear()
 	cam_ready = false
@@ -366,7 +407,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_F1:
-				hud.visible = not hud.visible
+				# tudo -> só marcha e velocidade -> nada (os testes de print põem
+				# hud.visible = false e somem os dois)
+				if hud.visible and hud_texto:
+					hud_texto = false
+					hud.text = ""
+				elif hud.visible:
+					hud.visible = false
+				else:
+					hud.visible = true
+					hud_texto = true
+					_hud_t = 0.0
 			KEY_F2:
 				fps_label.visible = not fps_label.visible
 				# mede o tempo de desenho na CPU e na GPU (só com o F2 ligado)
@@ -377,6 +428,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_troca_camera()
 			KEY_G:
 				cam_piloto.ligado = not cam_piloto.ligado
+			KEY_O:
+				oficina.abrir()
 			KEY_R:
 				if corrida and corrida.botao_repor():
 					return              # na corrida: o botão de reposição do jogo
@@ -388,6 +441,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				car.limpar_sujeira()        # recomeço da corrida: o jogo zera (0x223db0)
 				reset_camera()
 			KEY_ENTER, KEY_KP_ENTER:
+				if _continuar_resultados():
+					return
 				if corrida:
 					corrida.comecar()
 			KEY_BACKSPACE:
@@ -414,7 +469,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					car.painel.mover({KEY_9: Vector2(0, -0.01), KEY_0: Vector2(0, 0.01),
 						KEY_MINUS: Vector2(-0.01, 0), KEY_EQUAL: Vector2(0.01, 0)}[event.physical_keycode])
 			KEY_ESCAPE:
-				get_tree().quit()
+				if not abrir_pausa():
+					get_tree().quit()       # fora da corrida o Esc fecha o jogo
 	# controle: Select troca a câmera (o A é a embreagem, car.gd, e pula a introdução)
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_BACK:
 		_troca_camera()
@@ -422,6 +478,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A \
 			and corrida and corrida.pode_pular():
 		corrida.comecar()
+	# Start / A na tela de resultados: Continue; Start na corrida: pausa
+	if event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_START, JOY_BUTTON_A]:
+		if not _continuar_resultados() and event.button_index == JOY_BUTTON_START:
+			abrir_pausa()
 	# olhar livre na câmera do piloto e órbita nas de corrida: botão direito
 	# do mouse apertado
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -439,6 +499,7 @@ func _troca_camera() -> void:
 
 
 # ------------------------------------------------------------ menu de carros
+var oficina                              # menu/oficina.gd (pintura do carro)
 var menu: ItemList
 var menu_idx := []                       # linha do menu -> índice em frota()
 
@@ -497,6 +558,11 @@ func _swap_vehicle(i: int) -> void:
 	spawn_vehicle(i, Vector3(p.x, terrain.height_at(p.x, p.z) + 1.5, p.z), car.global_rotation.y)
 
 
+## monta o mesmo carro de novo no lugar (oficina: peças novas mudam a física)
+func remontar_carro() -> void:
+	_swap_vehicle(veh_idx)
+
+
 func _ajusta_piloto(k: int) -> void:
 	match k:
 		KEY_1: car.FP_UP -= 0.02
@@ -524,7 +590,18 @@ func _process(delta: float) -> void:
 		fps_label.text = "%d FPS" % f + _medidor(delta)
 		fps_label.add_theme_color_override("font_color",
 			Color(0.5, 1, 0.5) if f >= 55 else (Color(1, 0.9, 0.3) if f >= 30 else Color(1, 0.4, 0.4)))
-	if not hud.visible:
+	_passo_resultados()
+	var mostra_hud: bool = hud.visible and not (corrida and corrida.pode_pular()) \
+		and not (resultados and resultados.visible)
+	if hud_jogo:
+		# o HUD do jogo vale em todas as câmeras, como no PS2
+		hud_jogo.visible = mostra_hud
+		if mostra_hud:
+			hud_jogo.atualizar(delta, car, corrida)
+		hud_basico.atualizar(delta, car, false)
+	else:
+		hud_basico.atualizar(delta, car, mostra_hud and cam_mode <= 1)
+	if not hud.visible or not hud_texto:
 		return
 	# CPU: o texto grande do HUD 10x por segundo (era a cada quadro)
 	_hud_t -= delta
@@ -538,7 +615,7 @@ func _process(delta: float) -> void:
 			car.FP_UP, car.FP_BACK, car.FP_PITCH, car.FP_FOV, "ligados" if cam_piloto.ligado else "desligados"]
 		if car.painel:
 			fp += "\npainel: lado %+.2f (-/=)  altura %+.2f (9/0)" % [car.painel.ajuste.x, car.painel.ajuste.y]
-	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: esconder tudo   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
+	hud.text = "%d km/h   %d mph\nmarcha %s   %d rpm   câmbio %s   sujeira %d%%%s\nfísica: %s (%s)\n\nW/S ou setas: acelerar/frear (parado, segurar S = ré)   A/D: virar   Espaço ou A: embreagem (toque virando e acelerando = Clutch Turn)\nP: pneus portados/antigos   L: lateral jogo/remendo   M: câmbio auto/manual   E/Q: sobe/desce marcha   R: desvirar   T: voltar pro início   Enter: corrida (5 voltas)   Backspace: treino livre\nC ou Select: câmera (%s)%s   V: próximo carro   Tab: menu de carros   O: pintura   F: girar o modelo   B: volante (%s)   N: som %s   H: farol %s   F1: HUD (tudo / só o do jogo / nada)   F2: FPS   F3: C++ liga/desliga   Esc: sair" % [
 		int(kmh), int(kmh / 1.609), car.gear_label(), int(car.rpm), "MANUAL" if car.manual else "AUTO", int(car.sujeira_nivel * 100.0), (" (%s)" % car.sujeira.aviso if car.sujeira and car.sujeira.aviso != "" else ("" if car.sujeira else " (sem assets/efeitos: rode o fx_jogo)")), car.vehicle_name, ("pneus portados do jogo" if car.use_ported else "pneus antigos") + (", lateral do jogo" if car.lateral_game else ", lateral remendo"), CAM_NAMES[cam_mode],
 		" (analógico direito ou botão direito do mouse: girar em volta do carro)" if ORBITA and cam_mode <= 1 else "", car.volante_estilo if car.sw_malha else "do jogo", ("mudo" if AudioServer.is_bus_mute(0) else (car.som.pasta.get_file() if car.som else "sem loops")),
 		("ligado" if Farol.ligado else "desligado") if car.farol else "(sem farol no modelo)"]
@@ -799,3 +876,106 @@ func _passo_tremida(delta: float, j, s: Dictionary) -> void:
 	while jit_acc >= GameCamera.STEP:
 		jit_acc -= GameCamera.STEP
 		j.passo(GameCamera.STEP, s.speed, s.chao, s.batida)
+
+
+## tela de resultados: entra na sua chegada já com a tabela, refeita a cada
+## 2 s; some se a corrida recomeçar ou parar
+func _passo_resultados() -> void:
+	if resultados == null:
+		return
+	var chegou: bool = corrida != null and corrida.estado == corrida.CHEGOU
+	if not chegou:
+		_resultado_visto = false
+		if resultados.visible:
+			resultados.esconder()
+		return
+	if not _resultado_visto and corrida.resultados_prontos():
+		_resultado_visto = true
+		# NOSSO (pedido do Matheus): já entra com a tabela; no jogo entra vazia
+		# (0x4c1730 limpa as linhas) e a 1ª vez vem aos 3 s (relógio em -1)
+		resultados.mostrar(corrida.tabela())
+		_resultado_t = 0.0
+	if resultados.visible and resultados.pagina == "resultados":
+		_resultado_t += get_process_delta_time()
+		if _resultado_t >= corrida.RESULTADO_PASSO:
+			_resultado_t = 0.0
+			resultados.linhas_de(corrida.tabela())
+
+
+## Continue (Enter, Start ou A) nos resultados: a Race again (Restart /
+## Exit, LAYER_FINISHED_RACE; no jogo as páginas cRecordsPage e
+## cRaceFinishedPage vêm antes, ainda não portadas)
+func _continuar_resultados() -> bool:
+	if resultados == null or not resultados.visible or resultados.pagina != "resultados":
+		return false
+	resultados.abrir_menu("de_novo", ["RESTART", "EXIT"])   # 0x4cd270
+	return true
+
+
+## menu de pausa (Esc / Start na corrida): o jogo congela (get_tree().paused)
+## e a tela (menu/resultados.gd, pagina "pausa") fica por cima. Opções do
+## 0x462190: Resume, Respot (só correndo e abaixo de 40 mph, 0x4613a0),
+## Restart e Quit (com o "ARE YOU SURE?", pagina "confirma"), Game options,
+## Photographer. Devolve false fora da corrida.
+var pausado := false
+
+
+func abrir_pausa() -> bool:
+	if pausado or resultados == null or corrida == null or resultados.visible:
+		return false
+	if not (corrida.estado in [corrida.CONTANDO, corrida.CORRENDO]):
+		return false
+	var ops := ["Resume"]
+	if corrida.estado == corrida.CORRENDO and corrida.ia and corrida.ia.vigia_jogador \
+			and corrida.ia.vigia_jogador.pode_botao(car):
+		ops.append("Respot")
+	ops += ["RESTART", "QUIT", "Game_options", "Photographer"]
+	pausado = true
+	resultados.abrir_menu("pausa", ops)
+	get_tree().paused = true
+	# o HUD some na pausa (o _process daqui para junto e não esconderia)
+	if hud_jogo:
+		hud_jogo.visible = false
+	hud_basico.atualizar(0.0, car, false)
+	return true
+
+
+func fechar_pausa() -> void:
+	pausado = false
+	get_tree().paused = false
+	if resultados:
+		resultados.esconder()
+
+
+## escolha numa tela com seletor (menu/resultados.gd)
+func menu_acao(pagina: String, acao: String, op: String) -> void:
+	if pagina == "pausa":
+		if acao == "voltar":
+			fechar_pausa()
+			return
+		match op:
+			"Resume":
+				fechar_pausa()
+			"Respot":
+				fechar_pausa()
+				corrida.botao_repor()
+			"RESTART", "QUIT":
+				# pedem confirmação (0x4add68 casos 1 e 2 -> 0x4b0308)
+				resultados.abrir_confirma(op, op, "SURE_RESTART" if op == "RESTART" else "SURE_QUIT")
+			_:
+				pass                       # Game options e Photographer: ainda não portados
+	elif pagina == "confirma":
+		if acao == "ok" and resultados.confirma.sim:
+			fechar_pausa()
+			if op == "RESTART":
+				corrida.comecar()          # NOSSO: recomeça com a introdução (Enter pula)
+			else:
+				corrida.parar()            # NOSSO: Quit volta pro treino livre (no jogo, pros menus)
+		else:
+			resultados.voltar_pausa()      # NO, ou Back
+	elif pagina == "de_novo" and acao == "ok":
+		resultados.esconder()
+		if op == "RESTART":
+			corrida.comecar()
+		else:
+			corrida.parar()                # Exit (NOSSO: treino livre)

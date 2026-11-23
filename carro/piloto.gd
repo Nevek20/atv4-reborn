@@ -17,6 +17,7 @@ var root_pos := Vector3.ZERO      # osso ROOT na animação: vai em cima do ARSE
 # câmera do piloto (nossa, não existe no buggy do jogo): o capacete some (osso
 # head encolhido) e ficam o corpo, os braços e as mãos no volante
 var sem_cabeca := false
+var rabo = null                    # carro/rabo.gd (piloto feminino: o rabo de cavalo balançando)
 var _cabeca := -1
 var _esp := PackedInt32Array()
 var _tempos := PackedFloat32Array()
@@ -88,6 +89,14 @@ var _cpp_vol := false          # o C++ foi configurado já com o volante (a tabe
 
 
 ## (re)copia tudo pro C++ depois de montar (carregar, prender_no_volante)
+
+## oficina (aba Piloto): troca a textura do piloto (carro/piloto_pintura.gd)
+func pintar(tex: Texture2D) -> void:
+	if malha and malha.mesh:
+		var m := malha.mesh.surface_get_material(0) as StandardMaterial3D
+		if m:
+			m.albedo_texture = tex
+
 func _liga_cpp() -> void:
 	_cpp = null
 	_cpp_vol = false
@@ -100,8 +109,8 @@ func _liga_cpp() -> void:
 
 
 ## monta tudo a partir de dir/piloto.json; false se o asset não existe
-func carregar(dir: String, cull: int) -> bool:
-	var arq := dir.path_join("piloto.json")
+func carregar(dir: String, cull: int, arquivo := "piloto.json") -> bool:
+	var arq := dir.path_join(arquivo)
 	if not FileAccess.file_exists(arq):
 		return false
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(arq))
@@ -224,7 +233,20 @@ func carregar(dir: String, cull: int) -> bool:
 			_punho[mao] = g0[mao].affine_inverse() * (soma / cnt)
 	pose(0.0)
 	_liga_cpp()
+	# rabo de cavalo: modelo à parte, no espaço do corpo (o mesmo do esqueleto)
+	if d.has("rabo"):
+		rabo = preload("res://carro/rabo.gd").new()
+		add_child(rabo)
+		rabo.montar(d.rabo, mat, self)
 	return true
+
+
+## rabo de cavalo: um quadro da tela (v = |v| do carro em m/s). Some junto
+## com a cabeça (câmera do piloto)
+func rabo_passo(dt: float, v: float) -> void:
+	if rabo:
+		rabo.visible = not sem_cabeca
+		rabo.avancar(dt, v)
 
 
 func _desce_de(b: int, ancestral: int) -> bool:

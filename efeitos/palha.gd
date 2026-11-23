@@ -68,6 +68,7 @@ void fragment() {
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	top_level = true
 	extra_cull_margin = 16384.0
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF   # ver poeira.gd
 
 
 ## um fardo emitindo: dt de emissão restante e acumulador por ponto

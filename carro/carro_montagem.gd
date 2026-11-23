@@ -58,18 +58,34 @@ func _make_wheel_mesh(w: Dictionary) -> void:
 		var mesh: Mesh = load(path) as Mesh
 		var mi := MeshInstance3D.new()
 		mi.mesh = mesh
+		# aro comprado (oficina, Upgrade): a textura do material ALLOY vira a
+		# IG_WHEEL_HEAVYCLASS_0N do aro (a de fábrica é a 01)
+		var aro: Texture2D = null
+		var al: Dictionary = pecas.get("aros", {})
+		var esc_aro := String(pecas_escolhidas.get("Alloy", ""))
+		if al.has(esc_aro):
+			var ap := asset_dir.path_join(al[esc_aro]).simplify_path()
+			if ResourceLoader.exists(ap):
+				aro = load(ap)
 		for i in mesh.get_surface_count():
 			var m := mesh.surface_get_material(i)
 			if m is StandardMaterial3D:
 				var m2: StandardMaterial3D = m.duplicate()
+				if aro and m2.albedo_texture and m2.albedo_texture.resource_path.get_file().contains("ALLOY"):
+					m2.albedo_texture = aro
 				material_do_jogo(m2)
-				mi.set_surface_override_material(i, m2)
+				# borrão de movimento (NOSSO, roda_borrao.gd): mesma cor, borra girando
+				mi.set_surface_override_material(i, RodaBorrao.material(m2) if BORRAO_RODAS else m2)
+		w.malha_roda = mi
 		# component map (14881): Mirror="1" nas rodas da esquerda do jogo
 		# (o pivô está no frame do jogo, dentro do espelho)
 		if w.left:
 			mi.scale.x = -1.0
 		# centro do modelo = centro da roda (sem deslocamento: matriz da RAM)
 		spin.add_child(mi)
+		# cópias girando junto pro borrão da forma (cravos, contorno): só no
+		# carro do jogador (rodas_fantasma; os rivais desligam em ia.gd)
+		w.fantasmas = RodaBorrao.fantasmas(mi) if BORRAO_RODAS and rodas_fantasma else []
 		return
 	push_warning("Roda não encontrada em %s. Veja docs/assets.md (rodas)." % path)
 	var cyl := CylinderMesh.new()
@@ -125,6 +141,10 @@ func _load_model() -> void:
 	var lp := model_path.get_base_dir().path_join(livery_file)
 	if ResourceLoader.exists(lp):
 		livery = load(lp)
+	if not cores_pintura.is_empty() or piloto_escolhas.has("numero"):
+		var t := _textura_pintura(cores_pintura)
+		if t:
+			livery = t
 	for i in mesh.get_surface_count():
 		var m := mesh.surface_get_material(i)
 		if glb:
@@ -137,6 +157,7 @@ func _load_model() -> void:
 			m2.albedo_color = Color(0.85, 0.85, 0.85)
 		if livery and m and m.resource_name.ends_with("_white"):
 			m2.albedo_texture = livery
+			_mats_pintura.append(m2)
 		# textura com furo no jogo (redes das janelas, treliça do Trident):
 		# tools/alfa_texturas.py devolve o alfa e aqui vira recorte
 		if m2.albedo_texture and _tem_alfa(m2.albedo_texture):
@@ -163,6 +184,67 @@ func _load_model() -> void:
 	_load_steering_wheel()
 
 
+## acessórios comprados (oficina, Upgrade; só visuais, mIsPhysical="false":
+## sem casco, sem massa): o modelo do jogo no ponto do .pts (matriz
+## identidade), no frame do modelo como a carroceria; tools/gerar_buggies.py
+## põe a lista e o ponto no pecas.json. De fábrica é NOT_INSTALLED; o
+## RallyCompMap (Storm, Chimera) não tem nenhum dos dois.
+## Bumper: FrontBumper no BUMPER. Lighting: a barra de luz do teto
+## (LIGHTING) no LIGHTRIG, do tamanho do carro (vehicles.xml LightRigCategory)
+const ACESSORIOS := {"Bumper": ["parachoques", "ponto_parachoque", "ParaChoque"],
+	"Lighting": ["luzes", "ponto_luzes", "BarraDeLuz"]}
+
+
+func tem_acessorio(slot: String) -> bool:
+	var a: Array = ACESSORIOS[slot]
+	var pt := String(pecas.get(a[1], ""))
+	return pt != "" and points.has(pt) and not (pecas.get(a[0], {}) as Dictionary).is_empty()
+
+
+func tem_parachoque() -> bool:
+	return tem_acessorio("Bumper")
+
+
+## depois da física (precisa dos pontos BUMPER e LIGHTRIG)
+func _load_acessorios() -> void:
+	for slot in ACESSORIOS:
+		var mi := _load_acessorio(slot)
+		if slot == "Bumper":
+			parachoque_mi = mi
+		else:
+			luzes_mi = mi
+
+
+func _load_acessorio(slot: String) -> MeshInstance3D:
+	var a: Array = ACESSORIOS[slot]
+	var esc := String(pecas_escolhidas.get(slot, ""))
+	var lista: Dictionary = pecas.get(a[0], {})
+	if not lista.has(esc) or not tem_acessorio(slot):
+		return null
+	var path := asset_dir.path_join(lista[esc]).simplify_path()
+	var mesh: Mesh = load(path) as Mesh if ResourceLoader.exists(path) else null
+	if mesh == null:
+		push_warning("sem %s: rode o tools/gerar_buggies.py" % path)
+		return null
+	if mesh is ArrayMesh and _tem("acertar_giro"):
+		mesh = _acertar_giro(mesh)
+	var mi := MeshInstance3D.new()
+	mi.name = a[2]
+	mi.mesh = mesh
+	mi.set_meta("malha_path", path)      # sujeira.gd: a _camada.obj do lado
+	for i in mesh.get_surface_count():
+		var m := mesh.surface_get_material(i)
+		var m2: StandardMaterial3D = m.duplicate() if m is StandardMaterial3D else StandardMaterial3D.new()
+		if m2.albedo_texture and _tem_alfa(m2.albedo_texture):
+			m2.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR      # mesh_grey
+			m2.alpha_scissor_threshold = 0.5
+		material_do_jogo(m2)
+		mi.set_surface_override_material(i, m2)
+	mi.position = model_offset + points[String(pecas[a[1]])]
+	model_root.add_child(mi)
+	return mi
+
+
 ## depois da física (precisa dos pontos ARSE, rodas e EXHAUST)
 func _load_motor_treme() -> void:
 	if not (MOTOR_TREME and _tem("motor_treme")) or body_mi == null:
@@ -170,7 +252,9 @@ func _load_motor_treme() -> void:
 	motor_treme = preload("res://carro/motor_treme.gd").new()
 	motor_treme.name = "MotorTreme"
 	# trucks e extras: só o escape; extra (200 mil triângulos): só busca a 1 m da boca
-	if motor_treme.separar(body_mi, points, vehicle_id, vehicle_id.begins_with("TRUCK") or motor_escondido,
+	# os pontos do jogo (escape_jogo): mover a boca da fumaça pro fim do cano
+	# (ESCAPE_NOSSO, Renegade) aumentava o cofre e o escape virava motor
+	if motor_treme.separar(body_mi, points.merged(escape_jogo, true), vehicle_id, vehicle_id.begins_with("TRUCK") or motor_escondido,
 			1.0 if _cena_glb else 0.0):
 		model_root.add_child(motor_treme)
 	else:
@@ -529,13 +613,21 @@ func _load_piloto() -> void:
 	if not points.has("ARSE"):
 		return
 	piloto = preload("res://carro/piloto.gd").new()
-	if not piloto.carregar(PILOTO_DIR, MODEL_CULL):
+	# piloto feminino (tools/piloto.py: FEMALE_HIGH + rabo de cavalo, o mesmo
+	# esqueleto); sem o piloto_f.json fica o masculino
+	var arquivo := "piloto.json"
+	if String(piloto_escolhas.get("sexo", "m")) == "f" and FileAccess.file_exists(PILOTO_DIR.path_join("piloto_f.json")):
+		arquivo = "piloto_f.json"
+	piloto_sexo = "f" if arquivo == "piloto_f.json" else "m"
+	if not piloto.carregar(PILOTO_DIR, MODEL_CULL, arquivo):
 		piloto.free()
 		piloto = null
 		return
 	piloto.name = "Piloto"
 	piloto.position = model_offset + banco() - piloto.root_pos
 	model_root.add_child(piloto)
+	if not piloto_escolhas.is_empty():
+		pintar_piloto(piloto_escolhas)
 	piloto.paredes = _paredes_do_piloto()
 	if BRACO_ABERTO.has(chave()) and OS.get_environment("COT_MIN") == "" and OS.get_environment("PAREDE") == "":
 		piloto.cotovelo_min = BRACO_ABERTO[chave()].x
@@ -667,6 +759,70 @@ func _load_pedras() -> void:
 	if not pedras.montar(self):
 		pedras.queue_free()
 		pedras = null
+
+
+## oficina: pinta o carro com estas cores ({} = de fábrica) na hora, sem
+## recarregar o modelo. false = carro sem as camadas (rodar o gerar_pintura)
+func pintar(cores: Dictionary) -> bool:
+	var t := _textura_pintura(cores)
+	if t == null or _mats_pintura.is_empty():
+		return false
+	cores_pintura = cores.duplicate()
+	for m in _mats_pintura:
+		m.albedo_texture = t
+	if lascas:
+		lascas.cor = preload("res://efeitos/lascas.gd").cor_base(self)
+	return true
+
+
+## a pintura deste carro dá pra trocar (camadas do gerar_pintura e malha com "white")
+## oficina (aba Piloto): roupa, capacete, óculos, luva, bota e cores do piloto
+## na hora. false = sem as camadas (rodar o tools/piloto.py)
+func pintar_piloto(esc: Dictionary) -> bool:
+	if piloto == null:
+		return false
+	if _piloto_pintura == null:
+		_piloto_pintura = preload("res://carro/piloto_pintura.gd").carregar()
+	if _piloto_pintura == null:
+		return false
+	var num_antes := String(piloto_escolhas.get("numero", "00"))
+	piloto_escolhas = esc.duplicate(true)
+	# o número do perfil também vai no carro (quadros do número): repinta
+	if String(esc.get("numero", "00")) != num_antes and tem_camadas():
+		pintar(cores_pintura)
+	# trocou o sexo: outro modelo (o mesmo esqueleto), monta o piloto de novo
+	var sexo := String(_piloto_pintura.completo(esc).sexo)
+	if sexo != piloto_sexo and (sexo == "m" or FileAccess.file_exists(PILOTO_DIR.path_join("piloto_f.json"))):
+		var overlay: Material = piloto.malha.material_overlay if piloto.malha else null
+		piloto.queue_free()
+		piloto = null
+		_load_piloto()          # já pinta (piloto_escolhas) e prende no volante
+		if piloto and piloto.malha and overlay:
+			piloto.malha.material_overlay = overlay      # sujeira do piloto
+			if piloto.rabo:
+				piloto.rabo.malha.material_overlay = overlay
+		return piloto != null
+	piloto.pintar(ImageTexture.create_from_image(_piloto_pintura.montar(esc)))
+	return true
+
+
+func tem_camadas() -> bool:
+	if _pintura == null:
+		_pintura = preload("res://carro/pintura.gd").carregar(model_path.get_base_dir(), livery_file)
+	return _pintura != null and not _mats_pintura.is_empty()
+
+
+func _textura_pintura(cores: Dictionary) -> ImageTexture:
+	if _pintura == null:
+		_pintura = preload("res://carro/pintura.gd").carregar(model_path.get_base_dir(), livery_file)
+	if _pintura == null:
+		return null
+	# o número do piloto (perfil) vai nos quadros do número do carro
+	var e := cores
+	if piloto_escolhas.has("numero"):
+		e = cores.duplicate()
+		e["numero"] = piloto_escolhas.numero
+	return ImageTexture.create_from_image(_pintura.montar(e))
 
 
 func _load_lascas() -> void:
@@ -1144,6 +1300,12 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 		fc.visual_rodas(a_jogo)
 	else:
 		_visual_rodas_gd(a_jogo)
+	if BORRAO_RODAS:
+		for w in wheels:
+			var mr = w.get("malha_roda")
+			if mr:
+				RodaBorrao.aplicar(mr, w.get("fantasmas", []), w.left,
+					0.0 if longe_vis else RodaBorrao.giro(w.omega, dt))
 	# direção suavizada do piloto (0x187060: s += min(1/dt, 30)·(direção - s)·dt):
 	# é o que move os braços dele no jogo, então o volante anda junto
 	if dt > 0.0:
@@ -1158,6 +1320,7 @@ func _update_visuals(dt: float, _v_f: float) -> void:
 	var _t := Time.get_ticks_usec() if perf_on else 0
 	if piloto and not longe_vis:
 		piloto.pose(rider_s, treme if VOLANTE_GIRA else 0.0)
+		piloto.rabo_passo(dt, linear_velocity.length())     # corpo+0xe0
 	if perf_on: _t = _pf("vis: piloto (braços IK)", _t)
 	if susp_vis and not longe_vis:
 		susp_vis.update(a_jogo)

@@ -547,6 +547,56 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
 
 ## Piloto e volante
 
+- Textura do piloto (oficina, nov/2026; saves gear.p2s e Paint_Shop.p2s do
+  Matheus): /Setup/CharacterComposite/Textures/COMPOSITOR.xml, uma caixa por
+  parte no RIDER.bed (Rider_Template.tga 512x512): CLOTHING, ARMS, LEGS,
+  GOGGLES, BOOTS, GLOVES, HELMET (camadas BASE com Blend Off, PRIMARY,
+  SECONDARY, OVERLAY = a DETAIL, WRINKLE Multiply só no RGB), FACE e HAIR
+  (uma textura, Blend Off), PLAYER_NAME (FE_FontMedium) e PLAYER_NUMBER
+  (HUD_Numbers), Aspect 0.6, Fit Vertical. As camadas:
+  Characters/Textures/#crc/<Parte>/RIDER_NN_<CAMADA>_<PARTE>.bog (128x128;
+  NN = mTextureNum do CLOTHING.xml; a RIDER_02 não tem DETAIL nas pernas).
+  Characters/Textures_UI tem as mesmas maiores (menu). O rosto da corrida
+  (Face_Male_FACEnn, 32x32 4 bits) vem com o CLUT preto: só o do menu tem
+  rosto (no jogo o capacete cobre). CLOTHING.xml: Gear, Helmet, Goggles,
+  Gloves, Boots (12 cada) e Armour (8, não aparece no menu), mais 12
+  DefaultColours (base, primária, secundária, texto; uma por roupa).
+- Perfil do piloto na RAM (4 cópias iguais nos 2 saves, ex. 0xd26bc0): +0x00
+  roupa, capacete, óculos, luva, bota (1..12, u32), +0x20 BASE, +0x30
+  PRIMARY, +0x40 SECONDARY, +0x50 TEXT (float RGBA; alfa 0.992 = veio da
+  paleta), +0x60 rosto, cabelo, sexo (6, 4, 0 no do Matheus), depois o nome
+  e o número (strings). Um 2º piloto ao lado com tudo no modelo 1 e as
+  DefaultColours do 1 (rosto 2, cabelo 5, sexo 1): deve ser o perfil novo.
+  As cores valem pro piloto todo (o Matheus: "é que nem carro, nada
+  separado"); cada peça escolhe o modelo separado.
+- Piloto feminino: Characters/Models/InGame_MidSkel/FEMALE_HIGH.srd
+  (other/00510) usa o MESMO InGame_Mid.skl (47 ossos, mesmas matrizes da
+  cabeça) do MALE_HIGH; o rabo de cavalo é Characters/Models/PonyTail/
+  PONYTAIL.srd (00517, 183 vértices) com o PonyTail.skl (00520: PONY_A..
+  PONY_END, em fila) no espaço do corpo, PONY_A 6 cm atrás do osso "head",
+  e a pose PonyTail/HighDetail/Generic/PONY_TAIL_POSE.bac (raw/00507r +0,
+  514 bytes, tipo 1, 2 quadros iguais: cada osso gira em X, a ponta desce
+  pra 1.41 m, 20 cm atrás). UV do rabo na caixa HAIR da textura. Sexo no
+  perfil = +0x68 (0 no do Matheus); rostos Face_Female_FACE01..06.
+- Rabo balançando: objeto em piloto+0x2d4 (0x1a9588 cria: +0xc modelo, +0x10
+  esqueleto, +0x18 pose PONY_TAIL_POSE, +0x14 camada da física, +8 sistema
+  de partículas 0x1b17d0 com uma partícula por osso, 0x2e0 bytes, +0x2c0 =
+  índice do osso; +0x1c pino, +0x20 esfera da cabeça, +0x24 cilindro dos
+  ombros, +0x28 esfera das costas). Restrições (0x1abd38 lista, 0x1abdf0
+  aplica; 0x20 bytes: tipo em float, depois os números): 1 pino (0x1abf78),
+  2 distância (0x1ac018), 8 esfera (0x1ae618), 9 cilindro sem ponta
+  (0x1ae2e0); 3..7 e 10 existem mas o rabo não usa. Por quadro: 0x183e40 ->
+  0x1a9db0 (põe os colisores pelos ossos do piloto 3, 4, 5, 6 e 18) ->
+  0x1886f8 (forças, 0x1b1bc8 integra cada partícula pelo 0x1b1648, 0.8 do
+  passo, 0x1b1c50 restrições). Partícula: +0x10 posição, +0xb0 anterior,
+  +0x130 força, +0x170 massa, +0x174 1/massa (0x2356f8; padrão 1.0 em
+  0x235640), +0x2d0 posição no começo do quadro.
+- Remake (carro/piloto_pintura.gd, tools/piloto_pintura.py): BASE x cor,
+  PRIMARY e SECONDARY x cor (v x m // 255) por cima pelo alfa (DIV255),
+  DETAIL pelo alfa, WRINKLE v x w // 255; camadas já no tamanho da caixa
+  (BILINEAR) pra o Godot repetir a conta inteira (teste_piloto_pintura: 0
+  pixel diferente). C++: FisicaCarro.compor_piloto.
+
 - O volante NÃO gira no jogo: faz parte do BODY.pingu, desenhado com a
   matriz do carro (cCompPlace_Body +0x1c = 0x1fc100, identidade). Nenhum
   .pingu tem índice de matriz por vértice. O volante girando do remake é
@@ -1126,9 +1176,14 @@ vazios). Tudo vem do evento:
   tentando_passar_2, andando_em_linha_reta): lista fixa de 8 comportamentos
   (cada um +0x18 piloto, +0x1c cérebro; vtable em +0x14): #0 esperar
   (0x364960, vt 0x5af0c0), #1 largada em movimento (0x364720, vt 0x5af160),
-  #2 preso -> repõe (0x3645e0, vt 0x5af1c8: 0x364640 ativo com o tempo
-  preso > 10 s, ou > 3 s no outro modo; 0x3646d0 chama a reposição
-  0x15bd28), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
+  #2 preso -> repõe (0x3645e0, vt 0x5af1c8: 0x364640 lê o rastreador do
+  vizinhos +0x80 por 0x3570c8 ([1] modo, [2] tempo): modo 1 (parado) > 3 s
+  ou modo 0 (fora da rota, objeto +0xc4 slot +0x44 = 0) > 10 s vale 1;
+  0x3646d0 chama a reposição 0x15bd28(-1, veículo+0x9d0->+0xfc, 1, 1, 0)
+  e acaba. Rastreador 0x356e38 a cada passo: veículo +0xa78 = 0 zera;
+  modo 2 vira 0 (fora da rota) ou 1 (perto); perto (0x356fe8) = velocidade-
+  alvo do piloto +0x40 > 1e-6 e |posição (objeto +0x30, altura +0x50) -
+  âncora|² < 4; longe: âncora = posição), #3 0x360668 (vt 0x5af390), #4 0x35f9d8 (vt 0x5af5d8), #5
   ultrapassar (0x360aa8, vt 0x5af228), #6 0x35ec48 (vt 0x5af638), #7 corrida
   na linha (0x360358, vt 0x5af4e8: update 0x3603d0, começo 0x360550).
   Seletor 0x35e8a0: o atual (cérebro +4) continua se o estado dele é 1 ou 3
@@ -1140,6 +1195,20 @@ vazios). Tudo vem do evento:
   sai o velho, começa o novo (slot +0x34) no mesmo quadro; o mesmo: slot
   +0x4c (update). Nos 3 saves andando: 5 rivais no #7 e 2 no #5; nenhum no
   #3, #4 ou #6.
+  - #3, #4 e #6 nunca entram no RX01 offline (nov/2026): a prioridade do #4
+    (0x35fab8) é o Skill slot 1 e a do #3 (0x3606c8) precisa do slot 4; os
+    slots 1, 3 e 4 só valem (1, 1, 0.1) com rivalidade (0x35b1b0) e offline
+    são 0 (RAM). O #6 (prioridade 0x35ed38: pré-condição 0x35f0e8, alvo
+    0x35eea0) só aceita vizinho (slots 0/1) cujo objeto de IA (+0xc4, vtable
+    +0x14) é do tipo 2 ou 1; os corredores são tipo 0 (vt 0x5af920). Os tipos
+    1 (vt 0x5af8b8, construtor 0x365d98) e 2 (vt 0x5af850, 0x365c50) vêm de
+    pools do gerente da IA (0x3659a8, chamado em 0x352270: +0xc tipo 0 com 8,
+    +0x10 tipo 1 com 8, +0x14 tipo 2 com 64; pool: +0x4 lista em uso, +0xc
+    quantos, +0x14 lista livre, +0x1c quantos, +0x20 total). Nos 4 dumps da
+    corrida (idle_antes_do_Go, andando_em_linha_reta, tentando_ultrapassar,
+    tentando_passar_2) os dois pools estão com 0 em uso (8/8 e 64/64
+    livres): o #6 nunca acha alvo. O tipo 3 (vt 0x5af988) nem existe na RAM.
+    O que são os tipos 1 e 2 (outros modos?) não foi atrás.
   - #7: começo 0x360550 sorteia o desvio TODA vez que o #7 começa (Skill slot
     0 x [0, 10) m, lado sorteado); saída 0x3603d0: com o relógio
     (DAT_007f4820+0x24, 0 até o Go!) < 5 s o 0x359660 vai com desvio 0 e modo
@@ -1156,7 +1225,9 @@ vazios). Tudo vem do evento:
     a lateral do carro, peso (ângulo - 10°) / 10°. Depois limita na borda
     menos a meia largura (pelo lado do sinal) e, fora do modo 3, se a linha
     do carro ao ponto cruza a borda (corte de curva) volta o ponto pra
-    alcance/4 + raio na borda. Nos saves o ponto da direção fica a alcance +
+    alcance/4 + raio na borda (bordas recuadas: 0x32a4f8 = 0x32a338 com a
+    lateral + meia largura, 0x32a5e0 = 0x32a418 - meia largura; teste D x
+    esquerda < 0, senão D x direita > 0, estritos; portado em ia.gd). Nos saves o ponto da direção fica a alcance +
     0.8 +- 1.6 m de rota do carro (15 rivais no #7), não alcance + raio: a
     posição de rota do carro deve ficar atrás do CoM (não conferido).
   - 0x359eb8 com o pedido: arco 1 (0x35a040) do CoM no rumo do bico até o
@@ -1388,8 +1459,8 @@ vazios). Tudo vem do evento:
   corpo = veículo+0x60, velocidade em +0x20, |v| em +0x70) -> tipo 1;
   trapaça ou fora > WarningStray -> tipo 2; senão apaga o pedido.
 - Parâmetros por tipo (vtable +0x34 = 0x4d4808): (a, b, c) = 1: 0.2, 2, 3;
-  2: 0.2, 0, 3; 3: 0.2, 1, 3. 0x4d4ef0 só grava se não tem pedido (o 3
-  passa por cima). 0x4d4f60 conta: fase 1 até a, fase 2 até b (tipo 1 vira
+  2: 0.2, 0, 3; 3: 0.2, 1, 3. 0x4d4ef0 só grava se não tem pedido; o 3
+  passa por cima de um 1/2 andando e vai direto pra fase 2 com (0, 1, 3). 0x4d4f60 conta: fase 1 até a, fase 2 até b (tipo 1 vira
   2; vai pra 3 só com reposição ligada, 0x4d2d88), fase 3 até c -> devolve 4.
   0x4d35d0 com 4 chama 0x4d3538: se [0x7f4744]+0x3c == 0, 0x15bd28 repõe e o
   rastreio volta pro último aceito.
@@ -1399,18 +1470,115 @@ vazios). Tudo vem do evento:
   (0x329620 / 0x329680 -> 0x32a6c8 / 0x32a708: nó+0x44 = o registro do AIT,
   +0x20 / +0x24; sem ele, -+ nó+0x40 / 2). O link vai do nó do AIT i pro i-1
   (o sentido da corrida, = a direção +0x0c do AIT).
+- Checkpoint (tipo 3, nov/2026). Registro aceito +0x40: link, progresso
+  (+0x44), +0x48, CHECKPOINT PENDENTE (+0x4c), voltas (+0x50); +0x54..+0x64
+  = cópia salva (com o ponto de reposição). 0x4d50a8 grava o aceito e, se o
+  link mudou, +0x4c = 0x4d3168(link) (o checkpoint cuja lista de links,
+  cp+0xd4 / +0xe0 pares {link, fração}, tem esse link; 0x4d69c0). No update,
+  antes do aceite: com +0x4c, posição do veículo (vtable +0x54) na caixa
+  (cp+0x10 posição, +0x20/+0x30/+0x40 eixos, +0x50/+0x54/+0x58 MEIAS
+  medidas) e a linha 2 da matriz do link aceito . o eixo z do corpo
+  (veículo+0x60 +0x20) > 0 -> 0x4d43f0: +0x1c = cp, +0x30 = 0, copia o
+  aceito pro salvo e 0x4d50d0 apaga o +0x4c e, se o cp é tipo 2..4 e
+  0x4d2b30 = (progresso - D(voltas)) / (D(voltas + 1) - D(voltas)) > 0.25
+  (D = 0x4d2800, começo de cada volta), voltas + 1. Com avanço > 0: +0x30 =
+  0x4d5188 (pendente e rastreio noutro link, ou no mesmo e (t - fração do
+  cp) x comprimento > 5 m -> 1); trapaça não aceita; com +0x30 = 0,
+  0x4d31f0 / 0x4d32c8 andam do link aceito ao do rastreio (profundidade
+  Logic... +0x38 +0xc): achar um link com checkpoint no caminho (o aceito
+  só se pendente; o do rastreio não conta) -> 1 = +0x30 = 1 sem aceitar; 2
+  = aceita. RX01 (RAM do pause.p2s): 1 cp tipo 2, pos (536.267, 203.952,
+  1538.95), eixo de lado (-0.416, 0, 0.909), meias 15.83 / 5.94 / 1.44 m
+  (o tamanho do XML #7c14cf48 já é a meia medida), link 50 fração 0.0954 =
+  a face de entrada (o centro cai em 0.129 do link de 42.6 m).
+- Ponto de reposição (0x4d44c0, de 0.5 em 0.5 s aceitando, se +0x3c):
+  0x4d3fe0 projeta o veículo no link aceito e, com checkpoint pendente e o
+  ponto além do centro da caixa ((cp - ponto) . frente do link <= 0), usa
+  o começo do link; chão por raio (+0.1 m); 0x15bab8 grava no objeto de
+  reposição (+0x20 posição, +0x30..+0x50 base). O registro valer
+  (0x4d52b8) depende de uma flag do link (+0x20 +0x44 +8).
 - HUD 0x47bb58 (fases 2 e 3): tipo 1 WRONG_WAY (texto 0xa39), 2
   Off_Track_Go_Back (0x617), 3 MISSED_CHECKPOINT (0x526) e na fase 3 " - %d"
   com int(c - tempo) + 1. Índice do texto = posição na tabela de nomes
   0x54d838 (text/15205_en.txt).
 - Botão (update do corredor, 0x158f..): |v| do corpo < 17.88 m/s (40 mph)
   repõe (0x15bd28), senão +0x160 = 1 e o HUD 0x4796c0 mostra
-  Too_Fast_For_Respot (0x968) depois de 0.05 s apertado. O 0x4613a0 mostra
-  "Respot" na barra de botões.
+  Too_Fast_For_Respot (0x968) depois de 0.05 s apertado. O 0x4613a0 põe
+  "Respot" no menu de pausa (seção Menu de pausa).
+- Objeto de reposição do corredor (pedido 0x15bd28(tempo, obj, forçar,
+  na_hora, sem_tela); update 0x15c0e8 no update do corredor 0x1590f8):
+  estado 1 = conta +0x64 de 0.3 s (só se estava em 0) e +0x68 = +0x64 x
+  3.333 (1 -> 0); 2 = repõe (0x15bc50: 0x200fe0 acha o ponto, 0x183018 põe
+  o carro, veículo+0xb28 = 0) e vai pro 3; 3 espera o quadro seguinte
+  (DAT_007f48d8+0x80) e 0x15bfe0 vai pro 4; 4 = +0x68 = (1 - cos(178 t)) /
+  2 por 0.3 s (piscando), repete enquanto a caixa do carro encosta na de
+  outro (0x15c350) e acaba em 0x15c090 (+0x68 = 1, veículo+0xb28 = 1,
+  estado 0). Com "na hora" (as caixas) pula o 1 direto pro 2. Tempo padrão
+  (DAT_007f5334+0xc -> +0x14 -> +0x10) = 40 na RAM (vai pro 0x200fe0).
+- Tela preta: no estado 1, pra cada viewport do jogador (0x15b9e8 /
+  0x15b9d8) que não está escurecendo (0x457698) chama 0x4576c8 (fader+0xd8
+  = 1, viewport+0x118 = 1); no 3 -> 4 o 0x4576e0 volta. Fader =
+  viewport+0x114 (lista de viewports DAT_007f48b4 +0x10), update 0x2b3700:
+  +0xdc += dt / +0xd0 indo pro preto, -= dt / +0xd4 voltando; +0xd0 =
+  +0xd4 = 0.2 na RAM (pause, placar_final, andando_em_linha_reta).
+- Não portado ainda: o carro piscando (+0x68, quem lê não foi achado) e o
+  veículo+0xb28 (sem batida carro com carro enquanto pisca?).
 - Não achados: quem liga corredor+0x120 +0x24/+0x28 (zeradas na RAM); as
   caixas do 0x543b88 ([0x7f5f5c], lista vazia no RX01, limites +0xc0/+0xc4).
   Na RAM (corrida_no_normal) o pedido do jogador tem a = 0.2, c = 3.0 de uma
   reposição tipo 2 que já tinha acontecido.
+
+## Menu de pausa e Race again
+
+- Páginas da pausa registradas no 0x4688e8 (LAYER_PAUSE_MENU): a principal
+  0x457840 (vtable 0x5dbda8; barra 0x457b00 = texto 0x7b6 SELECT e 0x7f
+  BACK), opções do jogo, Photographer (0x4625a8) e o livro de truques
+  (0x463b18, só com 0x469798).
+- Opções (0x462190, cada uma 0x2d5760(lista, id, texto)), na ordem:
+  0x461250 Resume (id 0), 0x461a68, 0x4613a0 Respot (0xc), 0x4612c0
+  Restart (1), 0x461330 Quit (2), 0x4614d0 Game options (4, com o submenu),
+  0x461830 Photographer (9, só com 0x469798), 0x4618b0. Online (+0x14 != 0):
+  só Resume e Quit.
+- Respot (0x4613a0) só se: corrida no estado 10 (0x17afb0) ou evento 0xe,
+  |v| do carro < 17.88 m/s (0x1590c0), corredor+0xf4+0x2b8 != 0, 0x5437d8
+  e 0x170b70 == 0. No pause.p2s o carro estava a 29.4 m/s: sem Respot.
+- Race again (0x4cd270): título 0x70e Race_again, seletor Restart / Exit.
+- Texto pelo número: id = linha do text/15205_en.txt - 1 (tabela de nomes
+  0x54d838, 2631 entradas): Respot 0x764, RESTART 0x765, Resume 0x768,
+  QUIT 0x705, Game_options 0x2cd, Photographer 0x67b, Race_again 0x70e,
+  EXIT 0x279, PAUSE_MENU 0x674.
+- Seletor (cDOMenuSelector, LAYER_SELECTOR do Common.fex; RAM do pause.p2s
+  e finish_2.p2s): a opção atual no ID_CURRENT_OPT_TEXT (escala 1.4, canto
+  esquerdo do ID_SELECTOR, centrado na altura) e as próximas juntas no
+  ID_NEXT_OPT_TEXT (0.8, cor 0 0 0 0.565) com 3 espaços entre elas,
+  começando 16 px (640 x 480) depois do avanço da atual. mJustify 16 =
+  centrado só na altura. Os textos longos da RAM andam 0.9975 do nosso em
+  x (1.1 px em 435 px): a conta da escala não foi achada.
+- Animação do seletor (vtable 0x599828; textos da classe 0x599518):
+  entrada 0x2d1280 (evento 0xb / 0xc = esquerda / direita; trava nas
+  pontas e com +0xa08 = troca andando; manda o evento 0x12 pro 0x7f4884),
+  0x2d23a8 começa a troca (+0xa08 = 1), 0x2d2f40 a cada quadro até
+  DAT_00847230 = 0.2537 s. Atual (+0x18c) e antiga (+0x6dc, cópia, 0x2d7468)
+  andam com velocidade (+0x224) até o x de chegada (+0x228; 0x2d75a0); cor
+  de +0x230 (mEndColour) pra +0x250 (mColour) e escala de +0x214 (0.8) pra
+  +0x218 (1.4) pela fração do tempo (0x2d77a0 / 0x2d7868; +0x210 = 1 ao
+  contrário). Distância = largura + 0.05 NDC. Fileira (+0x1a4): 0x2d29a0
+  dá de onde a onde, 0x2d30f0 anda reta; +0xa1c = largura de 3 espaços em
+  0.8 (0.0675). Fantasmas +0x6e0 / +0x6e4 (0x2d3190 / 0x2d3808): cópias da
+  atual (cor de descanso, 0x2d7960) em escala DAT_00847240 = 1.5, x de -4
+  a +4 (alfa 0x7f/128) e de +4 a -4 (0x72/128), alfa caindo até 0.
+- Sons da pausa (0x4add68, evento 0x12 do seletor, 0x36b900(1, 1, gerente,
+  nome)): sub 0 trocou = IG_slide, sub 0 ponta (valor -1, sem troca
+  andando) = IG_cancel, sub 1 ajuste = IG_scrollHoriz (ponta IG_cancel),
+  sub 2 = IG_scrollVert (página ativa; evento 0x10). Nomes = entradas do
+  SoundDatabase.xml (banco Menu_IG: Scroll, Back, ScrollVert).
+- Escolha na pausa (0x4add68, evento 8 pelo id da opção): 0 Resume fecha;
+  1 Restart e 2 Quit abrem a confirmação 0x4b0308(tipo, título, pergunta):
+  (4, 0x765 RESTART, 0x85a SURE_RESTART) e (1, 0x705 QUIT, 0x859
+  SURE_QUIT); 0xc Respot = 0x4ae628.
+- Barra: ícone (new_buttons_4bit_en_GB) acabando onde o texto começa, do
+  tamanho do START dos resultados; textos em (0.3787 Select, 0.7762 Back,
+  0.6887 Continue; y -0.7417).
 
 ## Luz e névoa (Environment.xml)
 
@@ -1504,6 +1672,46 @@ de profundidade), sem luz e sem névoa. Não portado: SunHalo, rotationSpeed
 
 ## Pintura
 
+- Oficina de pintura (nov/2026; saves pintura.p2s e logo.p2s do Matheus, um
+  buggy): estados cPaintShopState e cLogosVehicleState (strings 0x4bdaf0,
+  0x4bdb00). Paleta = cDOFEXColourPicker com /Setup/Palette/Palette (string
+  0x498218): a Palette.bog é uma textura 8x8 de 8 bits e o que vale é o CLUT
+  de 256 (desfeito o swizzle), as 128 primeiras na ordem da tela, 16 colunas
+  x 8 linhas (o resto preto). Na RAM a paleta aparece copiada em float RGBA
+  (alfa 0.992) em 0x11942d0 / 0x1194c00 / 0x11a0980 / 0x11a12b0; a cor marcada
+  no print (coluna 16, linha 5) = 35, 188, 153 = a 80ª. Abas: BASE, PRIMARY,
+  SECONDARY, "usar cores do piloto", "padrão". Logos: as áreas do carro
+  (DecalArea das camadas Decal do XML da pintura), cada uma com os lugares 1º,
+  2º... (a k-ésima Decal), e a lista = os itens da <Classe>Logos.bed (67 no
+  buggy e no truck; na RAM do logo.p2s os nomes da BuggyLogos.bed em
+  0x1426f60..), mais "sem logo" (No_Logo) e "padrão" (Default_Custom_Logos).
+  Logos pintados na textura Detail não mudam. ATV e moto usam
+  /Setup/VehicleDecals.xml (FRONT/REAR/NOSE).
+- Cores dos rivais (nov/2026): o gerente dos pilotos da IA (DAT_007f5a90,
+  construtor 0x35a8d0) carrega o /Setup/AIPlayerColours.xml (0x35a500 ->
+  0x35a668: objeto +0x104 quantos, +0x110 os conjuntos de 0x30 = base,
+  primária, secundária em float RGBA; "Found %d AI Player Colour Sets").
+  27 conjuntos x 86 pilotos no AIPlayers.xml (não tem ligação fixa). NO
+  RX01 OFFLINE NÃO USA: nos 4 dumps da corrida a BASE da pintura de cada
+  carro (veículo+0x9d0 -> +0xc4 -> +0x78 -> +0xb0, a mesma das lasquinhas)
+  é a de fábrica do XML 150xx nos 8 (BUGGY_11, 01, 02, 04, 03, 02, 04, 01),
+  nenhuma bate com um conjunto, e nada na RAM aponta pra tabela (0xbf0580).
+  Carro repetido sai com a mesma pintura. Quem chama os conjuntos não foi
+  achado (outros modos: carreira, ATV/moto?).
+- Remake (carro/pintura.gd, nov/2026): o gerar_pintura salva as camadas
+  (camadas/mascaras.png R = Primary, G = Secondary; detalhe.png; logos.png com
+  logos e número) e o Godot junta com as 3 cores pela conta inteira do PIL
+  (composite = DIV255(fundo x (255 - m) + cor x m), alpha_composite de 7
+  bits), igual à pintura.png pixel a pixel nos 24 carros
+  (tests/teste_pintura_jogo.gd). C++: FisicaCarro.compor_pintura.
+  Logos: camadas/logos.json = lugares (chave, área, nº), folhas (nomes da
+  .bed na ordem), padrão (DefaultDecals casado com a .bed sem diferenciar
+  maiúscula/espaço) e peças na ordem do XML (logo e número: atlas da caixa
+  com [x, y, largura, altura, canto x, canto y] por item; número = chave
+  NUMERO, folha "numeros" 00..99, padrão "00" do perfil novo). Truck_04
+  (Lazarus, cortado): a caixa do número aponta pra Fairing_Truck_04.bed,
+  que não existe; o 87 está desenhado na Truck_04_Detail (3 placas).
+  Rotação dos Sprite no jogo: 0..355 graus (não só 90 em 90).
 - Textura "white" gerada em tempo real pelas camadas do XML 150xx
   (Buggy_NN_Base/Primary/Secondary/Detail + cores + decalques + número).
   tools/gerar_pintura.py faz igual.
@@ -1633,3 +1841,57 @@ JSON "interativos"). tests/teste_quebra.gd.
   0x23eb88 guarda a massa em +0x78 e 1/m em +0xc0. A cerca (Mass 0) é
   parada; o 0x141640 (soma dos contatos) só age em corpo com massa, então
   quem quebra a cerca é o 0x153390.
+
+## Truques (Score)
+
+- Gerente por corredor: corredor+0x15c (criado pelo 0x5213a0 pela classe
+  do veículo, +0xc4 → +0x38: 0 ATV, 1 moto, 2 buggy 0x524a78, 3 truck
+  0x524ab8). Objeto de estado em +0x3dc: +8 rodas no chão (corpo+0x8a8),
+  +0xc.. contato por roda, vtable +0x24 = estado (0x524980 nos 4 rodas),
+  +0x2c truque do piloto (-1), +0x14 giro (0), +0x1c falhou (0).
+- Campos: +4 total, +8 parado (chegou), +0xbc estado anterior, +0x16c tempo
+  do truque, +0x170 taxa, +0x174 pontos, +0x274 quadros com batida, +0x84 +
+  4 x estado vezes no combo, +0x1f4 truques diferentes (multiplicador),
+  +0x1f8 combo, +0x1fc combo aberto, +0x200 truques no combo, +0x204 tempo
+  do combo, +0x208..+0x214 truque mostrado (nome, pontos, mostrado, novo),
+  +0x278 / +0x27c / +0x280 / +0x284 relógios do fim do combo, +0x288 folga
+  (0.5 s), +0x294 ligado, +0x338 evento novo pro HUD, +0x388 nome, +0x3d0
+  pontos, +0x3d4 multiplicador, +0x3d8 tipo (0 ao vivo, 1 truque do piloto,
+  2 fechou, 3 perdeu, 4 bancou, 5 holeshot, 6 giro), +0x3e0 fase do combo.
+- Funções: 0x522c18 passo; 0x5220d8 truques de chão (casos 0x5f9630: 0
+  nada, 1 começa 0x522378, 2 soma 0x5223d0, 4 fecha e começa 0x522550, 5
+  fecha 0x522648); 0x5234f8 mostra; 0x5230b0 fecha; 0x523e18 fim do
+  combo; 0x523718 banca (total += combo x multiplicador; x 0x4c3e48 só no
+  tipo de evento 0xc); 0x523570 perde; 0x523ff0 para (chegada 0x1596d8);
+  0x523338 holeshot (0x546d08, cHoleshotBox); 0x524038 HUD lê e apaga.
+- Tabela: 0x1a43a8 acha o grupo pelo nome da classe (DAT_007f4720); +0xc
+  GroundTricks 7 x {Score int, Max int, Accel float} pelo enum 0x7f64a8
+  (0 Wheelie, 1/2 Bicycle, 3 Endo, 4 e 5 Slide, 6 AirTime); 0x1a35d0 dá o
+  nome; 0x1b5d08 traduz pela tabela de textos.
+- Corpo: +0x5a4 contatos no quadro (0x215248 soma e zera o +0x3d0;
+  0x212988 zera no começo do passo), +0x440 velocidade no plano do chão,
+  +0xe0 |v|, +0x6c0 derrapagem (0x20da90: asin(lateral / |v| no plano) com
+  rodas no chão, 0 no ar ou abaixo de sqrt(0.1) m/s).
+- HUD 0x47cf00: formatos 0x5dd828 "%u", 0x5dd830 "%u X%u", 0x5dd820 "%s
+  + %s"; cores em RAM 0x83d270 (amarela) e 0x83d260 (vermelha); fila
+  0x48a118 (2 s / 3 s) depois de limpar (0x492608 → 0x48a358); cor no
+  objeto 0x48a138 / 0x4749d0 (troca, não multiplica).
+
+## Telas do menu (.fex) e resultados
+
+- .fex (UI_PS2): 00 00 03 00 + bloco raiz; bloco = f0 0d ab cd, tamanho
+  (depois dele), tipo (hash) e filhos ou pares (chave hash, valor). Hash =
+  CRC32 sem o xor final. Valor: 4 bytes, string (tamanho + bytes + 0 e 0xcd
+  até múltiplo de 4; múltiplo de 4 sem o 0) ou bloco; 0xbadcadde fecha
+  lista. Classes cDisplayLayer, cDisplayReferenceLayer, cDOSprite
+  (mpDSSprite U0 U1 V0 V1), cDOMovingSprite, cDOString.
+- Objeto de texto na RAM (vtable 0x588158): fonte +8, string +0xc, flags
+  +0x20 (0x40, 0x80 = maiúsculas do mFlags 16), canto de cima à esquerda
+  em NDC +0x30, escala +0x40/+0x44, cor de cima +0x50 e de baixo +0x60,
+  vértices +0x74 (0x30 por vértice: cor, st, xyz; 2 por letra, 4 girado).
+  Sprite: rect atual no objeto (o cDOMovingSprite anda nele), textura e
+  caixa por nome.
+- Pós-corrida (0x465a38, tipo de evento 0/1/6/0xf): cSRResultsPage (0x45a390,
+  vtable 0x5dbbb8, LAYER_RESULTS), cRecordsPage, cRaceFinishedPage; colunas
+  na tabela 0x553070 (id, "Player_%d_Position" / Name / Total_Time /
+  Best_Lap / Stunt_Score / Best_Combo...).

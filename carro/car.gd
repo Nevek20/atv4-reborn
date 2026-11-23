@@ -33,6 +33,7 @@ func _ready() -> void:
 	_load_model()                 # antes da física: define model_offset
 	_marca("modelo")
 	_load_physics()
+	_load_acessorios()            # depois da física: para-choque e barra de luz (BUMPER, LIGHTRIG)
 	_load_piloto()                # depois da física: precisa do ponto ARSE
 	_marca("física+piloto")
 	_load_painel()
@@ -173,6 +174,18 @@ func _load_pecas() -> void:
 	if model_path == "" and pc.has("Body"):
 		model_path = asset_dir.path_join(pc.Body)
 	var rd: Dictionary = pecas.get("rodas", {})
+	# pneu comprado (oficina, Upgrade): a roda inteira TYRE_<pneu>_<tamanho>
+	# do jogo. De fábrica (DIRT_BUDGET) o jogo põe a TYRE_GENERIC (RAM: sem
+	# cravos); aqui vai a TYRE_DIRT_BUDGET com cravos, a da tela de seleção
+	# (melhoria NOSSA, DIRT_BUDGET_CRAVOS; sem ela no pecas.json, a genérica)
+	var pn: Dictionary = pecas.get("pneus", {})
+	var tire := String(pecas_escolhidas.get("Tire", ""))
+	if tire == "" and DIRT_BUDGET_CRAVOS:
+		tire = "DIRT_BUDGET"            # o de fábrica dos 48 (vehicles.xml DefaultConfig)
+	if tire == "DIRT_BUDGET" and not DIRT_BUDGET_CRAVOS:
+		tire = ""
+	if pn.has(tire):
+		rd = pn[tire]
 	if wheel_front_file == "" and rd.has("FrontWheel"):
 		wheel_front_file = asset_dir.path_join(rd.FrontWheel).simplify_path()
 	if wheel_rear_file == "" and rd.has("RearWheel"):
@@ -184,7 +197,7 @@ func _load_tuning() -> void:
 	if not FileAccess.file_exists("res://data/vehicles.xml"):
 		return
 	var t := VehicleData.factory_tuning("res://data/vehicles.xml", "res://data/upgrades.xml",
-		tuning_id if tuning_id != "" else vehicle_id)
+		tuning_id if tuning_id != "" else vehicle_id, pecas_escolhidas)
 	TUNE_ENGINE = t.engine
 	pneu = String(t.config.get("Tire", pneu))
 	TUNE_BRAKE = t.brake
@@ -240,6 +253,7 @@ func _load_physics() -> void:
 	# motor
 	P.idle = d.f("Engine", "Idle_rpm", 1000.0)
 	P.lim_on = d.tuned("Engine", "Rev_limiter_engage_rpm", TUNE_ENGINE)
+	P.max_rpm = d.tuned("Engine", "Max_rpm", TUNE_ENGINE)   # só o HUD (MAXREVS do conta-giros, motor+0xc)
 	P.lim_off = d.tuned("Engine", "Rev_limiter_disengage_rpm", TUNE_ENGINE)
 	P.lim_rate_on = d.f("Engine", "Rev_limiter_engage_rate", 15.0)
 	P.lim_rate_off = d.f("Engine", "Rev_limiter_disengage_rate", 15.0)
@@ -425,9 +439,11 @@ func _load_physics() -> void:
 	# do Godot por corpo(): a esquerda do jogo (x < 0) vira +X. Sem ele, no chute.
 	wheels.clear()
 	var pts := _load_points(points_file)
+	escape_jogo.clear()
 	if ESCAPE_NOSSO.has(vehicle_id):
 		for k in pts.keys():
 			if String(k).begins_with("EXHAUST"):
+				escape_jogo[k] = pts[k]
 				pts.erase(k)
 				points_rot.erase(k)
 		var e: Array = ESCAPE_NOSSO[vehicle_id]
@@ -1127,8 +1143,10 @@ func _rodas_gd(dt: float, space: PhysicsDirectSpaceState3D, up: Vector3) -> void
 func _batida_passo() -> void:
 	batida = 0.0
 	contato_som = {}
+	contatos = 0
 	var st := PhysicsServer3D.body_get_direct_state(get_rid())
 	if st:
+		contatos = st.get_contact_count()
 		var com := global_transform * center_of_mass
 		for i in st.get_contact_count():
 			var vp := _v_antes + _w_antes.cross(st.get_contact_local_position(i) - com)
@@ -1147,6 +1165,7 @@ func _batida_passo() -> void:
 				lascas.batida(p, n, _v_antes)
 	# outro carro (carro/batida_carros.gd): som com o patch Vehicle e tremida
 	if not _contato_carro.is_empty():
+		contatos += 1
 		batida = maxf(batida, _contato_carro.vn)
 		if contato_som.is_empty() or _contato_carro.vn > contato_som.vn:
 			contato_som = _contato_carro

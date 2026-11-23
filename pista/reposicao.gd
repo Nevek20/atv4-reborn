@@ -28,12 +28,32 @@ extends RefCounted
 ## HUD (0x47bb58): tipo 1 WRONG_WAY, 2 Off_Track_Go_Back, 3 MISSED_CHECKPOINT
 ## (textos do text/15205_en.txt), nas fases 2 e 3.
 ##
-## Não portado: o pedido tipo 3 (checkpoint perdido; o RX01 tem 1 caminho só),
-## 2 flags do objeto do corredor (+0x120 +0x24/+0x28, zeradas na RAM, quem liga
-## não foi achado) e as caixas do 0x543b88 (a lista está vazia no RX01).
+## Checkpoint (nov/2026; o RX01 tem 1, a linha de chegada: AILink 50, fração
+## 0.0954 = a face de entrada da caixa, 1.44 m antes do centro). O registro
+## aceito (+0x40) guarda o checkpoint pendente (+0x4c): o aceito entrar no link
+## dele liga (0x4d50a8 / 0x4d3168). Cada passo, com pendente:
+##  - caixa (0x4d3658): |local| <= meias medidas (15.83 x 5.94 x 1.44 m, RAM:
+##    o tamanho do XML JÁ É a meia medida) e a frente do carro . frente do
+##    link > 0 -> passou (0x4d43f0): apaga o pendente, estado 0 e conta a volta
+##    (0x4d50d0: só se andou > 1/4 de volta desde a última, 0x4d2b30);
+##  - com avanço > 0 o estado (+0x30) = 0x4d5188: 1 se o rastreio saiu do link
+##    ou passou 5 m da face de entrada sem a caixa. Sem pendente, o caminho
+##    do aceito até o rastreio (0x4d31f0 / 0x4d32c8) pulando o link do
+##    checkpoint também dá 1. Com estado 1 o avanço não é aceito.
+##  - estado 1 -> pedido tipo 3 (0.2, 1, 3; 0x4d4808), que passa na frente
+##    de um pedido 1/2 andando (0x4d4ef0: vai direto pra fase 2 com 0, 1, 3).
+## Repor com pendente além do centro da caixa volta pro começo do link
+## (0x4d3fe0), antes da caixa: senão repunha depois dela pra sempre.
+##
+## Não portado: 2 flags do objeto do corredor (+0x120 +0x24/+0x28, zeradas na
+## RAM, quem liga não foi achado), as caixas do 0x543b88 (a lista está vazia no
+## RX01) e o ponto salvo de 0.5 em 0.5 s (0x4d44c0; o nosso repõe no aceito).
 
-const PARAMS := {1: [0.2, 2.0, 3.0], 2: [0.2, 0.0, 3.0]}     # 0x4d4808
-const TEXTO := {1: "Wrong Way", 2: "Off Track, Go Back!"}
+const PARAMS := {1: [0.2, 2.0, 3.0], 2: [0.2, 0.0, 3.0], 3: [0.2, 1.0, 3.0]}   # 0x4d4808
+const PARAMS_3_POR_CIMA := [0.0, 1.0, 3.0]     # 0x4d4ef0: tipo 3 em cima de outro, fase 2
+const TEXTO := {1: "Wrong Way", 2: "Off Track, Go Back!", 3: "Missed Checkpoint"}
+const CP_PASSOU := 5.0           # 0x4d5188: m depois da face de entrada sem a caixa
+const VOLTA_MIN := 0.25          # 0x4d50d0: fração da volta desde a última contada
 const MPH := 0.44704
 
 var ia
@@ -48,6 +68,15 @@ var aceito := 0.0               # último progresso aceito (m de corrida)
 var pulo := true                # o 1º passo depois de repor não confere trapaça
 var fora := 0.0                 # m além da borda (diagnóstico e testes)
 var repostos := 0
+var pendente := false           # checkpoint pendente no registro aceito (+0x4c)
+var estado := 0                 # +0x30: 1 = checkpoint perdido
+var voltas := 0                 # passagens contadas pela caixa (+0x50)
+var _volta_ini := 0.0           # progresso do começo da volta atual (0x4d2800)
+
+# o checkpoint na linha da IA (do data/rx01_corrida.json "checkpoint")
+var _cp_seg := -1               # trecho da linha = o AILink do checkpoint
+var _cp_ent := 0.0              # s (m na volta) da face de entrada (a fração do link)
+var _cp_centro := 0.0           # s do centro da caixa (= s_linha)
 
 
 # CPU: os limites do <Logic> lidos uma vez (antes: 4 buscas por carro e passo)
@@ -64,15 +93,44 @@ func _init(ia_, prog: float) -> void:
 	_backward = logic.get("mBackwardLimit", 100.0)
 	_cheat_prog = logic.get("mCheatingProgress", 30.0)
 	_warn_stray = logic.get("mWarningStray", 4.0)
+	var cp: Dictionary = ia.corrida.dados.get("checkpoint", {})
+	var n: int = ia.linha.size()
+	if cp.has("link") and n > 1:
+		var k := int(cp.link)
+		_cp_seg = n - 1 - k if ia.corrida.sentido < 0 else k
+		var l: float = ia._plano(ia.linha[(_cp_seg + 1) % n] - ia.linha[_cp_seg]).length()
+		_cp_ent = float(ia.acc[_cp_seg]) + float(cp.get("fracao", 0.0)) * l
+		_cp_centro = fposmod(float(ia.s_linha), float(ia.comp))
+	# a 1ª volta vai da largada até a linha (0x4d2800 com 0 voltas)
+	_volta_ini = prog
 	recomecar(prog)
 
 
+## depois de repor (0x4d3538: estado 0, pulo; o pendente fica no registro)
 func recomecar(prog: float) -> void:
 	aceito = prog
 	pulo = true
 	tipo = 0
 	fase = 0
 	tempo = 0.0
+	estado = 0
+
+
+## onde repor: o último progresso aceito; com checkpoint pendente e o ponto
+## além do centro da caixa, o começo do link dele (0x4d3fe0)
+func ponto_repor() -> float:
+	if pendente and _cp_seg >= 0:
+		var s: float = fposmod(aceito + ia.s_linha, ia.comp)
+		if ia._seg(s) == _cp_seg and s >= _cp_centro:
+			return aceito - (s - float(ia.acc[_cp_seg]))
+	return aceito
+
+
+## trecho da linha com a volta (pra comparar links de voltas diferentes)
+func _seg_g(prog: float) -> int:
+	var s: float = prog + ia.s_linha
+	var v := floorf(s / ia.comp)
+	return int(v) * ia.linha.size() + ia._seg(s - v * ia.comp)
 
 
 ## um passo; devolve true quando é pra repor (em aceito)
@@ -88,6 +146,9 @@ func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
 		var g: Array = _fora_gd(r.prog, car.global_position)
 		fora = g[0]
 		d = g[1]
+	# caixa do checkpoint pendente (antes do aceite, 0x4d3658)
+	if pendente and _na_caixa(car, d):
+		_passou_caixa()
 	# trapaça e progresso aceito
 	var trapaca: bool = fora > _cheat_stray
 	var delta: float = r.prog - aceito
@@ -96,13 +157,17 @@ func passo(r: Dictionary, car: RigidBody3D, dt: float) -> bool:
 			trapaca = true
 		if delta > _cheat_prog:
 			trapaca = true
-	if delta > 0.0 and (pulo or not trapaca):
-		aceito = r.prog
+	if delta > 0.0:
+		estado = _estado_cp(r.prog)
+		if (pulo or not trapaca) and estado == 0:
+			_aceitar(r.prog)
 	pulo = false
 	# pedido
 	var lv: Vector3 = car.linear_velocity
 	var v := Vector3(lv.x, 0.0, lv.z)
-	if v.length() > 1e-3 and d.dot(v.normalized()) < -0.5:
+	if estado != 0:
+		_pedir(3)
+	elif v.length() > 1e-3 and d.dot(v.normalized()) < -0.5:
 		_pedir(1)
 	elif trapaca or fora > _warn_stray:
 		_pedir(2)
@@ -133,8 +198,65 @@ func _fora_gd(prog: float, p: Vector3) -> Array:
 	return [esq - lat if lat < esq else (lat - dir_ if lat > dir_ else 0.0), d]
 
 
+## 0x4d5188: checkpoint pendente e o rastreio já fora do link dele ou mais de
+## 5 m depois da face de entrada -> 1 (perdido)
+func _estado_cp(prog: float) -> int:
+	if not pendente or _cp_seg < 0:
+		return 0
+	if _seg_g(prog) != _seg_g(aceito):
+		return 1
+	var s: float = fposmod(prog + ia.s_linha, ia.comp)
+	return 1 if s - _cp_ent > CP_PASSOU else 0
+
+
+## 0x4d31f0 / 0x4d32c8 e o aceite (0x4d50a8): o caminho do link aceito até o
+## do rastreio não pode pular o do checkpoint (o aceito só se ele estiver
+## pendente; o do rastreio não conta). Entrar no link liga o pendente
+func _aceitar(prog: float) -> void:
+	var a := _seg_g(aceito)
+	var t := _seg_g(prog)
+	if t != a and _cp_seg >= 0:
+		var n: int = ia.linha.size()
+		var i0 := a if pendente else a + 1
+		for g in range(i0, t):
+			if posmod(g, n) == _cp_seg:
+				estado = 1
+				return
+		pendente = posmod(t, n) == _cp_seg
+	aceito = prog
+
+
+## dentro da caixa do checkpoint (eixos e meias medidas da RAM; a posição do
+## corpo) e de frente pro sentido do link aceito (a frente do carro)
+func _na_caixa(car: RigidBody3D, d: Vector3) -> bool:
+	var c = ia.corrida
+	var r: Vector3 = car.global_position - c._cp_pos
+	var m: Vector3 = c._cp_meia
+	if absf(r.dot(c._cp_lado)) > m.x or absf(r.y) > m.y or absf(r.dot(c._cp_frente)) > m.z:
+		return false
+	return car.global_transform.basis.z.dot(d) > 0.0
+
+
+## 0x4d43f0 + 0x4d50d0: apaga o pendente e o estado; a volta conta se andou
+## mais de 1/4 dela desde a última (0x4d2b30)
+func _passou_caixa() -> void:
+	pendente = false
+	estado = 0
+	var fim: float = float(voltas) * ia.comp       # 0x4d2800: a volta n acaba em n x comp
+	if (aceito - _volta_ini) / maxf(fim - _volta_ini, 1e-3) > VOLTA_MIN:
+		_volta_ini = fim
+		voltas += 1
+
+
 func _pedir(k: int) -> void:
 	if tipo != 0:
+		if k == 3 and tipo != 3:
+			tipo = 3
+			fase = 2
+			tempo = 0.0
+			a = PARAMS_3_POR_CIMA[0]
+			b = PARAMS_3_POR_CIMA[1]
+			c = PARAMS_3_POR_CIMA[2]
 		return
 	tipo = k
 	fase = 1

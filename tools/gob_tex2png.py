@@ -148,6 +148,9 @@ def convert(path):
 
     im = Image.new("RGBA", (w, h))
     im.putdata(data)
+    if bpp in (4, 8):                    # quem quiser a paleta (HUD: barras que acendem pela CLUT)
+        im.info["indices"] = idx
+        im.info["paleta"] = pal
     name = d[0x44:0x44 + 64].split(b"\x00")[0].decode("latin-1")
     return im, f"{name} {w}x{h} {bpp}bpp"
 

@@ -46,6 +46,11 @@ func _physics_process(dt: float) -> bool:
 				_falha("rivais: %d" % (0 if ia == null else ia.rivais.size()))
 				fase = 9
 				return false
+			# carro só do jogador (Sphinx speedrun, NOSSO) não vai pros rivais
+			var so: Array = main.VEHICLES.filter(func(v): return v.get("so_jogador", false)).map(func(v): return v.name)
+			for x in ia.rivais:
+				if x.carro in so:
+					_falha("rival %s com o carro só do jogador %s" % [x.nome, x.carro])
 			eu = {"nome": "Você", "car": main.car, "r": ia.jogador, "desvio": 0.0, "desvio0": ia._lateral(main.car.global_position, ia.jogador.prog + ia.s_linha) - ia.lat_zero(ia.jogador.prog + ia.s_linha), "prog0": ia.jogador.prog, "skill": 1.0, "preso": 0.0,
 				"re": 0.0, "capotado": 0.0, "repostos": 0, "res": 0}
 			fase = 1
@@ -73,15 +78,25 @@ func _physics_process(dt: float) -> bool:
 				var piores := 0
 				for x in ia.rivais:
 					var t5: Array = x.get("t5", [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-					print("%-10s skill %.2f  %-10s  andou %6.0f m  %4.1f km/h média  repostos %d  ré %d  ultrapassar %d (s nas fases 0-4: %.0f %.0f %.0f %.0f %.0f)" % [
+					print("%-10s skill %.2f  %-10s  andou %6.0f m  %4.1f km/h média  repostos %d  ré %d  ultrapassar %d (s nas fases 0-4: %.0f %.0f %.0f %.0f %.0f)  cortes de curva %d" % [
 						x.nome, x.skill, x.carro, x.r.prog, (x.r.prog + 54.8) / c.t * 3.6, x.repostos, x.res,
-						x.get("n5", 0), t5[0], t5[1], t5[2], t5[3], t5[4]])
+						x.get("n5", 0), t5[0], t5[1], t5[2], t5[3], t5[4], x.get("cortes", 0)])
 					if x.r.prog < voltas * ia.comp:
 						_falha("%s não completou %d volta(s) em %.0f s" % [x.nome, voltas, c.t])
 					if x.repostos > 2 * voltas:
 						piores += 1
 				if piores > 1:
 					_falha("%d rivais repostos demais" % piores)
+				# Score dos rivais (pista/truques.gd, um por rival como no jogo)
+				var scores: Array = ia.rivais.map(func(x): return x.truques.total)
+				print("Score dos rivais: %s" % [scores])
+				if scores.max() <= 0:
+					_falha("nenhum rival fez Score")
+				# melhor volta de cada rival (tela de resultados)
+				var melhores: Array = ia.rivais.map(func(x): return snappedf(x.melhor, 0.01))
+				print("melhor volta dos rivais: %s" % [melhores])
+				if melhores.min() <= 0.0:
+					_falha("rival sem melhor volta")
 				print("jogador (IA): andou %.0f m, repostos %d, ré %d; classificação %s" % [
 					eu.r.prog, eu.repostos, eu.res, ia.classificacao().map(func(e): return e.nome)])
 				fase = 9

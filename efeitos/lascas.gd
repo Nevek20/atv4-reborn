@@ -131,6 +131,11 @@ func montar(c) -> bool:
 	mi.name = "Lascas"
 	mi.multimesh = mm
 	mi.top_level = true
+	# sem interpolação de física: o buffer é gravado todo quadro em
+	# coordenadas do mundo; interpolado, o Godot misturava o buffer do passo
+	# anterior com o de agora pelo índice, e quando uma nuvem morre os índices
+	# andam: ela era desenhada entre 2 nuvens diferentes e piscava (Matheus)
+	mi.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 16384.0
 	add_child(mi)
@@ -143,6 +148,8 @@ func montar(c) -> bool:
 ## base da pintura (gerar_pintura -> pintura.json). Sem o .json (pintura velha):
 ## a cor que mais aparece na pintura.png (a base cobre quase tudo; NOSSO)
 static func cor_base(c) -> Color:
+	if c.get("cores_pintura") and c.cores_pintura.get("base") is Color:
+		return c.cores_pintura.base       # oficina (carro/pintura.gd)
 	var dir: String = c.model_path.get_base_dir() if c.model_path != "" else ""
 	var jp := dir.path_join(c.livery_file.get_basename() + ".json")
 	if dir != "" and FileAccess.file_exists(jp):

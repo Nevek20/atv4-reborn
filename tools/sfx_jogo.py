@@ -9,6 +9,8 @@ Bancos (Audio/*.bnk, achados pelo data/arquivos.tsv; os únicos que o jogo
 carrega numa corrida no RX01, conferido na RAM do SPU de 17 save states):
     Surface  = Audio/SURFACE.bnk   (rodas: Dirt, Tarmac, Screech, Gravel...)
     Coll_Big = Audio/Collide.bnk   (BigSuspension, SmallSuspension, LandingImpact...)
+    Menu_IG  = Audio/Menu_IG.bnk   (menu da pausa: Scroll, Back, ScrollVert... pelo
+               SoundDatabase.xml IG_slide / IG_cancel / IG_scrollHoriz / IG_scrollVert)
 Nome e índice de cada som = Audio/SampleBanks.xml (posição da entrada = índice
 do som no banco 989snd).
 
@@ -44,7 +46,7 @@ import struct
 import sys
 
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BANCOS = {"Surface": "Audio/SURFACE.bnk", "Coll_Big": "Audio/Collide.bnk"}
+BANCOS = {"Surface": "Audio/SURFACE.bnk", "Coll_Big": "Audio/Collide.bnk", "Menu_IG": "Audio/Menu_IG.bnk"}
 COEF = [(0, 0), (60, 0), (115, -52), (98, -55), (122, -60)]
 
 

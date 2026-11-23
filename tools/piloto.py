@@ -52,6 +52,13 @@ import sys
 
 SKL = "other/00519_bloco.bin"          # Characters/Skeletons/InGame_Mid.skl
 SRD = "other/00514_bloco.bin"          # MALE_HIGH.srd
+# piloto feminino (nov/2026): o mesmo esqueleto de 47 ossos; o rabo de cavalo
+# é outro modelo (7 ossos próprios) no mesmo espaço do corpo, atrás do osso
+# "head", que a PONY_TAIL_POSE (2 quadros iguais) dobra pra baixo
+SRD_F = "other/00510_bloco.bin"        # FEMALE_HIGH.srd
+SKL_RABO = "other/00520_bloco.bin"     # Characters/Skeletons/PonyTail.skl
+SRD_RABO = "other/00517_bloco.bin"     # Characters/Models/PonyTail/PONYTAIL.srd
+BAC_RABO = ("raw/00507r_bloco.bin", 0, 514)   # PonyTail/HighDetail/Generic/PONY_TAIL_POSE.bac
 BAC = "other/00312_bloco.bin"          # Truck/Controls STEER_LEFT.bac
 TEXTURA = "gob/00970_rider_fury.gob"   # Characters/Textures/Template/rider_fury.bog
 
@@ -169,6 +176,119 @@ def ler_bac(d):
     return {"dur": dur, "tempos": tempos, "quadros": quadros}
 
 
+def rabo_de_cavalo(ler):
+    """malha do rabo de cavalo na PONY_TAIL_POSE (vértices e normais no espaço
+    do corpo, já dobrado), pra ir inteira no osso "head" do corpo. NOSSO: o
+    rabo não balança (no jogo ele tem os 7 ossos dele; a pose é parada)"""
+    import numpy as np
+    nomes, pais, _esp = ler_skl(ler(SKL_RABO))
+    m = ler_srd(ler(SRD_RABO))
+    arq, ini, tam = BAC_RABO
+    pose = ler_bac(ler(arq)[ini:ini + tam])["quadros"][0]
+
+    def qmat(x, y, z, w):
+        return np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                         [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+                         [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    g = [None] * len(nomes)
+    for b in range(len(nomes)):
+        lm = np.eye(4)
+        lm[:3, :3] = qmat(*pose[b][3:])
+        lm[:3, 3] = pose[b][:3]
+        g[b] = lm if pais[b] < 0 else g[pais[b]] @ lm
+    # pele: pose global x inversa de repouso (a do .srd é em linhas: transpõe)
+    pele = [g[b] @ np.array(m["inv"][b], dtype=float).reshape(4, 4).T for b in range(len(nomes))]
+    pos, nrm = [], []
+    for v, n, ob, pw in zip(m["pos"], m["normal"], m["ossos"], m["pesos"]):
+        acc = np.zeros(3)
+        accn = np.zeros(3)
+        for b, w in zip(ob, pw):
+            if w > 0 and b < len(pele):
+                acc += w * (pele[b] @ np.append(v, 1.0))[:3]
+                accn += w * (pele[b][:3, :3] @ np.array(n))
+        pos.append(acc.tolist())
+        ln = np.linalg.norm(accn)
+        nrm.append((accn / ln if ln > 0 else accn).tolist())
+    return {"pos": pos, "normal": nrm, "uv": m["uv"], "tris": m["tris"]}
+
+
+def rabo_modelo(ler):
+    """rabo de cavalo como modelo próprio, como no jogo (FUN_001a9588): os 7
+    ossos do PonyTail.skl (PONY_A..PONY_END) com a inversa de repouso do
+    .srd, a malha presa neles e a PONY_TAIL_POSE em transforms globais (espaço
+    do corpo). O carro/rabo.gd balança a corrente (física do jogo) em cima."""
+    import numpy as np
+    nomes, pais, _esp = ler_skl(ler(SKL_RABO))
+    m = ler_srd(ler(SRD_RABO))
+    arq, ini, tam = BAC_RABO
+    pose = ler_bac(ler(arq)[ini:ini + tam])["quadros"][0]
+    g = [None] * len(nomes)
+    for b in range(len(nomes)):
+        x, y, z, w = pose[b][3:]
+        lm = np.eye(4)
+        lm[:3, :3] = [[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                      [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+                      [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]]
+        lm[:3, 3] = pose[b][:3]
+        g[b] = lm if pais[b] < 0 else g[pais[b]] @ lm
+    r = lambda v: [round(float(x), 6) for x in v]
+    glob = []
+    for b in range(len(nomes)):
+        # rotação global como quatérnio (x, y, z, w) + posição
+        rm = g[b][:3, :3]
+        t = np.trace(rm)
+        if t > 0:
+            k = 0.5 / np.sqrt(t + 1.0)
+            q = [(rm[2, 1] - rm[1, 2]) * k, (rm[0, 2] - rm[2, 0]) * k, (rm[1, 0] - rm[0, 1]) * k, 0.25 / k]
+        else:
+            i = int(np.argmax([rm[0, 0], rm[1, 1], rm[2, 2]]))
+            j, kk = (i + 1) % 3, (i + 2) % 3
+            sq = np.sqrt(1.0 + rm[i, i] - rm[j, j] - rm[kk, kk]) * 2
+            q = [0.0] * 4
+            q[i] = 0.25 * sq
+            q[j] = (rm[j, i] + rm[i, j]) / sq
+            q[kk] = (rm[kk, i] + rm[i, kk]) / sq
+            q[3] = (rm[kk, j] - rm[j, kk]) / sq
+        glob.append(r(list(g[b][:3, 3]) + q))
+    return {
+        "fonte": "tools/piloto.py: %s, %s, pose %s" % (SKL_RABO, SRD_RABO, BAC_RABO[0]),
+        "ossos": [{"nome": nomes[b], "pai": pais[b], "inv": r(m["inv"][b])} for b in range(len(nomes))],
+        "pose": glob,
+        "pos": [x for v in m["pos"] for x in r(v)],
+        "normal": [x for v in m["normal"] for x in r(v)],
+        "uv": [x for v in m["uv"] for x in r(v)],
+        "ossos_v": [x for v in m["ossos"] for x in v],
+        "pesos": [x for v in m["pesos"] for x in r(v)],
+        "tris": [x for t in m["tris"] for x in t],
+    }
+
+
+def modelo_json(nomes, pais, espelho, m, anim, fonte, rabo=None, osso_cabeca=-1):
+    r = lambda v: [round(x, 6) for x in v]
+    pos, normal, uv = list(m["pos"]), list(m["normal"]), list(m["uv"])
+    ossos_v, pesos, tris = list(m["ossos"]), list(m["pesos"]), list(m["tris"])
+    if rabo:
+        base = len(pos)
+        pos += rabo["pos"]
+        normal += rabo["normal"]
+        uv += rabo["uv"]
+        ossos_v += [[osso_cabeca, 0, 0, 0]] * len(rabo["pos"])
+        pesos += [[1.0, 0.0, 0.0, 0.0]] * len(rabo["pos"])
+        tris += [[a + base, b + base, c + base] for a, b, c in rabo["tris"]]
+    return {
+        "fonte": fonte,
+        "ossos": [{"nome": nomes[b], "pai": pais[b], "espelho": espelho[b], "inv": r(m["inv"][b])}
+                  for b in range(len(nomes))],
+        "pos": [x for v in pos for x in r(v)],
+        "normal": [x for v in normal for x in r(v)],
+        "uv": [x for v in uv for x in r(v)],
+        "ossos_v": [x for v in ossos_v for x in v],
+        "pesos": [x for v in pesos for x in r(v)],
+        "tris": [x for t in tris for x in t],
+        "steer_left": anim,
+    }
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unpacked")
@@ -178,27 +298,38 @@ def main():
     nomes, pais, espelho = ler_skl(ler(SKL))
     m = ler_srd(ler(SRD))
     anim = ler_bac(ler(BAC))
-    r = lambda v: [round(x, 6) for x in v]
-    out = {
-        "fonte": "tools/piloto.py: %s, %s, %s; textura %s" % (SKL, SRD, BAC, TEXTURA),
-        "ossos": [{"nome": nomes[b], "pai": pais[b], "espelho": espelho[b], "inv": r(m["inv"][b])}
-                  for b in range(len(nomes))],
-        "pos": [x for v in m["pos"] for x in r(v)],
-        "normal": [x for v in m["normal"] for x in r(v)],
-        "uv": [x for v in m["uv"] for x in r(v)],
-        "ossos_v": [x for v in m["ossos"] for x in v],
-        "pesos": [x for v in m["pesos"] for x in r(v)],
-        "tris": [x for t in m["tris"] for x in t],
-        "steer_left": anim,
-    }
+    out = modelo_json(nomes, pais, espelho, m, anim,
+                      "tools/piloto.py: %s, %s, %s; textura %s" % (SKL, SRD, BAC, TEXTURA))
+    # piloto feminino: corpo + rabo de cavalo, que é um modelo à parte com os
+    # ossos dele (balança: carro/rabo.gd). O rabo_de_cavalo() (preso inteiro
+    # na cabeça) ficou de reserva pra quem não tiver o rabo.gd
+    try:
+        mf = ler_srd(ler(SRD_F))
+        out_f = modelo_json(nomes, pais, espelho, mf, anim,
+                            "tools/piloto.py: %s, %s (+ rabo %s, %s, pose %s), %s" % (SKL, SRD_F, SKL_RABO, SRD_RABO, BAC_RABO[0], BAC))
+        out_f["rabo"] = rabo_modelo(ler)
+    except Exception as e:  # noqa: BLE001
+        out_f = None
+        print("[!] piloto feminino: %s" % e)
     os.makedirs(a.out, exist_ok=True)
     json.dump(out, open(os.path.join(a.out, "piloto.json"), "w"), separators=(",", ":"))
+    if out_f:
+        json.dump(out_f, open(os.path.join(a.out, "piloto_f.json"), "w"), separators=(",", ":"))
+        print("[+] piloto feminino: %d vértices + rabo de cavalo (%d vértices, %d ossos)" % (
+            len(out_f["pos"]) // 3, len(out_f["rabo"]["pos"]) // 3, len(out_f["rabo"]["ossos"])))
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from gob_tex2png import convert
     im, info = convert(os.path.join(a.unpacked, TEXTURA))
     if im is None:
         sys.exit("textura %s: %s" % (TEXTURA, info))
     im.convert("RGB").save(os.path.join(a.out, "piloto.png"))
+    # textura montada como o jogo (Gear + Paint Shop do piloto; oficina): por
+    # cima da rider_fury pronta, que fica só se faltar alguma camada
+    try:
+        import piloto_pintura
+        piloto_pintura.exportar(a.unpacked, a.out)
+    except Exception as e:  # noqa: BLE001
+        print("[!] textura do piloto montada: %s (fica a rider_fury pronta)" % e)
     print("[+] %s: %d ossos, %d vértices, %d triângulos, STEER_LEFT %d quadros em %.3f s" % (
         a.out, len(nomes), len(m["pos"]), len(m["tris"]), len(anim["tempos"]), anim["dur"]))
 

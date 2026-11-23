@@ -38,7 +38,7 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 ## Estrutura
 
 ```
-main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 esconde, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
+main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 tudo / só o HUD do jogo / nada, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
                      VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
 carro/               o carro
   car.gd               a FÍSICA portada do exe (suspensão, pneus, motor, câmbio, pedais, casco,
@@ -50,23 +50,32 @@ carro/               o carro
   suspension_visual.gd balanças, amortecedores e freios do jogo se mexendo
   carro_glb.gd         carros extras nossos (.glb no frame do jogo)
   piloto.gd            piloto do jogo no ARSE, braços pela direção (STEER_LEFT) e mãos no aro
+  rabo.gd              rabo de cavalo da piloto balançando (corrente de partículas do jogo)
   volantes.gd          volantes gerados, um estilo por carro (melhoria nossa)
   painel.gd            painel funcional (melhoria nossa)
   motor_treme.gd       motor e escape tremendo (melhoria nossa)
   motor_anima.gd       ventoinhas, polias e correia girando (melhoria nossa)
   luzes.gd, farol.gd   lanterna de freio, ré e farol acesos (melhoria nossa)
   sujeira.gd           sujeira do jogo na pintura e lama nas rodas
+  roda_borrao.gd       borrão de movimento nas rodas (melhoria nossa)
+  pecas.gd             peças compradas (upgrades.xml por classe; oficina, aba Upgrade)
+  pintura.gd           pintura montada em tempo real (camadas do gerar_pintura + 3 cores; oficina)
+  piloto_pintura.gd    textura do piloto montada como o jogo (peças + 4 cores; oficina, aba Piloto)
   batida_carros.gd     carro com carro (esferas do VehicleVehicle.hsc, lasquinha e som)
 camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.gd (tremida),
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
+menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa),
+                     hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud),
+                     resultados.gd (telas da corrida pelo .fex: resultados, pausa, Race again),
+                     fader.gd (tela preta da reposição)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
-                     reposicao.gd (reposição automática do jogo, R na corrida)
+                     reposicao.gd (reposição automática do jogo, R na corrida), truques.gd (Score: Slide e AirTime)
 som/                 motor_som.gd (motor, nosso), sfx_carro.gd (pneu, suspensão, pouso, batida do jogo),
                      som_jogo.gd (tocador 989snd); engine_sim/ e loops/ (os motores gravados)
 data/                XMLs e JSONs do jogo (física buggy_NN.xml, pontos, câmeras, peças, pista)
 assets/              gerados pelos tools (fora do git, menos o terreno): carros/ (buggy_NN, truck_NN,
-                     truck_bonus, escort, rodas), piloto/, pista/ (rx01, terreno), efeitos/, sons/
+                     truck_bonus, escort, rodas, parachoques, luzes), piloto/, pista/ (rx01, terreno), efeitos/, sons/, hud/
 fisica_cpp/          física do carro em C++ (GDExtension; godot-cpp 4.5 é submódulo): src/ (motor.cpp,
                      pneus.cpp, rodas.cpp, curvas.cpp, efeitos.cpp; visual e som: piloto.cpp,
                      suspensao.cpp, som.cpp, som_jogo.cpp; linha_ia.cpp, nuvens.cpp), SConstruct
@@ -94,7 +103,7 @@ Gerar assets no PC (fora do git; detalhes em docs/comandos.md):
 `tools/gerar_buggies.py` (carros, `--classe truck`), `tools/gerar_pintura.py`,
 `tools/fx_jogo.py` (texturas de efeito), `tools/sfx_jogo.py` (sons),
 `tools/rx01_objetos.py` (pista), `tools/piloto.py`, `tools/carro_glb.py`
-(carros extras nossos).
+(carros extras nossos), `tools/hud_jogo.py` (HUD), `tools/fex_jogo.py` (telas do menu).
 
 Na nuvem (Claude Code web) o `.claude/hooks/session-start.sh` instala o
 Godot 4.7.1 de Linux, Pillow e zstandard e já deixa `$GODOT` pronto. O
@@ -124,7 +133,7 @@ analyzeHeadless <proj_dir> atv4 -process -noanalysis -readOnly ^
   teste_largada). Derrapagem: 4 + 5 save states (teste_derrapagem,
   teste_entrada). Buccaneer na largada (2 vídeos, teste_truck_video).
 - Velocímetro do jogo ~1.06 x a velocidade pra frente (buggies; o Buccaneer
-  mostra direto).
+  mostra direto). No HUD do PAL andando reto (RAM): 1.0x (int de |v|).
 
 ## Regras que já custaram caro (o detalhe de cada uma no docs/historico.md)
 
@@ -133,6 +142,22 @@ Arquivos, modelos e pintura
   15154 (BUGGY_10), Sphinx = 15148 (BUGGY_04); 15150 é o Phantom.
 - Peças de fábrica: vehicles.xml DefaultConfig + upgrades.xml; efeitos
   SOMAM. Final: Level0/1 = 0.45/0.53, Level2+ = a custom 0.61.
+  Peças compradas (carro/pecas.gd, oficina aba Upgrade) entram no lugar da
+  DefaultConfig nessa mesma conta; trocar = salvar e remontar o carro
+  (main.remontar_carro), não recarregar a física no lugar. Pneu = roda
+  inteira TYRE_<pneu>_<tamanho> (pecas.json "pneus") + atrito do Override do
+  material; de fábrica é a TYRE_GENERIC (RAM), não a TYRE_DIRT_BUDGET, mas
+  aparece a DIRT_BUDGET com cravos (NOSSO, DIRT_BUDGET_CRAVOS). Aro =
+  só a textura ALLOY da roda (IG_WHEEL_HEAVYCLASS_0N; a de fábrica é a 01;
+  o 8 é extra NOSSO, fora do catálogo). Tune & Setup (aba Ajuste): câmbio,
+  amortecedor, marchas e final (GearRatioTuning 0..1, liberados pelo nível
+  do câmbio como o 0x3ec5d0: Level2 final, Level3+ marchas). Para-choque
+  = só visual (mIsPhysical false): FrontBumper no ponto BUMPER do .pts
+  (assets/carros/parachoques); RallyCompMap (Storm, Chimera) não tem. As
+  light_64 dele acendem no H (farol.gd procura na carroceria e nele; o 3
+  tem a lente no atlas chassis_comp03, LAMPADAS_ATLAS só nos acessórios).
+  Barra de luz (Lighting) = mesmo esquema no LIGHTRIG (teto), do tamanho do
+  carro (vehicles.xml LightRigCategory; assets/carros/luzes).
 - Blocos: nunca pela posição no unpacked; data/arquivos.tsv dá caminho ->
   bloco. Corrida usa Models_4K.
 - Pasta do carro = assets/carros/<id do jogo> (buggy_10 é o Renegade). Os
@@ -145,6 +170,26 @@ Arquivos, modelos e pintura
 - Cor do vértice do .pingu (0x80 = 1.0, até 2.0) multiplica a textura.
   Alfa: só mesh_grey, Buggy_05_framework e driver têm furo.
 - Texturas .gob com mipmap: o nível 0 começa no 0x15c.
+- Oficina: paleta = as 128 cores fixas do jogo (CLUT da Palette.bog, 16 x 8).
+  A pintura montada no Godot (carro/pintura.gd, C++ compor_pintura) tem que
+  sair igual à pintura.png (teste_pintura_jogo): mudou a conta no
+  gerar_pintura.juntar, muda nos dois. Cores salvas só no carro do jogador.
+  Logos: o gerar_pintura desenha todos os logos em cada caixa (atlas,
+  camadas/logos.json) e o Godot só cola (alpha_composite do PIL, exato).
+  Rivais no RX01 offline = pintura de fábrica (AIPlayerColours é de outro modo).
+- Piloto: textura montada pelo COMPOSITOR.xml (um modelo por peça, 4 cores
+  pro piloto todo; tools/piloto_pintura.py = carro/piloto_pintura.gd = C++
+  compor_piloto, teste_piloto_pintura). O rosto da corrida é preto no jogo.
+  Feminino = FEMALE_HIGH (mesmo esqueleto) + rabo de cavalo (piloto_f.json,
+  chave "rabo"); trocar o sexo remonta o piloto.
+  Número do perfil (00..99) = costas do piloto E quadros do número do carro
+  (os 100 pré-desenhados por caixa, como os logos); rivais = Number do
+  AIPlayers.xml. Trocar repinta os dois (teste_numero). Lazarus: o 87
+  desenhado nas placas é apagado e as caixas são NOSSAS (PLACAS_NOSSAS).
+  Rabo de cavalo = modelo à parte com 7 ossos e a corrente de partículas do
+  jogo (carro/rabo.gd, teste_rabo) no espaço do corpo: no buggy ele fica
+  encostado nas costas e balança pelo pescoço, não pela velocidade (o eixo
+  Z do ROOT sentado aponta pra cima). Não "melhorar" no chute.
 
 Física
 - Física a 50 Hz (PAL); o jogo DEPENDE do passo. Vídeo NTSC = 60 Hz.
@@ -200,6 +245,10 @@ Pista RX01
   são do editor (o exe não tem as classes): não portar.
 - Poça: transparência POCA_ALFA 0.5 é NOSSA (o modo do GS não foi achado).
 - Cercas quebram pelo impulso do jogo (ShatterImpulse 2); fardo = 100 kg.
+  Além da previsão antes do passo, a rede (_rede_cercas) olha os contatos de
+  verdade e quebra a cerca que segurou com impulso alto (senão vira parede e
+  joga o carro). Peças: não batem no carro; chute na quebra e o carro
+  empurra as que alcança (só um lado, reação <= 0.25 t·m/s; NOSSO).
   Fardo fica dormindo até alguém bater (o 1º passo do motor acorda corpo
   novo: objetos_rx01 põe pra dormir de novo) e dorme quase parado (NOSSO).
 - IA: o zero da rota é o CENTRO +0x5c do link e a borda é a do bloco extra
@@ -210,38 +259,74 @@ Pista RX01
   do jogo (0x34cea8) vai na física do rival: potência x (1 + s), subesterço
   x (2 - 2s) (car.gd mult_pot / mult_sub, o C++ lê; 1 no jogador; s = 0 na
   sua chegada). Comandos em sétimos, direto (cru = suavizado; piloto +0xa0
-  freio, +0xa4 acel, +0xa8 dir). NOSSO: ré/preso/capotado, a caixa da IA
-  (metade do AABB do casco), o corte de curva do 0x359730.
+  freio, +0xa4 acel, +0xa8 dir). Preso = o #2 do jogo: parado a < 2 m da
+  âncora querendo andar por > 3 s, repõe (sem ré, sem regra de capotado).
+  Corte de curva (0x359730, modos 1 e 2): a reta até o ponto passando por
+  fora da borda recuada (meia largura) traz o ponto pra alcance/4, na
+  borda (raro no RX01). NOSSO: a caixa da IA (metade do AABB do casco).
 - Cérebro da IA (pista/ia_ultrapassar.gd): o #7 (linha) não segura a vez; o
   #5 ultrapassar (prioridade 1) entra com alvo (batida prevista < 20 s, ou o
   da frente chegando por > 10 quadros) e segura até as fases acabarem.
   Recomeçar o #7 sorteia o desvio da Skill de novo (0x360550). Nos 5 s
   depois do Go! o #7 segue a faixa do grid (modo 0). Lateral do jogo =
   -(a nossa): mundo espelhado; a conta 0x3614a0 bate com a RAM a 0.01 m.
+  #3, #4 e #6 não entram no RX01 offline (Skill slots 1 e 4 = 0 sem
+  rivalidade; o #6 só mira objetos de IA tipo 1/2, pools vazios na RAM):
+  não portados de propósito.
 - Largada da IA: no jogo (offline) o rival fica parado ("esperar", alvo 0)
   até faltarem 2 s pro Go! (0x364b08, save idle_antes_do_Go) e aí pisa com o
   carro travado: o ronco (o Matheus confirmou no jogo). Sai no Go! sem
   demora. O contador por posição do 0x352c98 é da chegada, em outros tipos
   de evento; o #1 de 7.5 mph é da largada em movimento.
 - Largada = vídeos: intro, câmera descendo 5 s, Get Ready 2.25 s, Go! 5 s
-  depois; você larga em 8º.
+  depois; você larga em 8º. Intro anda pelo comprimento da curva (35 m/s
+  constante, interpolada entre passos); pular a intro pula a descida; na
+  intro os carros ficam mudos.
+- Volta do jogador = passar pela caixa do checkpoint com ele pendente
+  (vigia.voltas, 0x4d43f0 / 0x4d50d0). O tamanho do XML JÁ É a meia medida
+  (RAM: ±15.83 m, cobre a pista de 24.8 m): não dividir por 2. teste_corrida
+  cruza 10 m fora do centro. Rivais iguais (x.vigia.voltas).
+- Checkpoint perdido (tipo 3): pendente e o rastreio 5 m depois da face de
+  entrada (ou fora do link 50) sem a caixa -> aceito para, "Missed
+  Checkpoint" 0.2 / 1 / 3 s, passa por cima de um 1/2 andando (fase 2).
+  Repõe no começo do link 50 se o aceito passou do centro (0x4d3fe0).
 - Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
   o ponto segue o Respotting do TrackSetup (chão >= 0.93, sem água, 8 m de
   folga). Volta pro último ponto conhecido na linha, não pro mais perto.
 - Reposição automática (pista/reposicao.gd, todos os carros): fora da pista
   = além da BORDA do AIT (largura esq/dir a partir do ponto da linha), não
   distância do centro. Fora > 4 m: 3.2 s; contramão: 5.2 s; um passo dentro
-  zera. Manual = "Reposicionar" do menu de pausa, só abaixo de 40 mph (R
-  é NOSSO até ter menu).
+  zera. Manual = "Respot" do menu de pausa (logo depois do Resume, só
+  correndo e abaixo de 40 mph, 0x4613a0); o R continua (NOSSO, o Matheus
+  gosta). Repor o jogador: pedido (0x15bd28) com 0.3 s até repor e a tela
+  preta do fader da câmera (menu/fader.gd, 0.2 s pra ir e 0.2 s pra voltar,
+  RAM); as cInstantRespotBox repõem na hora, sem tela preta.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
-  lido, calibrado em prints). Fumaça é melhoria nossa (o jogo não solta).
+  lido, calibrado em prints). Fumaça é melhoria nossa (o jogo não solta):
+  gás com física num shader de partícula (jato do cano, arrasto pro ar
+  parado, esteira, empuxo; fumaca.gd), bem sutil: alfa 0.09, cinza claro,
+  0.15 -> 0.47 m, vida 0.7 s, até 50/s, 35% na lenta (FECHADO; maior ou
+  mais opaca virou "fumaceira"). Partícula com BILLBOARD_PARTICLES só
+  respeita a escala com billboard_keep_scale; boca e direção dos canos tortos
+  medidas no modelo (tests/medir_escapes.gd, car.gd ESCAPE_NOSSO), o
+  motor_treme separa pelos pontos do jogo (escape_jogo).
   Poeira: o jogador usa o CamSubject do Dust.xml, os rivais o Other.
 - Efeito solto no mundo (MultiMesh top_level na origem: poeira, pedrinhas,
   lascas, espirro) fica FORA do LOD dos rivais e grava custom_aabb das
   partículas vivas: no Forward+ a caixa contava os espaços vazios (origem
   do mundo) e a terra dos rivais sumia e piscava.
+- Efeito com buffer gravado todo quadro (MultiMesh da poeira, espirro,
+  pedras, lascas, palha): physics_interpolation_mode OFF. Interpolado, o
+  Godot misturava o buffer do passo anterior com o novo pelo índice e, com
+  nuvem morrendo, desenhava entre 2 nuvens: piscava acima de 50 FPS (nos
+  testes a 50 FPS não aparece).
+- Ordem das transparentes (efeitos/ordem_fx.gd, NOSSO): cada efeito de um
+  carro (poeira, espirro, pedras, lascas, fumaça) ordena pela distância do
+  CARRO + desempate por tipo (sorting_offset compensa o centro da caixa).
+  Pela caixa do rastro a ordem trocava ~5 vezes por segundo e piscava
+  (tests/medir_ordem_fx.gd). Efeito novo: entra nessa lista.
 - Som de pneu, suspensão, pouso e batida = do jogo (989snd). Mistura nossa
   por cima: SO_DERRAPANDO e GANHO_PNEU 0.6.
 - Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no
@@ -254,6 +339,74 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
   vezes por segundo (PASSO_SOM, PASSO_HUD): até 75 FPS igual, acima o tempo
   acumulado entra de uma vez. Não voltar pra "todo quadro".
 
+HUD (menu/hud_jogo.gd)
+- Layout = o XML do jogo (data/hud_circuit.xml) com a conta do quadro do
+  exe (0x46f7c0), conferida com a RAM (teste_hud: 50 quadros < 0.5 px):
+  não posicionar nada "no olho". Montado num 4:3 da altura da janela; em
+  janela larga cada bloco encosta no seu lado (NOSSO). Sprite em pixel =
+  int(caixa .bed) / 480 da altura (nunca pela largura). Texto na altura do
+  quadro + kerning. Fixos antes, números por cima. Ponteiro: rpm / Max_rpm,
+  10 rad/s, giro no canto da needle_base. Barras: int(pedal x 16), cores do
+  XML x 128. Velocidade do HUD = |v pra frente| (RAM), não o 1.06.
+  Conferir mudança com re/hud_ram.py nos save states e com o Screenshot.png
+  de dentro do .p2s (a tela real do PAL; o PCSX2 estica o 4:3). Rótulos
+  como na tabela (sem maiúsculas). Lista, minimapa: RAM. NOSSO: Score
+  centrado, 3 dígitos x 0.8, a conta do LEAD, BEST LAP terminando junto
+  com o Total.
+  Letras = a fonte como fica na RAM (largura arredondada, dígitos com a
+  largura do maior); tempo = células do modelo "--:--:--" com o dígito
+  espremido no traço; mAlignCentre anda 3/4 (sem a razão 4:3); lista:
+  só os nomes deslizam (1 s, freando, quem desce some no meio).
+  teste_hud confere cada letra com a RAM (re/hud_textos.py): não "acertar"
+  texto no olho. GS do PAL tem 512 de largura (x 1.25 pra 640).
+  Mensagens = fila do jogo (mQueueSize, duração, modo de alfa) disparada
+  pelos eventos do exe (hud_jogo _eventos: Get Ready 2.5 s, Go! + bandeira
+  verde 4 s, Lap Complete / Final Lap 1 s, Race Complete, avisos no
+  ERROR_MESSAGE); bandeira branca na última volta, quadriculada a 100 m,
+  3 s + 1 s sumindo. Com o HUD do jogo o label da corrida não repete isso.
+  Seta 3D = ARROW.pingu numa SubViewport com a câmera da RAM; aparece com
+  o aviso e aponta 10 m à frente do último progresso aceito, no plano da
+  câmera (0.2 da direção e 0.1 do alfa por quadro de 50 Hz). Modelo sem
+  textura: cor do vértice direto (byte / 255), não o x2 dos com textura.
+- Score (pista/truques.gd, HUD passo_truques): porta do gerente de truques
+  (corredor+0x15c). Buggy/truck só têm Slide (estados 4 e 5, esquerda e
+  direita contam separado) e AirTime (6), do data/tricks.xml. Pontos =
+  taxa crescendo (Accel) x tempo, truncados; banca combo x truques
+  diferentes 0.5 + 0.75 s depois de parar; chegada com combo aberto perde.
+  Troca direta de truque não zera os pontos (0x522550): o jogo é assim,
+  não "consertar". Batida do casco (car.contatos) segura o começo e zera o
+  tempo no ar. Rivais têm o deles igual (ia.gd x.truques, classificacao
+  "score"). Holeshot é só de ATV e moto (o Matheus
+  confirmou no jogo; o RX01 nem tem cHoleshotBox). FECHADO pelo Matheus.
+
+Tela de resultados (menu/resultados.gd)
+- Layout = os .fex do jogo (tools/fex_jogo.py -> data/fex_resultados.json:
+  PostRace LAYER_RESULTS + Common LAYER_FAKE_HISTORY e LAYER_IG_BUTTON_BAR +
+  NewPause LAYER_PAUSE_BACKGROUND). rect em NDC y pra cima, filho no NDC do
+  pai; texto centrado (mJustify 17), fonte/kerning do HUD, giro do texto em
+  rad e do sprite em graus. teste_resultados confere com a RAM do
+  placar_final.p2s (< 0.5 px): não posicionar no olho. Entra na sua
+  chegada (0x4c18e0), tabela vazia, refeita a cada 2 s (1ª aos 3 s); no jogo só com
+  quem já chegou; a IA pilota o seu carro. NOSSO (o Matheus quis): os 8
+  juntos e já na entrada da tela, quem não chegou com "--:--.--" (sem
+  projeção de tempo). Score dos rivais segue
+  contando até a chegada de cada um (no jogo para na sua; NOSSO, o Matheus
+  quis). Continue -> Race again (LAYER_FINISHED_RACE: Restart / Exit; Exit
+  = treino livre, NOSSO; Records e Race Finished ainda não).
+- Pausa (Esc / Start na corrida, main.abrir_pausa; get_tree().paused e a
+  tela com PROCESS_MODE_ALWAYS): LAYER_PAUSE_MENU, opções do 0x462190
+  (Resume, Respot, Restart, Quit, Game options, Photographer; as 2 últimas
+  ainda não fazem nada). Seletor (LAYER_SELECTOR) = RAM do pause.p2s e
+  finish_2.p2s: atual em 1.4 encostada à esquerda, as outras (só as de
+  DEPOIS, não dá a volta) em 0.8 a 16 px do avanço dela, com 3 espaços;
+  mJustify 0x10 = centra na altura, 0x01 na largura. Troca = a animação do
+  exe (0.2537 s, nova 0.8 -> 1.4, 2 fantasmas em 1.5; não anda no meio).
+  Sons do Menu_IG (sfx_jogo): trocar Scroll, ponta Back, abrir / voltar
+  ScrollVert, escolher sem som. Restart e Quit: "ARE YOU SURE?"
+  (LAYER_CONFIRM, começa no NO; a faixa dela fica no lugar da da pausa,
+  NOSSO: no jogo pula 2.7 px). teste_resultados confere as 3 telas com a
+  RAM, teste_pausa o fluxo e os sons. Fora da corrida o Esc fecha o jogo.
+
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo
   (o Matheus achou o do jogo mais feio). Não voltar.
@@ -264,6 +417,11 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Mãos no aro por IK com tabela por carro. Mão de fora parar escorregando
   pelo aro foi reprovado: não voltar. Banco, eixo do volante e braço aberto
   por carro: car.gd BANCO_NOSSO, VOLANTE_EIXO, BRACO_ABERTO.
+- Borrão nas rodas (roda_borrao.gd): o material da roda é um shader com a
+  MESMA cor do StandardMaterial (cor do vértice só vira linear se a saída não
+  é sRGB) que borra girando |omega| x dt, até 1.3 rad. O jogo não tem. A
+  forma (cravos, contorno) só borra com as 8 cópias transparentes da roda do
+  jogador (só a textura não resolvia: "parado e andando ao mesmo tempo").
 - Mola visual integrada no quadro: passos pequenos (a do motor_treme dava
   NaN abaixo de ~37 FPS, o velho "!v.is_finite()").
 - Motor treme e anima, painel, cabine fechada: tabelas por carro em
@@ -275,13 +433,24 @@ Carro por dentro (melhorias nossas, cada uma aprovada com print)
 
 Frota
 - 12 buggies, 12 trucks, o bônus Lazarus (CHASSIS_Truck_04, física própria
-  NOSSA) e extras nossos de .glb (Escort, x 1.25). Tabelas por carro usam
+  NOSSA) e extras nossos de .glb (Escort, x 1.25). Sphinx speedrun = Sphinx
+  com tudo no máximo, só do jogador ("so_jogador", rival não sorteia). Tabelas por carro usam
   car.chave() (o Lazarus tem o id do Jericho).
 
 ## Pendente / ideias
 
+Ordem combinada com o Matheus (nov/2026): fechar o RX01 -> ATV e moto numa
+pista com Holeshot (save state dele) até fechar 100% os veículos -> menu
+(esqueleto pelos .fex, opções de vídeo/áudio/controle, perfil e save) ->
+todos os mapas (LOD e carregamento entram aqui) -> todos os modos ->
+carreira -> gráficos (chave "fiel x melhorado") -> polimento. Multiplayer
+local (2 na mesma tela) é obrigatório: câmera, HUD e som têm que aceitar 2
+jogadores (não amarrar nada novo a "um jogador só").
+
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
-- IA: os outros comportamentos do cérebro (#2 preso, #3, #4, #6), LOD com
-  os modelos 2K/1K/500 do jogo.
-- Piloto: textura em camadas como o jogo, LOD, piloto feminino.
+- RX01: LOD das árvores. Reposição: carro piscando (fantasma) depois de
+  repor.
+- Pausa: Game options (vai ter vídeo, áudio e controle: só quando essas
+  configurações existirem), Photographer; Records e Race Finished.
+- IA: LOD com os modelos 2K/1K/500 do jogo.
+- Piloto: LOD, nome no menu.

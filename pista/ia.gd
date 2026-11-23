@@ -36,15 +36,17 @@ extends Node
 ##    #5 ultrapassar (seguir colado, sair pro lado, passar, desviar de batida
 ##    prevista) no lugar do #7 enquanto roda;
 ##  - a lateral pedida fica dentro das bordas menos a meia largura do carro
-##    (0x359730, objeto +0xf4).
+##    (0x359730, objeto +0xf4), e a reta até o ponto da direção que cruza a
+##    borda puxa o ponto pra perto, na borda (corte de curva, modos 1 e 2);
+##  - #2 preso (0x356e38 / 0x364640): parado a menos de 2 m da âncora
+##    querendo andar por mais de 3 s, repõe (até nov/2026 era NOSSO: ré,
+##    repor lento e capotado). Fora da pista e contramão: a regra do jogo,
+##    pista/reposicao.gd, igual à do jogador.
 ##
 ## NOSSO (docs/historico.md, Corrida):
 ##  - os outros comportamentos do cérebro (#3, #4, #6), os modos 15 (x1.2) e
 ##    rota tipo 4 (x0.5), o limite da rota (-1 no RX01), a demora na largada
-##    pela posição (0x352c98) e o corte de curva do 0x359730 (ponto da
-##    direção que cruza a borda volta pra perto);
-##  - preso: dá ré; capotado ou lento: volta pra linha (fora da pista e
-##    contramão: a regra do jogo, pista/reposicao.gd, igual à do jogador);
+##    pela posição (0x352c98);
 ##  - escolha dos 7 pilotos e dos carros (sorteio entre os da classe).
 
 const ARQ := "res://data/ia.json"
@@ -52,6 +54,7 @@ const Reposicao := preload("res://pista/reposicao.gd")
 const SomJogo := preload("res://som/som_jogo.gd")
 const VehicleData := preload("res://carro/vehicle_data.gd")
 const Ultrapassar := preload("res://pista/ia_ultrapassar.gd")
+const Truques := preload("res://pista/truques.gd")
 const N_RIVAIS := 7
 # save state com rivais (objeto do piloto, vtable 0x5ae0d0): o alvo (+0x30)
 # fica 16.9..21.5 m à frente a 34..38 m/s (0.46..0.57 s) e a direção crua
@@ -83,9 +86,10 @@ const DEG := 0.017453294
 # só pro _v_curva antigo (NOSSO, fora do uso; teste_cpp compara o C++)
 const A_LAT := 14.0
 const A_FRENA := 8.0
-const PRESO_T := 2.0             # s parado correndo -> ré
-const RE_T := 1.5
-const CAPOTADO_T := 2.0
+# #2 preso (0x356e38 / 0x364640): a menos de 2 m (3D) da âncora querendo
+# andar por mais de 3 s -> repõe (0x3646d0 -> 0x15bd28)
+const PRESO_T := 3.0
+const PRESO_R2 := 4.0            # m², 2 m
 const DEG_10 := 0.17453295        # 0x359730: modo 1 mistura a lateral acima de 10° (0x3e32b8c4)
 const COS_10 := 0.98480775
 # CPU (nov/2026, tests/medir_cpu.gd): rival além disso da câmera não mexe
@@ -417,34 +421,49 @@ func criar() -> void:
 	var truck: bool = main.car.vehicle_id.begins_with("TRUCK")
 	var classe := "Truck" if truck else "Buggy"
 	var frota: Array = (main.TRUCKS if truck else main.VEHICLES).filter(
-		func(v): return v.id != main.car.vehicle_id)
+		func(v): return v.id != main.car.vehicle_id and not v.get("so_jogador", false))
 	var pilotos: Array = dados.pilotos.filter(
 		func(p): return p.rivalry == "POTENTIAL" and classe in p.classes)
 	pilotos.shuffle()
 	frota.shuffle()
+	# diagnóstico (docs/comandos.md): RIVAL_CARRO=nome põe os 7 no mesmo carro
+	if OS.has_environment("RIVAL_CARRO"):
+		var so: Array = frota.filter(func(v): return v.name == OS.get_environment("RIVAL_CARRO"))
+		if not so.is_empty():
+			frota = so
 	var n := mini(N_RIVAIS, mini(pilotos.size(), corrida.dados.grid.size() - 1))
 	for k in n:
 		var v: Dictionary = frota[k % frota.size()]
 		var c = main.Car.new()
 		main.configurar(c, v)
 		c.som_3d = true
+		c.rodas_fantasma = false        # borrão das rodas só de textura nos rivais
 		c.direcao_direta = true
 		c.desligadas = c.desligadas + ["painel"] + (Array(OS.get_environment("IA_DESL").split(",")) if OS.has_environment("IA_DESL") else [])
 		c.terrain = main.terrain
 		c.objetos = main.objetos
 		c.name = "Rival%d" % (k + 1)
+		var pl: Dictionary = pilotos[k]
+		# número do rival (AIPlayers.xml Number): costas do piloto e quadros do carro
+		c.piloto_escolhas = {"numero": "%02d" % (int(pl.numero) % 100)}
 		main.add_child(c)
 		# carro com carro só pelas esferas do VehicleVehicle (batida_carros.gd)
 		batidas.separar(c, main.car)
 		for y in rivais:
 			batidas.separar(c, y.car)
-		var pl: Dictionary = pilotos[k]
 		if main.objetos:
 			main.objetos.rivais.append(c)
 		rivais.append({"car": c, "nome": pl.nome, "skill": float(pl.skill), "numero": int(pl.numero),
-			"carro": v.name, "r": {}, "preso": 0.0, "re": 0.0, "capotado": 0.0,
+			"carro": v.name, "r": {}, "preso": 0.0,
 			"desvio": desvio_skill(float(pl.skill)), "repostos": 0, "res": 0, "lod": 0, "lat": 0.0,
-			"bonus": maxf(float(pl.skill) - 0.5, 0.0) * BONUS_SKILL, "cu": 0.0})
+			"bonus": maxf(float(pl.skill) - 0.5, 0.0) * BONUS_SKILL, "cu": 0.0,
+			# Score do rival: o mesmo gerente de truques do jogador (no jogo
+			# cada corredor tem o seu, corredor+0x15c; a RAM mostra os 8
+			# contando). Aparece na tela de resultados
+			"truques": Truques.new(Truques.grupo_do(c)),
+			# voltas do rival (tela de resultados): como as do jogador, a 1ª
+			# passagem pela caixa do checkpoint começa a volta 1 e cada uma fecha
+			"k_volta": -1, "t_volta": 0.0, "melhor": -1.0})
 	posicionar()
 
 
@@ -519,14 +538,17 @@ func posicionar() -> void:
 		x.comp = 0
 		x.viz = {}
 		x.preso = 0.0
-		x.re = 0.0
-		x.capotado = 0.0
+		x.erase("ancora")
 		x.vigia = Reposicao.new(self, x.r.prog)
 	jogador = novo_rastreio(main.car.global_position)
 	vigia_jogador = Reposicao.new(self, jogador.prog)
 
 
 func limpar() -> void:
+	piloto_jogador = null
+	_pedido = 0
+	if main and main.fader:
+		main.fader.zerar()
 	for x in rivais:
 		if is_instance_valid(x.car):
 			x.car.queue_free()
@@ -535,12 +557,26 @@ func limpar() -> void:
 		main.objetos.rivais.clear()
 
 
+## depois da sua chegada a IA pilota o seu carro (o Matheus: no jogo o carro
+## continua andando sozinho), como um rival sem catchup
+var piloto_jogador = null
+func pilotar_jogador() -> void:
+	var p: Vector3 = main.car.global_position
+	piloto_jogador = {"car": main.car, "nome": "Você", "skill": 1.0, "r": jogador, "preso": 0.0,
+		"desvio": 0.0, "repostos": 0, "res": 0, "lod": 5, "lat": _lateral(p, jogador.prog + s_linha)
+		- lat_zero(jogador.prog + s_linha), "bonus": 0.0, "cu": 0.0, "comp": 0, "viz": {},
+		"vigia": vigia_jogador}
+
+
 func soltar() -> void:
 	for x in rivais:
 		x.car.largada_presa = false
+		x.truques.ligado = true
 
 
 func _physics_process(dt: float) -> void:
+	if main and main.car != null and vigia_jogador:
+		_passo_pedido()
 	if rivais.is_empty() or main.car == null:
 		return
 	rastrear(jogador, main.car.global_position)
@@ -550,17 +586,27 @@ func _physics_process(dt: float) -> void:
 		if is_instance_valid(y.car):
 			var dc: float = y.car.global_position.distance_to(olho)
 			y.car.longe_vis = dc > VIS_PERTO
-			var longe: bool = dc > SomJogo.MAX_3D
+			var longe: bool = dc > SomJogo.MAX_3D or corrida.estado == corrida.INTRO   # abertura: mudos
 			if longe and not y.car.longe_som:
 				y.car.calar_som()          # saiu do alcance: para o som (religa ao voltar)
 			y.car.longe_som = longe
 	var est: int = corrida.estado
 	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
-		repor_jogador()
+		pedir_repor_jogador()
 	# o rastreio de todos antes da lista: ela leva os dados do passo de cada
 	# carro (Ultrapassar.dados_carro), feitos 1 vez e lidos por quem olha
 	for x in rivais:
 		rastrear(x.r, x.car.global_position)
+		if est == corrida.CORRENDO or est == corrida.CHEGOU:
+			# como o jogador: a volta conta passando pela caixa do checkpoint
+			# (reposicao.gd voltas; a 1ª passagem começa a volta 1)
+			var kv: int = int(x.vigia.voltas) - 1
+			if kv > int(x.k_volta) and int(x.k_volta) < corrida.voltas:
+				if int(x.k_volta) >= 0:
+					var lap: float = corrida.t - float(x.t_volta)
+					x.melhor = lap if float(x.melhor) < 0.0 else minf(float(x.melhor), lap)
+				x.k_volta = kv
+				x.t_volta = corrida.t
 	_carros_laco = _monta_carros()
 	_catchup()
 	for x in rivais:
@@ -580,8 +626,11 @@ func _physics_process(dt: float) -> void:
 				and corrida.t_conta <= ESPERA_T else 0.0
 			car.test_input = {"thr": thr, "brk": 0.0, "steer": 0.0}
 			continue
-		if x.r.fim < 0.0 and x.r.prog >= corrida.voltas * comp:
+		if x.r.fim < 0.0 and int(x.vigia.voltas) > corrida.voltas:
 			x.r.fim = corrida.t
+			x.truques.parar()          # 0x1596d8: na chegada o combo aberto se perde
+		if x.r.fim < 0.0:
+			x.truques.passo(dt, car)
 		if x.r.fim >= 0.0:
 			car.test_input = {"thr": 0.0, "brk": 0.0, "steer": _direcao(x, car)}
 			continue
@@ -591,6 +640,11 @@ func _physics_process(dt: float) -> void:
 			_repor(x)
 			continue
 		_dirigir(x, car, dt)
+	if piloto_jogador != null and est == corrida.CHEGOU:
+		if piloto_jogador.vigia.passo(jogador, main.car, dt):
+			_repor(piloto_jogador)
+		else:
+			_dirigir(piloto_jogador, main.car, dt)
 	_carros_laco = null
 
 
@@ -602,7 +656,8 @@ func _direcao(x: Dictionary, car, xf_ = null, v_ := -1.0) -> float:
 	# alcance do comportamento (0x359730: clamp(esc x v, mín, máx); o #7 e as
 	# fases 0/3/4 do #5 usam 0.5, 15, 50)
 	var o: Vector3 = x.get("olha", Ultrapassar.OLHA)
-	var s: float = x.r.prog + s_linha + clampf(v * o.x, o.y, o.z)
+	# _lateral_pedida grava o alcance do passo (o corte de curva encurta)
+	var s: float = x.r.prog + s_linha + float(x.get("olha_d", clampf(v * o.x, o.y, o.z)))
 	x.s_alvo = s
 	var lat: float = lat_zero(s) + x.get("lat", 0.0)     # desvio conta do zero da IA
 	if _cpp:
@@ -628,7 +683,8 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 	var lv: Vector3 = car.linear_velocity
 	var vf: float = lv.dot(b.z)
 	var v: float = lv.length()
-	_pensar(x, car, dt)
+	if _pensar(x, car, dt):
+		return                          # #2: repôs
 	_lateral_pedida(x, car, v)
 	var st := _direcao(x, car, xf, v)
 	# acelerador e freio do jogo (0x34ed10): k = (v_alvo - v) x 0.2, v no plano
@@ -650,51 +706,6 @@ func _dirigir(x: Dictionary, car, dt: float) -> void:
 		thr = 0.0
 	elif absf(st) > 0.95:
 		thr = minf(thr, 0.5)
-	# preso: ré virando pro outro lado
-	if x.re > 0.0:
-		x.re -= dt
-		car.test_input = {"thr": 0.0, "brk": 1.0, "steer": -st}
-		return
-	x.preso = x.preso + dt if absf(vf) < 1.0 else 0.0
-	if x.preso > PRESO_T:
-		x.preso = 0.0
-		x.re = RE_T
-		x.res += 1
-		# 3 rés sem andar 20 m: volta pra linha
-		if x.r.prog - x.get("prog_re", -INF) < 20.0:
-			x.n_re = x.get("n_re", 0) + 1
-		else:
-			x.n_re = 1
-		x.prog_re = x.r.prog
-		if x.n_re >= 3:
-			x.n_re = 0
-			x.re = 0.0
-			if OS.has_environment("IA_LOG"):
-				print("IA repõe %s em %.0f m (preso)" % [x.nome, x.r.prog])
-			_repor(x)
-			return
-		if OS.has_environment("IA_LOG"):
-			print("IA ré %s em %.0f m (%.1f m da linha, t %.1f)" % [x.nome, x.r.prog, x.r.dist, corrida.t])
-	# vigia: menos de 15 m em 5 s correndo -> volta pra linha
-	x.vigia_t = x.get("vigia_t", 0.0) + dt
-	if x.vigia_t >= 5.0:
-		var andou: float = x.r.prog - x.get("vigia_prog", x.r.prog)
-		x.vigia_t = 0.0
-		x.vigia_prog = x.r.prog
-		if andou < 15.0 and x.has("vigia_ok"):
-			if OS.has_environment("IA_LOG"):
-				print("IA repõe %s em %.0f m (lento: %.0f m em 5 s)" % [x.nome, x.r.prog, andou])
-			_repor(x)
-			return
-		x.vigia_ok = true
-	# capotado: volta pra linha (NOSSO; fora da pista é a regra do jogo)
-	x.capotado = x.capotado + dt if b.y.y < 0.3 else 0.0
-	if x.capotado > CAPOTADO_T:
-		if OS.has_environment("IA_LOG"):
-			print("IA repõe %s em %.0f m (capotado, %.1f m da linha, t %.1f)" % [x.nome, x.r.prog,
-				x.r.dist, corrida.t])
-		_repor(x)
-		return
 	# acelerador e freio em sétimos, como a direção (save state freiando.p2s,
 	# nov/2026: 5/7, 2/7, 1/7, 0 e freio 1/7; o valor antes de arredondar fica
 	# no piloto +0xa0 freio, +0xa4 acelerador, +0xa8 direção)
@@ -810,20 +821,27 @@ func _v_curva(s: float) -> float:
 ## último passo e o próximo escolhe de novo. O #7 (corrida na linha, 0x3603d0)
 ## não segura: todo passo o #5 pode tomar a vez (prioridade 1 contra 0.1).
 ## Recomeçar o #7 sorteia o desvio da Skill de novo (0x360550)
-func _pensar(x: Dictionary, car, dt: float) -> void:
+func _pensar(x: Dictionary, car, dt: float) -> bool:
 	var lista: Array = _carros_laco if _carros_laco != null else _monta_carros()
 	Ultrapassar.percepcao(self, x, car, dt, lista)
+	var preso := _preso(x, dt)
 	var comp: int = x.get("comp", 0)
 	if comp == 5:
 		if not Ultrapassar.atualizar(self, x, dt):
 			x.comp = 0
 		_conta5(x, dt)
-		return
+		return false
+	# #2 (prioridade 1, antes do #5 na lista: no empate ganha ele)
+	if preso:
+		if OS.has_environment("IA_LOG"):
+			print("IA repõe %s em %.0f m (preso, #2 do jogo, t %.1f)" % [x.get("nome", "?"), x.r.prog, corrida.t])
+		_repor(x)
+		return true
 	if Ultrapassar.prioridade(x):
 		x.comp = 5 if Ultrapassar.comecar(self, x) else 0
 		x.n5 = int(x.get("n5", 0)) + 1
 		_conta5(x, dt)
-		return
+		return false
 	if comp != 7:
 		x.comp = 7
 		x.desvio = desvio_skill(float(x.get("skill", 1.0)))
@@ -835,6 +853,28 @@ func _pensar(x: Dictionary, car, dt: float) -> void:
 	x.olha = Ultrapassar.OLHA
 	x.v_max = INF
 	x.v_min = 0.0
+	return false
+
+
+## #2 preso (0x356e38, a cada passo): âncora no CoM (objeto +0x30 com a altura
+## +0x50); a menos de 2 m dela (3D) e querendo andar (velocidade-alvo do passo
+## anterior, piloto +0x40, > 0) o tempo conta (o 1º passo perto só marca);
+## longe, âncora nova e zera. Preso com mais de 3 s (0x364640) = repor.
+## O modo "fora da rota" (10 s) não acontece no RX01 (a rota cobre tudo).
+## Capotado e parado cai aqui também
+func _preso(x: Dictionary, dt: float) -> bool:
+	var p: Vector3 = x.me.cm
+	var perto: bool = x.has("ancora") and float(x.get("v_alvo", 0.0)) > 1e-6 \
+		and p.distance_squared_to(x.ancora) < PRESO_R2
+	if perto:
+		if x.get("preso_conta", false):
+			x.preso += dt
+		x.preso_conta = true
+	else:
+		x.preso = 0.0
+		x.preso_conta = false
+		x.ancora = p
+	return x.preso > PRESO_T
 
 
 ## estatística do #5 (testes): segundos em cada fase (5 = acabou no passo)
@@ -851,10 +891,9 @@ func _conta5(x: Dictionary, dt: float) -> void:
 ##  1: a pedida; com o bico torto (o ponto pedido a mais de 10° dele e o da
 ##     lateral do carro mais alinhado, mas também a mais de 10°) mistura com a
 ##     do carro: peso (ângulo - 10°) / 10°;
-##  2: a pedida (as fases do #5; o corte de curva dos modos 1 e 2 é NOSSO:
-##     não portado).
+##  2: a pedida (as fases do #5).
 ## Modos 1 e 2: dentro das bordas menos a meia largura do carro (objeto
-## +0xf4), pelo lado do sinal dela, como no jogo
+## +0xf4), pelo lado do sinal dela, e o corte de curva (abaixo), como no jogo
 func _lateral_pedida(x: Dictionary, car, v: float) -> void:
 	var o: Vector3 = x.get("olha", Ultrapassar.OLHA)
 	var s_me: float = x.r.prog + s_linha
@@ -868,6 +907,7 @@ func _lateral_pedida(x: Dictionary, car, v: float) -> void:
 		l_carro = bj.x + fr * (bj.y - bj.x)
 		if modo == 0:
 			x.lat = -l_carro
+			x.olha_d = s - s_me
 			return
 	var lg: float = -float(x.get("pede_lat", 0.0))
 	if modo == 1:
@@ -886,6 +926,31 @@ func _lateral_pedida(x: Dictionary, car, v: float) -> void:
 		lg = maxf(lg, bj.x + hw)
 	else:
 		lg = minf(lg, bj.y - hw)
+	x.olha_d = s - s_me
+	# corte de curva (modos 1 e 2): se a reta do carro até o ponto passa por
+	# fora da borda recuada da meia largura (0x32a4f8 esquerda + meia largura,
+	# 0x32a5e0 direita - meia largura, no ponto), o ponto volta pra alcance/4
+	# à frente, encostado nessa borda (no exe alcance/4 + o raio: sem o raio
+	# como o alcance todo, ver _direcao). Teste da esquerda primeiro, como lá.
+	# Produto vetorial no plano: o nosso (x, z) = (z, x) do jogo, sinal trocado
+	var cm2 := Vector2(x.me.cm.x, x.me.cm.z)
+	var pp := ponto_lat(s, -lg)
+	var d := Vector2(pp.x, pp.z) - cm2
+	var pe := ponto_lat(s, -(bj.x + hw))
+	var e := Vector2(pe.x, pe.z) - cm2
+	var lado := 0
+	if d.cross(e) > 0.0:               # jogo: d x esquerda < 0
+		lado = -1
+	else:
+		var pd := ponto_lat(s, -(bj.y - hw))
+		var r := Vector2(pd.x, pd.z) - cm2
+		if d.cross(r) < 0.0:           # jogo: d x direita > 0
+			lado = 1
+	if lado != 0:
+		x.olha_d = clampf(v * o.x, o.y, o.z) * 0.25
+		var bn := bordas_jogo(s_me + x.olha_d)
+		lg = bn.x + hw if lado < 0 else bn.y - hw
+		x.cortes = int(x.get("cortes", 0)) + 1
 	x.lat = -lg
 
 
@@ -916,13 +981,14 @@ func _lateral(p: Vector3, s: float) -> float:
 	return _plano(p - q).dot(Vector3(adiante.z, 0.0, -adiante.x))
 
 
-## volta pro último progresso aceito (o jogo repõe sempre lá: 0x4d3538)
+## volta pro último progresso aceito (o jogo repõe sempre lá: 0x4d3538; com
+## checkpoint pendente, antes da caixa: reposicao.gd ponto_repor)
 func _repor(x: Dictionary) -> void:
-	x.r.prog = x.vigia.aceito
+	x.r.prog = x.vigia.ponto_repor()
 	repor_em(x.car, x.r.prog + s_linha)
 	x.vigia.recomecar(x.r.prog)
-	x.capotado = 0.0
 	x.preso = 0.0
+	x.erase("ancora")
 	x.lat = x.desvio
 	x.repostos += 1
 	# NOSSO: reposto, o cérebro recomeça (vizinhos e comportamento)
@@ -930,8 +996,42 @@ func _repor(x: Dictionary) -> void:
 	x.comp = 0
 
 
+## pedido de reposição do jogador (0x15bd28 -> update 0x15c0e8): estado 1
+## conta REPOR_ESPERA com a tela indo pro preto (menu/fader.gd), no passo
+## seguinte (2) repõe, no outro (3 -> 4, 0x15bfe0) a tela volta. Com pedido
+## andando, outro não entra (0x15bd28 sai com o estado != 0). As caixas de
+## reposição na hora (cInstantRespotBox) repõem direto, sem tela preta.
+const REPOR_ESPERA := 0.3        # objeto de reposição +0x64 no estado 1
+var _pedido := 0                 # 0 nada, 1 contando, 2 repor, 3 clarear
+var _pedido_t := 0.0
+
+
+func pedir_repor_jogador() -> void:
+	if _pedido != 0:
+		return
+	_pedido = 1
+	_pedido_t = REPOR_ESPERA
+	if main and main.fader:
+		main.fader.escurecer()
+
+
+func _passo_pedido() -> void:
+	match _pedido:
+		1:
+			_pedido_t -= get_physics_process_delta_time()
+			if _pedido_t <= 0.0:
+				_pedido = 2
+		2:
+			repor_jogador()
+			_pedido = 3
+		3:
+			if main and main.fader:
+				main.fader.clarear()
+			_pedido = 0
+
+
 func repor_jogador() -> void:
-	jogador.prog = vigia_jogador.aceito
+	jogador.prog = vigia_jogador.ponto_repor()
 	repor_em(main.car, jogador.prog + s_linha)
 	vigia_jogador.recomecar(jogador.prog)
 	main.reset_camera()
@@ -977,9 +1077,12 @@ func repor_em(car: Node3D, s: float) -> void:
 ## colocação: quem chegou (pelo tempo) e depois pela distância de corrida
 func classificacao() -> Array:
 	var todos: Array = [{"nome": "Você", "prog": jogador.get("prog", -INF),
-		"fim": corrida.t_fim if corrida.estado == corrida.CHEGOU else -1.0, "jogador": true}]
+		"fim": corrida.t_fim if corrida.estado == corrida.CHEGOU else -1.0, "jogador": true,
+		"score": corrida.truques.total if corrida.truques else 0,
+		"melhor": corrida.melhor if corrida.melhor != INF else -1.0}]
 	for x in rivais:
-		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro})
+		todos.append({"nome": x.nome, "prog": x.r.prog, "fim": x.r.fim, "jogador": false, "carro": x.carro, "no": x.car,
+			"score": x.truques.total, "melhor": x.melhor})
 	todos.sort_custom(func(a, b):
 		if (a.fim >= 0.0) != (b.fim >= 0.0):
 			return a.fim >= 0.0

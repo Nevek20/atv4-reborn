@@ -111,6 +111,54 @@ def ler_bed(d):
     return out
 
 
+# caixas NOSSAS (não estão no archive), pelo nome do .bed: placas_nossas()
+BEDS_NOSSOS = {}
+
+# Lazarus (CHASSIS_Truck_04, carro cortado do jogo): o XML 15106 manda o
+# número pra Fairing_Truck_04.bed, que não existe, e o Text dele nem tem Fit
+# (a Chassis_Truck_04.bed tem um PLAYER_NUMBER, mas em cima de nada desta
+# textura). O "87" ficou desenhado na Truck_04_Detail, em 3 placas brancas: as
+# 2 laterais e o teto. NOSSO (pedido do Matheus): apaga o 87 (o miolo vira o
+# branco da placa) e põe uma caixa PLAYER_NUMBER em cada placa, no lugar e do
+# tamanho do 87 (casado com ele: IoU 0.73-0.76, a fonte do 87 não é a
+# HUD_Numbers), o do teto girado 270. Em px da Detail (512):
+# (tinta do 87 x0, y0, x1, y1), (centro do número), altura, giro
+PLACAS_NOSSAS = {
+    "Truck_04": [((152, 74, 187, 97), (170.0, 87.0), 25.5, 0),
+                 ((318, 213, 353, 237), (335.5, 226.0), 25.5, 0),
+                 ((409, 363, 440, 410), (425.0, 386.0), 33.0, 270)],
+}
+
+
+def placas_nossas(prefixo, s, detalhe):
+    """PLACAS_NOSSAS: (XML com as caixas novas, Detail sem o número velho)"""
+    from PIL import ImageDraw
+    placas = PLACAS_NOSSAS[prefixo]
+    w, h = detalhe.size
+    fx, fy = w / 512, h / 512
+    detalhe = detalhe.copy()
+    px = detalhe.load()
+    d = ImageDraw.Draw(detalhe)
+    bed = "Placas_" + prefixo
+    BEDS_NOSSOS[bed] = {}
+    raiz = ET.fromstring(s)
+    for lay in raiz.findall("LAYER"):
+        if lay.get("Type") == "Box" and lay.find("LAYER[@Type='Text']") is not None:
+            raiz.remove(lay)                       # a caixa quebrada (Fairing_Truck_04)
+    for k, (tinta, centro, alt, giro) in enumerate(placas):
+        x0, y0, x1, y1 = tinta
+        fundo = px[int((x0 - 3) * fx), int((y0 - 3) * fy)]      # o branco da placa
+        d.rectangle(((x0 - 2) * fx, (y0 - 2) * fy, (x1 + 2) * fx, (y1 + 2) * fy), fill=fundo)
+        nome = "PLAYER_NUMBER" + ("_%02d" % (k + 1) if k else "")
+        cx, cy = centro[0] / 512, centro[1] / 512
+        BEDS_NOSSOS[bed][nome] = (cx - 0.05, cy - alt / 1024, cx + 0.05, cy + alt / 1024)
+        caixa = ET.SubElement(raiz, "LAYER", Type="Box", BedFile=bed, Box=nome)
+        t = ET.SubElement(caixa, "LAYER", Type="Text", Name=nome, Font="HUD_Numbers",
+                          Fit="Vertical", Rotation=str(giro))
+        ET.SubElement(t, "Diffuse", A="255", R="0", G="0", B="0")
+    return ET.tostring(raiz, encoding="unicode"), detalhe
+
+
 class Arquivos:
     """bed e textura pelo nome do arquivo no archive (data/arquivos.tsv)"""
 
@@ -127,6 +175,8 @@ class Arquivos:
         return None
 
     def bed(self, nome):
+        if nome in BEDS_NOSSOS:
+            return BEDS_NOSSOS[nome]
         if nome not in self.cache:
             cam = self._caminho(nome + ".bed")
             self.cache[nome] = ler_bed(ler_bloco(self.src, self.arqs, cam)) if cam else None
@@ -158,11 +208,12 @@ def recorte(atlas, r):
     return atlas.crop((round(r[0] * w), round(r[1] * h), round(r[2] * w), round(r[3] * h)))
 
 
-def colar(img, peca, w, h, graus, centro):
-    """peça redimensionada pra w x h px, girada (anti-horário) e colada com o
-    centro em centro (px). Alfa pré-multiplicado pra borda não escurecer."""
+def colar_peca(peca, w, h, graus, centro):
+    """peça redimensionada pra w x h px, girada (anti-horário), com o centro
+    em centro (px): (imagem RGBA, canto) ou None. Alfa pré-multiplicado pra
+    borda não escurecer."""
     if w < 1 or h < 1:
-        return
+        return None
     pm = peca.convert("RGBa").resize((max(1, round(w)), max(1, round(h))), Image.LANCZOS)
     g = round(graus) % 360
     if g in (90, 180, 270):
@@ -170,7 +221,14 @@ def colar(img, peca, w, h, graus, centro):
     elif g:
         pm = pm.rotate(graus, Image.BICUBIC, expand=True)
     pm = pm.convert("RGBA")
-    img.alpha_composite(pm, (round(centro[0] - pm.width / 2), round(centro[1] - pm.height / 2)))
+    return pm, (round(centro[0] - pm.width / 2), round(centro[1] - pm.height / 2))
+
+
+def colar(img, peca, w, h, graus, centro):
+    r = colar_peca(peca, w, h, graus, centro)
+    if r:
+        img.alpha_composite(r[0], r[1])
+    return r
 
 
 def caixa_px(caixa, size):
@@ -180,6 +238,13 @@ def caixa_px(caixa, size):
 
 
 def texto(img, arq, caixa, lay, numero):
+    r = texto_peca(arq, caixa, lay, numero, img.size)
+    if r:
+        img.alpha_composite(r[0], r[1])
+    return r
+
+
+def texto_peca(arq, caixa, lay, numero, size):
     """camada Text (0x2fffd8): cada letra = o glifo do .bed da fonte (nome =
     código ASCII), proporção natural; Fit 1 "Vertical" = altura da caixa,
     2 "Horizontal" = largura, 3 "Both" = o menor; vezes Scale"""
@@ -201,7 +266,7 @@ def texto(img, arq, caixa, lay, numero):
     r, g, b, a = linha.split()
     tinta = [c.point(lambda v, m=m: v * m // 255) for c, m in zip((r, g, b, a), cor)]
     linha = Image.merge("RGBA", tinta)
-    centro, cw, ch = caixa_px(caixa, img.size)
+    centro, cw, ch = caixa_px(caixa, size)
     fit = lay.get("Fit", "No")
     e = 1.0
     if fit == "Vertical":
@@ -211,13 +276,20 @@ def texto(img, arq, caixa, lay, numero):
     elif fit == "Both":
         e = min(ch / linha.height, cw / linha.width)
     e *= float(lay.get("Scale", 1.0))
-    colar(img, linha, linha.width * e, linha.height * e, float(lay.get("Rotation", 0)), centro)
+    return colar_peca(linha, linha.width * e, linha.height * e, float(lay.get("Rotation", 0)), centro)
 
 
 def sprite(img, logo, caixa, lay):
+    r = sprite_peca(logo, caixa, lay, img.size)
+    if r:
+        img.alpha_composite(r[0], r[1])
+    return r
+
+
+def sprite_peca(logo, caixa, lay, size):
     """Sprite (0x2fedf8) com o logo: KeepAspect encaixa dentro da caixa sem
     girar (largura/altura da caixa x do logo), depois gira no centro"""
-    centro, w, h = caixa_px(caixa, img.size)
+    centro, w, h = caixa_px(caixa, size)
     if lay.get("KeepAspect", "0") not in ("0", ""):
         a_caixa = (w / h) / float(lay.get("Aspect", 1.0))
         a_logo = logo.width / logo.height
@@ -225,7 +297,7 @@ def sprite(img, logo, caixa, lay):
             h *= a_caixa / a_logo
         else:
             w *= a_logo / a_caixa
-    colar(img, logo, w, h, float(lay.get("Rotation", 0)), centro)
+    return colar_peca(logo, w, h, float(lay.get("Rotation", 0)), centro)
 
 
 def decalques(img, s, src, veh, numero, log=print):
@@ -270,13 +342,110 @@ def decalques(img, s, src, veh, numero, log=print):
             log(f"    {chave:12s} {nome:24s} {' '.join(caixas)}")
 
 
+def atlas_pecas(todas):
+    """peças (imagem, canto) -> atlas em prateleiras de até 1024 px e, por
+    peça, [x, y, largura, altura, canto x, canto y] (None = não desenha)"""
+    itens, x, y, alt, larg = [], 0, 0, 0, 1
+    for r in todas:
+        if r is None:
+            itens.append(None)
+            continue
+        w, h = r[0].size
+        if x + w > 1024:
+            x, y, alt = 0, y + alt, 0
+        itens.append([x, y, w, h, r[1][0], r[1][1]])
+        x += w
+        alt = max(alt, h)
+        larg = max(larg, x)
+    img = Image.new("RGBA", (larg, max(1, y + alt)), (0, 0, 0, 0))
+    for r, it in zip(todas, itens):
+        if it:
+            img.paste(r[0], (it[0], it[1]))
+    return img, itens
+
+
+def pecas_logos(s, src, veh, numero, size, pasta, log=print):
+    """oficina (Logos, carro/pintura.gd): cada lugar de logo do carro (a
+    k-ésima camada Decal de uma área, chave HOOD1, SIDE3...) com TODOS os logos
+    da folha (<Classe>Logos.bed) já desenhados em cada caixa dele, do jeito do
+    decalques() (KeepAspect, giro, LANCZOS), num atlas por caixa; o número
+    também vira peça. camadas/logos.json guarda a ordem do XML: o Godot cola
+    as peças na mesma ordem com a mesma conta do alpha_composite. Devolve a
+    camada com os logos de fábrica (tem que sair igual ao decalques())."""
+    arq = Arquivos(src)
+    padrao_xml = {k.upper(): v for k, v in decalques_padrao(veh).items()}
+    igual = lambda a: " ".join(a.split()).upper()
+    conta = {}
+    pecas, padrao, lugares, folhas = [], {}, [], {}
+    camada = Image.new("RGBA", size, (0, 0, 0, 0))
+    for lay in ET.fromstring(s).findall("LAYER"):
+        tipo = lay.get("Type")
+        if tipo == "Box":
+            t = lay.find("LAYER[@Type='Text']")
+            bed = arq.bed(lay.get("BedFile"))
+            if t is None or not bed or lay.get("Box") not in bed:
+                continue
+            # o número do perfil (oficina: Número, 00..99; rivais: o do
+            # AIPlayers.xml): os 100 já desenhados nesta caixa, como os logos
+            todas = [texto_peca(arq, bed[lay.get("Box")], t, "%02d" % k, size) for k in range(100)]
+            folhas["numeros"] = ["%02d" % k for k in range(100)]
+            padrao["NUMERO"] = numero
+            img, itens = atlas_pecas(todas)
+            nome = "numero_%s.png" % lay.get("Box")
+            img.save(os.path.join(pasta, nome))
+            pecas.append({"chave": "NUMERO", "folha": "numeros", "atlas": nome, "itens": itens})
+            r = todas[int(numero)] if numero.isdigit() and int(numero) < 100 else texto_peca(arq, bed[lay.get("Box")], t, numero, size)
+            if r:
+                camada.alpha_composite(r[0], r[1])
+        elif tipo == "Decal":
+            area = lay.get("DecalArea", "")
+            conta[area] = conta.get(area, 0) + 1
+            chave = area.replace(" ", "").upper() + str(conta[area])
+            tex = lay.find("LAYER[@Type='Texture']")
+            path = tex.get("Path") if tex is not None else "BuggyLogos"
+            logos, atlas = arq.bed(path), arq.textura(path)
+            if not logos or atlas is None:
+                log(f"[!] {chave}: sem a folha {path}")
+                continue
+            nomes = list(logos.keys())
+            folhas[path] = nomes
+            pedido = padrao_xml.get(chave, "")
+            escolhido = next((k for k in nomes if pedido and igual(k) == igual(pedido)), "")
+            padrao[chave] = escolhido
+            lugares.append({"chave": chave, "area": area, "lugar": conta[area]})
+            recortes = [recorte(atlas, logos[k]) for k in nomes]
+            for b in lay.findall("LAYER[@Type='Box']"):
+                bed = arq.bed(b.get("BedFile"))
+                sp = b.find("LAYER[@Type='Sprite']")
+                if not (bed and b.get("Box") in bed and sp is not None):
+                    continue
+                todas = [sprite_peca(rc, bed[b.get("Box")], sp, size) for rc in recortes]
+                img, itens = atlas_pecas(todas)
+                nome = "logo_%s_%s.png" % (chave, b.get("Box"))
+                img.save(os.path.join(pasta, nome))
+                pecas.append({"chave": chave, "folha": path, "atlas": nome, "itens": itens})
+                if escolhido:
+                    r = todas[nomes.index(escolhido)]
+                    if r:
+                        camada.alpha_composite(r[0], r[1])
+    import json
+    with open(os.path.join(pasta, "logos.json"), "w", encoding="utf-8") as f:
+        json.dump({"tamanho": list(size), "folhas": folhas, "lugares": lugares,
+                   "padrao": padrao, "pecas": pecas}, f)
+    return camada
+
+
 # cores da última pintura montada (main grava em <nome>.json: as lasquinhas
 # da batida usam a BASE, 0x3bbd60; RAM: Renegade 220,231,235, Storm 190,26,16)
 ULTIMAS_CORES = {}
 
 
-def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, chassis_=None):
-    """pintura do veículo (Image RGB) ou None; trocar = {"BASE": (r, g, b)...}"""
+def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, chassis_=None,
+           camadas_out=None):
+    """pintura do veículo (Image RGB) ou None; trocar = {"BASE": (r, g, b)...}.
+    camadas_out: pasta onde salvar as camadas pro Godot montar a pintura em
+    tempo real (carro/pintura.gd, oficina): mascaras.png (R = primária, G =
+    secundária), detalhe.png (RGBA) e logos.png (logos e número, RGBA)."""
     prefixo = re.sub(r"^BUGGY", "Buggy", veh, flags=re.I)
     if prefixo == "Buggy_12":
         prefixo = "Lancia"          # o Storm usa as texturas Lancia_*
@@ -308,21 +477,66 @@ def montar(src, veh, trocar=None, numero=NUMERO, com_decalques=True, log=print, 
 
     if "Base" not in camadas:
         return None
+    if prefixo in PLACAS_NOSSAS and "Detail" in camadas:
+        s, camadas["Detail"] = placas_nossas(prefixo, s, camadas["Detail"])
+        log(f"[+] {prefixo}: número velho apagado, {len(PLACAS_NOSSAS[prefixo])} caixas de número NOSSAS")
     w, h = camadas["Base"].size
-    base = cores["BASE"] or (255, 255, 255)
-    img = Image.new("RGB", (w, h), base)
-    for k, c in (("Primary", cores["PRIMARY"]), ("Secondary", cores["SECONDARY"])):
-        if k in camadas and c:
-            cam = camadas[k].resize((w, h))
-            img = Image.composite(Image.new("RGB", (w, h), c), img, cam.getchannel("A"))
-    if "Detail" in camadas:
-        cam = camadas["Detail"].resize((w, h))
-        img = Image.composite(cam.convert("RGB"), img, cam.getchannel("A"))
+    vazio = Image.new("L", (w, h), 0)
+    mascara = {k: camadas[k].resize((w, h)).getchannel("A") if k in camadas else vazio
+               for k in ("Primary", "Secondary")}
+    detalhe = camadas["Detail"].resize((w, h)) if "Detail" in camadas else Image.new("RGBA", (w, h))
+    # logos e número numa camada só (transparente fora deles), por cima do
+    # resto: a mesma conta de antes (cada um colado em cima da pintura), só
+    # que agora dá pra trocar as cores sem desenhar os logos de novo
+    logos = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     if com_decalques:
-        img = img.convert("RGBA")
-        decalques(img, s, src, veh, numero, log)
-        img = img.convert("RGB")
-    return img
+        decalques(logos, s, src, veh, numero, log)
+    if camadas_out:
+        os.makedirs(camadas_out, exist_ok=True)
+        for f in os.listdir(camadas_out):          # peças de logo de uma geração anterior
+            if f.startswith(("logo_", "numero_")):
+                os.remove(os.path.join(camadas_out, f))
+        open(os.path.join(camadas_out, ".gdignore"), "w").close()   # o Godot lê cru, sem importar
+        Image.merge("RGB", (mascara["Primary"], mascara["Secondary"], vazio)).save(
+            os.path.join(camadas_out, "mascaras.png"))
+        detalhe.save(os.path.join(camadas_out, "detalhe.png"))
+        logos.save(os.path.join(camadas_out, "logos.png"))
+        if com_decalques:
+            pc = pecas_logos(s, src, veh, numero, (w, h), camadas_out, log=lambda *a: None)
+            if pc.tobytes() != logos.tobytes():
+                log("[!] logos.json: as peças com os logos de fábrica não deram a mesma camada")
+    return juntar(cores, mascara["Primary"], mascara["Secondary"], detalhe, logos)
+
+
+def juntar(cores, m_prim, m_sec, detalhe, logos):
+    """base -> primária (máscara) -> secundária -> detalhe -> logos. O
+    carro/pintura.gd (e o FisicaCarro.compor_pintura) faz a MESMA conta
+    inteira do PIL (composite = DIV255, alpha_composite), pixel a pixel."""
+    w, h = detalhe.size
+    img = Image.new("RGB", (w, h), cores["BASE"] or (255, 255, 255))
+    for m, c in ((m_prim, cores["PRIMARY"]), (m_sec, cores["SECONDARY"])):
+        if c:
+            img = Image.composite(Image.new("RGB", (w, h), c), img, m)
+    img = Image.composite(detalhe.convert("RGB"), img, detalhe.getchannel("A"))
+    img = img.convert("RGBA")
+    img.alpha_composite(logos)
+    return img.convert("RGB")
+
+
+def paleta(src):
+    """as 128 cores da oficina de pintura do jogo (cDOFEXColourPicker lê
+    /Setup/Palette/Palette): o CLUT de 256 da Palette.bog, na ordem da tela
+    (16 colunas x 8 linhas; o resto é preto). Conferido com o save state
+    pintura.p2s: a cor marcada (coluna 16, linha 5) = 35, 188, 153."""
+    arqs = ler_arquivos()
+    d = ler_bloco(src, arqs, "Setup/Palette/Palette.bog")
+    import gob_tex2png as g
+    for up in g.find_uploads(d):
+        if up["dpsm"] == 0 and up["w"] * up["h"] == 256 and "tag" in up:
+            s = up["tag"] + 16
+            pal = [g.rgba32(d[s + 4 * i:s + 4 * i + 4]) for i in range(256)]
+            return [list(c[:3]) for c in g.unswizzle_clut256(pal)[:128]]
+    return None
 
 
 def main():
@@ -341,10 +555,20 @@ def main():
     a = ap.parse_args()
     trocar = {k.upper(): tuple(int(x) for x in getattr(a, k).split(","))
               for k in ("base", "primary", "secondary") if getattr(a, k)}
-    img = montar(a.src, a.veh, trocar, a.numero, not a.sem_decalques, chassis_=a.chassis)
+    img = montar(a.src, a.veh, trocar, a.numero, not a.sem_decalques, chassis_=a.chassis,
+                 camadas_out=None if trocar or a.nome != "pintura.png" else os.path.join(a.out, "camadas"))
     if img is None:
         return
     os.makedirs(a.out, exist_ok=True)
+    pp = os.path.join(PROJ, "assets", "pintura", "paleta.json")
+    if not os.path.exists(pp):
+        pal = paleta(a.src)
+        if pal:
+            os.makedirs(os.path.dirname(pp), exist_ok=True)
+            import json
+            with open(pp, "w", encoding="utf-8") as f:
+                json.dump(pal, f)
+            print(f"[+] paleta da oficina ({len(pal)} cores) em {pp}")
     dst = os.path.join(a.out, a.nome)
     img.save(dst)
     print(f"[+] salvo {dst} ({img.width}x{img.height})")

@@ -107,6 +107,7 @@ def config_xml(prefixo="BUGGY"):
             "roda": re.search(r'DefaultConfig[^>]*Wheel="([^"]+)"', blk).group(1),
             "mapa": re.search(r'ComponentMap="([^"]+)"', blk).group(1),
             "cams": re.search(r'Cameras="([^"]+)"', blk).group(1),
+            "luzes": (re.search(r'LightRigCategory="(\w+)"', blk) or re.search("()", "")).group(1).upper(),
         }
     return out
 
@@ -157,6 +158,12 @@ def mapear(unpacked, classe="buggy"):
                     continue
                 c["rodas"][model] = b
                 c.setdefault("posicoes_roda", []).append(pos)
+            elif tipo == "Bumper":
+                # para-choque comprado (Models_4K/Bumper/<peça>/FrontBumper) vai
+                # no ponto BUMPER do Body.pts; o RallyCompMap (Storm, Chimera) não tem
+                c["parachoque"] = pos
+            elif tipo == "Lighting":
+                c["ponto_luzes"] = pos           # LIGHTRIG (barra de luz do teto)
         # física: o arquivo do jogo pelo caminho (vazio = só a base)
         c["fisica"] = arqs.get(("Setup/VehicleParams/%s/%s.xml" % (k["pasta"], vid)).lower(), (None,))[0]
         carros.append(c)
@@ -178,6 +185,112 @@ def copiar(dados, dst):
     if os.path.exists(dst) and open(dst, "rb").read() == dados:
         return
     open(dst, "wb").write(dados)
+
+
+# pneus compráveis (catálogo de peças, xml 14882 -> data/componentes.xml):
+# cada um é uma roda inteira por tamanho, na pasta TYRE_<modelo>_<tamanho>
+# (o nome só existe como #crc no archive). De fábrica (DIRT_BUDGET) o jogo
+# carrega a TYRE_GENERIC_<tamanho> (conferido na RAM: bulldog, inferno,
+# phantom e storm; e a textura TYRE dela, sem cravos, no andando_em_linha_reta).
+# A TYRE_DIRT_BUDGET (com cravos, a da tela de seleção) entra também: o carro
+# de fábrica usa ela como melhoria NOSSA (pedido do Matheus, nov/2026).
+def catalogo_pneus(unpacked, classe):
+    """{componente: modelo da corrida} dos pneus da classe (Buggy, Truck)"""
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(classe)
+    t = c.find("Tire") if c is not None else None
+    return {e.get("mComponentName"): e.get("mInGameModelName") for e in (t if t is not None else [])}
+
+
+def pneus_da_roda(arqs, unpacked, pasta, roda):
+    """{componente: {FrontWheel: bloco, RearWheel: bloco}} no tamanho da roda"""
+    import zlib
+    tam = "RALLY" if roda.lower() == "wheel_rally" else roda.upper().replace("TYRE_GENERIC_", "")
+    out = {}
+    for comp, modelo in catalogo_pneus(unpacked, pasta).items():
+        h = "%08x" % (zlib.crc32(("%s_%s" % (modelo, tam)).lower().encode()) ^ 0xFFFFFFFF)
+        r = {}
+        for lado in ("FrontWheel", "RearWheel"):
+            b = bloco(arqs, "Vehicles/%s/%s/Wheel/#%s/%s.pingu" % (pasta, LOD, h, lado))
+            if b is not None:
+                r[lado] = b
+        if len(r) == 2:
+            out[comp] = r
+    return out
+
+
+# aros compráveis (catálogo, Alloy WHEEL_01..07 -> Wheel_Heavyclass_0N): no
+# jogo é só a textura do material ALLOY das rodas (a ALLOY de fábrica é igual
+# pixel a pixel à IG_WHEEL_HEAVYCLASS_01). Copia as da classe pra rodas/.
+def aros(unpacked, texturas, pasta, rodas_dir):
+    """{componente: png em rodas_dir} dos aros da classe"""
+    import glob
+    import shutil
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(pasta)
+    al = c.find("Alloy") if c is not None else None
+    arqs = ler_arquivos()
+    out = {}
+    lista = [(e.get("mComponentName"), e.get("mInGameModelName")) for e in (al if al is not None else [])]
+    # NOSSO: a IG_WHEEL_HEAVYCLASS_08 está pronta no archive (buggy e truck)
+    # mas o catálogo não lista; entra como aro extra (o Matheus pediu)
+    lista.append(("WHEEL_08", "Wheel_Heavyclass_08"))
+    for comp, modelo in lista:
+        nome = "IG_" + modelo.upper()
+        f = arqs.get(("Vehicles/%s/Textures/Wheel/%s.bog" % (pasta, nome)).lower())
+        if not f:
+            continue
+        base = os.path.splitext(os.path.basename(f[0]))[0]          # 22398_IG_WHEEL_HEAVYCLASS_01
+        achou = glob.glob(os.path.join(texturas, "**", base + ".png"), recursive=True)
+        if not achou:
+            print("[!] aro %s: sem %s.png nas texturas" % (comp, base))
+            continue
+        os.makedirs(rodas_dir, exist_ok=True)
+        shutil.copyfile(achou[0], os.path.join(rodas_dir, base + ".png"))
+        out[comp] = base + ".png"
+    return out
+
+
+# para-choques compráveis (catálogo, Bumper: BUMPER_0N_HEAVYCLASS_LARGE, só
+# visual, mIsPhysical="false"): /Vehicles/<classe>/Models_4K/Bumper/<modelo>/
+# FrontBumper.pingu, já no frame do ponto BUMPER (matriz identidade no .pts)
+def parachoques(arqs, unpacked, pasta):
+    """{componente: bloco} dos para-choques da classe (sem o NOT_INSTALLED)"""
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(pasta)
+    bp = c.find("Bumper") if c is not None else None
+    out = {}
+    for e in (bp if bp is not None else []):
+        comp, modelo = e.get("mComponentName"), e.get("mInGameModelName")
+        if comp == "NOT_INSTALLED":
+            continue
+        b = bloco(arqs, "Vehicles/%s/%s/Bumper/%s/FrontBumper.pingu" % (pasta, LOD, modelo))
+        if b is not None:
+            out[comp] = b
+    return out
+
+
+# barras de luz compráveis (catálogo, Lighting: LIGHTRIG_0N_HEAVYCLASS_<LARGE|
+# SMALL>, só visual): o tamanho vem do carro (vehicles.xml LightRigCategory),
+# /Vehicles/<classe>/Models_4K/Lighting/<modelo>/LIGHTING.pingu no ponto LIGHTRIG
+def luzes(arqs, unpacked, pasta):
+    """{componente: bloco} das barras de luz da classe (os 2 tamanhos)"""
+    import xml.etree.ElementTree as ET
+    raiz = ET.parse(os.path.join(unpacked, "xml", "14882_root.xml")).getroot()
+    c = raiz.find(pasta)
+    lt = c.find("Lighting") if c is not None else None
+    out = {}
+    for e in (lt if lt is not None else []):
+        comp, modelo = e.get("mComponentName"), e.get("mInGameModelName")
+        if comp == "NOT_INSTALLED":
+            continue
+        b = bloco(arqs, "Vehicles/%s/%s/Lighting/%s/LIGHTING.pingu" % (pasta, LOD, modelo))
+        if b is not None:
+            out[comp] = b
+    return out
 
 
 def pingu(unpacked, tex, bloco_, out, split=()):
@@ -223,6 +336,20 @@ def main():
 
     rodas_dir = os.path.join(a.assets, "rodas")
     feitas = set()
+    lista_aros = aros(a.unpacked, a.texturas, CLASSES[a.classe]["pasta"], rodas_dir)
+    # para-choques da classe: uma pasta só pra todos os carros (como as rodas)
+    pc_dir = os.path.join(a.assets, "parachoques")
+    lista_pc = parachoques(ler_arquivos(), a.unpacked, CLASSES[a.classe]["pasta"])
+    if lista_pc:
+        os.makedirs(pc_dir, exist_ok=True)
+        for b in lista_pc.values():
+            pingu(a.unpacked, a.texturas, b, pc_dir)
+    lz_dir = os.path.join(a.assets, "luzes")
+    lista_lz = luzes(ler_arquivos(), a.unpacked, CLASSES[a.classe]["pasta"])
+    if lista_lz:
+        os.makedirs(lz_dir, exist_ok=True)
+        for b in lista_lz.values():
+            pingu(a.unpacked, a.texturas, b, lz_dir)
     falhas_pintura = []
     dados = os.path.join(PROJ, "data", "vehicles")
     for c in carros:
@@ -246,6 +373,13 @@ def main():
             if b not in feitas:
                 pingu(a.unpacked, a.texturas, b, rodas_dir)
                 feitas.add(b)
+        # pneus compráveis no tamanho da roda deste carro (oficina, Upgrade)
+        pneus = pneus_da_roda(ler_arquivos(), a.unpacked, CLASSES[a.classe]["pasta"], c["roda"])
+        for r in pneus.values():
+            for b in r.values():
+                if b not in feitas:
+                    pingu(a.unpacked, a.texturas, b, rodas_dir)
+                    feitas.add(b)
         r = subprocess.run([sys.executable, os.path.join(AQUI, "gerar_pintura.py"),
                             a.unpacked, c["id"], out, "--chassis", c["chassis"]])
         if r.returncode != 0:
@@ -259,6 +393,14 @@ def main():
             "roda": c["roda"], "lod": LOD,
             "pecas": {pos: "%d_bloco.obj" % b for pos, b in c["pecas"].items()},
             "rodas": {k: "../rodas/%d_bloco.obj" % b for k, b in c["rodas"].items()},
+            "pneus": {p: {k: "../rodas/%d_bloco.obj" % b for k, b in r.items()} for p, r in pneus.items()},
+            "aros": {k: "../rodas/" + v for k, v in lista_aros.items()},
+            "parachoques": {k: "../parachoques/%d_bloco.obj" % b for k, b in lista_pc.items()} if c.get("parachoque") else {},
+            "ponto_parachoque": c.get("parachoque", ""),
+            # barras de luz do tamanho do carro (LightRigCategory)
+            "luzes": {k: "../luzes/%d_bloco.obj" % b for k, b in lista_lz.items()
+                      if c.get("luzes") and k.endswith("_" + c["luzes"])} if c.get("ponto_luzes") else {},
+            "ponto_luzes": c.get("ponto_luzes", ""),
             # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio)
             "rally": any(p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
             "estepe": [p for p in pos_rodas if p.startswith("SpareWheel")],
@@ -279,6 +421,9 @@ def main():
         pts = open(os.path.join(a.unpacked, "other", "%d_bloco.bin" % c["pontos"]), "rb").read()
         copiar(pts, os.path.join(dados, c["dados"] + "_points.bin"))
         print("[+] %s em %s" % (c["nome"], out))
+    # catálogo de peças do jogo (pneus, aros...): o Godot lista os pneus por ele
+    copiar(open(os.path.join(a.unpacked, "xml", "14882_root.xml"), "rb").read().replace(b"\r\n", b"\n"),
+           os.path.join(PROJ, "data", "componentes.xml"))
     # redes das janelas e treliça do Trident: alfa do jogo de volta (o
     # gob_tex2png salva sem alfa)
     subprocess.run([sys.executable, os.path.join(AQUI, "alfa_texturas.py"), a.unpacked])

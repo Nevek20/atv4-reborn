@@ -16,6 +16,7 @@ python tests/rodar_testes.py accel --veh 0 --hz 60                 :: passo NTSC
 python tools/ler_savestate.py arquivo.p2s
 python tools/ler_savestate.py arquivo.p2s --json estado.json   :: estado do carro pro remake
 python re/ia_alvo_ram.py arquivo.p2s     :: save com rivais: velocidade-alvo e pedais do jogo x a nossa conta (coluna exe = arco 2 do 0x35a150)
+python re/truques_ram.py a.p2s b.p2s     :: Score de cada corredor na RAM: pontos por minuto, maior combo, combo mais longo, catchup do corpo
 python re/ia_vizinhos_ram.py arquivo.p2s :: save com rivais: a percepção de cada um (vizinhos, setor, distâncias, tempo até bater)
 
 :: print do carro parado (na nuvem: xvfb-run -a ... --rendering-driver opengl3)
@@ -64,6 +65,7 @@ set GIRO_DEBUG=1 & %GODOT% --headless --path . -s res://tests/teste_luzes.gd   :
 %GODOT% --headless --path . -s res://tests/teste_farol.gd         :: farol: lentes achadas (Hurricane 2, Storm 6, 4 trucks e o Lazarus), lente e brilho, acende e apaga
 :: + print_tela com FAROL=1/0 força o farol aceso/apagado
 :: + print_tela com FREIO=1/0 e RE=1/0 forçam lanterna e ré acesas/apagadas, COR_VERTICE=0 tira a cor do vértice
+:: + print_tela com PECAS=Bumper:BUMPER_04_HEAVYCLASS_LARGE,Alloy:WHEEL_05 monta com peças da oficina só no print
 %GODOT% --path . --write-movie motor.avi --fixed-fps 60 -s res://tests/gravar_motor.gd -- 7   :: prévia: lenta, 7000 e volta (CAM_OFF/CAM_ALVO)
 %GODOT% --path . --write-movie fumaca.avi --fixed-fps 60 -s res://tests/gravar_fumaca.gd -- 0  :: câmera presa no cano acelerando (FUMACA_COR=1 vermelha)
 %GODOT% --headless --path . -s res://tests/teste_poeira.gd        :: poeira dos pneus na largada do RX01: parado não, asfalto não, terra sim, rastro no pulo
@@ -72,6 +74,8 @@ set GIRO_DEBUG=1 & %GODOT% --headless --path . -s res://tests/teste_luzes.gd   :
 %GODOT% --headless --path . -s res://tests/teste_agua.gd          :: poça do RX01 x 2 save states: caixa, profundidade por roda, lama, arrasto, espirro e som
 %GODOT% --headless --path . -s res://tests/teste_quebra.gd        :: cercas que quebram (60 km/h passa, 4 km/h segura) e fardo que sai empurrado e volta
 set VEL=30 & %GODOT% --headless --path . -s res://tests/medir_perda.gd   :: quanto o carro perde na cerca e no fardo (0/30/60°), com x sem o objeto
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cerca_batida.gd   :: batidas nas cercas (ângulo, ponta, emenda, 40/70 km/h) x o mesmo caminho sem a cerca; VELS ANGS DESL GUINADA THR N_CERCAS TUDO=1
+:: SEM_PREVISAO=1 desliga a previsão da quebra das cercas (sobra só a rede dos contatos)
 %GODOT% --path . --write-movie poeira.avi --fixed-fps 30 -s res://tests/gravar_poeira.gd -- 0  :: sai pra terra na câmera de corrida (SEM_POEIRA=1, POEIRA_COR=1)
 %GODOT% --headless --path . -s res://tests/teste_pedras.gd        :: pedrinhas: larga na terra, vira (VIRA=7): parado não, ~80 vivas, pro lado derrapando
 %GODOT% --path . --fixed-fps 60 -s res://tests/gravar_pedras.gd -- 0 pedras   :: prints da largada na terra (QUANDO=0.6,1.0,1.4; SEM_PEDRAS=1, PEDRAS_COR=1, VIRA=1)
@@ -99,10 +103,13 @@ python tools/rx01_objetos.py <unpacked>          :: --so-json só o JSON; depois
 %GODOT% --path . --write-movie corrida.avi --fixed-fps 30 -s res://tests/gravar_corrida.gd  :: vídeo da largada: intro, acelerando preso, VAI (DEPOIS=6 s, PULAR=1 pula a intro, CHECA_NAN=1 acha nó com NaN)
 %GODOT% --headless --path . -s res://tests/teste_corrida.gd   :: modo corrida: introdução, espera acelerando sem andar, VAI pra frente, 5 voltas pelo traçado, atalho pela linha não conta
 %GODOT% --headless --path . -s res://tests/teste_batida_carros.gd   :: rival a VEL km/h (50) na traseira do jogador: cascos do VehicleVehicle, empurrão, lasquinhas, som Vehicle
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_truques_ia.gd   :: Score dos rivais em 2 voltas: slides, AirTime (onde), bancos, catchup médio; CU=s fixa o catchup, SEMENTE, VOLTAS; RIVAL_CARRO=nome põe os 7 rivais nesse carro (vale na corrida normal também)
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_cpu.gd   :: CPU da corrida com 8 carros: física e process por parte (IA, batida, visual, script do carro), quadro real e cada nó
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/medir_ordem_fx.gd   :: efeitos transparentes que se cruzam na tela trocando de ordem (pisca): trocas por par, PASSOS=n
+godot --path . --resolution 480x270 --rendering-method forward_plus --rendering-driver vulkan --fixed-fps 50 -s res://tests/medir_pisca_fx.gd   :: pixels piscando na imagem (sobe e desce num quadro); ORDEM_FX=0 sem a ordem pelo carro, SAIDA=pasta grava os PNG, INICIO/QUADROS/LIMIAR
   (PERF_CARRO=1 antes: também o car.gd por parte do passo: rodas, pneus, efeitos, piloto, suspensão...)
 bash: TIMEFORMAT=%U; time $GODOT --headless --path . --fixed-fps 50 -s res://tests/bench_corrida.gd   :: CPU de uma corrida fixa de 15 s (comparar versões; PASSOS=1 = só o carregamento)
-%GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph)
+%GODOT% --headless --path . -s res://tests/teste_reposicao_auto.gd   :: reposição automática do jogo: corredor do AIT, fora da pista 3.2 s, contramão 5.2 s, botão (40 mph), checkpoint perdido 4.2 s (tipo 3)
 %GODOT% --headless --path . -s res://tests/teste_reposicao.gd   :: as 14 caixas de reposição do RX01: cada uma repõe na linha, chão plano, longe dos rivais
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_ia.gd   :: rivais da IA: 1 volta (VOLTAS=n, SEMENTE=n, DBG=1 quem fica lento, IA_LOG=1 reposições e ré, IA_TRACE=<nome> a cada 5 passos com o comportamento e a fase do ultrapassar, IA_TRACE_TUDO=1 todo passo); no fim, por rival, quantas vezes o ultrapassar (#5) entrou e os segundos em cada fase
 %GODOT% --path . --fixed-fps 50 -s res://tests/print_ia.gd -- ia   :: prints da corrida com rivais (QUANDO=-1,2,25: -1 = no grid)
@@ -133,6 +140,30 @@ python tools/alfa_texturas.py <unpacked>
 :: só a pintura (cores, logos e número "00"; --numero 27, --sem-decalques); depois reimportar no Godot
 python tools/gerar_pintura.py <unpacked> BUGGY_10 assets/carros/buggy_10
 python tests/teste_pintura.py <unpacked>      :: caixas do .bed x quadros do número (12 carros) e logos do DefaultDecals
+:: o gerar_pintura também salva <carro>/camadas/ (pro Godot trocar a cor ao vivo) e assets/pintura/paleta.json
+%GODOT% --headless --path . -s res://tests/teste_pintura_jogo.gd   :: pintura montada no Godot = pintura.png (24 carros), C++ = GDScript
+python tools/piloto_pintura.py <unpacked>   :: textura do piloto montada como o jogo + camadas (o tools/piloto.py já chama)
+%GODOT% --headless --path . -s res://tests/teste_piloto_pintura.gd   :: piloto montado no Godot = o do tool (padrão e o dos saves), C++ = GDScript
+%GODOT% --headless --path . -s res://tests/teste_upgrade.gd          :: peças compradas: conta de fábrica igual, Mosquito de fábrica x tudo no máximo (0-100)
+%GODOT% --headless --path . -s res://tests/teste_pneu.gd             :: pneu e aro comprados: 11 pneus e 7 aros do catálogo, roda e textura do aro trocam, atrito na terra
+%GODOT% --headless --path . -s res://tests/teste_borrao_rodas.gd     :: borrão das rodas: shader nas 4, 8 cópias por roda (escondidas parado, visíveis rápido, sem lama), BORRAO_RODAS=0 desliga
+%GODOT% --headless --path . -s res://tests/teste_ajuste.gd           :: Tune & Setup: marchas/final custom, Level0 ignora a final, amortecedor, o que cada câmbio libera, Renegade curto x longo
+python tools/hud_jogo.py <unpacked>       :: HUD do jogo -> assets/hud (texturas, caixas, fontes, kerning, textos das mensagens, seta.obj) e data/hud_circuit.xml
+python tools/fex_jogo.py <unpacked>       :: telas do menu (.fex) -> data/fex_resultados.json (tela de resultados) e assets/ui (texturas, fonte grande, textos)
+python re/resultados_ram.py placar_final.p2s  :: referência da tela de resultados na RAM -> tests/ref_resultados.json
+python re/resultados_ram.py pause.p2s --saida tests/ref_pausa.json   :: a da pausa (--so "a,b": só esses textos; finish_2.p2s -> tests/ref_de_novo.json)
+%GODOT% --headless --path . -s res://tests/teste_parachoque.gd       :: para-choque: 8 do catálogo + Nenhum, no ponto BUMPER da frota toda, Storm/Chimera sem, não mexe na física, lâmpadas no farol; barra de luz do teto do tamanho do carro
+%GODOT% --headless --path . -s res://tests/teste_hud.gd             :: HUD do jogo x RAM: 50 quadros a 640x480, conta-giros em tela larga, ponteiro/barras/velocidade dos save states, kerning
+%GODOT% --headless --path . -s res://tests/teste_resultados.gd      :: resultados, pausa e Race again x RAM (placar_final, pause, finish_2), seletor, formato do tempo, quando aparece
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_pausa.gd   :: pausa na corrida (congela, HUD some, Respot só parado, Esc volta, Quit com ARE YOU SURE?, sons) e Race again (Restart / Exit)
+%GODOT% --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pausa|de_novo|confirma]   :: print da tela de resultados (ou da pausa / Race again / confirma)
+%GODOT% --headless --path . -s res://tests/teste_truques.gd         :: Score: estados, 1º quadro da RAM, fórmulas do exe, combo x multiplicador, HUD e o carro pulando/derrapando
+python re/hud_ram.py arquivo.p2s           :: HUD na RAM do save state: matrizes, ponteiro, números, barras x rpm/marcha/velocidade do carro
+python re/hud_ref.py arquivo.p2s           :: refaz tests/ref_hud_4x3.json (matriz de cada quadro do HUD_CIRCUIT na RAM)
+python re/hud_textos.py arquivo.p2s        :: refaz tests/ref_hud_textos.json (cada letra dos textos do HUD na RAM + a fonte carregada; sem o nome do perfil)
+%GODOT% --headless --path . -s res://tests/teste_rabo.gd             :: rabo de cavalo: comprimentos, raiz no pino, parado x correndo, balanço virando
+%GODOT% --headless --path . -s res://tests/teste_numero.gd           :: número do perfil (oficina): carro e piloto repintam e salva; rivais com o do AIPlayers
+%GODOT% --headless --path . -s res://tests/medir_escapes.gd -- BUGGY_10 TRUCK_12   :: direção do cano no modelo x ponto EXHAUST (RAIO=0.5, VERTICES=1)
 
 :: motores do Engine Simulator (12 .mr) e dinamômetro sem tela (Linux)
 python tools/gerar_motores.py
@@ -207,3 +238,10 @@ GDScript; o tests/bench_corrida.gd imprime posição, rpm e marcha dos 8 carros
 no fim (e a soma do som), e com 0 e 1 tem que sair igual (e o rodar_testes
 idêntico). Visual, tremida, som do piloto/suspensão e vozes do som do jogo:
 tests/teste_cpp.gd.
+
+Rodar um trecho do exe com números nossos (contas de vetor do VU0 que o
+Ghidra embaralha): DumpAsm.java lista o assembly, re/emu_ee.py executa.
+```
+analyzeHeadless ~/ghidra_proj atv4 -process -noanalysis -readOnly -scriptPath re/ghidra_scripts -postScript DumpAsm.java rabo.asm 0x1a9db0 0x1ab488
+python re/rabo_colisores.py rabo.asm <dados>/exe/SCES_546.88   :: pino e colisores do rabo de cavalo no frame de cada osso
+```

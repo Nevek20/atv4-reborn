@@ -1,0 +1,184 @@
+extends SceneTree
+## Para-choque comprado (carro/pecas.gd slot Bumper, oficina aba Upgrade):
+## 1) o catálogo (componentes.xml) tem 9 opções por classe (NOT_INSTALLED +
+##    BUMPER_01..08_HEAVYCLASS_LARGE) e o de fábrica é NOT_INSTALLED
+## 2) frota toda (pecas.json do gerar_buggies): os carros com Bumper no
+##    component map têm os 8 modelos e o ponto BUMPER; o RallyCompMap (Storm,
+##    Chimera) não tem nenhum. Montado no ponto BUMPER (matriz identidade), a
+##    frente do para-choque fica de 0 a ~0.6 m à frente da carroceria e acima
+##    do fundo dela (se o ponto ou o frame estivessem errados, cairia dentro
+##    do carro ou no chão)
+## 3) carro montado (Renegade, Buccaneer, Storm): o para-choque escolhido entra
+##    no model_root na posição do ponto; de fábrica não tem; só visual: massa,
+##    casco e motor iguais aos de fábrica. As 4 lâmpadas (light_64) do
+##    para-choque 4 entram no farol (farol.gd, H), viradas pra frente e na
+##    frente da carroceria; Renegade e Buccaneer de fábrica não têm farol.
+##    O 3 não tem light_64: as 2 lentes do meio são o pedaço do atlas
+##    chassis_comp03 (farol.gd LAMPADAS_ATLAS) e as 2 de fora ficam tampadas
+## 4) barra de luz do teto (slot Lighting, mesmo esquema no ponto LIGHTRIG):
+##    8 por carro, todas do tamanho dele (LightRigCategory: Renegade LARGE,
+##    Mosquito SMALL); a 4 no Renegade acende 4 lâmpadas no teto (no farol,
+##    sem o z_min da carroceria) e a 3 acha as lentes pelo atlas
+## Uso: godot --headless --path . -s res://tests/teste_parachoque.gd
+
+const Main := preload("res://main.gd")
+const Car := preload("res://carro/car.gd")
+const PECAS := preload("res://carro/pecas.gd")
+const BP := "BUMPER_04_HEAVYCLASS_LARGE"
+
+var falhas := 0
+var carros: Array = []
+var c3                              # Renegade com o para-choque 3 (lente no atlas)
+var cl: Array = []                  # Renegade com as barras de luz 4 e 3
+var q := 0
+
+
+func _falha(t: String) -> void:
+	print("  FALHA: " + t)
+	falhas += 1
+
+
+func _initialize() -> void:
+	for cls in ["Buggy", "Truck"]:
+		var l: Array = PECAS.opcoes(cls).slots.get("Bumper", [])
+		print("  %s: %d opções (%s)" % [cls, l.size(), ", ".join(l.map(func(p): return PECAS.rotulo(p)))])
+		if l.size() != 9 or l[0] != "NOT_INSTALLED":
+			_falha("%s devia ter Nenhum + 8 para-choques" % cls)
+	if PECAS.fabrica("BUGGY_10").config.get("Bumper") != "NOT_INSTALLED":
+		_falha("de fábrica devia ser NOT_INSTALLED")
+	# 2) a frota pelo pecas.json
+	var pts_de = Car.new()
+	var vistos := {}
+	var pior := [INF, -INF]
+	for v in Main.frota():
+		var dir: String = v.dir
+		if vistos.has(dir) or not FileAccess.file_exists(dir.path_join("pecas.json")):
+			continue
+		vistos[dir] = true
+		var pj = JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("pecas.json")))
+		if not pj.has("parachoques"):
+			if not String(v.get("id", "")).begins_with("ESCORT"):
+				_falha("%s: pecas.json sem parachoques (rode o gerar_buggies)" % v.name)
+			continue
+		var rally: bool = String(v.id) in ["BUGGY_12", "TRUCK_12"]
+		var lista: Dictionary = pj.parachoques
+		if rally != lista.is_empty():
+			_falha("%s: %s" % [v.name, "rally não devia ter para-choque" if rally else "sem os para-choques"])
+		if rally:
+			continue
+		if lista.size() != 8:
+			_falha("%s: %d para-choques" % [v.name, lista.size()])
+		var lz: Dictionary = pj.get("luzes", {})
+		var tam: Array = lz.keys().map(func(k): return String(k).get_slice("_", 3))
+		if lz.size() != 8 or tam.any(func(t): return t != tam[0]) or not pts_de._load_points(v.points).has(pj.get("ponto_luzes", "")):
+			_falha("%s: barras de luz %s" % [v.name, lz.keys()])
+		elif String(v.id) in ["BUGGY_10", "BUGGY_01"] and tam[0] != ("LARGE" if v.id == "BUGGY_10" else "SMALL"):
+			_falha("%s: barra do tamanho errado (%s)" % [v.name, tam[0]])
+		var pts: Dictionary = pts_de._load_points(v.points)
+		if not pts.has(pj.ponto_parachoque):
+			_falha("%s: sem o ponto %s" % [v.name, pj.ponto_parachoque])
+			continue
+		var p: Vector3 = pts[pj.ponto_parachoque]
+		var corpo: AABB = (load(dir.path_join(pj.pecas.Body)) as Mesh).get_aabb()
+		for k in lista:
+			var path := dir.path_join(lista[k]).simplify_path()
+			if not ResourceLoader.exists(path):
+				_falha("%s: falta %s" % [v.name, path])
+				continue
+			var a: AABB = (load(path) as Mesh).get_aabb()
+			var frente := p.z + a.end.z - corpo.end.z
+			var baixo := p.y + a.position.y - corpo.position.y
+			pior = [minf(pior[0], frente), maxf(pior[1], frente)]
+			if frente < -0.1 or frente > 0.65 or baixo < 0.0:
+				_falha("%s %s: frente %.2f m da carroceria, %.2f m acima do fundo" % [v.name, k, frente, baixo])
+	pts_de.free()
+	print("  frota: %d carros, a frente do para-choque fica de %.2f a %.2f m à frente da carroceria" % [vistos.size(), pior[0], pior[1]])
+	# 3) montado
+	for id in ["BUGGY_10", "TRUCK_01", "BUGGY_12"]:
+		var v: Dictionary = {}
+		for x in Main.frota():
+			if x.get("id", "") == id and v.is_empty():
+				v = x
+		for com in [false, true]:
+			var c = Car.new()
+			Main.configurar(c, v)
+			if com:
+				c.pecas_escolhidas = {"Bumper": BP}
+			root.add_child(c)
+			c.reset_to(Vector3(carros.size() * 30.0, 50.0, 0.0), 0.0)
+			carros.append({"c": c, "nome": v.name, "com": com, "rally": id == "BUGGY_12"})
+
+
+func _process(_d: float) -> bool:
+	if c3 == null:
+		var v: Dictionary = {}
+		for x in Main.frota():
+			if x.get("id", "") == "BUGGY_10" and v.is_empty():
+				v = x
+		c3 = Car.new()
+		Main.configurar(c3, v)
+		c3.pecas_escolhidas = {"Bumper": "BUMPER_03_HEAVYCLASS_LARGE"}
+		root.add_child(c3)
+		c3.reset_to(Vector3(-60.0, 50.0, 0.0), 0.0)
+		for n in [4, 3]:
+			var c = Car.new()
+			Main.configurar(c, v)
+			c.pecas_escolhidas = {"Lighting": "LIGHTRIG_0%d_HEAVYCLASS_LARGE" % n}
+			root.add_child(c)
+			c.reset_to(Vector3(-90.0 - 30.0 * cl.size(), 50.0, 0.0), 0.0)
+			cl.append(c)
+	q += 1
+	if q < 2:
+		return false
+	for i in range(0, carros.size(), 2):
+		var fab = carros[i].c
+		var com = carros[i + 1].c
+		var nome: String = carros[i].nome
+		if fab.parachoque_mi != null:
+			_falha("%s de fábrica com para-choque" % nome)
+		if carros[i].rally:
+			if com.tem_parachoque() or com.parachoque_mi != null:
+				_falha("%s (rally) não devia montar para-choque" % nome)
+			else:
+				print("  %s: sem para-choque (RallyCompMap), como no jogo" % nome)
+			continue
+		var mi: MeshInstance3D = com.parachoque_mi
+		if mi == null or mi.get_parent() != com.model_root:
+			_falha("%s: para-choque não montou" % nome)
+			continue
+		var alvo: Vector3 = com.model_offset + com.points[com.pecas.ponto_parachoque]
+		if mi.position.distance_to(alvo) > 1e-5:
+			_falha("%s: fora do ponto BUMPER" % nome)
+		var cascos := func(c) -> int:
+			return c.get_children().filter(func(n): return n is CollisionShape3D).size()
+		print("  %s com %s: no ponto %s, massa %.0f x %.0f kg, casco %d x %d esferas, motor %.2f x %.2f" % [
+			nome, PECAS.rotulo(BP), com.points[com.pecas.ponto_parachoque], com.mass, fab.mass,
+			cascos.call(com), cascos.call(fab), com.TUNE_ENGINE, fab.TUNE_ENGINE])
+		if com.mass != fab.mass or cascos.call(com) != cascos.call(fab) or com.TUNE_ENGINE != fab.TUNE_ENGINE:
+			_falha("%s: o para-choque mexeu na física (é só visual no jogo)" % nome)
+		# farol (H): as lâmpadas do para-choque
+		var frente_corpo: float = com.body_mi.mesh.get_aabb().end.z
+		var lamp: Array = com.farol.lampadas if com.farol else []
+		print("  %s: farol de fábrica %s, com o para-choque %d lâmpadas em z %s (carroceria até %.2f)" % [
+			nome, "sim" if fab.farol else "não", lamp.size(),
+			", ".join(lamp.map(func(l): return "%.2f" % l.c.z)), frente_corpo])
+		if fab.farol != null or lamp.size() != 4 or not lamp.all(func(l): return l.n.z > 0.5 and l.c.z > frente_corpo - 0.1):
+			_falha("%s: as 4 lâmpadas do para-choque não entraram no farol" % nome)
+		elif com.farol.halos != 4 or com.parachoque_mi.get_children().filter(func(n): return n.name == "Lente_farol").size() != 1:
+			_falha("%s: lente ou brilhos do farol fora do para-choque" % nome)
+	var l3: Array = c3.farol.lampadas if c3.farol else []
+	print("  Renegade com o para-choque 3: %d lâmpadas em x %s (as do atlas chassis_comp03)" % [
+		l3.size(), ", ".join(l3.map(func(l): return "%.2f" % l.c.x))])
+	if l3.size() != 2 or not l3.all(func(l): return absf(l.c.x) < 0.3 and l.n.z > 0.5):
+		_falha("para-choque 3: as 2 lentes do meio deviam acender")
+	for k in cl.size():
+		var c = cl[k]
+		var lamp: Array = c.farol.lampadas if c.farol else []
+		var teto: float = c.body_mi.mesh.get_aabb().end.y
+		print("  Renegade com a barra %d: %s, %d lâmpadas em y %s (teto da carroceria %.2f)" % [[4, 3][k],
+			"montada" if c.luzes_mi else "SEM", lamp.size(), ", ".join(lamp.map(func(l): return "%.2f" % l.c.y)), teto])
+		if c.luzes_mi == null or lamp.size() != 4 or not lamp.all(func(l): return l.c.y > teto - 0.3 and l.n.z > 0.5):
+			_falha("barra de luz %d: devia montar no teto com 4 lâmpadas no farol" % [4, 3][k])
+	print("teste_parachoque: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
+	quit()
+	return true

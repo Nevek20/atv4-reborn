@@ -1,0 +1,1584 @@
+<Root FileVersion="1.0000000">
+   <ATV>
+      <Alloy mIsPhysical="false">
+         <Component mComponentName="WHEEL_Douglas_Alloy_04" mFEModel="Wheel_ATV_Douglas_Alloy_04" mFEDescription="" mFEName="Wheel_01" mFECost="500" mInGameModelName="WHEEL_Douglas_Alloy_04">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_Douglas_Alloy_01" mFEModel="Wheel_ATV_Douglas_Alloy_01" mFEDescription="" mFEName="Wheel_02" mFECost="500" mInGameModelName="WHEEL_Douglas_Alloy_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_Douglas_Alloy_02" mFEModel="Wheel_ATV_Douglas_Alloy_02" mFEDescription="" mFEName="Wheel_03" mFECost="500" mInGameModelName="WHEEL_Douglas_Alloy_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_Douglas_Alloy_03" mFEModel="Wheel_ATV_Douglas_Alloy_03" mFEDescription="" mFEName="Wheel_04" mFECost="500" mInGameModelName="WHEEL_Douglas_Alloy_03">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_ITP_C_Series_Cast" mFEModel="Wheel_ATV_ITP_C_Series_Cast" mFEDescription="" mFEName="Wheel_05" mFECost="500" mInGameModelName="WHEEL_ITP_C-Series_Cast">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_ITP_C_Series_C_Lock" mFEModel="Wheel_ATV_ITP_C_Series_C_Lock" mFEDescription="" mFEName="Wheel_06" mFECost="500" mInGameModelName="WHEEL_ITP_C-Series_C-Lock">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_ITP_Delta_Chrome" mFEModel="Wheel_ATV_ITP_Delta_Chrome" mFEDescription="" mFEName="Wheel_07" mFECost="500" mInGameModelName="WHEEL_ITP_Delta_Chrome">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_ITP_T9Pro_Beadlock" mFEModel="Wheel_ATV_ITP_T9Pro_Beadlock" mFEDescription="" mFEName="Wheel_08" mFECost="500" mInGameModelName="WHEEL_ITP_T9Pro_Beadlock">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Alloy>
+      <Bumper mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFEName="None" mFECost="0" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_ACMOD_01" mFEModel="Bumper_ATV_Acmod_01" mFEDescription="" mInGameModelName="BUMPER_ATV_ACMOD_01" mFEName="Bumper_01" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_ACMOD_02" mFEModel="Bumper_ATV_Acmod_02" mFEDescription="" mInGameModelName="BUMPER_ATV_ACMOD_02" mFEName="Bumper_02" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_ACMOD_03" mFEModel="Bumper_ATV_Acmod_03" mFEDescription="" mInGameModelName="BUMPER_ATV_ACMOD_03" mFEName="Bumper_03" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_ACMOD_04" mFEModel="Bumper_ATV_Acmod_04" mFEDescription="" mInGameModelName="BUMPER_ATV_ACMOD_04" mFEName="Bumper_04" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_DGMOD_01" mFEModel="Bumper_ATV_Dgmod_01" mFEDescription="" mInGameModelName="BUMPER_ATV_DGMOD_01" mFEName="Bumper_05" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_DGMOD_02" mFEModel="Bumper_ATV_Dgmod_02" mFEDescription="" mInGameModelName="BUMPER_ATV_DGMOD_02" mFEName="Bumper_06" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_DGMOD_03" mFEModel="Bumper_ATV_Dgmod_03" mFEDescription="" mInGameModelName="BUMPER_ATV_DGMOD_03" mFEName="Bumper_07" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_ATV_DGMOD_04" mFEModel="Bumper_ATV_Dgmod_04" mFEDescription="" mInGameModelName="BUMPER_ATV_DGMOD_04" mFEName="Bumper_08" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Bumper>
+      <Lighting mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFEName="None" mFECost="0" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_ATV_01" mFEModel="LightRig_LightClass_01" mFEDescription="" mFEName="Lightrig_01" mInGameModelName="LIGHTRIG_ATV_01" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_ATV_02" mFEModel="LightRig_LightClass_02" mFEDescription="" mInGameModelName="LIGHTRIG_ATV_02" mFEName="Lightrig_02" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_ATV_03" mFEModel="LightRig_LightClass_03" mFEDescription="" mInGameModelName="LIGHTRIG_ATV_03" mFEName="Lightrig_03" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Lighting>
+      <Chassis mIsPhysical="false">
+         <Component mComponentName="CHASSIS_AI_2STROKE" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_AI_2STROKE" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_AI_4STROKE" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_AI_4STROKE" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_01" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_01" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_02" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_02" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_03" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_03" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_04" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_04" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_05" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_05" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_06" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_06" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_07" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_07" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_08" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_08" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_ATV_01_GHOST" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_ATV_01_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Chassis>
+      <Fairing mIsPhysical="false">
+         <Component mComponentName="SandStorm" mFEModel="" mFEDescription="" mInGameModelName="SandStorm" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="WolfTrekker" mFEModel="" mFEDescription="" mInGameModelName="WolfTrekker" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_01" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_01" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_02" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_02" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_03" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_03" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_04" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_04" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_05" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_05" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_06" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_06" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_07" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_07" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_08" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_08" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_09" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_09" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_10" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_10" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_ATV_04_GHOST" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_ATV_04_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Fairing>
+      <Nerfbar mIsPhysical="false">
+         <Component mComponentName="NERFBAR_ATV_NEW_01" mFEModel="Nerfbar_ATV_New_01" mFEDescription="" mFEName="NERFBAR_01" mInGameModelName="NERFBAR_ATV_NEW_01" mFECost="0">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_02" mFEModel="Nerfbar_ATV_New_02" mFEDescription="" mFEName="NERFBAR_02" mInGameModelName="NERFBAR_ATV_NEW_02" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_03" mFEModel="Nerfbar_ATV_New_03" mFEDescription="" mFEName="NERFBAR_03" mInGameModelName="NERFBAR_ATV_NEW_03" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_04" mFEModel="Nerfbar_ATV_New_04" mFEDescription="" mFEName="NERFBAR_04" mInGameModelName="NERFBAR_ATV_NEW_04" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_05" mFEModel="Nerfbar_ATV_New_05" mFEDescription="" mFEName="NERFBAR_05" mInGameModelName="NERFBAR_ATV_NEW_05" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_06" mFEModel="Nerfbar_ATV_New_06" mFEDescription="" mFEName="NERFBAR_06" mInGameModelName="NERFBAR_ATV_NEW_06" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_07" mFEModel="Nerfbar_ATV_New_07" mFEDescription="" mFEName="NERFBAR_07" mInGameModelName="NERFBAR_ATV_NEW_07" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="NERFBAR_ATV_NEW_08" mFEModel="Nerfbar_ATV_New_08" mFEDescription="" mFEName="NERFBAR_08" mInGameModelName="NERFBAR_ATV_NEW_08" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Nerfbar>
+      <Tire mIsPhysical="false">
+         <!-- Hmmm, nasty grey area - how to treat the tires... They're currently just regular renderable components. -->
+         <Component mComponentName="DIRT_BUDGET" mFEModel="Tyre_ATV_Dirt_Budget" mFEDescription="" mFEName="Dirt_Budget" mInGameModelName="TYRE_DIRT_BUDGET_ATV">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PREMIUM" mFEModel="Tyre_ATV_Dirt_Premium" mFEDescription="" mFEName="Dirt_Premium" mInGameModelName="TYRE_DIRT_PREMIUM_ATV" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_BUDGET" mFEModel="Tyre_ATV_General_Purpose_Budget" mFEDescription="" mFEName="General_Purpose_Budget" mFECost="2000" mInGameModelName="TYRE_GENERALPURPOSE_BUDGET_ATV">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_PREMIUM" mFEModel="Tyre_ATV_General_Purpose_Premium" mFEDescription="" mFEName="General_Purpose_Premium" mInGameModelName="TYRE_GENERALPURPOSE_PREMIUM_ATV" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_BUDGET" mFEModel="Tyre_ATV_Mud_Budget" mFEDescription="" mFEName="Mud_Budget" mInGameModelName="TYRE_MUD_BUDGET_ATV" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_PREMIUM" mFEModel="Tyre_ATV_Mud_Premium" mFEDescription="" mFEName="Mud_Premium" mInGameModelName="TYRE_MUD_PREMIUM_ATV" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_BUDGET" mFEModel="Tyre_ATV_Snow_Budget" mFEDescription="" mFEName="Snow_Budget" mInGameModelName="TYRE_SNOW_BUDGET_ATV" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_PREMIUM" mFEModel="Tyre_ATV_Snow_Premium" mFEDescription="" mFEName="Snow_Premium" mInGameModelName="TYRE_SNOW_PREMIUM_ATV" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_BUDGET" mFEModel="Tyre_ATV_Sand_Budget" mFEDescription="" mFEName="Sand_Budget" mInGameModelName="TYRE_SAND_BUDGET_ATV" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_PREMIUM" mFEModel="Tyre_ATV_Sand_Premium" mFEDescription="" mFEName="Sand_Premium" mInGameModelName="TYRE_SAND_PREMIUM_ATV" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PROTOTYPE" mFEModel="Tyre_ATV_Prototype" mFEName="Prototype" mFEDescription="" mInGameModelName="TYRE_PROTOTYPE_ATV">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Tire>
+      <Wheel mIsPhysical="false">
+         <Component mComponentName="Wheel_Generic" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Generic_GHOST" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Wheel>
+      <!--
+      <EngineInternals>
+         <Component mComponentName="EngInt_Level1" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="EngInt_Level2" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineInternals>
+      <EngineManagementA>
+         <Component mComponentName="EngMgtA_Off" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="EngMgtA_On" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagementA>
+      <EngineManagementB>
+         <Component mComponentName="EngMgtB_Off" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="EngMgtB_On" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagementB>
+   -->
+      <EngineInternals mIsPhysical="true">
+         <Component mComponentName="EngineInternals_Level0" mFEModel="Engine_Internals_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineInternals_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level1" mFEModel="Engine_Internals_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level2" mFEModel="Engine_Internals_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="16000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Prototype" mFEModel="Engine_Internals_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineInternals>
+      <EngineManagement mIsPhysical="true">
+         <Component mComponentName="EngineManagement_Level0" mFEModel="Engine_Management_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineManagement_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level1" mFEModel="Engine_Management_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level2" mFEModel="Engine_Management_Upgrade_02" mFEDescription="" mFECost="6000" mFEName="Stage_2">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Prototype" mFEModel="Engine_Management_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagement>
+      <EngineHeader mIsPhysical="true">
+         <Component mComponentName="EngineHeader_Level0" mFEModel="Exhaust_Header_Lightclass_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineHeader_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level1" mFEModel="Exhaust_Header_Lightclass_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level2" mFEModel="Exhaust_Header_Lightclass_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </EngineHeader>
+      <Exhaust mIsPhysical="true">
+         <Component mComponentName="Exhaust_Level0" mFEModel="Exhaust_ATV_01" mFEDescription="Exhaust Name" mFEName="Standard" mInGameModelName="Exhaust_ATV_01">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level1a" mFEModel="Exhaust_ATV_02" mFEDescription="" mFECost="1950" mFEName="Stage_1a" mInGameModelName="Exhaust_ATV_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level1b" mFEModel="Exhaust_ATV_03" mFEDescription="" mFEName="Stage_1b" mInGameModelName="Exhaust_ATV_03" mFECost="1950">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level2a" mFEModel="Exhaust_ATV_04" mFEDescription="" mFEName="Stage_2a" mInGameModelName="Exhaust_ATV_04" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level2b" mFEModel="Exhaust_ATV_05" mFEDescription="" mFEName="Stage_2b" mInGameModelName="Exhaust_ATV_05" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level3a" mFEModel="Exhaust_ATV_06" mFEDescription="" mFEName="Stage_3a" mInGameModelName="Exhaust_ATV_06" mFECost="13000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level3b" mFEModel="Exhaust_ATV_07" mFEDescription="" mInGameModelName="Exhaust_ATV_07" mFEName="Stage_3b" mFECost="13000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Prototype" mFEModel="Exhaust_ATV_Prototype" mFEDescription="" mFEName="Prototype" mInGameModelName="Exhaust_ATV_08">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Exhaust>
+      <IntakeKit mIsPhysical="true">
+         <Component mComponentName="IntakeKit_Level0" mFEModel="Intake_Kit_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level1" mFEModel="Intake_Kit_Upgrade_01" mFEName="Stage_1" mFEDescription="" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level2" mFEModel="Intake_Kit_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level3" mFEModel="Intake_Kit_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Prototype" mFEModel="Intake_Kit_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </IntakeKit>
+      <Suspension mIsPhysical="true">
+         <Component mComponentName="Suspension_Level0" mFEModel="Suspension_Standard" mFEDescription="" mFEName="Standard">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level1" mFEModel="Suspension_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="7000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level2" mFEModel="Suspension_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="20000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Suspension>
+      <Brake mIsPhysical="true">
+         <Component mComponentName="Brake_Level0" mFEModel="Brakes_Standard" mFEDescription="" mFEName="Standard">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level1" mFEModel="Brakes_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level2" mFEModel="Brakes_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Prototype" mFEModel="Brakes_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Brake>
+      <GearboxLevel mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxLevel_Level0" mFEModel="Gearbox_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level1" mFEModel="Gearbox_Upgrade_01" mFECost="5000" mFEName="Stage_1" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level2" mFEModel="Gearbox_Upgrade_02" mFECost="10000" mFEName="Stage_2" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Prototype" mFEModel="Gearbox_Prototype" mFEDescription="" mFEName="Prototype">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxLevel>
+      <Clutch mIsPhysical="true">
+         <Component mComponentName="Clutch_Level0" mFEModel="Clutch_Standard" mFEDescription="" mFEName="Standard">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level1" mFEModel="Clutch_Upgrade_01" mFECost="2500" mFEName="Stage_1" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level2" mFEModel="Clutch_Upgrade_02" mFECost="7000" mFEName="Stage_2" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Clutch>
+      <BodyMass mIsPhysical="true">
+         <Component mComponentName="BodyMass_Level0" mFEModel="Weight_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level1" mFEModel="Weight_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level2" mFEModel="Weight_Upgrade_02" mFECost="15000" mFEName="Stage_2" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </BodyMass>
+      <GearboxType mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxType_Auto" mFEModel="" mFEName="Auto" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxType_Manual" mFEModel="" mFEName="Manual" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxType>
+      <Shocks mIsPhysical="true" mFEModel="Suspension_Standard">
+         <Component mComponentName="Shocks_Soft" mFEModel="" mFEName="Soft" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Medium" mFEModel="" mFEName="Medium" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Hard" mFEModel="" mFEName="Hard" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Shocks>
+      <FinalDriveRatio mIsPhysical="true">
+         <Component mComponentName="FinalDriveRatio_TunedSX" mFEModel="" mFEName="Very_Short" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_SX" mFEModel="" mFEName="Short" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_Standard" mFEModel="" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_GP" mFEModel="" mFEName="Long" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_TunedGP" mFEModel="" mFEName="Very_Long" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </FinalDriveRatio>
+   </ATV>
+   <Bike>
+      <!--
+      <EngineInternals>
+         <Component mComponentName="EngInt_Level1" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="EngInt_Level2" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineInternals>
+      <EngineManagementA>
+         <Component mComponentName="EngMgtA_Off" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="EngMgtA_On" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagementA>
+      <EngineManagementB>
+         <Component mComponentName="EngMgtB_Off" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="EngMgtB_On" mFEModel="" mFEDescription="" mIsVisual="true" mIsPhysical="false">
+	    <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagementB>
+    -->
+      <Chassis mIsPhysical="false">
+         <Component mComponentName="CHASSIS_Bike_2Stroke" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Bike_2Stroke" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Bike_4Stroke" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Bike_4Stroke" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Bike_08" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Bike_08" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Bike_4Stroke_GHOST" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Bike_4Stroke_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Chassis>
+      <Fairing mIsPhysical="false">
+         <Component mComponentName="FAIRING_Bike_01" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_01" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_02" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_02" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_03" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_03" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_04" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_04" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_05" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_05" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_06" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_06" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_07" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_07" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_08" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_08" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_09" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_09" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_10" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_10" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FAIRING_Bike_04_GHOST" mFEModel="" mFEDescription="" mInGameModelName="FAIRING_Bike_04_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Fairing>
+      <Wheel mIsPhysical="false">
+         <Component mComponentName="Wheel_Generic" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Generic_GHOST" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Wheel>
+      <Tire mIsPhysical="false">
+         <Component mComponentName="DIRT_BUDGET" mFEModel="Tyre_Dirt_Budget_MX" mFEDescription="" mFEName="Dirt_Budget" mInGameModelName="TYRE_DIRT_BUDGET_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PREMIUM" mFEModel="Tyre_Dirt_Premium_MX" mFEDescription="" mFEName="Dirt_Premium" mFECost="4000" mInGameModelName="TYRE_DIRT_PREMIUM_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_BUDGET" mFEModel="Tyre_General_Purpose_Budget_MX" mFEDescription="" mFEName="General_Purpose_Budget" mFECost="2000" mInGameModelName="TYRE_GENERALPURPOSE_BUDGET_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_PREMIUM" mFEModel="Tyre_General_Purpose_Premium_MX" mFEDescription="" mFEName="General_Purpose_Premium" mFECost="4000" mInGameModelName="TYRE_GENERALPURPOSE_PREMIUM_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_BUDGET" mFEModel="Tyre_Mud_Budget_MX" mFEDescription="" mFEName="Mud_Budget" mFECost="2000" mInGameModelName="TYRE_MUD_BUDGET_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_PREMIUM" mFEModel="Tyre_Mud_Premium_MX" mFECost="4000" mFEName="Mud_Premium" mFEDescription="" mInGameModelName="TYRE_MUD_PREMIUM_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_BUDGET" mFEModel="Tyre_Snow_Budget_MX" mFEDescription="" mFECost="2000" mFEName="Snow_Budget" mInGameModelName="TYRE_SNOW_BUDGET_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_PREMIUM" mFEModel="Tyre_Snow_Premium_MX" mFEDescription="" mFECost="4000" mFEName="Snow_Premium" mInGameModelName="TYRE_SNOW_PREMIUM_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_BUDGET" mFEModel="Tyre_Sand_Budget_MX" mFEDescription="" mFECost="2000" mFEName="Sand_Budget" mInGameModelName="TYRE_SAND_BUDGET_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_PREMIUM" mFEModel="Tyre_Sand_Premium_MX" mFEDescription="" mFECost="4000" mFEName="Sand_Premium" mInGameModelName="TYRE_SAND_PREMIUM_MX">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PROTOTYPE" mFEModel="Tyre_Prototype_MX" mFEDescription="" mFEName="Prototype" mInGameModelName="TYRE_PROTOTYPE_MX">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Tire>
+      <Lighting mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEName="None" mFEDescription="" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_MX_01" mFEModel="LightRig_LightClass_01" mFEDescription="" mFEName="Lightrig_01" mFECost="750" mInGameModelName="LIGHTRIG_MX_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_MX_02" mFEModel="LightRig_LightClass_02" mFEDescription="" mFEName="Lightrig_02" mFECost="750" mInGameModelName="LIGHTRIG_MX_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_MX_03" mFEModel="LightRig_LightClass_03" mFEDescription="" mFEName="Lightrig_03" mFECost="750" mInGameModelName="LIGHTRIG_MX_03">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Lighting>
+      <HandGuard mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFEName="None" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="HANDGUARD_01" mFEModel="Handguard_01" mFEDescription="" mFECost="750" mFEName="Handguard_01" mInGameModelName="HANDGUARD_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="HANDGUARD_02" mFEModel="Handguard_02" mFEDescription="" mFEName="Handguard_02" mFECost="750" mInGameModelName="HANDGUARD_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="HANDGUARD_03" mFEModel="Handguard_03" mFEDescription="" mFEName="Handguard_03" mFECost="750" mInGameModelName="HANDGUARD_03">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </HandGuard>
+      <EngineInternals mIsPhysical="true">
+         <Component mComponentName="EngineInternals_Level0" mFEModel="Engine_Internals_Standard" mFEDescription="" mFEName="Standard">
+            <!--Set EngineInternals_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level1" mFEModel="Engine_Internals_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level2" mFEModel="Engine_Internals_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="16000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Prototype" mFEModel="Engine_Internals_Prototype" mFEDescription="" mFEName="Prototype">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineInternals>
+      <EngineManagement mIsPhysical="true">
+         <Component mComponentName="EngineManagement_Level0" mFEModel="Engine_Management_Standard" mFEDescription="" mFEName="Standard">
+            <!--Set EngineManagement_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level1" mFEModel="Engine_Management_Upgrade_01" mFECost="2000" mFEName="Stage_1" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level2" mFEModel="Engine_Management_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Prototype" mFEModel="Engine_Management_Prototype" mFEDescription="" mFEName="Prototype">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagement>
+      <EngineHeader mIsPhysical="true">
+         <Component mComponentName="EngineHeader_Level0" mFEModel="Exhaust_Header_Lightclass_Standard" mFEDescription="" mFEName="Standard">
+            <!--Set EngineHeader_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level1" mFEModel="Exhaust_Header_Lightclass_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level2" mFEModel="Exhaust_Header_Lightclass_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </EngineHeader>
+      <Exhaust mIsPhysical="true">
+         <Component mComponentName="Exhaust_Level0" mFEModel="Exhaust_MX_Twostroke_01" mFEDescription="" mFEName="Standard" mInGameModelName="EXHAUST_MX_01">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level1a" mFEModel="Exhaust_MX_Twostroke_02" mFEDescription="" mFEName="Stage_1a" mInGameModelName="EXHAUST_MX_02" mFECost="1950">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level1b" mFEModel="Exhaust_MX_Twostroke_03" mFEDescription="" mInGameModelName="EXHAUST_MX_03" mFEName="Stage_1b" mFECost="1950">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level2a" mFEModel="Exhaust_MX_Twostroke_04" mFEDescription="" mInGameModelName="EXHAUST_MX_04" mFEName="Stage_2a" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level2b" mFEModel="Exhaust_MX_Twostroke_05" mFEDescription="" mFEName="Stage_2b" mInGameModelName="EXHAUST_MX_05" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level3a" mFEModel="Exhaust_MX_Twostroke_06" mFEDescription="" mInGameModelName="EXHAUST_MX_06" mFEName="Stage_3a" mFECost="13000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level3b" mFEModel="Exhaust_MX_Twostroke_07" mFEDescription="" mFEName="Stage_3b" mFECost="13000" mInGameModelName="EXHAUST_MX_07">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Prototype" mFEModel="Exhaust_MX_Twostroke_08" mFEDescription="" mFEName="Prototype" mInGameModelName="Exhaust_MX_08">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Exhaust>
+      <IntakeKit mIsPhysical="true">
+         <Component mComponentName="IntakeKit_Level0" mFEModel="Intake_Kit_Standard" mFEDescription="" mFEName="Standard">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level1" mFEModel="Intake_Kit_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level2" mFEModel="Intake_Kit_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level3" mFEModel="Intake_Kit_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Prototype" mFEModel="Intake_Kit_Prototype" mFEDescription="" mFEName="Prototype">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </IntakeKit>
+      <Suspension mIsPhysical="true">
+         <Component mComponentName="Suspension_Level0" mFEModel="Suspension_Standard" mFEDescription="" mFEName="Standard">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level1" mFEModel="Suspension_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="7000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level2" mFEModel="Suspension_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="20000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Suspension>
+      <Brake mIsPhysical="true">
+         <Component mComponentName="Brake_Level0" mFEModel="Brakes_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level1" mFEModel="Brakes_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level2" mFEModel="Brakes_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Prototype" mFEModel="Brakes_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Brake>
+      <GearboxLevel mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxLevel_Level0" mFEModel="Gearbox_Standard" mFEDescription="" mFEName="Standard">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level1" mFEModel="Gearbox_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level2" mFEModel="Gearbox_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Prototype" mFEModel="Gearbox_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxLevel>
+      <Clutch mIsPhysical="true">
+         <Component mComponentName="Clutch_Level0" mFEModel="Clutch_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level1" mFEModel="Clutch_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level2" mFEModel="Clutch_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="7000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Clutch>
+      <BodyMass mIsPhysical="true">
+         <Component mComponentName="BodyMass_Level0" mFEModel="Weight_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level1" mFEModel="Weight_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level2" mFEModel="Weight_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="15000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </BodyMass>
+      <GearboxType mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxType_Auto" mFEModel="" mFEName="Auto" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxType_Manual" mFEModel="" mFEName="Manual" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxType>
+      <Shocks mIsPhysical="true" mFEModel="Suspension_Standard">
+         <Component mComponentName="Shocks_Soft" mFEModel="" mFEName="Soft" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Medium" mFEModel="" mFEName="Medium" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Hard" mFEModel="" mFEName="Hard" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Shocks>
+      <FinalDriveRatio mIsPhysical="true">
+         <Component mComponentName="FinalDriveRatio_TunedSX" mFEModel="" mFEName="Very_Short" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_SX" mFEModel="" mFEName="Short" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_Standard" mFEModel="" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_GP" mFEModel="" mFEName="Long" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="FinalDriveRatio_TunedGP" mFEModel="" mFEName="Very_Long" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </FinalDriveRatio>
+      <SkidPlate mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFEName="None" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SKIDPLATE_01" mFEModel="Skidplate_01" mFEDescription="" mFEName="Skidplate_01" mFECost="750" mInGameModelName="SKIDPLATE_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SKIDPLATE_02" mFEModel="Skidplate_02" mFEDescription="" mFEName="Skidplate_02" mFECost="750" mInGameModelName="SKIDPLATE_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SKIDPLATE_03" mFEModel="Skidplate_03" mFEDescription="" mFEName="Skidplate_03" mFECost="750" mInGameModelName="SKIDPLATE_03">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </SkidPlate>
+      <Alloy mIsPhysical="false">
+         <Component mComponentName="Wheel_MX_01" mFEModel="Wheel_MX_01" mFEDescription="" mFEName="Wheel_01" mFECost="0" mInGameModelName="WHEEL_MX_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_02" mFEModel="Wheel_MX_02" mFEDescription="" mFEName="Wheel_02" mFECost="500" mInGameModelName="WHEEL_MX_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_03" mFEModel="Wheel_MX_03" mFEDescription="" mFEName="Wheel_03" mFECost="500" mInGameModelName="WHEEL_MX_03">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_04" mFEModel="Wheel_MX_04" mFEDescription="" mFEName="Wheel_04" mFECost="500" mInGameModelName="WHEEL_MX_04">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_05" mFEModel="Wheel_MX_05" mFEDescription="" mFEName="Wheel_05" mFECost="500" mInGameModelName="WHEEL_MX_05">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_06" mFEModel="Wheel_MX_06" mFEDescription="" mFEName="Wheel_06" mFECost="500" mInGameModelName="WHEEL_MX_06">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_07" mFEModel="Wheel_MX_07" mFEDescription="" mFEName="Wheel_07" mFECost="500" mInGameModelName="WHEEL_MX_07">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_MX_08" mFEModel="Wheel_MX_08" mFEDescription="" mFEName="Wheel_08" mFECost="500" mInGameModelName="WHEEL_MX_08">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Alloy>
+   </Bike>
+   <Buggy>
+      <Chassis mIsPhysical="false">
+         <Component mComponentName="CHASSIS_Buggy_01" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_01" mInGameShadowModelName="Shadow_Buggy_01">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_02" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_02" mInGameShadowModelName="Shadow_Buggy_02">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_03" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_03" mInGameShadowModelName="Shadow_Buggy_03">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_04" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_04" mInGameShadowModelName="Shadow_Buggy_04">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_05" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_05" mInGameShadowModelName="Shadow_Buggy_05">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_06" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_06" mInGameShadowModelName="Shadow_Buggy_06">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_07" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_07" mInGameShadowModelName="Shadow_Buggy_07">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_08" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_08" mInGameShadowModelName="Shadow_Buggy_08">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_09" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_09" mInGameShadowModelName="Shadow_Buggy_09">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_10" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_10" mInGameShadowModelName="Shadow_Buggy_10">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_11" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_11" mInGameShadowModelName="Shadow_Buggy_11">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Lancia" mFEModel="" mFEDescription="" mInGameModelName="Lancia" mInGameShadowModelName="Shadow_Lancia">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Buggy_05_GHOST" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Buggy_05_GHOST" mInGameShadowModelName="Shadow_Buggy_05">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Chassis>
+      <Wheel mIsPhysical="false">
+         <Component mComponentName="Wheel_Generic" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_AntiFreeze" mFEModel="" mFEDescription="" mInGameModelName="Wheel_AntiFreeze" mInGameShadowModelName="SHADOW_AntiFreeze">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Inferno" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Inferno" mInGameShadowModelName="SHADOW_Inferno">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Manx" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Manx" mInGameShadowModelName="SHADOW_Manx">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Placeholder" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Placeholder" mInGameShadowModelName="SHADOW_Placeholder">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Rally" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Rally" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Generic_GHOST" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_SMALL" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_SMALL" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_MEDIUM" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_MEDIUM" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_LARGE" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_LARGE" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_SANDCAR" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_SANDCAR" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Wheel>
+      <Tire mIsPhysical="false">
+         <Component mComponentName="DIRT_BUDGET" mFEModel="Tyre_Dirt_Budget" mFEDescription="" mInGameModelName="TYRE_DIRT_BUDGET" mFEName="Dirt_Budget">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PREMIUM" mFEModel="Tyre_Dirt_Premium" mFEDescription="" mInGameModelName="TYRE_DIRT_PREMIUM" mFEName="Dirt_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_BUDGET" mFEModel="Tyre_General_Purpose_Budget" mFEDescription="" mFEName="General_Purpose_Budget" mFECost="2000" mInGameModelName="TYRE_GENERALPURPOSE_BUDGET">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_PREMIUM" mFEModel="Tyre_General_Purpose_Premium" mFEDescription="" mFEName="General_Purpose_Premium" mInGameModelName="TYRE_GENERALPURPOSE_PREMIUM" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_BUDGET" mFEModel="Tyre_Mud_Budget" mFEDescription="" mInGameModelName="TYRE_MUD_BUDGET" mFEName="Mud_Budget" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_PREMIUM" mFEModel="Tyre_Mud_Premium" mFEDescription="" mInGameModelName="TYRE_MUD_PREMIUM" mFEName="Mud_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_BUDGET" mFEModel="Tyre_Snow_Budget" mFEDescription="" mInGameModelName="TYRE_SNOW_BUDGET" mFEName="Snow_Budget" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_PREMIUM" mFEModel="Tyre_Snow_Premium" mFEDescription="" mInGameModelName="TYRE_SNOW_PREMIUM" mFEName="Snow_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_BUDGET" mFEModel="Tyre_Sand_Budget" mFEDescription="" mInGameModelName="TYRE_SAND_BUDGET" mFEName="Sand_Budget" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_PREMIUM" mFEModel="Tyre_Sand_Premium" mFEDescription="" mInGameModelName="TYRE_SAND_PREMIUM" mFEName="Sand_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PROTOTYPE" mFEModel="Tyre_Prototype" mFEDescription="" mFEName="Prototype" mInGameModelName="TYRE_PROTOTYPE">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Tire>
+      <Lighting mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFECost="0" mFEName="None" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_01_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_01" mFEDescription="" mInGameModelName="LIGHTRIG_01_HEAVYCLASS_LARGE" mFEName="Lightrig_01" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_02_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_02" mFEDescription="" mInGameModelName="LIGHTRIG_02_HEAVYCLASS_LARGE" mFEName="Lightrig_02" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_03_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_03" mFEDescription="" mInGameModelName="LIGHTRIG_03_HEAVYCLASS_LARGE" mFEName="Lightrig_03" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_04_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_04" mFEDescription="" mInGameModelName="LIGHTRIG_04_HEAVYCLASS_LARGE" mFEName="Lightrig_04" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_05_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_05" mFEDescription="" mInGameModelName="LIGHTRIG_05_HEAVYCLASS_LARGE" mFEName="Lightrig_05" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_06_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_06" mFEDescription="" mInGameModelName="LIGHTRIG_06_HEAVYCLASS_LARGE" mFEName="Lightrig_06" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_07_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_07" mFEDescription="" mInGameModelName="LIGHTRIG_07_HEAVYCLASS_LARGE" mFEName="Lightrig_07" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_08_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_08" mFEDescription="" mInGameModelName="LIGHTRIG_08_HEAVYCLASS_LARGE" mFEName="Lightrig_08" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_01_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_01" mFEDescription="" mInGameModelName="LIGHTRIG_01_HEAVYCLASS_SMALL" mFEName="Lightrig_01" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_02_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_02" mFEDescription="" mInGameModelName="LIGHTRIG_02_HEAVYCLASS_SMALL" mFEName="Lightrig_02" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_03_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_03" mFEDescription="" mInGameModelName="LIGHTRIG_03_HEAVYCLASS_SMALL" mFEName="Lightrig_03" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_04_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_04" mFEDescription="" mInGameModelName="LIGHTRIG_04_HEAVYCLASS_SMALL" mFEName="Lightrig_04" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_05_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_05" mFEDescription="" mInGameModelName="LIGHTRIG_05_HEAVYCLASS_SMALL" mFEName="Lightrig_05" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_06_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_06" mFEDescription="" mInGameModelName="LIGHTRIG_06_HEAVYCLASS_SMALL" mFEName="Lightrig_06" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_07_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_07" mFEDescription="" mInGameModelName="LIGHTRIG_07_HEAVYCLASS_SMALL" mFEName="Lightrig_07" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_08_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_08" mFEDescription="" mInGameModelName="LIGHTRIG_08_HEAVYCLASS_SMALL" mFEName="Lightrig_08" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Lighting>
+      <Bumper mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFEName="None" mFECost="0" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_01_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_01" mFEDescription="" mInGameModelName="BUMPER_01_HEAVYCLASS_LARGE" mFEName="Bumper_01" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_02_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_02" mFEDescription="" mInGameModelName="BUMPER_02_HEAVYCLASS_LARGE" mFEName="Bumper_02" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_03_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_03" mFEDescription="" mInGameModelName="BUMPER_03_HEAVYCLASS_LARGE" mFEName="Bumper_03" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_04_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_04" mFEDescription="" mInGameModelName="BUMPER_04_HEAVYCLASS_LARGE" mFEName="Bumper_04" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_05_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_05" mFEDescription="" mInGameModelName="BUMPER_05_HEAVYCLASS_LARGE" mFEName="Bumper_05" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_06_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_06" mFEDescription="" mInGameModelName="BUMPER_06_HEAVYCLASS_LARGE" mFEName="Bumper_06" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_07_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_07" mFEDescription="" mInGameModelName="BUMPER_07_HEAVYCLASS_LARGE" mFEName="Bumper_07" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_08_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_08" mFEDescription="" mInGameModelName="BUMPER_08_HEAVYCLASS_LARGE" mFEName="Bumper_08" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Bumper>
+      <Alloy mIsVisual="true" mIsPhysical="false">
+         <Component mComponentName="WHEEL_01" mFEModel="Wheel_Heavyclass_01" mFEDescription="" mFEName="Wheel_01" mInGameModelName="Wheel_Heavyclass_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_02" mFEModel="Wheel_Heavyclass_02" mFEDescription="" mInGameModelName="Wheel_Heavyclass_02" mFEName="Wheel_02" mFECost="500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_03" mFEModel="Wheel_Heavyclass_03" mFEDescription="" mInGameModelName="Wheel_Heavyclass_03" mFEName="Wheel_03" mFECost="500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_04" mFEModel="Wheel_Heavyclass_04" mFEDescription="" mInGameModelName="Wheel_Heavyclass_04" mFEName="Wheel_04" mFECost="500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_05" mFEModel="Wheel_Heavyclass_05" mFEDescription="" mInGameModelName="Wheel_Heavyclass_05" mFEName="Wheel_05" mFECost="500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_06" mFEModel="Wheel_Heavyclass_06" mFEDescription="" mInGameModelName="Wheel_Heavyclass_06" mFEName="Wheel_06" mFECost="500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_07" mFEModel="Wheel_Heavyclass_07" mFEDescription="" mInGameModelName="Wheel_Heavyclass_07" mFEName="Wheel_07" mFECost="500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Alloy>
+      <EngineInternals mIsPhysical="true">
+         <Component mComponentName="EngineInternals_Level0" mFEModel="Engine_Internals_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineInternals_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level1" mFEModel="Engine_Internals_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="7500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level2" mFEModel="Engine_Internals_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="12500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level3" mFEModel="Engine_Internals_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="20000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Prototype" mFEModel="Engine_Internals_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineInternals>
+      <EngineManagement mIsPhysical="true">
+         <Component mComponentName="EngineManagement_Level0" mFEModel="Engine_Management_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineManagement_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level1" mFEModel="Engine_Management_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level2" mFEModel="Engine_Management_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Prototype" mFEModel="Engine_Management_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagement>
+      <EngineHeader mIsPhysical="true">
+         <Component mComponentName="EngineHeader_Level0" mFEModel="Exhaust_Header_Heavyclass_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineHeader_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level1" mFEModel="Exhaust_Header_Heavyclass_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level2" mFEModel="Exhaust_Header_Heavyclass_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Prototype" mFEModel="Exhaust_Header_Heavyclass_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineHeader>
+      <Exhaust mIsPhysical="true">
+         <Component mComponentName="Exhaust_Level0" mFEModel="Exhaust_Heavy_01" mFEName="Standard" mFEDescription="">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level1" mFEModel="Exhaust_Heavy_01" mFEDescription="" mFEName="Stage_1" mFECost="1950">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level2" mFEModel="Exhaust_Heavy_02" mFEDescription="" mFEName="Stage_2" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level3" mFEModel="Exhaust_Heavy_03" mFEDescription="" mFEName="Stage_3" mFECost="13000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Exhaust>
+      <IntakeKit mIsPhysical="true">
+         <Component mComponentName="IntakeKit_Level0" mFEModel="Intake_Kit_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level1" mFEModel="Intake_Kit_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level2" mFEModel="Intake_Kit_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level3" mFEModel="Intake_Kit_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Prototype" mFEModel="Intake_Kit_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </IntakeKit>
+      <Suspension mIsPhysical="true">
+         <Component mComponentName="Suspension_Level0" mFEModel="Suspension_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level1" mFEModel="Suspension_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level2" mFEModel="Suspension_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="7000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level3" mFEModel="Suspension_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="15000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Suspension>
+      <Brake mIsPhysical="true">
+         <Component mComponentName="Brake_Level0" mFEModel="Brakes_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level1" mFEModel="Brakes_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level2" mFEModel="Brakes_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Prototype" mFEModel="Brakes_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Brake>
+      <GearboxLevel mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxLevel_Level0" mFEModel="Gearbox_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level1" mFEModel="Gearbox_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level2" mFEModel="Gearbox_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level3" mFEModel="Gearbox_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Prototype" mFEModel="Gearbox_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxLevel>
+      <Clutch mIsPhysical="true">
+         <Component mComponentName="Clutch_Level0" mFEModel="Clutch_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level1" mFEModel="Clutch_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level2" mFEModel="Clutch_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Clutch>
+      <BodyMass mIsPhysical="true">
+         <Component mComponentName="BodyMass_Level0" mFEModel="Weight_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level1" mFEModel="Weight_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level2" mFEModel="Weight_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="15000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </BodyMass>
+      <GearboxType mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxType_Auto" mFEModel="" mFEName="Auto" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxType_Manual" mFEModel="" mFEName="Manual" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxType>
+      <Shocks mIsPhysical="true" mFEModel="Suspension_Standard">
+         <Component mComponentName="Shocks_Soft" mFEModel="" mFEName="Soft" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Medium" mFEModel="" mFEName="Medium" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Hard" mFEModel="" mFEName="Hard" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Shocks>
+      <GearRatios mIsPhysical="true">
+         <Component mComponentName="GearRatios_Default" mFEModel="" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="GearRatios_Custom" mFEModel="" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearRatios>
+   </Buggy>
+   <Truck>
+      <EngineInternals mIsPhysical="true">
+         <Component mComponentName="EngineInternals_Level0" mFEModel="Engine_Internals_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineInternals_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level1" mFEModel="Engine_Internals_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="7500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level2" mFEModel="Engine_Internals_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="12500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Level3" mFEModel="Engine_Internals_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="20000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineInternals_Prototype" mFEModel="Engine_Internals_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineInternals>
+      <EngineManagement mIsPhysical="true">
+         <Component mComponentName="EngineManagement_Level0" mFEModel="Engine_Management_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineManagement_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level1" mFEModel="Engine_Management_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Level2" mFEModel="Engine_Management_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineManagement_Prototype" mFEModel="Engine_Management_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineManagement>
+      <EngineHeader mIsPhysical="true">
+         <Component mComponentName="EngineHeader_Level0" mFEModel="Exhaust_Header_Heavyclass_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set EngineHeader_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level1" mFEModel="Exhaust_Header_Heavyclass_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Level2" mFEModel="Exhaust_Header_Heavyclass_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="EngineHeader_Prototype" mFEModel="Exhaust_Header_Heavyclass_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </EngineHeader>
+      <Exhaust mIsPhysical="true">
+         <Component mComponentName="Exhaust_Level0" mFEModel="Exhaust_Heavy_01" mFEName="Standard" mFEDescription="">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level1" mFEModel="Exhaust_Heavy_01" mFEDescription="" mFEName="Stage_1" mFECost="1950">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level2" mFEModel="Exhaust_Heavy_02" mFEDescription="" mFEName="Stage_2" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Exhaust_Level3" mFEModel="Exhaust_Heavy_03" mFEDescription="" mFEName="Stage_3" mFECost="13000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Exhaust>
+      <IntakeKit mIsPhysical="true">
+         <Component mComponentName="IntakeKit_Level0" mFEModel="Intake_Kit_Standard" mFEName="Standard" mFEDescription="">
+            <!--Set IntakeKit_Level0 to "None" in the string table-->
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level1" mFEModel="Intake_Kit_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level2" mFEModel="Intake_Kit_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Level3" mFEModel="Intake_Kit_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="IntakeKit_Prototype" mFEModel="Intake_Kit_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </IntakeKit>
+      <Suspension mIsPhysical="true">
+         <Component mComponentName="Suspension_Level0" mFEModel="Suspension_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level1" mFEModel="Suspension_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level2" mFEModel="Suspension_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="7000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Suspension_Level3" mFEModel="Suspension_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="15000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Suspension>
+      <Brake mIsPhysical="true">
+         <Component mComponentName="Brake_Level0" mFEModel="Brakes_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level1" mFEModel="Brakes_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Level2" mFEModel="Brakes_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="8000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Brake_Prototype" mFEModel="Brakes_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Brake>
+      <GearboxLevel mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxLevel_Level0" mFEModel="Gearbox_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level1" mFEModel="Gearbox_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="3500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level2" mFEModel="Gearbox_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Level3" mFEModel="Gearbox_Upgrade_03" mFEDescription="" mFEName="Stage_3" mFECost="10000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxLevel_Prototype" mFEModel="Gearbox_Prototype" mFEName="Prototype" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxLevel>
+      <Clutch mIsPhysical="true">
+         <Component mComponentName="Clutch_Level0" mFEModel="Clutch_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level1" mFEModel="Clutch_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="2500">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="Clutch_Level2" mFEModel="Clutch_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="6000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Clutch>
+      <BodyMass mIsPhysical="true">
+         <Component mComponentName="BodyMass_Level0" mFEModel="Weight_Standard" mFEName="Standard" mFEDescription="">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level1" mFEModel="Weight_Upgrade_01" mFEDescription="" mFEName="Stage_1" mFECost="5000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BodyMass_Level2" mFEModel="Weight_Upgrade_02" mFEDescription="" mFEName="Stage_2" mFECost="15000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </BodyMass>
+      <GearboxType mIsPhysical="true" mFEModel="Gearbox_Standard">
+         <Component mComponentName="GearboxType_Auto" mFEModel="" mFEName="Auto" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="GearboxType_Manual" mFEModel="" mFEName="Manual" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearboxType>
+      <Chassis mIsPhysical="false">
+         <Component mComponentName="CHASSIS_Truck_01" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_01" mInGameShadowModelName="Shadow_Truck_01">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_02" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_02" mInGameShadowModelName="Shadow_Truck_02">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_03" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_03" mInGameShadowModelName="Shadow_Truck_03">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_04" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_04" mInGameShadowModelName="Shadow_Truck_04">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_05" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_05" mInGameShadowModelName="Shadow_Truck_05">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_06" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_06" mInGameShadowModelName="Shadow_Truck_06">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_07" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_07" mInGameShadowModelName="Shadow_Truck_07">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_08" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_08" mInGameShadowModelName="Shadow_Truck_08">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_09" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_09" mInGameShadowModelName="Shadow_Truck_09">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_10" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_10" mInGameShadowModelName="Shadow_Truck_10">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_11" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_11" mInGameShadowModelName="Shadow_Truck_11">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_12" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_12" mInGameShadowModelName="Shadow_Truck_12">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Dakar" mFEModel="" mFEDescription="" mInGameModelName="Dakar" mInGameShadowModelName="Shadow_Dakar">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="CHASSIS_Truck_05_GHOST" mFEModel="" mFEDescription="" mInGameModelName="CHASSIS_Truck_05_GHOST" mInGameShadowModelName="Shadow_Truck_05">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Chassis>
+      <Wheel mIsPhysical="false">
+         <Component mComponentName="Wheel_Generic" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_StockTruck" mFEModel="" mFEDescription="" mInGameModelName="Wheel_StockTruck" mInGameShadowModelName="SHADOW_StockTruck">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Placeholder" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Placeholder" mInGameShadowModelName="SHADOW_Placeholder">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Generic_GHOST" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Generic_GHOST" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_SMALL" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_SMALL" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_MEDIUM" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_MEDIUM" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="TYRE_GENERIC_LARGE" mFEModel="" mFEDescription="" mInGameModelName="TYRE_GENERIC_LARGE" mInGameShadowModelName="Shadow_Generic">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Rally" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Rally" mInGameShadowModelName="SHADOW_Placeholder">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Wheel_Rally_Large" mFEModel="" mFEDescription="" mInGameModelName="Wheel_Rally_Large" mInGameShadowModelName="SHADOW_Placeholder">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Wheel>
+      <Tire mIsPhysical="false">
+         <Component mComponentName="DIRT_BUDGET" mFEModel="Tyre_Dirt_Budget" mFEDescription="" mInGameModelName="TYRE_DIRT_BUDGET" mFEName="Dirt_Budget">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PREMIUM" mFEModel="Tyre_Dirt_Premium" mFEDescription="" mInGameModelName="TYRE_DIRT_PREMIUM" mFEName="Dirt_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_BUDGET" mFEModel="Tyre_General_Purpose_Budget" mFEDescription="" mFEName="General_Purpose_Budget" mInGameModelName="TYRE_GENERALPURPOSE_BUDGET" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="GENERAL_PURPOSE_PREMIUM" mFEModel="Tyre_General_Purpose_Premium" mFEDescription="" mInGameModelName="TYRE_GENERALPURPOSE_PREMIUM" mFEName="General_Purpose_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_BUDGET" mFEModel="Tyre_Mud_Budget" mFEDescription="" mInGameModelName="TYRE_MUD_BUDGET" mFEName="Mud_Budget" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="MUD_PREMIUM" mFEModel="Tyre_Mud_Premium" mFEDescription="" mInGameModelName="TYRE_MUD_PREMIUM" mFEName="Mud_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_BUDGET" mFEModel="Tyre_Snow_Budget" mFEDescription="" mInGameModelName="TYRE_SNOW_BUDGET" mFEName="Snow_Budget" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SNOW_PREMIUM" mFEModel="Tyre_Snow_Premium" mFEDescription="" mInGameModelName="TYRE_SNOW_PREMIUM" mFEName="Snow_Premium" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_BUDGET" mFEModel="Tyre_Sand_Budget" mFEDescription="" mInGameModelName="TYRE_SAND_BUDGET" mFEName="Sand_Budget" mFECost="2000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="SAND_PREMIUM" mFEModel="Tyre_Sand_Premium" mFEDescription="" mFEName="Sand_Premium" mInGameModelName="TYRE_SAND_PREMIUM" mFECost="4000">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="DIRT_PROTOTYPE" mFEModel="Tyre_Prototype" mFEDescription="" mFEName="Prototype" mInGameModelName="TYRE_PROTOTYPE">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Tire>
+      <Lighting mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFECost="0" mFEName="None" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_01_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_01" mFEDescription="" mFEName="Lightrig_01" mFECost="750" mInGameModelName="LIGHTRIG_01_HEAVYCLASS_LARGE" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_02_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_02" mFEDescription="" mFECost="750" mFEName="Lightrig_02" mInGameModelName="LIGHTRIG_02_HEAVYCLASS_LARGE" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_03_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_03" mFEDescription="" mFECost="750" mFEName="Lightrig_03" mInGameModelName="LIGHTRIG_03_HEAVYCLASS_LARGE" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_04_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_04" mFEDescription="" mInGameModelName="LIGHTRIG_04_HEAVYCLASS_LARGE" mFEName="Lightrig_04" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_05_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_05" mFEDescription="" mInGameModelName="LIGHTRIG_05_HEAVYCLASS_LARGE" mFEName="Lightrig_05" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_06_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_06" mFEDescription="" mInGameModelName="LIGHTRIG_06_HEAVYCLASS_LARGE" mFEName="Lightrig_06" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_07_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_07" mFEDescription="" mInGameModelName="LIGHTRIG_07_HEAVYCLASS_LARGE" mFEName="Lightrig_07" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_08_HEAVYCLASS_LARGE" mFEModel="Lightrig_Heavyclass_08" mFEDescription="" mInGameModelName="LIGHTRIG_08_HEAVYCLASS_LARGE" mFEName="Lightrig_08" mFECost="750" mCategory="LARGE">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_01_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_01" mFEDescription="" mFEName="Lightrig_01" mFECost="750" mInGameModelName="LIGHTRIG_01_HEAVYCLASS_SMALL" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_02_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_02" mFEDescription="" mFECost="750" mFEName="Lightrig_02" mInGameModelName="LIGHTRIG_02_HEAVYCLASS_SMALL" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_03_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_03" mFEDescription="" mFECost="750" mFEName="Lightrig_03" mInGameModelName="LIGHTRIG_03_HEAVYCLASS_SMALL" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_04_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_04" mFEDescription="" mInGameModelName="LIGHTRIG_04_HEAVYCLASS_SMALL" mFEName="Lightrig_04" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_05_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_05" mFEDescription="" mInGameModelName="LIGHTRIG_05_HEAVYCLASS_SMALL" mFEName="Lightrig_05" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_06_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_06" mFEDescription="" mInGameModelName="LIGHTRIG_06_HEAVYCLASS_SMALL" mFEName="Lightrig_06" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_07_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_07" mFEDescription="" mInGameModelName="LIGHTRIG_07_HEAVYCLASS_SMALL" mFEName="Lightrig_07" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="LIGHTRIG_08_HEAVYCLASS_SMALL" mFEModel="Lightrig_Heavyclass_08" mFEDescription="" mInGameModelName="LIGHTRIG_08_HEAVYCLASS_SMALL" mFEName="Lightrig_08" mFECost="750" mCategory="SMALL">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Lighting>
+      <Bumper mIsPhysical="false">
+         <Component mComponentName="NOT_INSTALLED" mFEModel="NOT_INSTALLED" mFEDescription="" mFEName="None" mFECost="0" mInGameModelName="NOT_INSTALLED">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_01_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_01" mFEDescription="" mInGameModelName="BUMPER_01_HEAVYCLASS_LARGE" mFEName="Bumper_01" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_02_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_02" mFEDescription="" mInGameModelName="BUMPER_02_HEAVYCLASS_LARGE" mFEName="Bumper_02" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_03_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_03" mFEDescription="" mInGameModelName="BUMPER_03_HEAVYCLASS_LARGE" mFEName="Bumper_03" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_04_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_04" mFEDescription="" mInGameModelName="BUMPER_04_HEAVYCLASS_LARGE" mFEName="Bumper_04" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_05_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_05" mFEDescription="" mInGameModelName="BUMPER_05_HEAVYCLASS_LARGE" mFEName="Bumper_05" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_06_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_06" mFEDescription="" mInGameModelName="BUMPER_06_HEAVYCLASS_LARGE" mFEName="Bumper_06" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_07_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_07" mFEDescription="" mInGameModelName="BUMPER_07_HEAVYCLASS_LARGE" mFEName="Bumper_07" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="BUMPER_08_HEAVYCLASS_LARGE" mFEModel="Bumper_HeavyClass_08" mFEDescription="" mInGameModelName="BUMPER_08_HEAVYCLASS_LARGE" mFEName="Bumper_08" mFECost="750">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Bumper>
+      <Alloy mIsPhysical="false">
+         <Component mComponentName="WHEEL_01" mFEModel="Wheel_Heavyclass_01" mFEDescription="" mInGameModelName="Wheel_Heavyclass_01" mFEName="Wheel_01">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_02" mFEModel="Wheel_Heavyclass_02" mFEDescription="" mFEName="Wheel_02" mFECost="500" mInGameModelName="Wheel_Heavyclass_02">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_03" mFEModel="Wheel_Heavyclass_03" mFEDescription="" mFEName="Wheel_03" mFECost="500" mInGameModelName="Wheel_Heavyclass_03">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_04" mFEModel="Wheel_Heavyclass_04" mFEDescription="" mFEName="Wheel_04" mFECost="500" mInGameModelName="Wheel_Heavyclass_04">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_05" mFEModel="Wheel_Heavyclass_05" mFEDescription="" mFEName="Wheel_05" mFECost="500" mInGameModelName="Wheel_Heavyclass_05">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_06" mFEModel="Wheel_Heavyclass_06" mFEDescription="" mFEName="Wheel_06" mFECost="500" mInGameModelName="Wheel_Heavyclass_06">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+         <Component mComponentName="WHEEL_07" mFEModel="Wheel_Heavyclass_07" mFEDescription="" mFEName="Wheel_07" mFECost="500" mInGameModelName="Wheel_Heavyclass_07">
+            <UnlockableData DefaultState="UNLOCKED"/>
+         </Component>
+      </Alloy>
+      <Shocks mIsPhysical="true" mFEModel="Suspension_Standard">
+         <Component mComponentName="Shocks_Soft" mFEModel="" mFEName="Soft" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Medium" mFEModel="" mFEName="Medium" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="Shocks_Hard" mFEModel="" mFEName="Hard" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </Shocks>
+      <GearRatios mIsPhysical="true">
+         <Component mComponentName="GearRatios_Default" mFEModel="" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+         <Component mComponentName="GearRatios_Custom" mFEModel="" mFEDescription="">
+            <UnlockableData DefaultState="LOCKED"/>
+         </Component>
+      </GearRatios>
+   </Truck>
+</Root>

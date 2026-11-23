@@ -105,7 +105,8 @@ func montar(car) -> bool:
 			aviso = "sem _camada.obj: rode o gerar_buggies"
 	var rodas: Array = [car.wheel_front_file, car.wheel_rear_file]
 	for mi in _malhas(car):
-		var path: String = mi.mesh.resource_path
+		# malha refeita (acertar_giro do para-choque) guarda o caminho no meta
+		var path: String = String(mi.get_meta("malha_path", mi.mesh.resource_path))
 		if mi == car.body_mi or path == "" or path.ends_with("_camada.obj"):
 			continue
 		if path in rodas:
@@ -123,6 +124,8 @@ func montar(car) -> bool:
 		piloto.set_shader_parameter("tex", load(TEX_PILOTO))
 		piloto.set_shader_parameter("escala", ESCALA_PILOTO)
 		car.piloto.malha.material_overlay = piloto
+		if car.piloto.rabo:
+			car.piloto.rabo.malha.material_overlay = piloto
 	if aviso != "":
 		push_warning("Sujeira: " + aviso)
 	return camadas > 0 or piloto != null
@@ -169,7 +172,7 @@ static func _material(code: String, tex: Texture2D) -> ShaderMaterial:
 static func _malhas(n: Node) -> Array[MeshInstance3D]:
 	var out: Array[MeshInstance3D] = []
 	for c in n.get_children():
-		if c is MeshInstance3D and c.mesh:
+		if c is MeshInstance3D and c.mesh and not c.has_meta("fantasma"):   # cópias do borrão das rodas: sem lama
 			out.append(c)
 		out.append_array(_malhas(c))
 	return out
