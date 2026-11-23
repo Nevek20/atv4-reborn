@@ -1476,12 +1476,60 @@ vazios). Tudo vem do evento:
   0x54d838 (text/15205_en.txt).
 - Botão (update do corredor, 0x158f..): |v| do corpo < 17.88 m/s (40 mph)
   repõe (0x15bd28), senão +0x160 = 1 e o HUD 0x4796c0 mostra
-  Too_Fast_For_Respot (0x968) depois de 0.05 s apertado. O 0x4613a0 mostra
-  "Respot" na barra de botões.
+  Too_Fast_For_Respot (0x968) depois de 0.05 s apertado. O 0x4613a0 põe
+  "Respot" no menu de pausa (seção Menu de pausa).
+- Objeto de reposição do corredor (pedido 0x15bd28(tempo, obj, forçar,
+  na_hora, sem_tela); update 0x15c0e8 no update do corredor 0x1590f8):
+  estado 1 = conta +0x64 de 0.3 s (só se estava em 0) e +0x68 = +0x64 x
+  3.333 (1 -> 0); 2 = repõe (0x15bc50: 0x200fe0 acha o ponto, 0x183018 põe
+  o carro, veículo+0xb28 = 0) e vai pro 3; 3 espera o quadro seguinte
+  (DAT_007f48d8+0x80) e 0x15bfe0 vai pro 4; 4 = +0x68 = (1 - cos(178 t)) /
+  2 por 0.3 s (piscando), repete enquanto a caixa do carro encosta na de
+  outro (0x15c350) e acaba em 0x15c090 (+0x68 = 1, veículo+0xb28 = 1,
+  estado 0). Com "na hora" (as caixas) pula o 1 direto pro 2. Tempo padrão
+  (DAT_007f5334+0xc -> +0x14 -> +0x10) = 40 na RAM (vai pro 0x200fe0).
+- Tela preta: no estado 1, pra cada viewport do jogador (0x15b9e8 /
+  0x15b9d8) que não está escurecendo (0x457698) chama 0x4576c8 (fader+0xd8
+  = 1, viewport+0x118 = 1); no 3 -> 4 o 0x4576e0 volta. Fader =
+  viewport+0x114 (lista de viewports DAT_007f48b4 +0x10), update 0x2b3700:
+  +0xdc += dt / +0xd0 indo pro preto, -= dt / +0xd4 voltando; +0xd0 =
+  +0xd4 = 0.2 na RAM (pause, placar_final, andando_em_linha_reta).
+- Não portado ainda: o carro piscando (+0x68, quem lê não foi achado) e o
+  veículo+0xb28 (sem batida carro com carro enquanto pisca?).
 - Não achados: quem liga corredor+0x120 +0x24/+0x28 (zeradas na RAM); as
   caixas do 0x543b88 ([0x7f5f5c], lista vazia no RX01, limites +0xc0/+0xc4).
   Na RAM (corrida_no_normal) o pedido do jogador tem a = 0.2, c = 3.0 de uma
   reposição tipo 2 que já tinha acontecido.
+
+## Menu de pausa e Race again
+
+- Páginas da pausa registradas no 0x4688e8 (LAYER_PAUSE_MENU): a principal
+  0x457840 (vtable 0x5dbda8; barra 0x457b00 = texto 0x7b6 SELECT e 0x7f
+  BACK), opções do jogo, Photographer (0x4625a8) e o livro de truques
+  (0x463b18, só com 0x469798).
+- Opções (0x462190, cada uma 0x2d5760(lista, id, texto)), na ordem:
+  0x461250 Resume (id 0), 0x461a68, 0x4613a0 Respot (0xc), 0x4612c0
+  Restart (1), 0x461330 Quit (2), 0x4614d0 Game options (4, com o submenu),
+  0x461830 Photographer (9, só com 0x469798), 0x4618b0. Online (+0x14 != 0):
+  só Resume e Quit.
+- Respot (0x4613a0) só se: corrida no estado 10 (0x17afb0) ou evento 0xe,
+  |v| do carro < 17.88 m/s (0x1590c0), corredor+0xf4+0x2b8 != 0, 0x5437d8
+  e 0x170b70 == 0. No pause.p2s o carro estava a 29.4 m/s: sem Respot.
+- Race again (0x4cd270): título 0x70e Race_again, seletor Restart / Exit.
+- Texto pelo número: id = linha do text/15205_en.txt - 1 (tabela de nomes
+  0x54d838, 2631 entradas): Respot 0x764, RESTART 0x765, Resume 0x768,
+  QUIT 0x705, Game_options 0x2cd, Photographer 0x67b, Race_again 0x70e,
+  EXIT 0x279, PAUSE_MENU 0x674.
+- Seletor (cDOMenuSelector, LAYER_SELECTOR do Common.fex; RAM do pause.p2s
+  e finish_2.p2s): a opção atual no ID_CURRENT_OPT_TEXT (escala 1.4, canto
+  esquerdo do ID_SELECTOR, centrado na altura) e as próximas juntas no
+  ID_NEXT_OPT_TEXT (0.8, cor 0 0 0 0.565) com 3 espaços entre elas,
+  começando 16 px (640 x 480) depois do avanço da atual. mJustify 16 =
+  centrado só na altura. Os textos longos da RAM andam 0.9975 do nosso em
+  x (1.1 px em 435 px): a conta da escala não foi achada.
+- Barra: ícone (new_buttons_4bit_en_GB) acabando onde o texto começa, do
+  tamanho do START dos resultados; textos em (0.3787 Select, 0.7762 Back,
+  0.6887 Continue; y -0.7417).
 
 ## Luz e névoa (Environment.xml)
 

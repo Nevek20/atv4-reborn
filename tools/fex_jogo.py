@@ -1,10 +1,12 @@
 """
 fex_jogo.py
 ===========
-Telas do menu do jogo (.fex do UI_PS2) pro Godot. Por enquanto a tela de
-resultados da corrida (cSRResultsPage: LAYER_RESULTS do PostRace.fex) com o
-que ela puxa: LAYER_FAKE_HISTORY (título) e LAYER_IG_BUTTON_BAR (barra de
-baixo) do Common.fex e LAYER_PAUSE_BACKGROUND (fundo) do NewPause.fex.
+Telas do menu do jogo (.fex do UI_PS2) pro Godot. A tela de
+resultados da corrida (cSRResultsPage: LAYER_RESULTS do PostRace.fex), a
+pausa (LAYER_PAUSE_MENU do NewPause.fex) e a Race again (LAYER_FINISHED_RACE
+do PostRace.fex), com o que elas puxam: LAYER_FAKE_HISTORY (título),
+LAYER_SELECTOR (a fileira de opções) e LAYER_IG_BUTTON_BAR (barra de baixo)
+do Common.fex e LAYER_PAUSE_BACKGROUND (fundo) do NewPause.fex.
 
 Formato .fex (binário, little endian): 00 00 03 00 e um bloco raiz. Bloco =
 f0 0d ab cd, tamanho (bytes depois dele), tipo (hash) e depois, até o fim,
@@ -57,7 +59,8 @@ H = {zlib.crc32(n.encode()) ^ 0xFFFFFFFF: n for n in NOMES}
 DOCS = {"PostRace": "other/16698_bloco.bin", "Common": "other/16690_bloco.bin",
         "NewPause": "other/16696_bloco.bin"}
 CAMADAS = [("Common", "LAYER_FAKE_HISTORY"), ("NewPause", "LAYER_PAUSE_BACKGROUND"),
-           ("PostRace", "LAYER_RESULTS"), ("Common", "LAYER_IG_BUTTON_BAR")]
+           ("PostRace", "LAYER_RESULTS"), ("Common", "LAYER_IG_BUTTON_BAR"),
+           ("NewPause", "LAYER_PAUSE_MENU"), ("PostRace", "LAYER_FINISHED_RACE"), ("Common", "LAYER_SELECTOR")]
 TEXTURAS = {
     "4_bit_generics": ("UI_PS2/FrontEnd/Textures/fex_new/#657f9b86", "UI_PS2/FrontEnd/Textures/fex_new/#069922b6"),
     "FE_extras": ("UI_PS2/FrontEnd/Textures/fex_new/FE_extras.bog", "UI_PS2/FrontEnd/Textures/fex_new/FE_extras.bed"),
@@ -66,7 +69,10 @@ TEXTURAS = {
                                "UI_PS2/FrontEnd/Textures/fex_new/new_buttons_4bit_en_GB.bed"),
     "FONT_LARGE": ("Fonts/FE_FontLarge.bog", "Fonts/FE_FontLarge.bed"),
 }
-CHAVES_TEXTO = ["RACE_RESULTS", "POSITION", "NAME", "TOTAL_TIME", "BEST_LAP", "STUNT_SCORE", "CONTINUE"]
+CHAVES_TEXTO = ["RACE_RESULTS", "POSITION", "NAME", "TOTAL_TIME", "BEST_LAP", "STUNT_SCORE", "CONTINUE",
+                # pausa (0x462190) e Race again (0x4cd270); barra (0x457b00: SELECT e BACK)
+                "PAUSE_MENU", "Resume", "Respot", "RESTART", "QUIT", "Game_options", "Photographer",
+                "Race_again", "EXIT", "SELECT", "BACK"]
 
 
 def ler_fex(d):

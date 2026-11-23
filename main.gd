@@ -130,6 +130,7 @@ var hud: Label
 var fps_label: Label                     # contador de FPS (F2 liga e desliga); F1 esconde o HUD
 var hud_basico                           # menu/hud_basico.gd: marcha e velocidade (NOSSO, sem assets/hud)
 var resultados                           # menu/resultados.gd: tela de resultados da corrida (PostRace.fex)
+var fader                                # menu/fader.gd: tela preta da reposição do jogador
 var _resultado_visto := false            # já mostrou nesta chegada
 var _resultado_t := 0.0                  # relógio da tabela (0x4c18e0: refaz a cada 2 s)
 var hud_jogo                             # menu/hud_jogo.gd: o HUD do jogo (HUD_CIRCUIT.xml)
@@ -212,9 +213,15 @@ func _ready() -> void:
 	else:
 		hud_jogo.free()
 		hud_jogo = null
+	# tela preta da reposição (fader da câmera do jogo), embaixo do HUD
+	fader = preload("res://menu/fader.gd").new()
+	layer.add_child(fader)
+	layer.move_child(fader, 0)
 	resultados = preload("res://menu/resultados.gd").new()
 	if resultados.montar():
 		layer.add_child(resultados)
+		resultados.dono = self
+		resultados.process_mode = Node.PROCESS_MODE_ALWAYS   # a pausa congela o resto
 	else:
 		resultados.free()
 		resultados = null
@@ -462,7 +469,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					car.painel.mover({KEY_9: Vector2(0, -0.01), KEY_0: Vector2(0, 0.01),
 						KEY_MINUS: Vector2(-0.01, 0), KEY_EQUAL: Vector2(0.01, 0)}[event.physical_keycode])
 			KEY_ESCAPE:
-				get_tree().quit()
+				if not abrir_pausa():
+					get_tree().quit()       # fora da corrida o Esc fecha o jogo
 	# controle: Select troca a câmera (o A é a embreagem, car.gd, e pula a introdução)
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_BACK:
 		_troca_camera()
@@ -470,9 +478,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A \
 			and corrida and corrida.pode_pular():
 		corrida.comecar()
-	# Start / A na tela de resultados: Continue
+	# Start / A na tela de resultados: Continue; Start na corrida: pausa
 	if event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_START, JOY_BUTTON_A]:
-		_continuar_resultados()
+		if not _continuar_resultados() and event.button_index == JOY_BUTTON_START:
+			abrir_pausa()
 	# olhar livre na câmera do piloto e órbita nas de corrida: botão direito
 	# do mouse apertado
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -886,19 +895,80 @@ func _passo_resultados() -> void:
 		# (0x4c1730 limpa as linhas) e a 1ª vez vem aos 3 s (relógio em -1)
 		resultados.mostrar(corrida.tabela())
 		_resultado_t = 0.0
-	if resultados.visible:
+	if resultados.visible and resultados.pagina == "resultados":
 		_resultado_t += get_process_delta_time()
 		if _resultado_t >= corrida.RESULTADO_PASSO:
 			_resultado_t = 0.0
 			resultados.linhas_de(corrida.tabela())
 
 
-## Continue (Enter, Start ou A): NOSSO até ter as páginas seguintes do jogo
-## (cRecordsPage, cRaceFinishedPage): volta pro treino livre
+## Continue (Enter, Start ou A) nos resultados: a Race again (Restart /
+## Exit, LAYER_FINISHED_RACE; no jogo as páginas cRecordsPage e
+## cRaceFinishedPage vêm antes, ainda não portadas)
 func _continuar_resultados() -> bool:
-	if resultados == null or not resultados.visible:
+	if resultados == null or not resultados.visible or resultados.pagina != "resultados":
 		return false
-	resultados.esconder()
-	if corrida:
-		corrida.parar()
+	resultados.abrir_menu("de_novo", ["RESTART", "EXIT"])   # 0x4cd270
 	return true
+
+
+## menu de pausa (Esc / Start na corrida): o jogo congela (get_tree().paused)
+## e a tela (menu/resultados.gd, pagina "pausa") fica por cima. Opções do
+## 0x462190: Resume, Respot (só correndo e abaixo de 40 mph, 0x4613a0),
+## Restart, Quit, Game options, Photographer. Devolve false fora da corrida.
+var pausado := false
+
+
+func abrir_pausa() -> bool:
+	if pausado or resultados == null or corrida == null or resultados.visible:
+		return false
+	if not (corrida.estado in [corrida.CONTANDO, corrida.CORRENDO]):
+		return false
+	var ops := ["Resume"]
+	if corrida.estado == corrida.CORRENDO and corrida.ia and corrida.ia.vigia_jogador \
+			and corrida.ia.vigia_jogador.pode_botao(car):
+		ops.append("Respot")
+	ops += ["RESTART", "QUIT", "Game_options", "Photographer"]
+	pausado = true
+	resultados.abrir_menu("pausa", ops)
+	get_tree().paused = true
+	# o HUD some na pausa (o _process daqui para junto e não esconderia)
+	if hud_jogo:
+		hud_jogo.visible = false
+	hud_basico.atualizar(0.0, car, false)
+	return true
+
+
+func fechar_pausa() -> void:
+	pausado = false
+	get_tree().paused = false
+	if resultados:
+		resultados.esconder()
+
+
+## escolha numa tela com seletor (menu/resultados.gd)
+func menu_acao(pagina: String, acao: String, op: String) -> void:
+	if pagina == "pausa":
+		if acao == "voltar":
+			fechar_pausa()
+			return
+		match op:
+			"Resume":
+				fechar_pausa()
+			"Respot":
+				fechar_pausa()
+				corrida.botao_repor()
+			"RESTART":
+				fechar_pausa()
+				corrida.comecar()          # NOSSO: recomeça com a introdução (Enter pula)
+			"QUIT":
+				fechar_pausa()
+				corrida.parar()            # NOSSO: volta pro treino livre (no jogo, pros menus)
+			_:
+				pass                       # Game options e Photographer: ainda não portados
+	elif pagina == "de_novo" and acao == "ok":
+		resultados.esconder()
+		if op == "RESTART":
+			corrida.comecar()
+		else:
+			corrida.parar()                # Exit (NOSSO: treino livre)

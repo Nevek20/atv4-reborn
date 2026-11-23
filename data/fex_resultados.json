@@ -4616,6 +4616,8956 @@
     }
    ],
    "tipo": "quadro"
+  },
+  "LAYER_PAUSE_MENU": {
+   "nome": "LAYER_PAUSE_MENU",
+   "mVisible": 1,
+   "mAlpha": 1.0,
+   "rect": [
+    -1.0,
+    -1.0,
+    2.0,
+    2.0
+   ],
+   "filhos": [
+    {
+     "nome": "REF_LAYER_PAUSE_BACKGROUND",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\NewPause.fex",
+      "LAYER_PAUSE_BACKGROUND"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "REF_LAYER_FAKE_HISTORY",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_FAKE_HISTORY"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "REF_LAYER_SELECTOR",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_SELECTOR"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "ID_BG_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_FAKE_HISTORY_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_SELECTOR_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_FSOBJ_FRAME",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -0.75,
+      1.78125,
+      1.083333
+     ],
+     "filhos": [
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_02",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.036741,
+        0.670029,
+        0.724199,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.32747,
+        0.24723,
+        0.47325,
+        0.14834
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_01",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -0.004053,
+        0.43926,
+        0.779391,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.59437,
+        0.2617,
+        0.65753,
+        0.14574
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -0.037648,
+        0.18744,
+        0.700202,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_01",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.075136,
+        -0.035172,
+        0.628212,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.59437,
+        0.2617,
+        0.65753,
+        0.14574
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.027143,
+        -0.261468,
+        0.738597,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_02",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -0.02805,
+        -0.477239,
+        0.705001,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.32747,
+        0.24723,
+        0.47325,
+        0.14834
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_01",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.010345,
+        -0.724585,
+        0.726598,
+        0.307692
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.59437,
+        0.2617,
+        0.65753,
+        0.14574
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.078298,
+        0.691008,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.056147,
+        0.45783,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.072391,
+        0.218175,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.106356,
+        -0.008526,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.094542,
+        -0.244942,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.054671,
+        -0.471643,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "cross_icon",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+       "rect": [
+        0.075345,
+        -0.70806,
+        0.109961,
+        0.240886
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.14666,
+        0.61912,
+        0.24618,
+        0.42023
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_GREEN_TARGETS_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.075484,
+        0.673171,
+        0.896409,
+        0.269045
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -1.007607,
+          -1.0,
+          0.28509,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_RED_TARGETS_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.049325,
+        0.442401,
+        0.945256,
+        0.269045
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -0.99826,
+          -1.0,
+          0.270358,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_LINKERS_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.072012,
+        0.211632,
+        0.899881,
+        0.265217
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -1.001425,
+          -1.0,
+          0.27995,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_COMBOS_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.101681,
+        -0.019137,
+        0.880683,
+        0.269045
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -1.002863,
+          -1.0,
+          0.290181,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_POINTS_1_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.087719,
+        -0.265216,
+        0.877193,
+        0.292009
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -0.999152,
+          -1.03317,
+          0.316202,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_POINTS_2_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.044089,
+        -0.48833,
+        0.940021,
+        0.276699
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -1.002323,
+          -0.966829,
+          0.279599,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_FSOBJ_POINTS_3_TICK",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        0.070267,
+        -0.70379,
+        0.906862,
+        0.257562
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "filhos": [
+        {
+         "nome": "ID_NEW_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "tick_icon",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\8_bit_generics",
+         "rect": [
+          -1.000918,
+          -0.999999,
+          0.269777,
+          1.999989
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "uv": [
+          0.02455,
+          0.62106,
+          0.12827,
+          0.42183
+         ],
+         "tipo": "sprite"
+        }
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "FS_GREEN_TARGETS",
+       "mStringNameInTable": 1,
+       "rect": [
+        0.216455,
+        0.680825,
+        0.532051,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "FS_RED_TARGETS",
+       "mStringNameInTable": 1,
+       "rect": [
+        0.181367,
+        0.442401,
+        0.593317,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "FS_HUD_LINKERS",
+       "mStringNameInTable": 1,
+       "rect": [
+        0.216455,
+        0.211632,
+        0.571415,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "FS_HUD_COMBOS",
+       "mStringNameInTable": 1,
+       "rect": [
+        0.251542,
+        -0.019137,
+        0.569293,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_FSOBJ_POINTS_1",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "Points_1",
+       "mStringNameInTable": 0,
+       "rect": [
+        0.251542,
+        -0.249906,
+        0.54292,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_FSOBJ_POINTS_2",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "Points_2",
+       "mStringNameInTable": 0,
+       "rect": [
+        0.216455,
+        -0.469193,
+        0.547176,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_FSOBJ_POINTS_3",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "p",
+       "mStringNameInTable": 0,
+       "rect": [
+        0.216455,
+        -0.7191,
+        0.566373,
+        0.230769
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      }
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_DISK_ERROR_MSG_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -0.955546,
+      -0.499667,
+      2.0,
+      1.083
+     ],
+     "filhos": [
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -1.051293,
+        -0.308095,
+        2.051293,
+        0.384516
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 17,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "DISC_ERROR_",
+       "mStringNameInTable": 1,
+       "rect": [
+        -1.0,
+        -0.231,
+        2.0,
+        0.231
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -0.853879,
+        -1.053388,
+        1.625689,
+        0.63589
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 17,
+       "mJustify": 17,
+       "mSpacingMode": 1,
+       "mScale": 1.0,
+       "mAspect": 1.0,
+       "mpStringName": "DISC_ERROR_MESSAGE",
+       "mStringNameInTable": 1,
+       "rect": [
+        -0.836782,
+        -1.084939,
+        1.673156,
+        0.776939
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      }
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "REF_LAYER_IG_BUTTON_BAR",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 1,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_IG_BUTTON_BAR"
+     ],
+     "tipo": "ref"
+    }
+   ],
+   "tipo": "quadro"
+  },
+  "LAYER_FINISHED_RACE": {
+   "nome": "LAYER_FINISHED_RACE",
+   "mVisible": 1,
+   "mAlpha": 1.0,
+   "rect": [
+    -1.0,
+    -1.0,
+    2.0,
+    2.0
+   ],
+   "filhos": [
+    {
+     "nome": "ID_BG_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_FAKE_HISTORY_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_SELECTOR_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "REF_LAYER_PAUSE_BACKGROUND",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\NewPause.fex",
+      "LAYER_PAUSE_BACKGROUND"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "REF_LAYER_FAKE_HISTORY",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_FAKE_HISTORY"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "REF_LAYER_SELECTOR",
+     "mVisible": 0,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_SELECTOR"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "REF_LAYER_MESSAGE_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 1,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_MESSAGE_FRAME"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "ID_NEXT_TRACK",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      0.125,
+      -0.458333,
+      0.5,
+      0.916667
+     ],
+     "filhos": [
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -3.816773,
+        -1.016977,
+        4.679819,
+        0.393856
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_03",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -3.816773,
+        -1.016977,
+        4.574556,
+        0.393856
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "uv": [
+        0.66666,
+        0.27458,
+        0.73109,
+        0.13662
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TITLE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 17,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": "Next_track",
+       "mStringNameInTable": 1,
+       "rect": [
+        -3.75,
+        -0.953775,
+        1.349888,
+        0.272727
+       ],
+       "mColour1": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColour2": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_TRACK_NAME",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 17,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": "ironstone national park",
+       "mStringNameInTable": 0,
+       "rect": [
+        -2.613589,
+        -0.945711,
+        3.363589,
+        0.272727
+       ],
+       "mColour1": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColour2": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      }
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_NEW_TIREBEHAVIOUR",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -0.468862,
+      -0.678491,
+      1.02749,
+      0.125
+     ],
+     "filhos": [
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -1.193943,
+        -1.657761,
+        2.266829,
+        2.775371
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TIRESTAR_1",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "star_on",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\tire_icons",
+       "rect": [
+        -0.21927,
+        -0.625975,
+        0.157626,
+        1.625974
+       ],
+       "mColour": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "uv": [
+        0.3125,
+        1.0,
+        0.57812,
+        0
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TIRESTAR_2",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "star_on",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\tire_icons",
+       "rect": [
+        0.011499,
+        -0.625975,
+        0.157626,
+        1.625974
+       ],
+       "mColour": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "uv": [
+        0.3125,
+        1.0,
+        0.57812,
+        0
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TIRESTAR_3",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "star_on",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\tire_icons",
+       "rect": [
+        0.218305,
+        -0.625975,
+        0.157626,
+        1.625974
+       ],
+       "mColour": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "uv": [
+        0.3125,
+        1.0,
+        0.57812,
+        0
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TIRESTAR_4",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "star_on",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\tire_icons",
+       "rect": [
+        0.449074,
+        -0.625975,
+        0.157626,
+        1.625974
+       ],
+       "mColour": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "uv": [
+        0.3125,
+        1.0,
+        0.57812,
+        0
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TIRESTAR_5",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "star_on",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\tire_icons",
+       "rect": [
+        0.679843,
+        -0.625975,
+        0.157626,
+        1.625974
+       ],
+       "mColour": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourTR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBL": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "mColourBR": [
+        0.588235,
+        0.588235,
+        0.588235,
+        1.0
+       ],
+       "uv": [
+        0.3125,
+        1.0,
+        0.57812,
+        0
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_TIRE_RATING_STRING",
+       "mVisible": 1,
+       "mAlpha": 0.8,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 18,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": "Tire_Rating",
+       "mStringNameInTable": 1,
+       "rect": [
+        -1.149,
+        0.787955,
+        0.635842,
+        -1.891737
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      }
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "REF_LAYER_IG_BUTTON_BAR",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 1,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_IG_BUTTON_BAR"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "ID_NEW_WEATHERANDSURFACE",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -0.59375,
+      -0.821678,
+      0.96875,
+      0.932868
+     ],
+     "filhos": [
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -0.595523,
+        -0.449287,
+        1.761985,
+        0.26006
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_NEW_SPRITE",
+       "mVisible": 0,
+       "mAlpha": 0.7,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -0.594564,
+        -0.132447,
+        1.426968,
+        0.267044
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_SURFACE_STRING",
+       "mVisible": 0,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 0,
+       "mFlags": 0,
+       "mJustify": 17,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": 0,
+       "mStringNameInTable": 0,
+       "rect": [
+        -0.626343,
+        -0.736977,
+        0.962963,
+        0.307692
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_SURFACE_A_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": "snow",
+       "mStringNameInTable": 0,
+       "rect": [
+        0.096774,
+        -0.399676,
+        0.277252,
+        0.166448
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_SURFACE_B_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": "TARMAC",
+       "mStringNameInTable": 0,
+       "rect": [
+        0.623323,
+        -0.399676,
+        0.376677,
+        0.167353
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      },
+      {
+       "nome": "ID_NEW_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 16,
+       "mJustify": 16,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": "Surface",
+       "mStringNameInTable": 1,
+       "rect": [
+        -0.553995,
+        -0.491915,
+        0.376298,
+        0.330621
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      }
+     ],
+     "tipo": "quadro"
+    }
+   ],
+   "tipo": "quadro"
+  },
+  "LAYER_SELECTOR": {
+   "nome": "LAYER_SELECTOR",
+   "mVisible": 1,
+   "mAlpha": 1.0,
+   "rect": [
+    -1.0,
+    -1.0,
+    2.0,
+    2.0
+   ],
+   "filhos": [
+    {
+     "nome": "ID_LAYER_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "filhos": [
+      {
+       "nome": "ID_SELECTOR",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "rect": [
+        -0.898,
+        0.417,
+        0.75,
+        0.125
+       ],
+       "filhos": [
+        {
+         "nome": "#5cf06ba2",
+         "tipo": "quadro"
+        },
+        {
+         "nome": "#252c0437",
+         "tipo": "quadro"
+        },
+        {
+         "nome": "ID_SELECT_DS_SPRITE",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "selector_line",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          -1.285232,
+          -1.63265,
+          5.403206,
+          3.040747
+         ],
+         "mColour": [
+          0,
+          0,
+          0,
+          0.560784
+         ],
+         "mColourTL": [
+          0,
+          0,
+          0,
+          0.560784
+         ],
+         "mColourTR": [
+          0,
+          0,
+          0,
+          0.560784
+         ],
+         "mColourBL": [
+          0,
+          0,
+          0,
+          0.560784
+         ],
+         "mColourBR": [
+          0,
+          0,
+          0,
+          0.560784
+         ],
+         "uv": [
+          0,
+          0.41922,
+          1.0,
+          0.28384
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_SELECTOR_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "selector_line",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          -1.290867,
+          -1.362075,
+          5.403206,
+          3.040747
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mColourBL": [
+          0.952941,
+          0.917647,
+          0.803922,
+          1.0
+         ],
+         "mColourBR": [
+          0.917647,
+          0.917647,
+          0.803922,
+          1.0
+         ],
+         "uv": [
+          0,
+          0.41922,
+          1.0,
+          0.28384
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_OPT_TEXT",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 1.4,
+         "mAspect": 1.0,
+         "mpStringName": "Current Option",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -1.0,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#5cf06ba2",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_CURRENT_OPT_TEXT",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 1.4,
+         "mAspect": 1.0,
+         "mpStringName": "Current Option",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -1.0,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0.513726,
+          0.145098,
+          0,
+          1.0
+         ],
+         "mColour2": [
+          0.513726,
+          0.145098,
+          0,
+          1.0
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#5cf06ba2",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_NEXT_OPT_TEXT",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": " - Option 2 - Option 3",
+         "mStringNameInTable": 0,
+         "rect": [
+          1.245481,
+          -1.0,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_HILIGHT_SPRITE",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -1.096,
+          -3.566622,
+          5.324,
+          1.894621
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_0",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -1.022,
+          -3.64,
+          5.446904,
+          1.8
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_0",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_0",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.69,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 0",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -4.08,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.494118
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.505882
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.75,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.275794,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "mEndColour2": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_1",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.846,
+          -3.64,
+          5.324,
+          0.1
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_1",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            0.972549,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_1",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 1",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -5.736,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.494118
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.494118
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267404,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "mEndColour2": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.026988,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_2",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.762667,
+          -3.64,
+          5.324,
+          0.1
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_2",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourTL": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourTR": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourBL": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourBR": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_2",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 2",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -7.416,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.494118
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.505882
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267289,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "mEndColour2": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourTL": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourTR": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourBL": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "mColourBR": [
+            0.952941,
+            0.945098,
+            0.917647,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_3",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.846,
+          -3.64,
+          5.324,
+          0.5
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_3",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_3",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 3",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -9.096,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.494118
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.494118
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267231,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "mEndColour2": [
+            0.513726,
+            0.145098,
+            0,
+            1.0
+           ],
+           "tipo": "texto"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            0.945098,
+            0.784314
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_4",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.596,
+          -3.64,
+          5.324,
+          0.1
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_4",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_4",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 4",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -10.776,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mEndColour2": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "ID_BG_SPRITE_0",
+           "mVisible": 0,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mHotspotX": 0,
+           "mHotspotY": 0,
+           "BoxName": 0,
+           "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\new_selector",
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour": [
+            1.0,
+            1.0,
+            1.0,
+            0.662745
+           ],
+           "mColourTL": [
+            1.0,
+            1.0,
+            1.0,
+            0.662745
+           ],
+           "mColourTR": [
+            1.0,
+            1.0,
+            1.0,
+            0.662745
+           ],
+           "mColourBL": [
+            1.0,
+            1.0,
+            1.0,
+            0.662745
+           ],
+           "mColourBR": [
+            1.0,
+            1.0,
+            1.0,
+            0.662745
+           ],
+           "uv": [
+            0,
+            1.0,
+            1.0,
+            0
+           ],
+           "tipo": "sprite"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267329,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_5",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.679333,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_5",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_5",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 5",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -12.456,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267289,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_6",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.679333,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_6",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_6",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 6",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -14.136001,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267289,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_7",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.762667,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_7",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_7",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 7",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -15.816001,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267318,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_8",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.679333,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          0.4,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          0.4,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          0.4,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          0.4,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          0.4,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_8",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_8",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 8",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -17.496,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.267226,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_9",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -1.096,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_9",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_9",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 9",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -19.176001,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.26726,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            1.0,
+            1.0,
+            1.0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_10",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -1.012666,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_10",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_10",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 10",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -20.856001,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          1.0,
+          1.0,
+          1.0,
+          0.498039
+         ],
+         "mColour2": [
+          1.0,
+          1.0,
+          1.0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.176427,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            1.0,
+            1.0,
+            1.0,
+            0.498039
+           ],
+           "mColour2": [
+            1.0,
+            1.0,
+            1.0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_11",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.938667,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_11",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_11",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.7,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 11",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -22.536001,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          1.0,
+          1.0,
+          1.0,
+          0.498039
+         ],
+         "mColour2": [
+          1.0,
+          1.0,
+          1.0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.176601,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            1.0,
+            1.0,
+            1.0,
+            0.498039
+           ],
+           "mColour2": [
+            1.0,
+            1.0,
+            1.0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_12",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": 0,
+         "TexName": "Init/White",
+         "rect": [
+          -0.679333,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          1.0,
+          1.0,
+          0
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_12",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_12",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 12",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -24.216002,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          1.0,
+          1.0,
+          1.0,
+          0.498039
+         ],
+         "mColour2": [
+          1.0,
+          1.0,
+          1.0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.077888,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_13",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "option_line",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          -1.096,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          0.54868,
+          0.99987,
+          0.52186
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_13",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_13",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 13",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -26.136002,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.077821,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_14",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "option_line",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          -0.762667,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          0.54868,
+          0.99987,
+          0.52186
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_14",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_14",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 14",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -28.056002,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.077933,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_SPRITE_15",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "option_line",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          -0.762667,
+          -3.64,
+          5.324,
+          0.2
+         ],
+         "mColour": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourTR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBL": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "mColourBR": [
+          1.0,
+          1.0,
+          1.0,
+          0
+         ],
+         "uv": [
+          0,
+          0.54868,
+          0.99987,
+          0.52186
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_OLD_SETTING_15",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": 0,
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -3.64,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 16,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -1.0,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_SETTING_15",
+         "mVisible": 1,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 0.8,
+         "mAspect": 1.0,
+         "mpStringName": "Setting 15",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -29.976002,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.498039
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "filhos": [
+          {
+           "nome": "#3d4c1c79",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#1a4edfd4",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#025888e6",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#e3f6bb45",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#252c0437",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#f06a2aba",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "#0e9f24ac",
+           "tipo": "quadro"
+          },
+          {
+           "nome": "VALUE_TEXT",
+           "mVisible": 1,
+           "mAlpha": 1.0,
+           "mRotation": 0,
+           "mFont": 1,
+           "mFlags": 24,
+           "mJustify": 16,
+           "mSpacingMode": 1,
+           "mScale": 0.8,
+           "mAspect": 1.0,
+           "mpStringName": " - Value",
+           "mStringNameInTable": 0,
+           "rect": [
+            -0.077888,
+            -1.0,
+            2.0,
+            2.0
+           ],
+           "mColour1": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mColour2": [
+            0,
+            0,
+            0,
+            0.498039
+           ],
+           "mEndColour1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "mEndColour2": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+           ],
+           "tipo": "texto"
+          }
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_ARROW_L_SPRITE",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "left_arrow",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          1.647,
+          -2.954544,
+          0.106355,
+          0.814544
+         ],
+         "mColour": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourTL": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourTR": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourBL": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourBR": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "uv": [
+          0.66626,
+          0.49932,
+          0.69457,
+          0.44268
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_ARROW_R_SPRITE",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mHotspotX": 0,
+         "mHotspotY": 0,
+         "BoxName": "right_arrow",
+         "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+         "rect": [
+          1.795765,
+          -2.954544,
+          0.106355,
+          0.814544
+         ],
+         "mColour": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourTL": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourTR": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourBL": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "mColourBR": [
+          0,
+          0,
+          0,
+          1.0
+         ],
+         "uv": [
+          0.70304,
+          0.49932,
+          0.73135,
+          0.44268
+         ],
+         "tipo": "sprite"
+        },
+        {
+         "nome": "ID_CUR_OPT_BIG_STRING_1",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 1.0,
+         "mAspect": 1.0,
+         "mpStringName": "Placeholder",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -1.0,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "mColour2": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "tipo": "texto"
+        },
+        {
+         "nome": "ID_CUR_OPT_BIG_STRING_2",
+         "mVisible": 0,
+         "mAlpha": 1.0,
+         "mRotation": 0,
+         "mFont": 1,
+         "mFlags": 16,
+         "mJustify": 16,
+         "mSpacingMode": 1,
+         "mScale": 1.0,
+         "mAspect": 1.0,
+         "mpStringName": "Placeholder",
+         "mStringNameInTable": 0,
+         "rect": [
+          -1.0,
+          -1.0,
+          2.0,
+          2.0
+         ],
+         "mColour1": [
+          0,
+          0,
+          0,
+          0.564706
+         ],
+         "mColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "mEndColour2": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+         ],
+         "tipo": "texto"
+        }
+       ],
+       "tipo": "quadro"
+      }
+     ],
+     "tipo": "quadro"
+    }
+   ],
+   "tipo": "quadro"
   }
  }
 }

@@ -2,8 +2,9 @@ extends SceneTree
 ## Print da tela de resultados (menu/resultados.gd) com os números do save
 ## state placar_final.p2s do Matheus (nome do perfil trocado por PLAYER), por
 ## cima de um fundo cinza. Uso:
-##   godot --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t]
-## t = segundos de tela (os quadriculados andam)
+##   godot --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pagina]
+## t = segundos de tela (os quadriculados andam); pagina = resultados (padrão),
+## pausa (as opções do pause.p2s) ou de_novo (Race again do finish_2.p2s)
 
 const CL := [
 	{"nome": "Você", "jogador": true, "fim": 89.98, "melhor": 42.63, "score": 11266},
@@ -32,6 +33,10 @@ func _initialize() -> void:
 	root.add_child(r)
 	r.mostrar(CL)
 	var a := OS.get_cmdline_user_args()
+	if a.size() > 2 and a[2] == "pausa":
+		r.abrir_menu("pausa", ["Resume", "RESTART", "QUIT", "Game_options", "Photographer"])
+	elif a.size() > 2 and a[2] == "de_novo":
+		r.abrir_menu("de_novo", ["RESTART", "EXIT"])
 	if a.size() > 1:
 		r.t = float(a[1])
 

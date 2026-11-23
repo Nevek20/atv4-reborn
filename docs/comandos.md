@@ -151,10 +151,12 @@ python tools/piloto_pintura.py <unpacked>   :: textura do piloto montada como o 
 python tools/hud_jogo.py <unpacked>       :: HUD do jogo -> assets/hud (texturas, caixas, fontes, kerning, textos das mensagens, seta.obj) e data/hud_circuit.xml
 python tools/fex_jogo.py <unpacked>       :: telas do menu (.fex) -> data/fex_resultados.json (tela de resultados) e assets/ui (texturas, fonte grande, textos)
 python re/resultados_ram.py placar_final.p2s  :: referência da tela de resultados na RAM -> tests/ref_resultados.json
+python re/resultados_ram.py pause.p2s --saida tests/ref_pausa.json   :: a da pausa (--so "a,b": só esses textos; finish_2.p2s -> tests/ref_de_novo.json)
 %GODOT% --headless --path . -s res://tests/teste_parachoque.gd       :: para-choque: 8 do catálogo + Nenhum, no ponto BUMPER da frota toda, Storm/Chimera sem, não mexe na física, lâmpadas no farol; barra de luz do teto do tamanho do carro
 %GODOT% --headless --path . -s res://tests/teste_hud.gd             :: HUD do jogo x RAM: 50 quadros a 640x480, conta-giros em tela larga, ponteiro/barras/velocidade dos save states, kerning
-%GODOT% --headless --path . -s res://tests/teste_resultados.gd      :: tela de resultados x RAM do placar_final.p2s (45 textos, título girado), formato do tempo, quando aparece
-%GODOT% --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png   :: print da tela de resultados com os números do save state
+%GODOT% --headless --path . -s res://tests/teste_resultados.gd      :: resultados, pausa e Race again x RAM (placar_final, pause, finish_2), seletor, formato do tempo, quando aparece
+%GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_pausa.gd   :: pausa na corrida (congela, HUD some, Respot só parado, Esc volta, Quit) e Race again (Restart / Exit)
+%GODOT% --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pausa|de_novo]   :: print da tela de resultados (ou da pausa / Race again)
 %GODOT% --headless --path . -s res://tests/teste_truques.gd         :: Score: estados, 1º quadro da RAM, fórmulas do exe, combo x multiplicador, HUD e o carro pulando/derrapando
 python re/hud_ram.py arquivo.p2s           :: HUD na RAM do save state: matrizes, ponteiro, números, barras x rpm/marcha/velocidade do carro
 python re/hud_ref.py arquivo.p2s           :: refaz tests/ref_hud_4x3.json (matriz de cada quadro do HUD_CIRCUIT na RAM)

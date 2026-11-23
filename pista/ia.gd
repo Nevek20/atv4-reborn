@@ -546,6 +546,9 @@ func posicionar() -> void:
 
 func limpar() -> void:
 	piloto_jogador = null
+	_pedido = 0
+	if main and main.fader:
+		main.fader.zerar()
 	for x in rivais:
 		if is_instance_valid(x.car):
 			x.car.queue_free()
@@ -572,6 +575,8 @@ func soltar() -> void:
 
 
 func _physics_process(dt: float) -> void:
+	if main and main.car != null and vigia_jogador:
+		_passo_pedido()
 	if rivais.is_empty() or main.car == null:
 		return
 	rastrear(jogador, main.car.global_position)
@@ -587,7 +592,7 @@ func _physics_process(dt: float) -> void:
 			y.car.longe_som = longe
 	var est: int = corrida.estado
 	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
-		repor_jogador()
+		pedir_repor_jogador()
 	# o rastreio de todos antes da lista: ela leva os dados do passo de cada
 	# carro (Ultrapassar.dados_carro), feitos 1 vez e lidos por quem olha
 	for x in rivais:
@@ -986,6 +991,40 @@ func _repor(x: Dictionary) -> void:
 	# NOSSO: reposto, o cérebro recomeça (vizinhos e comportamento)
 	x.viz = {}
 	x.comp = 0
+
+
+## pedido de reposição do jogador (0x15bd28 -> update 0x15c0e8): estado 1
+## conta REPOR_ESPERA com a tela indo pro preto (menu/fader.gd), no passo
+## seguinte (2) repõe, no outro (3 -> 4, 0x15bfe0) a tela volta. Com pedido
+## andando, outro não entra (0x15bd28 sai com o estado != 0). As caixas de
+## reposição na hora (cInstantRespotBox) repõem direto, sem tela preta.
+const REPOR_ESPERA := 0.3        # objeto de reposição +0x64 no estado 1
+var _pedido := 0                 # 0 nada, 1 contando, 2 repor, 3 clarear
+var _pedido_t := 0.0
+
+
+func pedir_repor_jogador() -> void:
+	if _pedido != 0:
+		return
+	_pedido = 1
+	_pedido_t = REPOR_ESPERA
+	if main and main.fader:
+		main.fader.escurecer()
+
+
+func _passo_pedido() -> void:
+	match _pedido:
+		1:
+			_pedido_t -= get_physics_process_delta_time()
+			if _pedido_t <= 0.0:
+				_pedido = 2
+		2:
+			repor_jogador()
+			_pedido = 3
+		3:
+			if main and main.fader:
+				main.fader.clarear()
+			_pedido = 0
 
 
 func repor_jogador() -> void:

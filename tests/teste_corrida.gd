@@ -181,9 +181,13 @@ func _physics_process(_dt: float) -> bool:
 				_falha("tela de resultados (os 8 juntos)")
 			if v < 3.0:
 				_falha("depois da chegada a IA não pilotou o carro")
+			# Continue -> Race again (Restart / Exit); Exit volta pro treino livre
 			main._continuar_resultados()
+			if not r.visible or r.pagina != "de_novo" or r.opcoes != ["RESTART", "EXIT"]:
+				_falha("Continue não abriu a Race again (%s %s)" % [r.pagina, r.opcoes])
+			main.menu_acao("de_novo", "ok", "EXIT")
 			if r.visible or c.estado != c.LIVRE:
-				_falha("Continue não voltou pro treino livre")
+				_falha("Exit não voltou pro treino livre")
 			fase = 3
 		3:
 			# atalho: começa de novo e passa pela linha indo e voltando

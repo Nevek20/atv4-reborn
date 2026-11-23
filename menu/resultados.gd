@@ -1,10 +1,17 @@
 extends Control
-## Tela de resultados da corrida (cSRResultsPage do exe, tipo de evento 0;
-## depois dela o jogo mostra cRecordsPage e cRaceFinishedPage, ainda não
-## portadas). Layout = as camadas do jogo (data/fex_resultados.json,
-## tools/fex_jogo.py): LAYER_RESULTS do PostRace.fex, com o título
-## LAYER_FAKE_HISTORY (Common.fex, que traz o fundo LAYER_PAUSE_BACKGROUND do
-## NewPause.fex) no ID_FAKE_HISTORY_FRAME e a barra LAYER_IG_BUTTON_BAR.
+## Telas do menu da corrida, desenhadas pelas camadas do jogo
+## (data/fex_resultados.json, tools/fex_jogo.py), uma por vez (pagina):
+##   - "resultados": tela de resultados (cSRResultsPage, tipo de evento 0):
+##     LAYER_RESULTS do PostRace.fex;
+##   - "pausa": menu de pausa (LAYER_PAUSE_MENU do NewPause.fex; opções do
+##     0x462190, barra Select / Back do 0x457b00);
+##   - "de_novo": Race again (LAYER_FINISHED_RACE do PostRace.fex, 0x4cd270:
+##     Restart / Exit), depois do Continue dos resultados.
+## Em todas: o título LAYER_FAKE_HISTORY (Common.fex, que traz o fundo
+## LAYER_PAUSE_BACKGROUND do NewPause.fex) no ID_FAKE_HISTORY_FRAME, a
+## fileira de opções LAYER_SELECTOR no ID_SELECTOR_FRAME e a barra
+## LAYER_IG_BUTTON_BAR. Records e Race Finished (cRecordsPage,
+## cRaceFinishedPage) ainda não portadas.
 ##
 ## Conta (conferida com a RAM do placar_final.p2s, 50 textos):
 ##   - quadro: rect (X, Y, W, H) em NDC (y pra cima, Y = embaixo); o filho
@@ -20,6 +27,12 @@ extends Control
 ##     cor em cada canto x mAlpha; mRotation em GRAUS em volta do mHotspot
 ##     (-1..1 no sprite, -1 -1 = canto de baixo à esquerda).
 ##   - cDOMovingSprite: anda mVelocityX por segundo até mEndXPos e volta.
+##   - mJustify: 0x10 centra na altura, 0x01 na largura (17 = os dois; o
+##     seletor usa 16: encostado à esquerda e centrado na altura).
+##   - seletor (cDOMenuSelector, RAM do pause.p2s e finish_2.p2s): a opção
+##     atual no ID_CURRENT_OPT_TEXT (escala 1.4, encostada no ID_SELECTOR) e
+##     as outras numa linha só no ID_NEXT_OPT_TEXT (0.8), separadas por 3
+##     espaços, começando 16 px (640 x 480) depois do avanço da atual.
 ## Preenchido pelo código do jogo (RAM): uma linha por corredor (posição,
 ## nome, tempo total e melhor volta "mm:ss.cc", Stunt Score), a do jogador
 ## com o Player_N_Highlight; o título "Race Results"; a barra com o botão
@@ -34,10 +47,32 @@ const FONTES := ["FONT_SMALL", "FONT_MEDIUM", "FONT_LARGE"]       # Ingame.fpj F
 const LINHA := {"FONT_SMALL": 22.0, "FONT_MEDIUM": 30.0, "FONT_LARGE": 35.0}
 const NOME_JOGADOR := "PLAYER"    # o nome do perfil (NOSSO: ainda sem perfil)
 # barra de baixo (RAM do placar_final.p2s): o botão START no
-# ID_BUTTON_BAR_FRAME e o texto do lado (canto de cima à esquerda, escala 0.8)
-const START_RECT := [0.59446, -2.8, 0.16552, 5.6]
+# ID_BUTTON_BAR_FRAME ([0.59446, -2.8, 0.16552, 5.6] nele) e o texto do lado
+# (canto de cima à esquerda, escala 0.8)
 const CONTINUE_POS := Vector2(0.6887, -0.7417)
 const CONTINUE_ESC := 0.8
+# botão da barra: o ícone (new_buttons_4bit_en_GB) acaba onde o texto começa,
+# do tamanho do START_RECT (0.15 x 0.2333 NDC, embaixo em -0.9083)
+const BOTAO_W := 0.15
+const BOTAO_Y := -0.908333
+const BOTAO_H := 0.233333
+# por página: [caixa do ícone, texto, x do texto (RAM)]
+const BARRA := {
+	"resultados": [["start_button", "CONTINUE", 0.6887]],
+	"pausa": [["cross_button", "SELECT", 0.3787], ["triangle_button", "BACK", 0.7762]],
+	"de_novo": [["cross_button", "CONTINUE", 0.6887]],
+}
+const CAMADA := {"resultados": "LAYER_RESULTS", "pausa": "LAYER_PAUSE_MENU", "de_novo": "LAYER_FINISHED_RACE"}
+const TITULO := {"resultados": "RACE_RESULTS", "pausa": "PAUSE_MENU", "de_novo": "Race_again"}
+# quadros que o código do jogo esconde nessas telas (erro de disco; na Race
+# again do Rallycross: próxima pista, pneus e piso)
+const ESCONDIDOS := ["ID_DISK_ERROR_MSG_FRAME", "ID_NEXT_TRACK", "ID_NEW_TIREBEHAVIOUR", "ID_NEW_WEATHERANDSURFACE"]
+const GAP_OPCAO := 16.0           # px entre a opção atual e as próximas (RAM)
+const SEP_OPCOES := "   "
+# textos da tabela do jogo (text/15205_en.txt), caso o ui.json seja de antes
+const TEXTOS_EN := {"PAUSE_MENU": "PAUSE MENU", "Resume": "Resume", "Respot": "Respot", "RESTART": "Restart",
+	"QUIT": "Quit", "Game_options": "Game options", "Photographer": "Photographer", "Race_again": "Race again",
+	"EXIT": "Exit", "SELECT": "Select", "BACK": "Back", "CONTINUE": "Continue", "RACE_RESULTS": "Race Results"}
 
 var lay := {}
 var info := {}                    # ui.json: texturas, caixas, textos
@@ -47,6 +82,10 @@ var _kern := {}
 var lingua := "en"
 var linhas: Array = []            # [{pos, nome, total, melhor, score, jogador}]
 var t := 0.0                      # tempo na tela (sprites que andam)
+var pagina := "resultados"
+var opcoes: Array = []            # chaves de texto das opções do seletor
+var opcao := 0
+var dono = null                   # main.gd: menu_acao(pagina, acao, opção)
 var _a := Rect2()                 # área 4:3 na tela
 var _cheia := Rect2()             # a tela toda
 var _medindo = null               # medir(): junta os textos em vez de desenhar
@@ -107,17 +146,83 @@ func _preparar_fontes() -> void:
 
 
 func _txt(k: String) -> String:
-	return String(info.get("textos", {}).get(lingua, {}).get(k, k))
+	return String(info.get("textos", {}).get(lingua, {}).get(k, TEXTOS_EN.get(k, k)))
 
 
 # ------------------------------------------------------------------ dados
 ## monta as linhas a partir da classificação (pista/ia.gd classificacao()):
 ## [{nome, fim, jogador, score, melhor}]
 func mostrar(cl: Array) -> void:
+	pagina = "resultados"
+	opcoes = []
 	linhas_de(cl)
 	t = 0.0
 	visible = true
 	queue_redraw()
+
+
+## tela com seletor (pausa, de_novo): opções = chaves de texto
+func abrir_menu(pag: String, ops: Array) -> void:
+	pagina = pag
+	opcoes = ops.duplicate()
+	opcao = 0
+	t = 0.0
+	visible = true
+	queue_redraw()
+
+
+func mover(d: int) -> void:
+	if not opcoes.is_empty():
+		opcao = posmod(opcao + d, opcoes.size())
+		queue_redraw()
+
+
+func escolhida() -> String:
+	return String(opcoes[opcao]) if opcao < opcoes.size() else ""
+
+
+## setas / X (ok) / triângulo ou Esc (voltar); Start na pausa volta pro jogo
+func _unhandled_input(ev: InputEvent) -> void:
+	if not visible or opcoes.is_empty():
+		return
+	var acao := ""
+	if ev is InputEventKey and ev.pressed and not ev.echo:
+		match ev.physical_keycode:
+			KEY_LEFT:
+				acao = "esq"
+			KEY_RIGHT:
+				acao = "dir"
+			KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
+				acao = "ok"
+			KEY_ESCAPE, KEY_BACKSPACE:
+				acao = "voltar"
+	elif ev is InputEventJoypadButton and ev.pressed:
+		match ev.button_index:
+			JOY_BUTTON_DPAD_LEFT:
+				acao = "esq"
+			JOY_BUTTON_DPAD_RIGHT:
+				acao = "dir"
+			JOY_BUTTON_A:
+				acao = "ok"
+			JOY_BUTTON_Y, JOY_BUTTON_START:
+				acao = "voltar"
+	elif ev is InputEventJoypadMotion and ev.axis == JOY_AXIS_LEFT_X:
+		var lado := 0 if absf(ev.axis_value) < 0.5 else int(signf(ev.axis_value))
+		if lado != _eixo and lado != 0:
+			acao = "esq" if lado < 0 else "dir"
+		_eixo = lado
+	if acao == "":
+		return
+	get_viewport().set_input_as_handled()
+	if acao == "esq":
+		mover(-1)
+	elif acao == "dir":
+		mover(1)
+	elif dono:
+		dono.menu_acao(pagina, acao, escolhida())
+
+
+var _eixo := 0
 
 
 ## troca as linhas sem recomeçar a tela (os quadriculados seguem andando)
@@ -158,9 +263,7 @@ func _draw() -> void:
 	var w := size.y * 4.0 / 3.0
 	_a = Rect2((size.x - w) * 0.5, 0.0, w, size.y)
 	_cheia = Rect2(Vector2.ZERO, size)
-	var raiz := Rect2(-1, -1, 2, 2)
-	var res: Dictionary = lay.camadas.get("LAYER_RESULTS", {})
-	_desenha(res, raiz)
+	_desenha(lay.camadas.get(CAMADA.get(pagina, "LAYER_RESULTS"), {}), Rect2(-1, -1, 2, 2))
 
 
 ## os textos como ficariam numa tela 640 x 480 (testes, contra a RAM):
@@ -169,7 +272,7 @@ func medir() -> Array:
 	_medindo = []
 	_a = Rect2(0, 0, 640, 480)
 	_cheia = _a
-	_desenha(lay.camadas.get("LAYER_RESULTS", {}), Rect2(-1, -1, 2, 2))
+	_desenha(lay.camadas.get(CAMADA.get(pagina, "LAYER_RESULTS"), {}), Rect2(-1, -1, 2, 2))
 	var m: Array = _medindo
 	_medindo = null
 	return m
@@ -203,6 +306,8 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0) -> void:
 		vis = true
 	elif nome.begins_with("ID_PLAYER_"):
 		vis = int(nome.trim_prefix("ID_PLAYER_")) <= linhas.size()
+	elif nome in ESCONDIDOS:
+		vis = false
 	if not vis:
 		return
 	var r := filho(pai, no.get("rect", [-1, -1, 2, 2]))
@@ -220,8 +325,59 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0) -> void:
 		_desenha(f, r, a)
 	if nome == "ID_FAKE_HISTORY_FRAME" and lay.camadas.has("LAYER_FAKE_HISTORY"):
 		_desenha(lay.camadas.LAYER_FAKE_HISTORY, r, a)
+	elif nome == "ID_SELECTOR_FRAME" and not opcoes.is_empty():
+		_seletor(r, a)
 	elif nome == "ID_BUTTON_BAR_FRAME":
 		_barra(r, a)
+
+
+static func _no(pai: Dictionary, nome: String) -> Dictionary:
+	for f in pai.get("filhos", []):
+		if String(f.get("nome", "")) == nome:
+			return f
+	return {}
+
+
+## LAYER_SELECTOR: a faixa (ID_SELECTOR_SPRITE), a opção atual e as outras
+func _seletor(r: Rect2, a: float) -> void:
+	var lf := _no(lay.camadas.get("LAYER_SELECTOR", {}), "ID_LAYER_FRAME")
+	var sel := _no(lf, "ID_SELECTOR")
+	if sel.is_empty():
+		return
+	var rs := filho(filho(r, lf.get("rect", [-1, -1, 2, 2])), sel.get("rect", [-1, -1, 2, 2]))
+	a *= float(lf.get("mAlpha", 1.0)) * float(sel.get("mAlpha", 1.0))
+	var faixa := _no(sel, "ID_SELECTOR_SPRITE")
+	if not faixa.is_empty():
+		_sprite(faixa, filho(rs, faixa.rect), a * float(faixa.get("mAlpha", 1.0)))
+	var cur := _no(sel, "ID_CURRENT_OPT_TEXT")
+	var prox := _no(sel, "ID_NEXT_OPT_TEXT")
+	if cur.is_empty():
+		return
+	var s := _opcao_txt(cur, escolhida())
+	var fonte: String = FONTES[clampi(int(cur.get("mFont", 1)), 0, 2)]
+	var esc := float(cur.get("mScale", 1.0))
+	var c1: Array = cur.get("mColour1", [1, 1, 1, 1])
+	var c2: Array = cur.get("mColour2", c1)
+	var topo := texto(s, fonte, filho(rs, cur.rect), esc, int(cur.get("mJustify", 16)),
+		Color(c1[0], c1[1], c1[2], c1[3] * a), Color(c2[0], c2[1], c2[2], c2[3] * a))
+	if prox.is_empty() or opcoes.size() < 2:
+		return
+	# as outras na ordem, dando a volta (NOSSO: a RAM só mostra a 1ª atual)
+	var resto := []
+	for k in range(1, opcoes.size()):
+		resto.append(_opcao_txt(prox, String(opcoes[(opcao + k) % opcoes.size()])))
+	var adv: float = glifos(s, fonte, esc)[1].x
+	var rp := filho(rs, prox.rect)
+	rp.position.x = topo.x + (adv + GAP_OPCAO) / 320.0
+	var d1: Array = prox.get("mColour1", [0, 0, 0, 1])
+	var d2: Array = prox.get("mColour2", d1)
+	texto(SEP_OPCOES.join(resto), FONTES[clampi(int(prox.get("mFont", 1)), 0, 2)], rp, float(prox.get("mScale", 1.0)),
+		int(prox.get("mJustify", 16)), Color(d1[0], d1[1], d1[2], d1[3] * a), Color(d2[0], d2[1], d2[2], d2[3] * a))
+
+
+func _opcao_txt(no: Dictionary, k: String) -> String:
+	var s := _txt(k)
+	return s.to_upper() if int(no.get("mFlags", 0)) & 16 else s
 
 
 func _linha(nome: String):
@@ -299,7 +455,7 @@ func _texto_no(no: Dictionary, r: Rect2, a: float) -> void:
 		elif nome.ends_with("_Stunt_Score"):
 			s = str(ln.score)
 	elif nome.begins_with("ID_FAKEHIST_TITLE_STRING"):
-		s = _txt("RACE_RESULTS")
+		s = _txt(TITULO.get(pagina, "RACE_RESULTS"))
 	if int(no.get("mFlags", 0)) & 16:
 		s = s.to_upper()
 	var fonte: String = FONTES[clampi(int(no.get("mFont", 1)), 0, 2)]
@@ -352,8 +508,9 @@ static func _kern_de(kern: Dictionary, c: int, prox: int) -> float:
 	return base + float(kern.tabela[linha][prox - 0x40]) * float(kern.passo)
 
 
-## texto no rect (NDC): justify 17 centra nos dois eixos; senão no canto de
-## cima à esquerda. Devolve o canto de cima à esquerda (NDC)
+## texto no rect (NDC): justify 0x10 centra na altura, 0x01 na largura
+## (17 = os dois); sem eles, no canto de cima à esquerda. Devolve o canto de
+## cima à esquerda (NDC)
 func texto(s: String, fonte: String, r: Rect2, esc: float, just: int, c1: Color, c2: Color,
 		rot := 0.0, aspecto := 1.0) -> Vector2:
 	var gl: Array = glifos(s, fonte, esc, aspecto, s == tempo(-1.0))
@@ -362,9 +519,9 @@ func texto(s: String, fonte: String, r: Rect2, esc: float, just: int, c1: Color,
 	var w_ndc := tam.x / 320.0
 	var h_ndc := tam.y / 240.0
 	var topo := Vector2(r.position.x, r.end.y)
-	if just & 1:
-		topo.y = r.get_center().y + h_ndc * 0.5
 	if just & 16:
+		topo.y = r.get_center().y + h_ndc * 0.5
+	if just & 1:
 		topo.x = r.get_center().x - w_ndc * 0.5
 	_letras(gl[0], fonte, topo, c1, c2, rot, s)
 	return topo
@@ -401,15 +558,19 @@ func _letras(ls: Array, fonte: String, topo: Vector2, c1: Color, c2: Color, rot 
 
 # ------------------------------------------------------------------ barra
 ## barra de baixo (o código do jogo põe os botões no ID_BUTTON_BAR_FRAME):
-## START + "Continue" (RAM)
-func _barra(r: Rect2, a: float) -> void:
+## ícone + texto por página (RAM: START + Continue nos resultados, X Select +
+## triângulo Back na pausa, X Continue na Race again)
+func _barra(_r: Rect2, a: float) -> void:
 	var tn := "new_buttons_4bit_en_GB"
 	var tx: Texture2D = tex.get(tn)
-	if tx and _medindo == null:
-		var b: Array = info.texturas[tn].caixas.get("start_button", [0, 0, 1, 1])
-		var p := _px(filho(r, START_RECT))
-		var ts := tx.get_size()
-		draw_texture_rect_region(tx, p, Rect2(b[0] * ts.x, b[1] * ts.y, (b[2] - b[0]) * ts.x, (b[3] - b[1]) * ts.y),
-			Color(1, 1, 1, a))
-	var gl: Array = glifos(_txt("CONTINUE"), "FONT_MEDIUM", CONTINUE_ESC)
-	_letras(gl[0], "FONT_MEDIUM", CONTINUE_POS, Color(1, 1, 1, a), Color(1, 1, 1, a), 0.0, _txt("CONTINUE"))
+	for item in BARRA.get(pagina, []):
+		var x0: float = item[2]
+		if tx and _medindo == null:
+			var b: Array = info.texturas[tn].caixas.get(item[0], [0, 0, 1, 1])
+			var p := _px(Rect2(x0 - BOTAO_W, BOTAO_Y, BOTAO_W, BOTAO_H))
+			var ts := tx.get_size()
+			draw_texture_rect_region(tx, p, Rect2(b[0] * ts.x, b[1] * ts.y, (b[2] - b[0]) * ts.x, (b[3] - b[1]) * ts.y),
+				Color(1, 1, 1, a))
+		var s := _txt(item[1])
+		var gl: Array = glifos(s, "FONT_MEDIUM", CONTINUE_ESC)
+		_letras(gl[0], "FONT_MEDIUM", Vector2(x0, CONTINUE_POS.y), Color(1, 1, 1, a), Color(1, 1, 1, a), 0.0, s)

@@ -66,7 +66,8 @@ camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.g
                      camera_piloto.gd e camera_orbita.gd (melhorias nossas)
 menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa),
                      hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud),
-                     resultados.gd (tela de resultados da corrida, PostRace.fex)
+                     resultados.gd (telas da corrida pelo .fex: resultados, pausa, Race again),
+                     fader.gd (tela preta da reposição)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida), truques.gd (Score: Slide e AirTime)
@@ -291,8 +292,11 @@ Pista RX01
 - Reposição automática (pista/reposicao.gd, todos os carros): fora da pista
   = além da BORDA do AIT (largura esq/dir a partir do ponto da linha), não
   distância do centro. Fora > 4 m: 3.2 s; contramão: 5.2 s; um passo dentro
-  zera. Manual = "Reposicionar" do menu de pausa, só abaixo de 40 mph (R
-  é NOSSO até ter menu).
+  zera. Manual = "Respot" do menu de pausa (logo depois do Resume, só
+  correndo e abaixo de 40 mph, 0x4613a0); o R continua (NOSSO, o Matheus
+  gosta). Repor o jogador: pedido (0x15bd28) com 0.3 s até repor e a tela
+  preta do fader da câmera (menu/fader.gd, 0.2 s pra ir e 0.2 s pra voltar,
+  RAM); as cInstantRespotBox repõem na hora, sem tela preta.
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -381,9 +385,18 @@ Tela de resultados (menu/resultados.gd)
   chegada (0x4c18e0), tabela vazia, refeita a cada 2 s (1ª aos 3 s); no jogo só com
   quem já chegou; a IA pilota o seu carro. NOSSO (o Matheus quis): os 8
   juntos e já na entrada da tela, quem não chegou com "--:--.--" (sem
-  projeção de tempo); Continue volta pro livre. Score dos rivais segue
+  projeção de tempo). Score dos rivais segue
   contando até a chegada de cada um (no jogo para na sua; NOSSO, o Matheus
-  quis).
+  quis). Continue -> Race again (LAYER_FINISHED_RACE: Restart / Exit; Exit
+  = treino livre, NOSSO; Records e Race Finished ainda não).
+- Pausa (Esc / Start na corrida, main.abrir_pausa; get_tree().paused e a
+  tela com PROCESS_MODE_ALWAYS): LAYER_PAUSE_MENU, opções do 0x462190
+  (Resume, Respot, Restart, Quit, Game options, Photographer; as 2 últimas
+  ainda não fazem nada). Seletor (LAYER_SELECTOR) = RAM do pause.p2s e
+  finish_2.p2s: atual em 1.4 encostada à esquerda, as outras em 0.8 a 16 px
+  do avanço dela, com 3 espaços; mJustify 0x10 = centra na altura, 0x01 na
+  largura. teste_resultados confere as 3 telas com a RAM, teste_pausa o
+  fluxo. Fora da corrida o Esc fecha o jogo.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo
@@ -418,6 +431,8 @@ Frota
 ## Pendente / ideias
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: LOD das árvores. Reposição: efeito na tela, checkpoint perdido.
+- RX01: LOD das árvores. Reposição: checkpoint perdido, carro piscando
+  (fantasma) depois de repor.
+- Pausa: Game options, Photographer, confirmação; Records e Race Finished.
 - IA: LOD com os modelos 2K/1K/500 do jogo.
 - Piloto: LOD, nome no menu.

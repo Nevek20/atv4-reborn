@@ -2680,6 +2680,54 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   podia sair 2 vezes, um com peças no máximo). main.gd "so_jogador": true,
   ia.criar filtra; teste_ia confere.
 
+## Menu de pausa, Race again e tela preta da reposição (nov/2026)
+
+- Pedido do Matheus, com o pause.p2s (pausa a 106 km/h) e o finish_2.p2s
+  (a tela depois do Continue dos resultados): "o R é bem interessante,
+  ficar pausando só pra respawnar é chato, mas colocar no menu também não é
+  má ideia". O R ficou (NOSSO) e o Respot entrou na pausa.
+- Pausa (Esc / Start na corrida, contando ou correndo): o jogo congela
+  (get_tree().paused; a tela com PROCESS_MODE_ALWAYS) e o HUD some, como na
+  print. Opções do exe (0x462190, docs/engenharia_reversa.md, Menu de
+  pausa): Resume, Respot (só correndo e abaixo de 40 mph: no save, a 29.4
+  m/s, ele não aparece), Restart, Quit, Game options, Photographer. Barra:
+  X Select, triângulo Back (0x457b00). Esc, Backspace, triângulo ou Start =
+  Back = Resume. NOSSO por enquanto: Restart recomeça com a introdução
+  (Enter pula), Quit e o Exit da Race again voltam pro treino livre (no
+  jogo, pros menus), Game options e Photographer não fazem nada, sem a
+  confirmação (o NewPause.fex tem a LAYER_CONFIRM "ARE YOU SURE?" Yes / No,
+  falta ver se o Restart / Quit usam) e sem a animação do seletor andando
+  (a opção troca na hora). Fora da corrida o Esc fecha o jogo, como antes.
+- Race again (LAYER_FINISHED_RACE, 0x4cd270): o Continue dos resultados
+  abre ela com Restart / Exit e X Continue (no jogo Records e Race
+  Finished vêm antes: ainda não portadas).
+- Layout = as camadas do .fex (tools/fex_jogo.py agora exporta
+  LAYER_PAUSE_MENU, LAYER_FINISHED_RACE e LAYER_SELECTOR) desenhadas pelo
+  menu/resultados.gd (pagina "pausa" / "de_novo"). Achados no caminho:
+  mJustify 0x10 é centrar na ALTURA e 0x01 na largura (só tinha 17 antes,
+  os dois juntos); o seletor põe as outras opções numa linha só, 16 px
+  depois da atual, com 3 espaços. Conferido com a RAM dos 2 saves
+  (re/resultados_ram.py --saida, tests/ref_pausa.json e ref_de_novo.json;
+  teste_resultados): pior 0.16 px na pausa, 0.21 na Race again, título
+  girado 0.07..0.09 px. O fim da linha longa ("Restart   Quit   Game
+  options   Photographer") escorrega 1.1 px (a RAM anda 0.9975 do nosso
+  em x; nos textos curtos não aparece).
+- NOSSO: as outras opções dão a volta (Quit escolhido mostra "Game options
+  Photographer Resume Restart"); a RAM só tem a 1ª opção escolhida.
+- Tela preta da reposição (o Matheus: "a tela fica preta gradativamente e
+  volta quando o carro está na pista"): o pedido do jogo (0x15bd28 ->
+  update 0x15c0e8) conta 0.3 s, repõe no passo seguinte e, no outro, a
+  tela volta. A tela é o fader da câmera (update 0x2b3700): 0.2 s pra
+  escurecer e 0.2 s pra voltar (RAM, 3 saves). menu/fader.gd embaixo do
+  HUD; vale pro botão (R e Respot) e pra reposição automática do jogador;
+  as cInstantRespotBox seguem na hora, sem tela preta (o 0x15bd28 com "na
+  hora"). teste_reposicao_auto: repõe aos 0.30 s com a tela toda preta,
+  aos 0.8 s ela já voltou.
+- Achado e NÃO portado: depois de repor o carro pisca ((1 - cos(178 t)) / 2
+  por 0.3 s) e repete enquanto encosta em outro carro, com o veículo+0xb28
+  zerado nesse tempo (deve ser a batida com os outros desligada: fantasma).
+  Os rivais também esperam 0.3 s antes de repor; aqui repõem na hora.
+
 ## HUD básico (nov/2026, NOSSO)
 
 - Agora só quando falta o assets/hud (o HUD do jogo toma o lugar).
@@ -2707,10 +2755,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
-- Reposição: falta o efeito na tela/câmera na hora de repor, o pedido
-  tipo 3 (checkpoint perdido), as 2 flags do corredor+0x120 e a opção
-  "Reposicionar" no menu de pausa (quando tiver menu; seção Reposição
-  automática).
+- Reposição: falta o pedido tipo 3 (checkpoint perdido), as 2 flags do
+  corredor+0x120, o carro piscando / fantasma depois de repor e os 0.3 s
+  dos rivais (seção Menu de pausa, tela preta feita).
+- Pausa: Game options, Photographer, a confirmação (LAYER_CONFIRM) e a
+  animação do seletor; Records e Race Finished depois dos resultados.
 - RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).
   As 2 luzes direcionais (cLightDirectional) NÃO existem no jogo (nov/2026):
   são só do editor, como as cercas; o exe não tem o nome da classe (toda

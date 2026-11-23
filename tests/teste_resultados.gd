@@ -8,7 +8,10 @@ extends SceneTree
 ##     esquerda;
 ##  3. tempo "mm:ss.cc";
 ##  4. quando aparece (pista/corrida.gd, estado 0x4c18e0): na sua chegada, com
-##     todos (NOSSO: quem não chegou com o tempo em traços).
+##     todos (NOSSO: quem não chegou com o tempo em traços);
+##  5. a pausa (pause.p2s, tests/ref_pausa.json) e a Race again (finish_2.p2s,
+##     tests/ref_de_novo.json): título, opção atual, as outras, a barra; e o
+##     seletor dando a volta.
 ## Uso: godot --headless --path . -s res://tests/teste_resultados.gd
 
 const CL := [
@@ -43,7 +46,18 @@ func _initialize() -> void:
 		print("teste_resultados: ok (sem assets/ui: rode tools/fex_jogo.py; pulado)")
 		quit()
 		return
-	_layout(r)
+	r.mostrar(CL)
+	print("  resultados (placar_final.p2s):")
+	_layout(r, "res://tests/ref_resultados.json", "Race Results")
+	# pausa (pause.p2s: a 106 km/h, sem o Respot) e Race again (finish_2.p2s)
+	r.abrir_menu("pausa", ["Resume", "RESTART", "QUIT", "Game_options", "Photographer"])
+	print("  pausa (pause.p2s):")
+	_layout(r, "res://tests/ref_pausa.json", "PAUSE MENU")
+	r.abrir_menu("de_novo", ["RESTART", "EXIT"])
+	print("  race again (finish_2.p2s):")
+	_layout(r, "res://tests/ref_de_novo.json", "Race again")
+	_seletor(r)
+	r.mostrar(CL)
 	_tempo(r)
 	r.free()
 	_fluxo()
@@ -51,16 +65,15 @@ func _initialize() -> void:
 	quit(1 if falhas else 0)
 
 
-func _layout(r) -> void:
-	r.mostrar(CL)
+func _layout(r, arq: String, titulo: String) -> void:
 	var nossos: Array = r.medir()
-	var ref: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/ref_resultados.json"))
+	var ref: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(arq))
 	var pior := 0.0
 	var conferidos := 0
 	var usados := {}
 	for e in ref.textos:
 		var s := String(e.txt)
-		if s == "Race Results":
+		if s == titulo:
 			continue
 		var achado = null
 		for k in nossos.size():
@@ -75,7 +88,11 @@ func _layout(r) -> void:
 			_falha("sem o texto '%s' (y %.1f)" % [s, e.y[0]])
 			continue
 		var ls: Array = achado.letras
-		var erros := [absf(ls[0].position.x - float(e.x[0][0])), absf(ls[-1].end.x - float(e.x[-1][1])),
+		# o fim de texto longo escorrega 0.25% (a RAM anda 0.9975 do nosso em x:
+		# 1.1 px em 435 px; a conta da escala do GS não foi achada)
+		var larg: float = ls[-1].end.x - ls[0].position.x
+		var erros := [absf(ls[0].position.x - float(e.x[0][0])),
+			maxf(absf(ls[-1].end.x - float(e.x[-1][1])) - 0.0026 * larg, 0.0),
 			absf(ls[0].position.y - float(e.y[0])), absf(ls[0].end.y - float(e.y[1]))]
 		var m: float = erros.max()
 		pior = maxf(pior, m)
@@ -87,8 +104,8 @@ func _layout(r) -> void:
 	if pior > 0.5 or conferidos < ref.textos.size() - 2:
 		_falha("posição dos textos")
 	# título: 1ª letra girada (RAM: baixo esq, cima esq, baixo dir, cima dir)
-	var tit: Array = nossos.filter(func(n): return String(n.txt) == "Race Results")
-	var ram: Array = ref.textos.filter(func(e): return String(e.txt) == "Race Results")
+	var tit: Array = nossos.filter(func(n): return String(n.txt) == titulo)
+	var ram: Array = ref.textos.filter(func(e): return String(e.txt) == titulo)
 	if tit.size() != 2 or ram.size() != 2:
 		_falha("título: %d nossos, %d na RAM" % [tit.size(), ram.size()])
 		return
@@ -105,6 +122,19 @@ func _layout(r) -> void:
 	print("  título girado: pior canto %.2f px" % pior_t)
 	if pior_t > 1.0:
 		_falha("título")
+
+
+## seletor: andar dá a volta; as outras opções seguem a atual na ordem
+func _seletor(r) -> void:
+	r.abrir_menu("pausa", ["Resume", "Respot", "RESTART", "QUIT"])
+	r.mover(-1)
+	var a: String = r.escolhida()
+	r.mover(2)
+	var b: String = r.escolhida()
+	var txts: Array = r.medir().map(func(n): return String(n.txt))
+	print("  seletor: esquerda do 1º -> %s; depois -> %s; textos %s" % [a, b, txts.slice(2, 4)])
+	if a != "QUIT" or b != "Respot" or not txts.has("RESPOT") or not txts.has("RESTART   QUIT   RESUME"):
+		_falha("seletor (volta / ordem das outras)")
 
 
 func _tempo(r) -> void:

@@ -346,7 +346,7 @@ func botao_repor() -> bool:
 	if estado != CORRENDO or ia == null or ia.vigia_jogador == null:
 		return false
 	if ia.vigia_jogador.pode_botao(main.car):
-		ia.repor_jogador()
+		ia.pedir_repor_jogador()
 	else:
 		t_rapido = TEMPO_RAPIDO
 	return true

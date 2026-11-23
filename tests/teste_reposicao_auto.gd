@@ -165,16 +165,33 @@ func _physics_process(_dt: float) -> bool:
 				_falha("a 25 m/s o botão não mostrou Too Fast")
 			main.car.linear_velocity = Vector3.ZERO
 			c.t_rapido = 0.0
-			var pos0: Vector3 = main.car.global_position
 			_colocar(50, float(ia.dir[50]) + 3.0, false)
+			marcas = {"pos0": main.car.global_position, "antes": antes, "alfa": 0.0}
 			c.botao_repor()
-			var andou: float = (main.car.global_position - pos0).length()
-			print("  botão parado: repôs a %.1f m (Too Fast a 25 m/s: ok)" % andou)
 			if c.t_rapido > 0.0:
 				_falha("parado o botão deu Too Fast")
-			if antes != c.ia.vigia_jogador.repostos:
-				_falha("o botão contou como reposição automática")
-			fase = 9
+			t = 0.0
+			fase = 6
+		6:
+			# 5. tela preta (menu/fader.gd, 0.2 s) e o carro reposto no passo
+			# depois dos 0.3 s (0x15c0e8 estados 1 -> 2), a tela volta depois
+			t += DT
+			main.car.linear_velocity = Vector3.ZERO
+			main.fader.passo(DT)
+			marcas.alfa = maxf(marcas.alfa, main.fader.alfa)
+			var andou: float = (main.car.global_position - marcas.pos0).length()
+			if andou > 0.5 and not marcas.has("repos"):
+				marcas.repos = t
+				marcas.alfa_repos = main.fader.alfa
+			if t >= 0.8:
+				print("  botão parado: repôs aos %.2f s (tela preta %.2f nessa hora, máx %.2f), aos 0.8 s %.2f" % [
+					marcas.get("repos", -1.0), marcas.get("alfa_repos", -1.0), marcas.alfa, main.fader.alfa])
+				_perto(marcas.get("repos", -1.0), 0.32, 0.03, "botão: reposição")
+				if marcas.alfa < 0.99 or main.fader.alfa > 0.0:
+					_falha("tela preta: máx %.2f, aos 0.8 s %.2f" % [marcas.alfa, main.fader.alfa])
+				if marcas.antes != c.ia.vigia_jogador.repostos:
+					_falha("o botão contou como reposição automática")
+				fase = 9
 		9:
 			print("teste_reposicao_auto: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 			return true

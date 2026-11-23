@@ -15,7 +15,12 @@ do AIPlayers.xml (data/ia.json) não vão pro arquivo.
 
 Grava tests/ref_resultados.json. Uso:
     python re/resultados_ram.py placar_final.p2s
+    python re/resultados_ram.py pause.p2s --saida tests/ref_pausa.json
+    python re/resultados_ram.py finish_2.p2s --saida tests/ref_de_novo.json --so "Race again,Restart,Exit,Continue"
+(--so: só esses textos; na tela seguinte a tabela velha continua na RAM).
+O título girado (FE_FontLarge) leva os 4 cantos da 1ª letra.
 """
+import argparse
 import json
 import os
 import struct
@@ -27,10 +32,17 @@ sys.path.insert(0, os.path.join(PROJ, "tools"))
 from ler_savestate import ler_ram  # noqa: E402
 
 VT = 0x588158
+TITULOS = ("Race Results", "PAUSE MENU", "Race again")     # FE_FontLarge girado (LAYER_FAKE_HISTORY)
 
 
 def main():
-    m = ler_ram(sys.argv[1])
+    ap = argparse.ArgumentParser()
+    ap.add_argument("p2s")
+    ap.add_argument("--saida", default=os.path.join(PROJ, "tests", "ref_resultados.json"))
+    ap.add_argument("--so", default="")
+    arg = ap.parse_args()
+    so = set(x for x in arg.so.split(",") if x)
+    m = ler_ram(arg.p2s)
     u = lambda a: struct.unpack_from("<I", m, a)[0]
     f = lambda a: struct.unpack_from("<f", m, a)[0]
     pilotos = {p["nome"] for p in json.load(open(os.path.join(PROJ, "data", "ia.json")))["pilotos"]}
@@ -45,14 +57,14 @@ def main():
             continue
         s = m[sp:m.find(b"\0", sp)].decode("latin-1")
         n = len(s.replace(" ", ""))
-        if not 0 < n < 40:
+        if not 0 < n < 60 or (so and s not in so):
             continue
         gx = lambda a: (u(a) / 16.0 - 1792.0) * 1.25
         gy = lambda a: (u(a) / 16.0 - 1792.0) * 480.0 / 512.0
         e = {"txt": s, "pos": [round(f(o + 0x30), 5), round(f(o + 0x34), 5)],
              "esc": round(f(o + 0x40), 4), "flags": u(o + 0x20),
              "cor": [round(f(o + 0x50 + 4 * k), 4) for k in range(8)]}
-        if s == "Race Results":
+        if s in TITULOS:
             # título girado: 4 vértices por letra (baixo esq, cima esq, baixo dir, cima dir)
             e["letra0"] = [[round(gx(vp + k * 0x30 + 0x20), 2), round(gy(vp + k * 0x30 + 0x24), 2)] for k in range(4)]
         else:
@@ -65,10 +77,18 @@ def main():
         if nome_col and s not in pilotos:
             continue                    # o nome do perfil não vai pro repositório
         out.append(e)
+    vistos = set()
+    unicos = []
+    for e in out:                       # o mesmo texto 2 vezes no mesmo lugar (Continue na Race again)
+        k = (e["txt"], tuple(e["pos"]))
+        if k not in vistos:
+            vistos.add(k)
+            unicos.append(e)
+    out = unicos
     out.sort(key=lambda e: (-e["pos"][1], e["pos"][0]))
-    json.dump({"fonte": os.path.basename(sys.argv[1]) + " (re/resultados_ram.py)", "textos": out},
-              open(os.path.join(PROJ, "tests", "ref_resultados.json"), "w", encoding="utf-8"), indent=1)
-    print("[+] %d textos em tests/ref_resultados.json" % len(out))
+    json.dump({"fonte": os.path.basename(arg.p2s) + " (re/resultados_ram.py)", "textos": out},
+              open(arg.saida, "w", encoding="utf-8"), indent=1)
+    print("[+] %d textos em %s" % (len(out), arg.saida))
     for e in out:
         print("   %-14s pos (%.4f, %.4f) esc %.2f %s" % (e["txt"], e["pos"][0], e["pos"][1], e["esc"],
                                                        e.get("x", [[0, 0]])[0]), flush=True)
