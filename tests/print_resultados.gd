@@ -4,7 +4,8 @@ extends SceneTree
 ## cima de um fundo cinza. Uso:
 ##   godot --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pagina]
 ## t = segundos de tela (os quadriculados andam); pagina = resultados (padrão),
-## pausa (as opções do pause.p2s) ou de_novo (Race again do finish_2.p2s)
+## pausa (as opções do pause.p2s), de_novo (Race again do finish_2.p2s) ou
+## confirma (o "ARE YOU SURE?" do Restart)
 
 const CL := [
 	{"nome": "Você", "jogador": true, "fim": 89.98, "melhor": 42.63, "score": 11266},
@@ -37,6 +38,9 @@ func _initialize() -> void:
 		r.abrir_menu("pausa", ["Resume", "RESTART", "QUIT", "Game_options", "Photographer"])
 	elif a.size() > 2 and a[2] == "de_novo":
 		r.abrir_menu("de_novo", ["RESTART", "EXIT"])
+	elif a.size() > 2 and a[2] == "confirma":
+		r.abrir_menu("pausa", ["Resume", "RESTART", "QUIT", "Game_options", "Photographer"])
+		r.abrir_confirma("RESTART", "RESTART", "SURE_RESTART")
 	if a.size() > 1:
 		r.t = float(a[1])
 

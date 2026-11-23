@@ -13566,6 +13566,677 @@
     }
    ],
    "tipo": "quadro"
+  },
+  "LAYER_CONFIRM": {
+   "nome": "LAYER_CONFIRM",
+   "mVisible": 1,
+   "mAlpha": 1.0,
+   "rect": [
+    -1.0,
+    -1.0,
+    2.0,
+    2.0
+   ],
+   "filhos": [
+    {
+     "nome": "ID_BG_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_FAKE_HISTORY_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "REF_LAYER_PAUSE_BACKGROUND",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\NewPause.fex",
+      "LAYER_PAUSE_BACKGROUND"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "REF_LAYER_FAKE_HISTORY",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_FAKE_HISTORY"
+     ],
+     "tipo": "ref"
+    },
+    {
+     "nome": "ID_TRANSITION_FRAME",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "filhos": [
+      {
+       "nome": "ID_SELECTOR_SPRITE",
+       "mVisible": 0,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "selector_line",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -1.01537,
+        0.385891,
+        2.026963,
+        0.208415
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0,
+        0.41922,
+        1.0,
+        0.28384
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_SELECTOR_SPRITE",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "selector_line",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -1.01537,
+        0.395302,
+        2.026963,
+        0.192255
+       ],
+       "mColour": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTL": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourTR": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColourBL": [
+        0.952941,
+        0.917647,
+        0.803922,
+        1.0
+       ],
+       "mColourBR": [
+        0.917647,
+        0.917647,
+        0.803922,
+        1.0
+       ],
+       "uv": [
+        0,
+        0.41922,
+        1.0,
+        0.28384
+       ],
+       "tipo": "sprite"
+      }
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_NEW_SPRITE",
+     "mVisible": 1,
+     "mAlpha": 0.6,
+     "mRotation": 0,
+     "mHotspotX": 0,
+     "mHotspotY": 0,
+     "BoxName": "PUNK_SQUARE",
+     "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+     "rect": [
+      -0.253865,
+      -0.376087,
+      0.314033,
+      0.14851
+     ],
+     "mColour": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourTL": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourTR": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourBL": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourBR": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "uv": [
+      0.91705,
+      0.72032,
+      1.0,
+      0.55974
+     ],
+     "tipo": "sprite"
+    },
+    {
+     "nome": "ID_NEW_SPRITE",
+     "mVisible": 1,
+     "mAlpha": 0.6,
+     "mRotation": 0,
+     "mHotspotX": 0,
+     "mHotspotY": 0,
+     "BoxName": "punk_box_01",
+     "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+     "rect": [
+      -0.25,
+      -0.366052,
+      0.5,
+      0.179042
+     ],
+     "mColour": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourTL": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourTR": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourBL": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "mColourBR": [
+      0,
+      0,
+      0,
+      1.0
+     ],
+     "uv": [
+      0.59437,
+      0.2617,
+      0.65753,
+      0.14574
+     ],
+     "tipo": "sprite"
+    },
+    {
+     "nome": "ID_YES_NO",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mRotation": 0,
+     "mFont": 1,
+     "mFlags": 16,
+     "mJustify": 17,
+     "mSpacingMode": 1,
+     "mScale": 1.0,
+     "mAspect": 1.0,
+     "mpStringName": "YES",
+     "mStringNameInTable": 1,
+     "rect": [
+      -0.25,
+      -0.333333,
+      0.5,
+      0.125
+     ],
+     "mColour1": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColour2": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mEndColour1": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mEndColour2": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "filhos": [
+      {
+       "nome": "#5cf06ba2",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#f06a2aba",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#0e9f24ac",
+       "tipo": "quadro"
+      }
+     ],
+     "tipo": "texto"
+    },
+    {
+     "nome": "ID_NEW_SPRITE",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mRotation": -90.0,
+     "mHotspotX": 0,
+     "mHotspotY": 0,
+     "BoxName": "down_arrow",
+     "TexName": "UI_PS2\\InGame\\Textures\\pause_bits",
+     "rect": [
+      -0.15625,
+      -0.291667,
+      0.0625,
+      0.083333
+     ],
+     "mColour": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourTL": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourTR": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourBL": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourBR": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "uv": [
+      0.14453,
+      0.60416,
+      0.27734,
+      0.04166
+     ],
+     "tipo": "sprite"
+    },
+    {
+     "nome": "ID_NEW_SPRITE",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mRotation": -90.0,
+     "mHotspotX": 0,
+     "mHotspotY": 0,
+     "BoxName": "up_arrow",
+     "TexName": "UI_PS2\\InGame\\Textures\\pause_bits",
+     "rect": [
+      0.09375,
+      -0.291667,
+      0.0625,
+      0.083333
+     ],
+     "mColour": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourTL": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourTR": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourBL": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "mColourBR": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "uv": [
+      0.00781,
+      0.60416,
+      0.14062,
+      0.04166
+     ],
+     "tipo": "sprite"
+    },
+    {
+     "nome": "ID_PROMPT",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "rect": [
+      -0.690825,
+      -0.175963,
+      1.4375,
+      0.291667
+     ],
+     "filhos": [
+      {
+       "nome": "ID_PROMPT_BACKGROUND",
+       "mVisible": 1,
+       "mAlpha": 0.6,
+       "mRotation": 0,
+       "mHotspotX": 0,
+       "mHotspotY": 0,
+       "BoxName": "punk_box_04",
+       "TexName": "UI_PS2\\Frontend\\Textures\\fex_new\\4_bit_generics",
+       "rect": [
+        -1.130435,
+        -1.093115,
+        2.17854,
+        1.564335
+       ],
+       "mColour": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourTR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBL": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "mColourBR": [
+        0,
+        0,
+        0,
+        1.0
+       ],
+       "uv": [
+        0.21671,
+        0.26556,
+        0.30594,
+        0.14192
+       ],
+       "tipo": "sprite"
+      },
+      {
+       "nome": "ID_PROMPT_STRING",
+       "mVisible": 1,
+       "mAlpha": 1.0,
+       "mRotation": 0,
+       "mFont": 1,
+       "mFlags": 17,
+       "mJustify": 17,
+       "mSpacingMode": 1,
+       "mScale": 0.8,
+       "mAspect": 1.0,
+       "mpStringName": 0,
+       "mStringNameInTable": 0,
+       "rect": [
+        -1.086957,
+        -1.0,
+        2.086957,
+        1.428571
+       ],
+       "mColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mEndColour2": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "tipo": "texto"
+      }
+     ],
+     "tipo": "quadro"
+    },
+    {
+     "nome": "ID_CURRENT_OPT_TEXT",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mRotation": 0,
+     "mFont": 1,
+     "mFlags": 16,
+     "mJustify": 16,
+     "mSpacingMode": 1,
+     "mScale": 1.4,
+     "mAspect": 1.0,
+     "mpStringName": "SURE_QUESTION_MARK",
+     "mStringNameInTable": 1,
+     "rect": [
+      -0.888115,
+      0.381328,
+      2.0,
+      0.204724
+     ],
+     "mColour1": [
+      0.513726,
+      0.145098,
+      0,
+      1.0
+     ],
+     "mColour2": [
+      0.513726,
+      0.145098,
+      0,
+      1.0
+     ],
+     "mEndColour1": [
+      0,
+      0,
+      0,
+      0.564706
+     ],
+     "mEndColour2": [
+      0,
+      0,
+      0,
+      0.564706
+     ],
+     "filhos": [
+      {
+       "nome": "#3d4c1c79",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#1a4edfd4",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#025888e6",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#e3f6bb45",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#5cf06ba2",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#252c0437",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#f06a2aba",
+       "tipo": "quadro"
+      },
+      {
+       "nome": "#0e9f24ac",
+       "tipo": "quadro"
+      }
+     ],
+     "tipo": "texto"
+    },
+    {
+     "nome": "REF_LAYER_IG_BUTTON_BAR",
+     "mVisible": 1,
+     "mAlpha": 1.0,
+     "mIncludeCopy": 1,
+     "rect": [
+      -1.0,
+      -1.0,
+      2.0,
+      2.0
+     ],
+     "ref": [
+      "UI_PS2\\InGame\\Common.fex",
+      "LAYER_IG_BUTTON_BAR"
+     ],
+     "tipo": "ref"
+    }
+   ],
+   "tipo": "quadro"
   }
  }
 }

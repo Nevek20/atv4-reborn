@@ -2723,6 +2723,32 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   as cInstantRespotBox seguem na hora, sem tela preta (o 0x15bd28 com "na
   hora"). teste_reposicao_auto: repõe aos 0.30 s com a tela toda preta,
   aos 0.8 s ela já voltou.
+- 2ª rodada (vídeo do Matheus no PCSX2: "o menu até que tá bonito, mas não
+  tem as animações nem o barulho"):
+  - Seletor (cDOMenuSelector, docs/engenharia_reversa.md): NÃO dá a volta
+    (o vídeo mostra só as opções depois da atual; o 0x2d1280 trava nas
+    pontas) e não anda no meio da troca. A troca dura 0.2537 s (RAM): a
+    nova vai de 0.8 a 1.4 e da cor escura pro vermelho, a antiga ao
+    contrário, a velocidade constante; pra esquerda a nova entra por fora
+    e a antiga vai pro começo da fileira, pra direita a nova sai da
+    fileira e a antiga sai pela esquerda; a fileira anda reta; 2 cópias da
+    nova em 1.5 cruzam a faixa (de -4 a +4 e de +4 a -4 no x do seletor)
+    sumindo (alfa 0.99 e 0.89 até 0). Render nosso quadro a quadro x vídeo:
+    igual. Fora do 4:3 os textos do seletor são cortados (o PS2 não tem
+    tela ali; NOSSO na tela larga).
+  - Sons (banco Menu_IG, tools/sfx_jogo.py; SoundDatabase.xml): trocar =
+    IG_slide (Scroll), bater na ponta = IG_cancel (Back), a página ficar
+    ativa (abrir a pausa, voltar da confirmação) = IG_scrollVert
+    (ScrollVert), mudar YES / NO = IG_scrollHoriz (Scroll). Conferido com
+    o áudio do vídeo (envelope do espectro: 7 trocas = Scroll, 1.00;
+    abrir = ScrollVert, 0.98; escolher e voltar pro jogo = silêncio).
+  - Restart e Quit pedem "ARE YOU SURE?" (0x4add68 casos 1 e 2 -> 0x4b0308;
+    LAYER_CONFIRM: título da opção, pergunta SURE_RESTART / SURE_QUIT,
+    YES / NO começando no NO como no vídeo). NO ou Back voltam pra pausa na
+    mesma opção. Layout pelo .fex, conferido no olho com o quadro do vídeo
+    (falta save state pra RAM).
+  - Falta: Game options (a lista Vibration / Music volume / SFX volume /
+    HUD que aparece embaixo com a opção marcada) e Photographer.
 - Achado e NÃO portado: depois de repor o carro pisca ((1 - cos(178 t)) / 2
   por 0.3 s) e repete enquanto encosta em outro carro, com o veículo+0xb28
   zerado nesse tempo (deve ser a batida com os outros desligada: fantasma).

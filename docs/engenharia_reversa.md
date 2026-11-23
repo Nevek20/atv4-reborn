@@ -1527,6 +1527,28 @@ vazios). Tudo vem do evento:
   começando 16 px (640 x 480) depois do avanço da atual. mJustify 16 =
   centrado só na altura. Os textos longos da RAM andam 0.9975 do nosso em
   x (1.1 px em 435 px): a conta da escala não foi achada.
+- Animação do seletor (vtable 0x599828; textos da classe 0x599518):
+  entrada 0x2d1280 (evento 0xb / 0xc = esquerda / direita; trava nas
+  pontas e com +0xa08 = troca andando; manda o evento 0x12 pro 0x7f4884),
+  0x2d23a8 começa a troca (+0xa08 = 1), 0x2d2f40 a cada quadro até
+  DAT_00847230 = 0.2537 s. Atual (+0x18c) e antiga (+0x6dc, cópia, 0x2d7468)
+  andam com velocidade (+0x224) até o x de chegada (+0x228; 0x2d75a0); cor
+  de +0x230 (mEndColour) pra +0x250 (mColour) e escala de +0x214 (0.8) pra
+  +0x218 (1.4) pela fração do tempo (0x2d77a0 / 0x2d7868; +0x210 = 1 ao
+  contrário). Distância = largura + 0.05 NDC. Fileira (+0x1a4): 0x2d29a0
+  dá de onde a onde, 0x2d30f0 anda reta; +0xa1c = largura de 3 espaços em
+  0.8 (0.0675). Fantasmas +0x6e0 / +0x6e4 (0x2d3190 / 0x2d3808): cópias da
+  atual (cor de descanso, 0x2d7960) em escala DAT_00847240 = 1.5, x de -4
+  a +4 (alfa 0x7f/128) e de +4 a -4 (0x72/128), alfa caindo até 0.
+- Sons da pausa (0x4add68, evento 0x12 do seletor, 0x36b900(1, 1, gerente,
+  nome)): sub 0 trocou = IG_slide, sub 0 ponta (valor -1, sem troca
+  andando) = IG_cancel, sub 1 ajuste = IG_scrollHoriz (ponta IG_cancel),
+  sub 2 = IG_scrollVert (página ativa; evento 0x10). Nomes = entradas do
+  SoundDatabase.xml (banco Menu_IG: Scroll, Back, ScrollVert).
+- Escolha na pausa (0x4add68, evento 8 pelo id da opção): 0 Resume fecha;
+  1 Restart e 2 Quit abrem a confirmação 0x4b0308(tipo, título, pergunta):
+  (4, 0x765 RESTART, 0x85a SURE_RESTART) e (1, 0x705 QUIT, 0x859
+  SURE_QUIT); 0xc Respot = 0x4ae628.
 - Barra: ícone (new_buttons_4bit_en_GB) acabando onde o texto começa, do
   tamanho do START dos resultados; textos em (0.3787 Select, 0.7762 Back,
   0.6887 Continue; y -0.7417).

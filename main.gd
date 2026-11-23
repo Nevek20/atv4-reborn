@@ -915,7 +915,8 @@ func _continuar_resultados() -> bool:
 ## menu de pausa (Esc / Start na corrida): o jogo congela (get_tree().paused)
 ## e a tela (menu/resultados.gd, pagina "pausa") fica por cima. Opções do
 ## 0x462190: Resume, Respot (só correndo e abaixo de 40 mph, 0x4613a0),
-## Restart, Quit, Game options, Photographer. Devolve false fora da corrida.
+## Restart e Quit (com o "ARE YOU SURE?", pagina "confirma"), Game options,
+## Photographer. Devolve false fora da corrida.
 var pausado := false
 
 
@@ -958,14 +959,20 @@ func menu_acao(pagina: String, acao: String, op: String) -> void:
 			"Respot":
 				fechar_pausa()
 				corrida.botao_repor()
-			"RESTART":
-				fechar_pausa()
-				corrida.comecar()          # NOSSO: recomeça com a introdução (Enter pula)
-			"QUIT":
-				fechar_pausa()
-				corrida.parar()            # NOSSO: volta pro treino livre (no jogo, pros menus)
+			"RESTART", "QUIT":
+				# pedem confirmação (0x4add68 casos 1 e 2 -> 0x4b0308)
+				resultados.abrir_confirma(op, op, "SURE_RESTART" if op == "RESTART" else "SURE_QUIT")
 			_:
 				pass                       # Game options e Photographer: ainda não portados
+	elif pagina == "confirma":
+		if acao == "ok" and resultados.confirma.sim:
+			fechar_pausa()
+			if op == "RESTART":
+				corrida.comecar()          # NOSSO: recomeça com a introdução (Enter pula)
+			else:
+				corrida.parar()            # NOSSO: Quit volta pro treino livre (no jogo, pros menus)
+		else:
+			resultados.voltar_pausa()      # NO, ou Back
 	elif pagina == "de_novo" and acao == "ok":
 		resultados.esconder()
 		if op == "RESTART":

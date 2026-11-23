@@ -60,19 +60,41 @@ const BOTAO_H := 0.233333
 const BARRA := {
 	"resultados": [["start_button", "CONTINUE", 0.6887]],
 	"pausa": [["cross_button", "SELECT", 0.3787], ["triangle_button", "BACK", 0.7762]],
+	"confirma": [["cross_button", "SELECT", 0.3787], ["triangle_button", "BACK", 0.7762]],
 	"de_novo": [["cross_button", "CONTINUE", 0.6887]],
 }
-const CAMADA := {"resultados": "LAYER_RESULTS", "pausa": "LAYER_PAUSE_MENU", "de_novo": "LAYER_FINISHED_RACE"}
+const CAMADA := {"resultados": "LAYER_RESULTS", "pausa": "LAYER_PAUSE_MENU", "de_novo": "LAYER_FINISHED_RACE",
+	"confirma": "LAYER_CONFIRM"}
 const TITULO := {"resultados": "RACE_RESULTS", "pausa": "PAUSE_MENU", "de_novo": "Race_again"}
 # quadros que o código do jogo esconde nessas telas (erro de disco; na Race
 # again do Rallycross: próxima pista, pneus e piso)
 const ESCONDIDOS := ["ID_DISK_ERROR_MSG_FRAME", "ID_NEXT_TRACK", "ID_NEW_TIREBEHAVIOUR", "ID_NEW_WEATHERANDSURFACE"]
-const GAP_OPCAO := 16.0           # px entre a opção atual e as próximas (RAM)
+const GAP_OPCAO := 16.0           # px entre a opção atual e as próximas (0.05 NDC, RAM e 0x2d20f0)
 const SEP_OPCOES := "   "
+# troca de opção (cDOMenuSelector: 0x2d23a8 começa, 0x2d2f40 a cada quadro,
+# 0x2d75a0 / 0x2d77a0 / 0x2d7868 o texto andando): dura T_ANIM; a opção
+# nova vai de 0.8 a 1.4 e da cor escura (mEndColour) pro vermelho
+# (mColour), a antiga ao contrário, as duas a velocidade constante; a
+# fileira das próximas anda em linha reta (0x2d29a0 / 0x2d30f0); 2 cópias
+# da nova em escala 1.5 cruzam a faixa sumindo (0x2d3190 / 0x2d3808).
+# Seta pra fora das pontas não anda; durante a troca, nada anda (0x2d1280)
+const T_ANIM := 0.2537369         # DAT_00847230 (RAM)
+# sons (banco Menu_IG, tools/sfx_jogo.py; SoundDatabase.xml): a pausa manda o
+# evento do seletor (0x12) pro 0x4add68 -> 0x36b900: trocou de opção =
+# IG_slide (Scroll); bateu na ponta = IG_cancel (Back, só fora da troca);
+# a página ativa (abriu, ou voltou da confirmação) = IG_scrollVert
+# (ScrollVert). Escolher e voltar pro jogo: sem som (vídeo do Matheus)
+const SomJogo := preload("res://som/som_jogo.gd")
+const SOM_TROCA := "Scroll"
+const SOM_PONTA := "Back"
+const SOM_ATIVA := "ScrollVert"
+const ESC_FANTASMA := 1.5         # DAT_00847240 (RAM)
+const FANTASMAS := [[-4.0, 4.0, 1.0], [4.0, -4.0, 0.9]]   # +0x6e8 / +0x6fc: de, até, alfa (x do seletor)
 # textos da tabela do jogo (text/15205_en.txt), caso o ui.json seja de antes
 const TEXTOS_EN := {"PAUSE_MENU": "PAUSE MENU", "Resume": "Resume", "Respot": "Respot", "RESTART": "Restart",
 	"QUIT": "Quit", "Game_options": "Game options", "Photographer": "Photographer", "Race_again": "Race again",
-	"EXIT": "Exit", "SELECT": "Select", "BACK": "Back", "CONTINUE": "Continue", "RACE_RESULTS": "Race Results"}
+	"EXIT": "Exit", "SELECT": "Select", "BACK": "Back", "CONTINUE": "Continue", "RACE_RESULTS": "Race Results",
+	"YES": "Yes", "NO": "No"}
 
 var lay := {}
 var info := {}                    # ui.json: texturas, caixas, textos
@@ -86,6 +108,14 @@ var pagina := "resultados"
 var opcoes: Array = []            # chaves de texto das opções do seletor
 var opcao := 0
 var dono = null                   # main.gd: menu_acao(pagina, acao, opção)
+var anim := -1.0                  # tempo da troca de opção (-1 parado)
+var _de := 0                      # opção de antes da troca
+var _recorte := false             # textos do seletor cortados no 4:3 (fora é tela que o PS2 não tem)
+var _som = null                   # SomJogo dos sons do menu (toca com o jogo pausado)
+# confirmação da pausa (LAYER_CONFIRM; 0x4add68 -> 0x4b0308): o título e a
+# pergunta da opção, YES / NO (começa no NO, vídeo do Matheus)
+var confirma := {"op": "", "titulo": "", "pergunta": "", "sim": false}
+var ultimo_som := ""              # testes
 var _a := Rect2()                 # área 4:3 na tela
 var _cheia := Rect2()             # a tela toda
 var _medindo = null               # medir(): junta os textos em vez de desenhar
@@ -166,15 +196,57 @@ func abrir_menu(pag: String, ops: Array) -> void:
 	pagina = pag
 	opcoes = ops.duplicate()
 	opcao = 0
+	anim = -1.0
 	t = 0.0
 	visible = true
+	tocar(SOM_ATIVA)
 	queue_redraw()
 
 
-func mover(d: int) -> void:
-	if not opcoes.is_empty():
-		opcao = posmod(opcao + d, opcoes.size())
-		queue_redraw()
+## anda uma opção (0x2d1280): não passa das pontas nem anda no meio da
+## troca; devolve se andou
+func mover(d: int) -> bool:
+	var n := opcao + d
+	if opcoes.is_empty() or anim >= 0.0:
+		return false
+	if n < 0 or n >= opcoes.size():
+		tocar(SOM_PONTA)
+		return false
+	_de = opcao
+	opcao = n
+	anim = 0.0
+	tocar(SOM_TROCA)
+	queue_redraw()
+	return true
+
+
+## "ARE YOU SURE?" de uma opção da pausa (Restart: RESTART / SURE_RESTART,
+## Quit: QUIT / SURE_QUIT, pelos números de texto do 0x4add68)
+func abrir_confirma(op: String, titulo: String, pergunta: String) -> void:
+	confirma = {"op": op, "titulo": titulo, "pergunta": pergunta, "sim": false}
+	pagina = "confirma"
+	anim = -1.0
+	queue_redraw()
+
+
+## NO / Back na confirmação: volta pra pausa na mesma opção (a página ativa
+## de novo: IG_scrollVert, vídeo)
+func voltar_pausa() -> void:
+	pagina = "pausa"
+	anim = -1.0
+	tocar(SOM_ATIVA)
+	queue_redraw()
+
+
+## um som do banco Menu_IG (sem os sons extraídos, nada)
+func tocar(nome: String) -> void:
+	ultimo_som = nome
+	if not SomJogo.existe("Menu_IG", nome):
+		return
+	if _som == null:
+		_som = SomJogo.new()
+		add_child(_som)
+	_som.tocar("Menu_IG", nome)
 
 
 func escolhida() -> String:
@@ -214,6 +286,14 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if acao == "":
 		return
 	get_viewport().set_input_as_handled()
+	if pagina == "confirma":
+		if acao == "esq" or acao == "dir":
+			confirma.sim = not confirma.sim       # o YES / NO (evento 1: IG_scrollHoriz)
+			tocar(SOM_TROCA)
+			queue_redraw()
+		elif dono:
+			dono.menu_acao(pagina, acao, String(confirma.op))
+		return
 	if acao == "esq":
 		mover(-1)
 	elif acao == "dir":
@@ -253,6 +333,10 @@ static func tempo(s: float) -> String:
 func _process(dt: float) -> void:
 	if visible:
 		t += dt
+		if anim >= 0.0:
+			anim += dt
+			if anim >= T_ANIM:
+				anim = -1.0
 		queue_redraw()
 
 
@@ -308,6 +392,8 @@ func _desenha(no: Dictionary, pai: Rect2, alfa := 1.0) -> void:
 		vis = int(nome.trim_prefix("ID_PLAYER_")) <= linhas.size()
 	elif nome in ESCONDIDOS:
 		vis = false
+	elif nome in ["REF_LAYER_PAUSE_BACKGROUND", "REF_LAYER_FAKE_HISTORY"]:
+		vis = false                 # o ID_FAKE_HISTORY_FRAME já traz os dois
 	if not vis:
 		return
 	var r := filho(pai, no.get("rect", [-1, -1, 2, 2]))
@@ -353,26 +439,84 @@ func _seletor(r: Rect2, a: float) -> void:
 	var prox := _no(sel, "ID_NEXT_OPT_TEXT")
 	if cur.is_empty():
 		return
-	var s := _opcao_txt(cur, escolhida())
 	var fonte: String = FONTES[clampi(int(cur.get("mFont", 1)), 0, 2)]
-	var esc := float(cur.get("mScale", 1.0))
-	var c1: Array = cur.get("mColour1", [1, 1, 1, 1])
-	var c2: Array = cur.get("mColour2", c1)
-	var topo := texto(s, fonte, filho(rs, cur.rect), esc, int(cur.get("mJustify", 16)),
-		Color(c1[0], c1[1], c1[2], c1[3] * a), Color(c2[0], c2[1], c2[2], c2[3] * a))
-	if prox.is_empty() or opcoes.size() < 2:
+	var esc := float(cur.get("mScale", 1.4))            # +0x218
+	var esc_p := float(prox.get("mScale", 0.8))         # +0x214 (a das próximas)
+	var just := int(cur.get("mJustify", 16))
+	# cores: de descanso (mColour, vermelho) e de passagem (mEndColour, a das próximas)
+	var c_resto := [_cor(cur, "mColour1", a), _cor(cur, "mColour2", a)]
+	var c_passa := [_cor(cur, "mEndColour1", a), _cor(cur, "mEndColour2", a)]
+	var c_prox := [_cor(prox, "mColour1", a), _cor(prox, "mColour2", a)]
+	var rc := filho(rs, cur.rect)
+	var x0 := rc.position.x                             # canto esquerdo do seletor (NDC)
+	var s := _opcao_txt(cur, escolhida())
+	_recorte = true
+	if anim < 0.0:
+		texto(s, fonte, rc, esc, just, c_resto[0], c_resto[1])
+		_fileira(prox, rs, x0 + (_adv(s, fonte, esc) + GAP_OPCAO) / 320.0, opcao + 1, c_prox, a)
+		_recorte = false
 		return
-	# as outras na ordem, dando a volta (NOSSO: a RAM só mostra a 1ª atual)
+	var f := clampf(anim / T_ANIM, 0.0, 1.0)
+	var s_v := _opcao_txt(cur, String(opcoes[_de]))
+	var gap := GAP_OPCAO / 320.0
+	var wn := _adv(s, fonte, esc) / 320.0                # nova grande
+	var wv := _adv(s_v, fonte, esc) / 320.0              # antiga grande
+	var x_n: float
+	var x_v: float
+	var x_f: float
+	var de_f: int
+	if opcao > _de:
+		# pra direita: a nova sai de onde estava na fileira, a antiga sai pela
+		# esquerda (mesma velocidade, para em -largura), a fileira encosta
+		x_n = lerpf(x0 + wv + gap, x0, f)
+		x_v = maxf(x0 - (wv + gap) * f, x0 - wv)
+		x_f = lerpf(x0 + wv + gap + _adv(s, fonte, esc_p) / 320.0 + gap, x0 + wn + gap, f)
+		de_f = opcao + 1
+	else:
+		# pra esquerda: a nova entra pela esquerda, a antiga vai pra fileira
+		x_n = lerpf(x0 - (wn + gap), x0, f)
+		x_v = lerpf(x0, x0 + wn + gap, f)
+		x_f = lerpf(x0 + wv + gap, x0 + wn + gap + (_adv(s_v, fonte, esc_p) + _adv(SEP_OPCOES, fonte, esc_p)) / 320.0, f)
+		de_f = _de + 1
+	_fileira(prox, rs, x_f, de_f, c_prox, a)
+	var rn := Rect2(x_n, rc.position.y, rc.size.x, rc.size.y)
+	texto(s, fonte, rn, lerpf(esc_p, esc, f), just, c_passa[0].lerp(c_resto[0], f), c_passa[1].lerp(c_resto[1], f))
+	var rv := Rect2(x_v, rc.position.y, rc.size.x, rc.size.y)
+	texto(s_v, fonte, rv, lerpf(esc, esc_p, f), just, c_resto[0].lerp(c_passa[0], f), c_resto[1].lerp(c_passa[1], f))
+	# os 2 fantasmas: cor de descanso, alfa (a - a f) x 127 / 128 (0x2d3808)
+	for g in FANTASMAS:
+		var xl: float = g[0] + (g[1] - g[0]) * f
+		var al: float = (g[2] - g[2] * f) * 127.0 / 128.0
+		var rg := Rect2(rs.position.x + (xl + 1.0) * 0.5 * rs.size.x, rc.position.y, rc.size.x, rc.size.y)
+		var k1: Color = c_resto[0]
+		var k2: Color = c_resto[1]
+		k1.a = al * a
+		k2.a = al * a
+		texto(s, fonte, rg, ESC_FANTASMA, just, k1, k2)
+	_recorte = false
+
+
+## a fileira das próximas (ID_NEXT_OPT_TEXT): as opções depois de "de", numa
+## linha só com 3 espaços, a partir de x (NDC)
+func _fileira(prox: Dictionary, rs: Rect2, x: float, de: int, cores: Array, _a: float) -> void:
+	if prox.is_empty() or de >= opcoes.size():
+		return
 	var resto := []
-	for k in range(1, opcoes.size()):
-		resto.append(_opcao_txt(prox, String(opcoes[(opcao + k) % opcoes.size()])))
-	var adv: float = glifos(s, fonte, esc)[1].x
+	for k in range(de, opcoes.size()):
+		resto.append(_opcao_txt(prox, String(opcoes[k])))
 	var rp := filho(rs, prox.rect)
-	rp.position.x = topo.x + (adv + GAP_OPCAO) / 320.0
-	var d1: Array = prox.get("mColour1", [0, 0, 0, 1])
-	var d2: Array = prox.get("mColour2", d1)
-	texto(SEP_OPCOES.join(resto), FONTES[clampi(int(prox.get("mFont", 1)), 0, 2)], rp, float(prox.get("mScale", 1.0)),
-		int(prox.get("mJustify", 16)), Color(d1[0], d1[1], d1[2], d1[3] * a), Color(d2[0], d2[1], d2[2], d2[3] * a))
+	rp.position.x = x
+	texto(SEP_OPCOES.join(resto), FONTES[clampi(int(prox.get("mFont", 1)), 0, 2)], rp, float(prox.get("mScale", 0.8)),
+		int(prox.get("mJustify", 16)), cores[0], cores[1])
+
+
+func _adv(s: String, fonte: String, esc: float) -> float:
+	return glifos(s, fonte, esc)[1].x
+
+
+static func _cor(no: Dictionary, k: String, a: float) -> Color:
+	var c: Array = no.get(k, no.get("mColour1", [1, 1, 1, 1]))
+	return Color(c[0], c[1], c[2], c[3] * a)
 
 
 func _opcao_txt(no: Dictionary, k: String) -> String:
@@ -439,7 +583,7 @@ func _movel(no: Dictionary, r: Rect2) -> Rect2:
 # ------------------------------------------------------------------ textos
 func _texto_no(no: Dictionary, r: Rect2, a: float) -> void:
 	var nome := String(no.get("nome", ""))
-	var s := String(no.get("mpStringName", ""))
+	var s := str(no.get("mpStringName", ""))
 	if int(no.get("mStringNameInTable", 0)) == 1:
 		s = _txt(s)
 	var ln = _linha(nome)
@@ -455,7 +599,11 @@ func _texto_no(no: Dictionary, r: Rect2, a: float) -> void:
 		elif nome.ends_with("_Stunt_Score"):
 			s = str(ln.score)
 	elif nome.begins_with("ID_FAKEHIST_TITLE_STRING"):
-		s = _txt(TITULO.get(pagina, "RACE_RESULTS"))
+		s = _txt(String(confirma.titulo) if pagina == "confirma" else TITULO.get(pagina, "RACE_RESULTS"))
+	elif nome == "ID_YES_NO":
+		s = _txt("YES" if confirma.sim else "NO")
+	elif nome == "ID_PROMPT_STRING":
+		s = _txt(String(confirma.pergunta))
 	if int(no.get("mFlags", 0)) & 16:
 		s = s.to_upper()
 	var fonte: String = FONTES[clampi(int(no.get("mFont", 1)), 0, 2)]
@@ -547,6 +695,20 @@ func _letras(ls: Array, fonte: String, topo: Vector2, c1: Color, c2: Color, rot 
 	for l in ls:
 		var q: Rect2 = l[0]
 		var src: Rect2 = l[1]
+		if _recorte and rot == 0.0:
+			# corta no 4:3 (o PS2 não tem tela fora dele; os textos do seletor
+			# entram e saem por ali)
+			var x_a := o.x + q.position.x * kx
+			var x_b := o.x + q.end.x * kx
+			var lim_a := maxf(x_a, _a.position.x)
+			var lim_b := minf(x_b, _a.end.x)
+			if lim_b <= lim_a:
+				continue
+			if lim_a > x_a or lim_b < x_b:
+				var u0 := src.position.x + (lim_a - x_a) / (x_b - x_a) * src.size.x
+				var u1 := src.position.x + (lim_b - x_a) / (x_b - x_a) * src.size.x
+				q = Rect2((lim_a - o.x) / kx, q.position.y, (lim_b - lim_a) / kx, q.size.y)
+				src = Rect2(u0, src.position.y, u1 - u0, src.size.y)
 		var pts := PackedVector2Array([Vector2(q.position.x * kx, 0), Vector2(q.end.x * kx, 0),
 			Vector2(q.end.x * kx, q.size.y * ky), Vector2(q.position.x * kx, q.size.y * ky)])
 		for i in 4:

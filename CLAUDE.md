@@ -393,10 +393,14 @@ Tela de resultados (menu/resultados.gd)
   tela com PROCESS_MODE_ALWAYS): LAYER_PAUSE_MENU, opções do 0x462190
   (Resume, Respot, Restart, Quit, Game options, Photographer; as 2 últimas
   ainda não fazem nada). Seletor (LAYER_SELECTOR) = RAM do pause.p2s e
-  finish_2.p2s: atual em 1.4 encostada à esquerda, as outras em 0.8 a 16 px
-  do avanço dela, com 3 espaços; mJustify 0x10 = centra na altura, 0x01 na
-  largura. teste_resultados confere as 3 telas com a RAM, teste_pausa o
-  fluxo. Fora da corrida o Esc fecha o jogo.
+  finish_2.p2s: atual em 1.4 encostada à esquerda, as outras (só as de
+  DEPOIS, não dá a volta) em 0.8 a 16 px do avanço dela, com 3 espaços;
+  mJustify 0x10 = centra na altura, 0x01 na largura. Troca = a animação do
+  exe (0.2537 s, nova 0.8 -> 1.4, 2 fantasmas em 1.5; não anda no meio).
+  Sons do Menu_IG (sfx_jogo): trocar Scroll, ponta Back, abrir / voltar
+  ScrollVert, escolher sem som. Restart e Quit: "ARE YOU SURE?"
+  (LAYER_CONFIRM, começa no NO). teste_resultados confere as 3 telas com a
+  RAM, teste_pausa o fluxo e os sons. Fora da corrida o Esc fecha o jogo.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo
@@ -433,6 +437,6 @@ Frota
 Lista completa no fim do docs/historico.md. Os principais:
 - RX01: LOD das árvores. Reposição: checkpoint perdido, carro piscando
   (fantasma) depois de repor.
-- Pausa: Game options, Photographer, confirmação; Records e Race Finished.
+- Pausa: Game options, Photographer; Records e Race Finished.
 - IA: LOD com os modelos 2K/1K/500 do jogo.
 - Piloto: LOD, nome no menu.

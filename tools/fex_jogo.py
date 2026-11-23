@@ -60,7 +60,8 @@ DOCS = {"PostRace": "other/16698_bloco.bin", "Common": "other/16690_bloco.bin",
         "NewPause": "other/16696_bloco.bin"}
 CAMADAS = [("Common", "LAYER_FAKE_HISTORY"), ("NewPause", "LAYER_PAUSE_BACKGROUND"),
            ("PostRace", "LAYER_RESULTS"), ("Common", "LAYER_IG_BUTTON_BAR"),
-           ("NewPause", "LAYER_PAUSE_MENU"), ("PostRace", "LAYER_FINISHED_RACE"), ("Common", "LAYER_SELECTOR")]
+           ("NewPause", "LAYER_PAUSE_MENU"), ("PostRace", "LAYER_FINISHED_RACE"), ("Common", "LAYER_SELECTOR"),
+           ("NewPause", "LAYER_CONFIRM")]
 TEXTURAS = {
     "4_bit_generics": ("UI_PS2/FrontEnd/Textures/fex_new/#657f9b86", "UI_PS2/FrontEnd/Textures/fex_new/#069922b6"),
     "FE_extras": ("UI_PS2/FrontEnd/Textures/fex_new/FE_extras.bog", "UI_PS2/FrontEnd/Textures/fex_new/FE_extras.bed"),
@@ -72,7 +73,9 @@ TEXTURAS = {
 CHAVES_TEXTO = ["RACE_RESULTS", "POSITION", "NAME", "TOTAL_TIME", "BEST_LAP", "STUNT_SCORE", "CONTINUE",
                 # pausa (0x462190) e Race again (0x4cd270); barra (0x457b00: SELECT e BACK)
                 "PAUSE_MENU", "Resume", "Respot", "RESTART", "QUIT", "Game_options", "Photographer",
-                "Race_again", "EXIT", "SELECT", "BACK"]
+                "Race_again", "EXIT", "SELECT", "BACK",
+                # confirmação (0x4add68 -> 0x4b0308: título e pergunta por opção)
+                "SURE_QUESTION_MARK", "SURE_RESTART", "SURE_QUIT", "YES", "NO"]
 
 
 def ler_fex(d):

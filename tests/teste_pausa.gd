@@ -6,8 +6,11 @@ extends SceneTree
 ##  2. setas andam no seletor; Enter no Respot volta pro jogo e pede a
 ##     reposição (tela preta, menu/fader.gd);
 ##  3. a 25 m/s a pausa vem sem o Respot (0x4613a0: |v| < 17.88);
-##  4. Esc / triângulo na pausa = Resume; Quit volta pro treino livre;
-##  5. Race again: Restart recomeça a corrida, Exit volta pro livre.
+##  4. Esc / triângulo na pausa = Resume; Quit pede "ARE YOU SURE?" (começa
+##     no NO: volta pra pausa na mesma opção; seta = YES: treino livre);
+##  5. Race again: Restart recomeça a corrida, Exit volta pro livre;
+##  6. sons do menu (banco Menu_IG): abrir = ScrollVert, trocar = Scroll,
+##     ponta = Back.
 ## Uso: godot --headless --path . --fixed-fps 50 -s res://tests/teste_pausa.gd
 
 var main
@@ -78,11 +81,18 @@ func _physics_process(_dt: float) -> bool:
 				_falha("o jogo andou na pausa (%.3f m, relógio %.2f -> %.2f)" % [andou, marca.t, c.t])
 			if main.hud_jogo and main.hud_jogo.visible:
 				_falha("HUD na pausa")
+			if r.ultimo_som != "ScrollVert":
+				_falha("som de abrir a pausa: %s" % r.ultimo_som)
+			_tecla(KEY_LEFT)
+			if r.ultimo_som != "Back":
+				_falha("som da ponta: %s" % r.ultimo_som)
 			_tecla(KEY_RIGHT)
 			fase = 3
 		3:
 			if r.escolhida() != "Respot":
 				_falha("seta pra direita não foi pro Respot (%s)" % r.escolhida())
+			if r.ultimo_som != "Scroll":
+				_falha("som de trocar de opção: %s" % r.ultimo_som)
 			_tecla(KEY_ENTER)
 			marca.q = q
 			fase = 4
@@ -118,10 +128,20 @@ func _physics_process(_dt: float) -> bool:
 				return false
 			if paused or r.visible:
 				_falha("Esc na pausa não voltou pro jogo")
-			# Quit: treino livre
+			# Quit: pede confirmação; NO volta pra pausa; YES = treino livre
 			main.abrir_pausa()
 			main.menu_acao("pausa", "ok", "QUIT")
-			print("Quit: estado %d (livre %d), paused %s" % [c.estado, c.LIVRE, paused])
+			if r.pagina != "confirma" or r.confirma.sim or not paused:
+				_falha("Quit sem a confirmação (%s, sim %s)" % [r.pagina, r.confirma.sim])
+			main.menu_acao("confirma", "ok", "QUIT")
+			if r.pagina != "pausa" or c.estado == c.LIVRE:
+				_falha("NO na confirmação não voltou pra pausa")
+			main.menu_acao("pausa", "ok", "QUIT")
+			_tecla(KEY_RIGHT)
+			if not r.confirma.sim:
+				_falha("seta na confirmação não foi pro YES")
+			_tecla(KEY_ENTER)
+			print("Quit + YES: estado %d (livre %d), paused %s" % [c.estado, c.LIVRE, paused])
 			if c.estado != c.LIVRE or paused or r.visible:
 				_falha("Quit não voltou pro treino livre")
 			if main.abrir_pausa():

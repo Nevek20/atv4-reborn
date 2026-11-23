@@ -124,17 +124,45 @@ func _layout(r, arq: String, titulo: String) -> void:
 		_falha("título")
 
 
-## seletor: andar dá a volta; as outras opções seguem a atual na ordem
+## seletor (0x2d1280): não passa das pontas, não anda no meio da troca; as
+## outras opções são só as de depois da atual. Troca (0x2d23a8): pra esquerda
+## a nova entra por fora da esquerda e chega no lugar da atual em T_ANIM
 func _seletor(r) -> void:
 	r.abrir_menu("pausa", ["Resume", "Respot", "RESTART", "QUIT"])
-	r.mover(-1)
-	var a: String = r.escolhida()
-	r.mover(2)
-	var b: String = r.escolhida()
+	var ponta: bool = r.mover(-1)
+	var anda: bool = r.mover(1)
+	var no_meio: bool = r.mover(1)
+	r.anim = -1.0
+	r.mover(1)
+	r.anim = -1.0
 	var txts: Array = r.medir().map(func(n): return String(n.txt))
-	print("  seletor: esquerda do 1º -> %s; depois -> %s; textos %s" % [a, b, txts.slice(2, 4)])
-	if a != "QUIT" or b != "Respot" or not txts.has("RESPOT") or not txts.has("RESTART   QUIT   RESUME"):
-		_falha("seletor (volta / ordem das outras)")
+	print("  seletor: esquerda no 1º %s, direita %s, no meio da troca %s; em %s as outras %s" % [ponta, anda,
+		no_meio, r.escolhida(), txts.slice(2, 4)])
+	if ponta or not anda or no_meio or r.escolhida() != "RESTART" or not txts.has("QUIT") or txts.has("RESUME"):
+		_falha("seletor (pontas / troca / ordem das outras)")
+	# troca pra esquerda: x da 1ª letra da nova no começo e no fim
+	var x_resto: float = _x_de(r, "RESTART")
+	r.mover(-1)
+	r.anim = 0.0
+	var x0: float = _x_de(r, "RESPOT")
+	r.anim = r.T_ANIM * 0.999
+	var x1: float = _x_de(r, "RESPOT")
+	r.anim = -1.0
+	var x2: float = _x_de(r, "RESPOT")
+	print("  troca pra esquerda: a nova de x %.1f a %.1f px (no lugar: %.1f; a atual ficava em %.1f)" % [x0, x1, x2, x_resto])
+	if x0 >= x_resto - 20.0 or absf(x1 - x2) > 1.0 or absf(x2 - x_resto) > 0.5:
+		_falha("animação da troca")
+
+
+## x da 1ª letra do texto s (o de escala maior, se tiver 2: a opção atual;
+## os fantasmas em 1.5, 45 px de altura, ficam de fora)
+func _x_de(r, s: String) -> float:
+	var ns: Array = r.medir().filter(func(n): return String(n.txt) == s and not n.letras.is_empty() \
+		and (n.letras[0] as Rect2).size.y < 44.0)
+	if ns.is_empty():
+		return INF
+	ns.sort_custom(func(a, b): return (a.letras[0] as Rect2).size.y > (b.letras[0] as Rect2).size.y)
+	return (ns[0].letras[0] as Rect2).position.x
 
 
 func _tempo(r) -> void:
