@@ -443,7 +443,8 @@ Ordem combinada com o Matheus (nov/2026): fechar o RX01 -> ATV e moto numa
 pista com Holeshot (save state dele) até fechar 100% os veículos -> menu
 (esqueleto pelos .fex, opções de vídeo/áudio/controle, perfil e save) ->
 todos os mapas (LOD e carregamento entram aqui) -> todos os modos ->
-carreira -> gráficos (chave "fiel x melhorado") -> polimento. Multiplayer
+carreira -> gráficos (chave "fiel x melhorado") -> polimento -> online
+(o Matheus e um amigo correndo pela internet). Multiplayer
 local (2 na mesma tela) é obrigatório: câmera, HUD e som têm que aceitar 2
 jogadores (não amarrar nada novo a "um jogador só").
 
