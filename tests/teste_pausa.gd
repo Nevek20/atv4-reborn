@@ -100,10 +100,10 @@ func _physics_process(_dt: float) -> bool:
 			if q < marca.q + 3:
 				return false
 			print("Respot: paused %s, tela %s, pedido %d, tela preta indo pra %.0f" % [paused, r.visible,
-				c.ia._pedido, main.fader.alvo])
+				c.ia.repor_jog.estado, main.fader.alvo])
 			if paused or r.visible:
 				_falha("Respot não voltou pro jogo")
-			if c.ia._pedido == 0 and main.fader.alfa <= 0.0:
+			if c.ia.repor_jog.estado == 0 and main.fader.alfa <= 0.0:
 				_falha("Respot não pediu a reposição")
 			marca.q = q
 			fase = 5

@@ -51,6 +51,7 @@ extends Node
 
 const ARQ := "res://data/ia.json"
 const Reposicao := preload("res://pista/reposicao.gd")
+const ReporCarro := preload("res://pista/repor_carro.gd")
 const SomJogo := preload("res://som/som_jogo.gd")
 const VehicleData := preload("res://carro/vehicle_data.gd")
 const Ultrapassar := preload("res://pista/ia_ultrapassar.gd")
@@ -540,13 +541,23 @@ func posicionar() -> void:
 		x.preso = 0.0
 		x.erase("ancora")
 		x.vigia = Reposicao.new(self, x.r.prog)
+		if x.has("repor"):
+			x.repor.terminar()
+		x.repor = ReporCarro.new(x.car, _repor.bind(x), _todos_carros, batidas.esferas)
 	jogador = novo_rastreio(main.car.global_position)
 	vigia_jogador = Reposicao.new(self, jogador.prog)
+	if repor_jog:
+		repor_jog.terminar()
+	repor_jog = ReporCarro.new(main.car, repor_jogador, _todos_carros, batidas.esferas, main.fader)
+	_preso_jog_t = 0.0
+	_ar_jog = 0.0
 
 
 func limpar() -> void:
 	piloto_jogador = null
-	_pedido = 0
+	if repor_jog:
+		repor_jog.terminar()
+		repor_jog = null
 	if main and main.fader:
 		main.fader.zerar()
 	for x in rivais:
@@ -575,8 +586,12 @@ func soltar() -> void:
 
 
 func _physics_process(dt: float) -> void:
-	if main and main.car != null and vigia_jogador:
-		_passo_pedido()
+	# objetos de reposição (0x15c0e8 no update de cada corredor)
+	if main and main.car != null and repor_jog:
+		repor_jog.passo(dt)
+	for x in rivais:
+		if x.has("repor"):
+			x.repor.passo(dt)
 	if rivais.is_empty() or main.car == null:
 		return
 	rastrear(jogador, main.car.global_position)
@@ -591,8 +606,10 @@ func _physics_process(dt: float) -> void:
 				y.car.calar_som()          # saiu do alcance: para o som (religa ao voltar)
 			y.car.longe_som = longe
 	var est: int = corrida.estado
-	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt):
-		pedir_repor_jogador()
+	if est == corrida.CORRENDO and vigia_jogador and vigia_jogador.passo(jogador, main.car, dt) and repor_jog:
+		repor_jog.pedir(false, true)    # 0x4d3538 força
+	if est == corrida.CORRENDO:
+		_preso_jogador(dt)
 	# o rastreio de todos antes da lista: ela leva os dados do passo de cada
 	# carro (Ultrapassar.dados_carro), feitos 1 vez e lidos por quem olha
 	for x in rivais:
@@ -636,9 +653,8 @@ func _physics_process(dt: float) -> void:
 			continue
 		if x.vigia.passo(x.r, car, dt):
 			if OS.has_environment("IA_LOG"):
-				print("IA repõe %s em %.0f m (regra do jogo, t %.1f)" % [x.nome, x.vigia.aceito, corrida.t])
-			_repor(x)
-			continue
+				print("IA pede reposição de %s em %.0f m (regra do jogo, t %.1f)" % [x.nome, x.vigia.aceito, corrida.t])
+			x.repor.pedir(false, true)      # 0x4d3538: 0.3 s andando e repõe (repor_carro.gd)
 		_dirigir(x, car, dt)
 	if piloto_jogador != null and est == corrida.CHEGOU:
 		if piloto_jogador.vigia.passo(jogador, main.car, dt):
@@ -834,9 +850,12 @@ func _pensar(x: Dictionary, car, dt: float) -> bool:
 	# #2 (prioridade 1, antes do #5 na lista: no empate ganha ele)
 	if preso:
 		if OS.has_environment("IA_LOG"):
-			print("IA repõe %s em %.0f m (preso, #2 do jogo, t %.1f)" % [x.get("nome", "?"), x.r.prog, corrida.t])
-		_repor(x)
-		return true
+			print("IA pede reposição de %s em %.0f m (preso, #2 do jogo, t %.1f)" % [x.get("nome", "?"), x.r.prog, corrida.t])
+		if x.has("repor"):
+			x.repor.pedir(true, true)       # 0x3646d0: na hora
+		else:
+			_repor(x)               # o piloto do seu carro depois da chegada
+			return true
 	if Ultrapassar.prioridade(x):
 		x.comp = 5 if Ultrapassar.comecar(self, x) else 0
 		x.n5 = int(x.get("n5", 0)) + 1
@@ -996,38 +1015,59 @@ func _repor(x: Dictionary) -> void:
 	x.comp = 0
 
 
-## pedido de reposição do jogador (0x15bd28 -> update 0x15c0e8): estado 1
-## conta REPOR_ESPERA com a tela indo pro preto (menu/fader.gd), no passo
-## seguinte (2) repõe, no outro (3 -> 4, 0x15bfe0) a tela volta. Com pedido
-## andando, outro não entra (0x15bd28 sai com o estado != 0). As caixas de
-## reposição na hora (cInstantRespotBox) repõem direto, sem tela preta.
-const REPOR_ESPERA := 0.3        # objeto de reposição +0x64 no estado 1
-var _pedido := 0                 # 0 nada, 1 contando, 2 repor, 3 clarear
-var _pedido_t := 0.0
+## pedido de reposição do jogador (0x15bd28 -> update 0x15c0e8, o objeto de
+## reposição dele: pista/repor_carro.gd): 0.3 s com a tela indo pro preto
+## (menu/fader.gd), repõe, a tela volta e o carro fica fantasma (sem batida
+## com outro carro) 0.3 s e até sair de cima dos outros
+var repor_jog                    # ReporCarro do jogador
 
 
 func pedir_repor_jogador() -> void:
-	if _pedido != 0:
+	if repor_jog:
+		repor_jog.pedir()
+
+
+## os carros da corrida (o jogador e os rivais)
+func _todos_carros() -> Array:
+	var l: Array = [main.car]
+	for y in rivais:
+		l.append(y.car)
+	return l
+
+
+## preso do jogador (update do veículo 0x2017a8, só o corredor humano, com
+## reposição ligada e a corrida andando): nem todas as rodas no chão, |v| <
+## 1 m/s (corpo+0xe0), |giro| < 0.55 rad/s (corpo+0xa0) e sem estar voando
+## (corpo+0x3d0 < 0.2 s) somam o tempo; passou de 0.69 s pede a reposição
+## (a de sempre, com a tela preta). Fora disso o tempo desce a 1/s até 0.
+## NOSSO: o corpo+0x3d0 conta sem roda no chão e zera com o casco encostando
+## (o jogo zera com o corpo+0x1fc, que as rodas incrementam e não foi lido).
+const PRESO_JOG_T := 0.69           # DAT_00550518
+const PRESO_JOG_V := 1.0             # DAT_0055051c
+const PRESO_JOG_GIRO := 0.55         # DAT_00550520
+const PRESO_JOG_AR := 0.2            # DAT_00550524
+var _preso_jog_t := 0.0          # veículo+0x9f8
+var preso_jog_ligado := true     # testes que seguram o carro parado no ar desligam
+var _ar_jog := 0.0               # corpo+0x3d0
+
+
+func _preso_jogador(dt: float) -> void:
+	var car = main.car
+	if car == null or repor_jog == null or not preso_jog_ligado:
 		return
-	_pedido = 1
-	_pedido_t = REPOR_ESPERA
-	if main and main.fader:
-		main.fader.escurecer()
-
-
-func _passo_pedido() -> void:
-	match _pedido:
-		1:
-			_pedido_t -= get_physics_process_delta_time()
-			if _pedido_t <= 0.0:
-				_pedido = 2
-		2:
-			repor_jogador()
-			_pedido = 3
-		3:
-			if main and main.fader:
-				main.fader.clarear()
-			_pedido = 0
+	var rodas: int = car.wheels.size()
+	if car.grounded > 0 or int(car.contatos) > 0:
+		_ar_jog = 0.0
+	else:
+		_ar_jog += dt
+	var preso: bool = car.grounded < rodas and car.linear_velocity.length() < PRESO_JOG_V \
+		and car.angular_velocity.length() < PRESO_JOG_GIRO and _ar_jog < PRESO_JOG_AR
+	if preso:
+		_preso_jog_t += dt
+		if _preso_jog_t > PRESO_JOG_T:
+			repor_jog.pedir()
+	elif _preso_jog_t > 0.0:
+		_preso_jog_t = maxf(_preso_jog_t - dt, 0.0)
 
 
 func repor_jogador() -> void:

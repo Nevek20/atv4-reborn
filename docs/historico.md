@@ -1821,7 +1821,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
 - Reposição (nov/2026, pista/corrida.gd caixas + pista/ia.gd repor_em,
   teste_reposicao): as 14 cInstantRespotBox do RALLYCROSS.bin ficam em cima
   das 6 arquibancadas e de cabanas e celeiros, 22..93 m fora do centro da
-  pista: cair numa repõe na hora (o jogador e os rivais). Caixa centrada em
+  pista: cair numa repõe na hora (o jogador e os rivais). CORRIGIDO
+  (nov/2026, Fantasma abaixo): o 0x542208 pede com a espera de 0.3 s e a
+  tela preta; o "instant" é só sem a contagem 3-2-1. Caixa centrada em
   pos, Z = dir (bate com o eixo Z do modelo da arquibancada embaixo, nas
   6), tamanho inteiro. O ponto de reposição segue a seção Respotting do
   TrackSetup/RALLYCROSS.xml (lida em 0x1bfb68): chão com normal.y >=
@@ -2159,6 +2161,30 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   nosso repõe no aceito, como antes). Depois os rivais também passaram a
   contar a volta e a chegada pela caixa (x.vigia.voltas), como no jogo
   (cada corredor tem o mesmo objeto de progresso).
+- Fantasma, espera dos rivais e jogador preso (nov/2026, o Matheus:
+  "fechado, pode fazer"; pista/repor_carro.gd, teste_reposicao_auto partes
+  6 e 7, teste_reposicao). O "carro piscando" que estava no pendente NÃO
+  existe no PAL: o objeto de reposição calcula um +0x68 (1 -> 0 na espera,
+  (1 - cos(178 t)) / 2 depois), mas nenhum código do exe lê esse campo
+  (varredura do ELF inteiro, docs/engenharia_reversa.md). O que existe:
+  reposto = fantasma (veículo+0xb28 = 0: o par carro com carro não bate,
+  0x151028) por 0.3 s e até a caixa dele sair da de qualquer outro.
+  Objeto por carro (multiplayer: um por jogador, cada um com a sua tela
+  preta). Rivais passam pelo mesmo pedido: fora/contramão/checkpoint
+  esperam 0.3 s andando; o preso #2 da IA repõe na hora (como no exe).
+  Corrigido: as cInstantRespotBox pedem com a espera e a tela preta
+  (0x542208 só pede com o objeto parado), não repõem na hora. Achado no
+  caminho: o jogador preso (0x2017a8): nem todas as rodas no chão, |v| < 1
+  m/s, |giro| < 0.55 rad/s e sem voar (> 0.2 s sem roda nem casco) por
+  0.69 s pede a reposição de sempre. Pega capotado, de lado e encalhado; o
+  R (NOSSO) continua. NOSSO: o "voar" zera com o casco encostando (o exe
+  zera com o corpo+0x1fc, não lido) e a caixa do fantasma = as esferas do
+  VehicleVehicle. Teste: rival reposto 0.32 s depois do pedido, fantasma
+  segue encostado e acaba longe, a batida pula o par; capotado parado pede
+  aos 0.68 s e repõe 0.32 s depois, de pé; caixa repõe no 16º passo com a
+  tela preta. Não portado: o 0x34f5e0 (IA repõe na hora por outra regra).
+  teste_batida_carros está instável (o caso "de lado meio carro à frente"
+  ou o "de cima" falham conforme a rodada, com e sem essa mudança).
 - Batida carro com carro (nov/2026, carro/batida_carros.gd,
   teste_batida_carros): o casco é o VehicleVehicle.hsc (o outro casco que o
   0x1fed48 carrega; tools/casco.py grava esferas_carro, 25 no Renegade
@@ -2860,9 +2886,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   +0xc do catchup (0 nos 7 rivais do Normal), LOD de verdade (gerar Models_2K/1K/500 e
   Models_Shadow; o 2K tem o piloto embutido), batida carro com carro
   (VehicleVehicle.hsc), câmera que desce até o carro depois da intro.
-- Reposição: falta as 2 flags do corredor+0x120, o carro piscando /
-  fantasma depois de repor, os 0.3 s dos rivais (seção Menu de pausa, tela
-  preta feita) e o ponto salvo de 0.5 em 0.5 s (o tipo 3 foi feito).
+- Reposição: falta as 2 flags do corredor+0x120, o 0x34f5e0 da IA e o
+  ponto salvo de 0.5 em 0.5 s (tipo 3, fantasma, espera dos rivais e
+  jogador preso feitos; o carro não pisca no PAL).
 - Pausa: Game options, Photographer, a confirmação (LAYER_CONFIRM) e a
   animação do seletor; Records e Race Finished depois dos resultados.
 - RX01, falta: LOD das árvores (câmera de introdução feita, seção Corrida).

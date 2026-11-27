@@ -1511,18 +1511,41 @@ vazios). Tudo vem do evento:
   3.333 (1 -> 0); 2 = repõe (0x15bc50: 0x200fe0 acha o ponto, 0x183018 põe
   o carro, veículo+0xb28 = 0) e vai pro 3; 3 espera o quadro seguinte
   (DAT_007f48d8+0x80) e 0x15bfe0 vai pro 4; 4 = +0x68 = (1 - cos(178 t)) /
-  2 por 0.3 s (piscando), repete enquanto a caixa do carro encosta na de
-  outro (0x15c350) e acaba em 0x15c090 (+0x68 = 1, veículo+0xb28 = 1,
-  estado 0). Com "na hora" (as caixas) pula o 1 direto pro 2. Tempo padrão
+  2 por 0.3 s; depois +0x68 = 1 e espera a caixa do carro (vtable +0x94,
+  min/max alinhados aos eixos) sair da de todo outro corredor (0x15c350) e
+  acaba em 0x15c090 (+0x68 = 1, veículo+0xb28 = 1, estado 0, +0x64 = 0.3).
+  Com "na hora" pula o 1: estado 2, repõe e vai pro 4. Tempo padrão
   (DAT_007f5334+0xc -> +0x14 -> +0x10) = 40 na RAM (vai pro 0x200fe0).
+  Criado em 0x1581f8 (corredor+0xfc = 0x15ba00(veículo, +0xf4, +0xf8);
+  +0x70 = 1 reposição ligada, 0x511750 desliga). Quem pede: 0x4d3538 (o
+  progresso: fora, contramão, checkpoint) (-1, 1, 0, 0); 0x542208
+  cInstantRespotBox (-1, 1, 0, 0), só com o objeto parado (0x159e28:
+  estado != 0); 0x3646d0 preso #2 da IA e 0x34f5e0 (IA) (-1, 1, 1, 0) na
+  hora; 0x2017a8 jogador preso (-1, 0, 0, 0). Forçado com pedido andando:
+  estado 1 com o +0x64 que estava (só do 0 começa em 0.3).
+- veículo+0xb28 = batida carro com carro ligada: 0x151028 (o par de
+  colisão) só chama o contato com os dois != 0. 0 no reposto (0x15bc50) até
+  o fim do 4, e na montagem do corredor (0x1645a0).
+- +0x68 NINGUÉM LÊ (nov/2026): varredura do ELF inteiro (lw corredor+0xfc
+  seguido de lw/lwc1 +0x68 com a mesma base em até 300 instruções; getters
+  "lwc1 f0, 0x68(a0); jr ra"; funções que recebem o objeto em a0) e a
+  decompilação de 0x150000..0x240000: o único acesso fora do objeto é o
+  +0x70 (0x2017a8) e o +4 (estado). O carro não pisca no PAL.
+- Jogador preso (0x2017a8, update do veículo): com (corredor+0x108)+8 == 1
+  (humano), objeto +0x70, veículo+0xa78, relógio no estado 10 (0x17afb0) e
+  0x17afc0: rodas no chão (corpo+0x3c8) < rodas (corpo+0x250), |v|
+  (corpo+0xe0) < 1.0 (DAT_0055051c), |giro|^2 (corpo+0xa0, o estado do
+  corpo é posição +0x70, +0x80, velocidade +0x90, giro +0xa0) < 0.55^2
+  (DAT_00550520) e corpo+0x3d0 < 0.2 (DAT_00550524) -> veículo+0x9f8 += dt;
+  > 0.69 (DAT_00550518) pede. Senão o +0x9f8 desce dt até 0. corpo+0x3d0 =
+  tempo sem roda no chão com corpo+0x1fc == 0 (0x20d568; o +0x1fc as rodas
+  incrementam em 0x20cf28, não lido); corpo+0x4e4 = tempo sem roda no chão.
 - Tela preta: no estado 1, pra cada viewport do jogador (0x15b9e8 /
   0x15b9d8) que não está escurecendo (0x457698) chama 0x4576c8 (fader+0xd8
   = 1, viewport+0x118 = 1); no 3 -> 4 o 0x4576e0 volta. Fader =
   viewport+0x114 (lista de viewports DAT_007f48b4 +0x10), update 0x2b3700:
   +0xdc += dt / +0xd0 indo pro preto, -= dt / +0xd4 voltando; +0xd0 =
   +0xd4 = 0.2 na RAM (pause, placar_final, andando_em_linha_reta).
-- Não portado ainda: o carro piscando (+0x68, quem lê não foi achado) e o
-  veículo+0xb28 (sem batida carro com carro enquanto pisca?).
 - Não achados: quem liga corredor+0x120 +0x24/+0x28 (zeradas na RAM); as
   caixas do 0x543b88 ([0x7f5f5c], lista vazia no RX01, limites +0xc0/+0xc4).
   Na RAM (corrida_no_normal) o pedido do jogador tem a = 0.2, c = 3.0 de uma

@@ -290,7 +290,8 @@ Pista RX01
   entrada (ou fora do link 50) sem a caixa -> aceito para, "Missed
   Checkpoint" 0.2 / 1 / 3 s, passa por cima de um 1/2 andando (fase 2).
   Repõe no começo do link 50 se o aceito passou do centro (0x4d3fe0).
-- Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) repõem na hora;
+- Reposição: 14 cInstantRespotBox (arquibancadas, cabanas) pedem na hora
+  (sem a contagem 3-2-1, mas com a espera de 0.3 s e a tela preta, 0x542208);
   o ponto segue o Respotting do TrackSetup (chão >= 0.93, sem água, 8 m de
   folga). Volta pro último ponto conhecido na linha, não pro mais perto.
 - Reposição automática (pista/reposicao.gd, todos os carros): fora da pista
@@ -300,7 +301,13 @@ Pista RX01
   correndo e abaixo de 40 mph, 0x4613a0); o R continua (NOSSO, o Matheus
   gosta). Repor o jogador: pedido (0x15bd28) com 0.3 s até repor e a tela
   preta do fader da câmera (menu/fader.gd, 0.2 s pra ir e 0.2 s pra voltar,
-  RAM); as cInstantRespotBox repõem na hora, sem tela preta.
+  RAM). Objeto de reposição por carro (pista/repor_carro.gd, 0x15c0e8):
+  rivais também esperam 0.3 s andando (o preso #2 da IA repõe na hora,
+  0x3646d0); reposto = fantasma (sem batida carro com carro, 0x151028)
+  0.3 s e até a caixa dele sair da de outro. O carro NÃO pisca: o +0x68 do
+  objeto não é lido por ninguém no exe. Jogador preso (0x2017a8): nem todas
+  as rodas no chão, |v| < 1, |giro| < 0.55, sem voar > 0.2 s, por 0.69 s ->
+  pede a reposição (capotado, de lado, encalhado).
 
 Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
 - Poeira, pedrinhas e lasquinhas = porta do jogo, tamanho x 0.6 (VU1 não
@@ -451,8 +458,7 @@ local (2 na mesma tela) é obrigatório: câmera, HUD e som têm que aceitar 2
 jogadores (não amarrar nada novo a "um jogador só").
 
 Lista completa no fim do docs/historico.md. Os principais:
-- RX01: LOD das árvores. Reposição: carro piscando (fantasma) depois de
-  repor.
+- RX01: LOD das árvores (na fase dos mapas). Fechado no resto.
 - Pausa: Game options (vai ter vídeo, áudio e controle: só quando essas
   configurações existirem), Photographer; Records e Race Finished.
 - IA: LOD com os modelos 2K/1K/500 do jogo.

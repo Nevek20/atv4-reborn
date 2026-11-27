@@ -3,8 +3,9 @@ extends SceneTree
 ## cInstantRespotBox do RALLYCROSS.bin. Larga o jogador dentro de cada caixa
 ## com a corrida rodando e confere: volta pra linha (menos de 1 m dela), num
 ## chão com normal.y >= mUprightTolerance, longe dos outros carros
-## (mSafePlayerDistance) e fora de qualquer caixa. Confere também que um
-## ponto ao lado da caixa (fora dela) não repõe.
+## (mSafePlayerDistance) e fora de qualquer caixa. A caixa pede a reposição
+## forçada com a espera de 0.3 s e a tela preta (0x542208, repor_carro.gd).
+## Confere também que um ponto ao lado da caixa (fora dela) não repõe.
 ## Uso: godot --headless --path . -s res://tests/teste_reposicao.gd
 
 var main
@@ -64,14 +65,23 @@ func _physics_process(_dt: float) -> bool:
 			var centro: Vector3 = (cx[0] as Transform3D).affine_inverse().origin
 			if not c.na_caixa(centro):
 				_falha("centro da caixa %d fora dela" % k)
+			c.ia.repor_jog.terminar()       # o fantasma da caixa anterior
+			main.fader.zerar()
 			main.car.reset_to(centro, 0.0)
 			main.car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
 			espera = 0
 			fase = 3
 		3:
 			espera += 1
-			if espera < 3:
+			if c.ia.repor_jog.estado < 3 and espera < 60:
 				return false
+			if espera >= 60:
+				_falha("caixa %d: não repôs em 1.2 s" % k)
+			elif k == 0:
+				# 1 passo pra entrar, 0.3 s (15 passos) e o passo que repõe
+				print("caixa 0: reposto no passo %d (0.3 s de espera, tela preta %.2f)" % [espera, main.fader.alvo])
+				if espera < 16 or espera > 18 or main.fader.alvo < 1.0:
+					_falha("caixa: reposição fora dos 0.3 s ou sem tela preta (passo %d)" % espera)
 			var p: Vector3 = main.car.global_position
 			var ia = c.ia
 			var dl: float = ia._projetar(p)[1]

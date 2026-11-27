@@ -13,6 +13,11 @@ extends SceneTree
 ##     da face de entrada, repõe 4.2 s depois no começo do link (antes da
 ##     caixa) e aí passar conta; largo demais (18 m) com "Off Track" andando,
 ##     o tipo 3 passa na frente direto na fase 2.
+##  6. fantasma (repor_carro.gd, 0x15c0e8 estado 4): reposto, o carro fica
+##     sem batida com outro carro 0.3 s e enquanto a caixa dele encosta na
+##     de outro; um rival pedido espera 0.3 s andando e repõe;
+##  7. jogador capotado parado (0x2017a8): pede a reposição depois de 0.69 s
+##     e é reposto 0.3 s depois, de pé.
 ## Uso: godot --headless --path . -s res://tests/teste_reposicao_auto.gd
 
 const DT := 0.02
@@ -89,6 +94,9 @@ func _physics_process(_dt: float) -> bool:
 				return false
 			ia = c.ia
 			v = ia.vigia_jogador
+			# as partes 1 a 6 seguram o carro parado (velocidade zerada, ele
+			# fica no ar): a regra do capotado fica pra parte 7
+			ia.preso_jog_ligado = false
 			# 1. corredor: centro da pista de cada link dentro da largura
 			var ls: Array = c.dados.links.duplicate()
 			if c.sentido < 0:
@@ -199,7 +207,44 @@ func _physics_process(_dt: float) -> bool:
 				fase = 7
 		7:
 			_teste_checkpoint()
-			fase = 9
+			fase = 12
+		12:
+			_teste_fantasma()
+			fase = 13
+			t = 0.0
+			marcas = {}
+			# 7. capotado: de cabeça pra baixo, parado, no link 60
+			_colocar(60, 0.0, false)
+			var xf: Transform3D = main.car.global_transform
+			xf.basis = xf.basis.rotated(xf.basis.z.normalized(), PI)
+			xf.origin.y += 0.6
+			main.car.global_transform = xf
+			main.car.reset_physics_interpolation()
+			marcas.antes = ia.repor_jog.estado
+			ia.repor_jog.terminar()
+			ia._preso_jog_t = 0.0
+			ia.preso_jog_ligado = true
+		13:
+			t += DT
+			if ia._preso_jog_t > 0.0 and not marcas.has("ini"):
+				marcas.ini = t
+			if ia.repor_jog.estado == 1 and not marcas.has("pediu"):
+				marcas.pediu = t
+			if ia.repor_jog.estado >= 3 and not marcas.has("repos"):
+				marcas.repos = t
+				marcas.up = main.car.global_transform.basis.y.y
+			if marcas.has("repos") or t > 6.0:
+				if not marcas.has("pediu"):
+					_falha("capotado não pediu a reposição em 6 s (preso %.2f s, rodas %d)" % [
+						ia._preso_jog_t, main.car.grounded])
+				else:
+					print("  capotado: preso desde %.2f s, pediu aos %.2f s, reposto aos %.2f s (de pé %.2f)" % [
+						marcas.get("ini", -1.0), marcas.pediu, marcas.get("repos", -1.0), marcas.get("up", -1.0)])
+					_perto(marcas.pediu - marcas.get("ini", 0.0), 0.70, 0.03, "capotado: pedido")
+					_perto(marcas.get("repos", -1.0) - marcas.pediu, 0.32, 0.03, "capotado: reposição")
+					if marcas.get("up", -1.0) < 0.9:
+						_falha("reposto não ficou de pé")
+				fase = 9
 		9:
 			print("teste_reposicao_auto: %s" % ("ok" if falhas == 0 else "FALHA (%d)" % falhas))
 			return true
@@ -314,3 +359,52 @@ func _mover(x: RigidBody3D, r: Dictionary, al: float, lat: float, alto: float, d
 	var p := _pos(al, lat, alto)
 	x.global_transform = Transform3D(Basis(Vector3.UP, atan2(d.x, d.z)), p)
 	ia.rastrear(r, p)
+
+
+## 6. fantasma e a espera dos rivais: com os passos chamados na mão
+func _teste_fantasma() -> void:
+	var x: Dictionary = ia.rivais[0]
+	var rr = x.repor
+	var antes: Vector3 = x.car.global_position
+	rr.pedir()
+	var t_rep := -1.0
+	var tt := 0.0
+	for k in 30:
+		tt += DT
+		rr.passo(DT)
+		if t_rep < 0.0 and rr.estado >= 3:
+			t_rep = tt
+	_perto(t_rep, 0.32, 0.03, "rival: reposição depois do pedido")
+	if not x.car.fantasma:
+		_falha("rival reposto não ficou fantasma")
+	# encosta o jogador em cima dele: fica fantasma passando dos 0.3 s
+	var xf: Transform3D = x.car.global_transform
+	main.car.global_transform = Transform3D(xf.basis, xf.origin + xf.basis.x * 0.5)
+	for k in 30:
+		rr.passo(DT)
+	var preso_fant: bool = x.car.fantasma and rr.estado == 4
+	# o jogador sai de cima: termina
+	main.car.global_transform = Transform3D(xf.basis, xf.origin + Vector3(30.0, 0.0, 0.0))
+	rr.passo(DT)
+	print("  fantasma: encostado depois de 0.6 s %s, longe %s (estado %d)" % [preso_fant, x.car.fantasma, rr.estado])
+	if not preso_fant:
+		_falha("encostado em outro carro o fantasma acabou")
+	if x.car.fantasma or rr.estado != 0:
+		_falha("longe dos outros o fantasma não acabou")
+	# batida_carros pula o par com fantasma (só esses 2 carros na lista)
+	var lista_antes: Callable = ia.batidas.carros
+	var par := [main.car, x.car]
+	ia.batidas.carros = func(): return par
+	x.car.fantasma = true
+	var n0: int = ia.batidas.contatos
+	main.car.global_transform = Transform3D(xf.basis, xf.origin + xf.basis.x * 0.3)
+	ia.batidas._physics_process(DT)
+	var n_f: int = ia.batidas.contatos - n0
+	x.car.fantasma = false
+	ia.batidas._physics_process(DT)
+	var n_n: int = ia.batidas.contatos - n0 - n_f
+	ia.batidas.carros = lista_antes
+	print("  batida carro com carro: fantasma %d contatos, normal %d" % [n_f, n_n])
+	if n_f != 0 or n_n == 0:
+		_falha("fantasma não pulou a batida (fantasma %d, normal %d)" % [n_f, n_n])
+	x.car.global_position = antes

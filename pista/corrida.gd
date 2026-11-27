@@ -328,12 +328,16 @@ func na_caixa(p: Vector3) -> bool:
 func _caixas() -> void:
 	if ia == null or caixas.is_empty():
 		return
-	if na_caixa(main.car.global_position):
-		ia.repor_jogador()
+	# cInstantRespotBox (0x542208): só com o objeto de reposição parado
+	# (0x159e28), pedido forçado com a espera de 0.3 s e a tela preta
+	# (pista/repor_carro.gd); "instant" = sem a contagem 3-2-1 do fora
+	if ia.repor_jog and ia.repor_jog.estado == 0 and na_caixa(main.car.global_position):
+		ia.repor_jog.pedir(false, true)
 		reposicoes += 1
 	for x in ia.rivais:
-		if is_instance_valid(x.car) and na_caixa(x.car.global_position):
-			ia._repor(x)
+		if is_instance_valid(x.car) and x.has("repor") and x.repor.estado == 0 \
+				and na_caixa(x.car.global_position):
+			x.repor.pedir(false, true)
 			reposicoes += 1
 
 

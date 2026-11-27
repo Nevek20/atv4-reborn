@@ -485,6 +485,7 @@ var jitter_chao := 0.0        # veículo+0xac0: média do WheelJitter embaixo de
 # nenhum, 4.86 m/s num registro velho e 0.08 m/s encostado.
 var batida := 0.0             # corpo+0x7a0: maior velocidade de contato do último passo (m/s)
 var contatos := 0             # corpo+0x5a4: contatos do casco no último passo (pista/truques.gd)
+var fantasma := false         # veículo+0xb28 = 0: sem batida com outro carro (reposição, pista/repor_carro.gd)
 # o contato com o mundo fixo mais forte do passo, pro som da batida (0x36e7a8):
 # {vn, r (ponto - centro), mat}; vazio sem contato
 var contato_som := {}

@@ -96,6 +96,9 @@ func _physics_process(dt: float) -> void:
 		env.append(_vetores[c][2])
 	for i in lista.size():
 		for j in range(i + 1, lista.size()):
+			# 0x151028: o par só bate com os dois +0xb28 != 0 (reposto = fantasma)
+			if lista[i].fantasma or lista[j].fantasma:
+				continue
 			var d := pos[i].distance_to(pos[j])
 			if d > PERTO or d > env[i] + env[j] + 0.01:
 				continue            # longe: nenhuma esfera de um toca a do outro
