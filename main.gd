@@ -106,11 +106,42 @@ const TRUCKS := [
 # Desligado o que é de carro (volante, painel, motor, luzes, fumaça) e o
 # piloto (o do ATV é outro: etapa 3); sem som de motor gravado pro ATV
 const BASE_ATV := "res://data/vehicles/atv_base.xml"      # Setup/VehicleParams/AtV/ATV.xml
+# as nossas da cabine e o piloto (etapa 1c) ficam desligados no ATV
+const DESLIGAR_ATV := ["volante_nosso", "volante_gira", "volante_treme", "maos", "painel", "motor_treme",
+	"motor_anima", "luzes", "farol", "fumaca", "som_motor", "piloto"]
+# ordem da lista do jogo (vehicles.xml FEOrder); o ATV_08 (Wildcat) é o
+# ATVCompMap_A (com para-lamas)
 const ATVS := [
+	{"name": "Nomad 250", "id": "ATV_01", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_01",
+		"data": "res://data/vehicles/atv_01.xml", "points": "res://data/vehicles/atv_01_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Misfit 250", "id": "ATV_02", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_02",
+		"data": "res://data/vehicles/atv_02.xml", "points": "res://data/vehicles/atv_02_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Warthog 350", "id": "ATV_03", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_03",
+		"data": "res://data/vehicles/atv_03.xml", "points": "res://data/vehicles/atv_03_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Hawk 350", "id": "ATV_04", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_04",
+		"data": "res://data/vehicles/atv_04.xml", "points": "res://data/vehicles/atv_04_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Ikon 450", "id": "ATV_05", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_05",
+		"data": "res://data/vehicles/atv_05.xml", "points": "res://data/vehicles/atv_05_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Baron 450", "id": "ATV_06", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_06",
+		"data": "res://data/vehicles/atv_06.xml", "points": "res://data/vehicles/atv_06_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Wickeedo 500", "id": "ATV_07", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_07",
+		"data": "res://data/vehicles/atv_07.xml", "points": "res://data/vehicles/atv_07_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Wildcat 650", "id": "ATV_08", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_08",
+		"data": "res://data/vehicles/atv_08.xml", "points": "res://data/vehicles/atv_08_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
+	{"name": "Scorpion 650", "id": "ATV_09", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_09",
+		"data": "res://data/vehicles/atv_09.xml", "points": "res://data/vehicles/atv_09_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": DESLIGAR_ATV},
 	{"name": "Samurai 650", "id": "ATV_10", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_10",
 		"data": "res://data/vehicles/atv_10.xml", "points": "res://data/vehicles/atv_10_points.bin", "base": BASE_ATV,
-		"atv": true, "desligar": ["volante_nosso", "volante_gira", "volante_treme", "maos", "painel", "motor_treme",
-		"motor_anima", "luzes", "farol", "fumaca", "som_motor", "piloto"]},
+		"atv": true, "desligar": DESLIGAR_ATV},
 ]
 const EXTRAS := [
 	{"name": "Escort RS1600", "id": "ESCORT", "tune_id": "BUGGY_12", "cams": "LanciaCam",

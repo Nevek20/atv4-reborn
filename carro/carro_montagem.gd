@@ -145,6 +145,7 @@ func _load_model() -> void:
 		var t := _textura_pintura(cores_pintura)
 		if t:
 			livery = t
+	livery_atual = livery
 	if not glb:
 		_materiais_corpo(mi, mesh, livery)
 	var aabb := mesh.get_aabb()

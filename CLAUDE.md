@@ -461,12 +461,14 @@ Frota
   NOSSA) e extras nossos de .glb (Escort, x 1.25). Sphinx speedrun = Sphinx
   com tudo no máximo, só do jogador ("so_jogador", rival não sorteia). Tabelas por carro usam
   car.chave() (o Lazarus tem o id do Jericho).
-- ATVs (main.ATVS, só o ATV_10 Samurai 650 por enquanto, o do save state;
-  teste_atv): mesma física do buggy, sem piloto até a etapa 1c. Peças
+- ATVs (main.ATVS, os 10 na ordem do jogo; o Samurai 650 é o do save
+  state; teste_atv): mesma física do buggy, sem piloto até a etapa 1c. Peças
   "Body/<tipo>" do pecas.json (carenagem com a pintura, escape, nerfbar)
   presas na carroceria; balanças e eixo = classes do truck; amortecedor,
   guidão e coroa portados (suspension_visual + suspensao.cpp). "rally" do
   pecas.json = roda da FRENTE sem balança (a de trás do ATV é de rally).
+  Para-lamas do Wildcat (ATVCompMap_A) = "FrontLeftBrake/Fairing", classe
+  do freio do truck, com a pintura (livery_atual).
   Final de fábrica 1.12: o 1.02 da RAM do atv_cl01 é do perfil do Matheus
   (os rivais lá têm o 0.5 de fábrica). No ATV a final é peça (curta, média,
   longa: FinalDriveRatio do upgrades.xml), sem o ajuste fino do buggy/truck.

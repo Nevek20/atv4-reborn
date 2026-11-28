@@ -2354,6 +2354,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     Standard 0.5, GP 0.25, TunedGP 0; 1.02 = 0 (a mais longa). O Matheus
     estava na "longa" (corridas longas): longa = 0 (RAM + ele). Curta e
     média ainda sem conferir (devem ser 1 e 0.5).
+- Os 10 ATVs (nov/2026, o Matheus pediu antes da etapa 1b): main.ATVS na
+  ordem do jogo, mesmas regras do Samurai. O Wildcat 650 (ATV_08) é o
+  ATVCompMap_A: os para-lamas (Fairing LeftMudGuard / RightMudGuard) ficam
+  no FrontLeftBrake / FrontRightBrake, a mesma classe do freio do truck
+  (0x221308: gira com o esterço em volta do WHEEL e sobe o curso), e levam
+  a pintura da carroceria (car.livery_atual). Câmbio conferido com os 7
+  rivais do atv_cl01 (bloco efetivo na RAM): 4 com o ATV.xml base (ATV_01
+  e 03: 23.1 / 13.2 / 9.2 / 7.1 / 5.8) e 3 com 28.8 / 16.5 / 11.5 / 8.9 /
+  7.2 (ATV_02 e 04), todos com final 1.08 = o Standard de fábrica.
+  teste_atv monta os 10 (peças, pintura, C++ = GDScript).
   - Andando com a física de hoje: 155 kg, 144 km/h em 7 s na largada do
     RX01, 4 rodas no chão 96% em reta. Virando ele levanta a roda de dentro
     (bitola estreita, CoM alto): esperado, mas o controle do piloto (peso,

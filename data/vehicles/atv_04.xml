@@ -1,0 +1,23 @@
+<Root FileVersion="1.0000000">
+   <RigidBody Mass_non_tuned="0.1699999" Mass_fully_tuned="0.1599999"/>
+   <Engine Rev_limiter_engage_rpm_non_tuned="11000.000" Rev_limiter_engage_rpm_fully_tuned="11000.000" Rev_limiter_disengage_rpm_non_tuned="10900.000" Rev_limiter_disengage_rpm_fully_tuned="10900.000" Max_rpm_non_tuned="12000.000" Max_rpm_fully_tuned="12000.000" Drive_torque_non_tuned="0.1480000" Drive_torque_fully_tuned="0.1819999" Friction_torque_non_tuned="0.0139999" Friction_torque_fully_tuned="0.0179999">
+      <Drive_torque_vs_rpm NumValues="13" RpmMax="11999.999" TorqueScale="0.1480000" Value0="0.0000000" Value1="0.2709999" Value2="0.3059999" Value3="0.3230000" Value4="0.3389999" Value5="0.3420000" Value6="0.3179999" Value7="0.2949999" Value8="0.2779999" Value9="0.2659999" Value10="0.2589999" Value11="0.229" Value12="0.207"/>
+      <Friction_torque_vs_rpm NumValues="13" RpmMax="11999.999" TorqueScale="0.0139999" Value0="0.0000000" Value1="0.0129999" Value2="0.0389999" Value3="0.0769999" Value4="0.1289999" Value5="0.1940000" Value6="0.2709999" Value7="0.3609999" Value8="0.4639999" Value9="0.5804999" Value10="0.7094999" Value11="0.8509995" Value12="1.0000000"/>
+   </Engine>
+   <Gearbox>
+      <Ratios Gear_R="-15.000000" Gear_1_non_tuned="28.799999" Gear_1_fully_tuned="28.799999" Gear_2_non_tuned="16.500000" Gear_2_fully_tuned="16.500000" Gear_3_non_tuned="11.500000" Gear_3_fully_tuned="11.500000" Gear_4_non_tuned="8.8999996" Gear_4_fully_tuned="8.8999996" Gear_5_non_tuned="7.1999998" Gear_5_fully_tuned="7.1999998"/>
+      <AutoManual Change_up_rpm="10000.000" Maximum_clutch_torque_non_tuned="0.0529999" Maximum_clutch_torque_fully_tuned="0.0639999"/>
+   </Gearbox>
+   <FrictionEllipse>
+      <FrontWheels>
+         <HalfWidth Maximum_friction_half_width="2.0999999" Maximum_friction="1.0000000" Minimum_friction_half_width="2.0999999" Minimum_friction="0.1000000"/>
+      </FrontWheels>
+      <RearWheels>
+         <HalfWidth Maximum_friction_half_width="1.9899999" Maximum_friction="1.0000000" Minimum_friction_half_width="1.9899999" Minimum_friction="0.1000000"/>
+      </RearWheels>
+   </FrictionEllipse>
+   <BasicSteering Understeer_coefficient_non_tuned="17.000000" Understeer_coefficient_fully_tuned="14.000000"/>
+   <PreLoad>
+      <Force_vs_speed ForceScale="50.000000"/>
+   </PreLoad>
+</Root>

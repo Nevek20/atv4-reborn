@@ -192,6 +192,7 @@ var lascas: Node3D = null
 var cores_pintura := {}
 var _pintura = null               # camadas (carro/pintura.gd), na 1ª vez que precisa
 var _mats_pintura: Array[StandardMaterial3D] = []   # materiais com a pintura ("white")
+var livery_atual: Texture2D = null    # a pintura da carroceria (o para-lama do ATV, na suspensão, usa também)
 # oficina (aba Piloto, carro/piloto_pintura.gd): roupa, capacete, óculos,
 # luva, bota e as cores. {} = a textura do piloto.png (perfil padrão); o main
 # põe as salvas do jogador antes do _ready (os rivais ficam no padrão)

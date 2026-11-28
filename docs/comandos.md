@@ -38,7 +38,7 @@ set VEL=20 & %GODOT% --headless --path . -s res://tests/teste_batida.gd   :: Sto
 %GODOT% --headless --path . -s res://tests/teste_freio.gd   :: patinada, ABS e trava
 %GODOT% --headless --path . -s res://tests/teste_roda.gd    :: giro das rodas por torque (no ar, preso)
 %GODOT% --headless --path . -s res://tests/teste_camera_passo.gd  :: câmera de órbita sem vai e volta
-%GODOT% --headless --path . -s res://tests/teste_atv.gd     :: ATV_10: câmbio x RAM, peças (carenagem, guidão, amortecedores, coroa) x exe, C++ = GDScript, anda
+%GODOT% --headless --path . -s res://tests/teste_atv.gd     :: os 10 ATVs montam (peças, pintura, câmbio x RAM dos rivais, C++ = GDScript); o ATV_10 anda
 %GODOT% --headless --path . -s res://tests/teste_camera_ram.gd    :: câmera parada x RAM de 6 save states (4 buggies, 2 trucks)
 %GODOT% --headless --path . -s res://tests/teste_camera_piloto.gd :: câmera do piloto: freada, curva, FOV, borrão, mouse (números de projeto)
 %GODOT% --headless --path . -s res://tests/teste_camera_orbita.gd  :: órbita: solto = câmera do jogo, lados, 3 voltas, volta curta, chão, mouse
@@ -136,7 +136,7 @@ python tools/migrar_assets.py            :: --ver só mostra; depois %GODOT% --h
 :: assets dos 12 buggies (modelo, peças, freios, rodas, pintura; + <modelo>_camada.obj com o 2º UV) -> assets/carros/buggy_NN
 python tools/gerar_buggies.py <unpacked> [<texturas>]   :: sem a pasta: "texturas" do lado da unpacked; para se não achar .png
 python tools/gerar_buggies.py <unpacked> [<texturas>] --classe truck   :: os 12 trucks -> assets/carros/truck_NN, data/vehicles/truck_NN*
-python tools/gerar_buggies.py <unpacked> [<texturas>] --classe atv --so 10   :: o Samurai 650 (ATV_10) -> assets/carros/atv_10, data/vehicles/atv_10*, atv_base.xml
+python tools/gerar_buggies.py <unpacked> [<texturas>] --classe atv   :: os 10 ATVs -> assets/carros/atv_NN, data/vehicles/atv_NN*, atv_base.xml
 :: só o alfa das texturas com furo (redes das janelas, treliça do Trident); o gerar_buggies já chama
 python tools/alfa_texturas.py <unpacked>
 :: só a pintura (cores, logos e número "00"; --numero 27, --sem-decalques); depois reimportar no Godot

@@ -14,9 +14,9 @@ code and docs.
 > **Status:** playable. One track (RX01, Rallycross) with a full race: intro
 > flyover, countdown, 7 AI rivals, laps, the game's HUD, Score, results
 > screen and pause menu. 12 buggies, 12 trucks, one unused truck rescued
-> from the game files and one extra car of our own. The first ATV (Samurai
-> 650) already drives with the buggy physics; its rider, the ATV-only
-> physics and the bikes are next.
+> from the game files and one extra car of our own. The 10 ATVs already
+> drive with the buggy physics; their rider, the ATV-only physics and the
+> bikes are next.
 
 ## Highlights
 
@@ -82,7 +82,7 @@ python tools\gob_tex2png.py <unpacked>\gob --out <textures>
 :: 2. buggies, trucks and the ATV (body, parts, brakes, wheels, tires, livery)
 python tools\gerar_buggies.py <unpacked> <textures>
 python tools\gerar_buggies.py <unpacked> <textures> --classe truck
-python tools\gerar_buggies.py <unpacked> <textures> --classe atv --so 10
+python tools\gerar_buggies.py <unpacked> <textures> --classe atv
 
 :: 3. driver, sounds and effects
 python tools\piloto.py <unpacked>

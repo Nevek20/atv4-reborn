@@ -18,6 +18,11 @@ extends SceneTree
 ##  - visual em C++ = GDScript;
 ##  - acelerando 6 s reto: anda, sobe marcha, as 4 rodas no chão quase o
 ##    tempo todo.
+## E os 10 ATVs montam (peças, pintura na carenagem; o Wildcat, ATVCompMap_A,
+## com os para-lamas na classe FrontLeftBrake e a pintura), visual em C++ =
+## GDScript em cada um, e o câmbio dos 7 rivais do mesmo save state: 4 com o
+## ATV.xml base (ATV_01 e 03: 23.1 / 13.2 / 9.2 / 7.1 / 5.8) e 3 com 28.8 /
+## 16.5 / 11.5 / 8.9 / 7.2 (ATV_02 e 04), todos com final 1.08.
 ## Uso: godot --headless --path . -s res://tests/teste_atv.gd
 
 const Car := preload("res://carro/car.gd")
@@ -25,6 +30,9 @@ const Main := preload("res://main.gd")
 const Terrain := preload("res://pista/terrain.gd")
 
 const MARCHAS_RAM := [23.1, 11.5, 7.7, 5.8, 4.6]
+# câmbio efetivo dos rivais na RAM do atv_cl01_largada (marchas 1..5, final)
+const RIVAIS_RAM := {"ATV_01": [[23.1, 13.2, 9.2, 7.1, 5.8], 1.08], "ATV_03": [[23.1, 13.2, 9.2, 7.1, 5.8], 1.08],
+	"ATV_02": [[28.8, 16.5, 11.5, 8.9, 7.2], 1.08], "ATV_04": [[28.8, 16.5, 11.5, 8.9, 7.2], 1.08]}
 const FINAL_FABRICA := 1.12
 const RE_RAM := -15.0
 
@@ -61,6 +69,85 @@ func _initialize() -> void:
 	car.terrain = terrain
 	root.add_child(car)
 	car.test_input = {"thr": 0.0, "brk": 0.0, "steer": 0.0}
+
+
+## os 10 ATVs: monta cada um, confere e solta (antes de qualquer passo)
+func _frota() -> void:
+	for v in Main.ATVS:
+		if not FileAccess.file_exists(String(v.dir).path_join("pecas.json")):
+			_falha("sem %s/pecas.json (gerar_buggies --classe atv)" % v.dir)
+			continue
+		var c = Car.new()
+		Main.configurar(c, v)
+		c.terrain = terrain
+		root.add_child(c)
+		var nomes := []
+		var pinta := 0
+		for n in c.model_root.get_children():
+			nomes.append(String(n.name))
+			if n.name == "Fairing" and n is MeshInstance3D:
+				for i in n.mesh.get_surface_count():
+					if c._mats_pintura.has(n.get_surface_override_material(i)):
+						pinta += 1
+		var sv = c.susp_vis
+		var faltam := []
+		for k in ["Fairing", "Exhaust", "Nerfbar"]:
+			if not k in nomes:
+				faltam.append(k)
+		for k in ["LeftFrame", "RightFrame", "RearAxle", "LeftShocks", "RightShocks", "Handlebar", "Sprocket"]:
+			if not sv.truck.has(k):
+				faltam.append(k)
+		if pinta == 0:
+			faltam.append("pintura da carenagem")
+		var lamas := ""
+		if v.id == "ATV_08":
+			for k in ["FrontLeftBrake", "FrontRightBrake"]:
+				var mis: Array = sv.truck.get(k, {}).get("mis", [])
+				var pl := 0
+				for mi in mis:
+					for i in mi.mesh.get_surface_count():
+						if c._mats_pintura.has(mi.get_surface_override_material(i)):
+							pl += 1
+				if mis.size() != 1 or pl == 0:
+					faltam.append("%s (para-lama: %d peças, %d com pintura)" % [k, mis.size(), pl])
+			lamas = " + para-lamas"
+		if sv.rally or sv.corners.size() != 2:
+			faltam.append("rally %s / %d cantos" % [sv.rally, sv.corners.size()])
+		# C++ x GDScript parado, com esterço
+		var d := 0.0
+		if sv._cpp:
+			sv._cpp.update(0.3)
+			var a := {}
+			for k in sv.truck:
+				var tk: Dictionary = sv.truck[k]
+				for mi in tk.get("mis", [tk.get("mi")]):
+					a[mi] = mi.transform
+			var cp = sv._cpp
+			sv._cpp = null
+			sv.update(0.3)
+			sv._cpp = cp
+			for mi in a:
+				var b: Transform3D = mi.transform
+				d = maxf(d, (a[mi].origin - b.origin).length() + (a[mi].basis.x - b.basis.x).length()
+					+ (a[mi].basis.y - b.basis.y).length() + (a[mi].basis.z - b.basis.z).length())
+		if d > 1e-5:
+			faltam.append("C++ diferente do GDScript (%.6f)" % d)
+		var g := Array(c.gears).slice(1)
+		var cambio := "%s final %.2f" % [str(g.map(func(x): return snappedf(x, 0.01))), c.P.final]
+		if RIVAIS_RAM.has(v.id):
+			var r: Array = RIVAIS_RAM[v.id]
+			for i in 5:
+				if absf(g[i] - r[0][i]) > 1e-3:
+					faltam.append("marcha %d %.2f (RAM %.1f)" % [i + 1, g[i], r[0][i]])
+			if absf(c.P.final - r[1]) > 1e-3:
+				faltam.append("final %.3f (RAM %.2f)" % [c.P.final, r[1]])
+			cambio += " = RAM"
+		print("  %-12s %s  %.0f kg  %s%s %s" % [v.name, v.id, c.mass, cambio, lamas,
+			"ok" if faltam.is_empty() else "FALHA: " + ", ".join(faltam)])
+		if not faltam.is_empty():
+			falhas += 1
+		root.remove_child(c)
+		c.free()
 
 
 func _falha(msg: String) -> void:
@@ -135,6 +222,7 @@ func _physics_process(dt: float) -> bool:
 	if car == null or not car.is_inside_tree():
 		return false
 	if t == 0.0:
+		_frota()
 		var p: Vector2 = Main.SPAWN_XZ
 		car.reset_to(Vector3(p.x, terrain.height_at(p.x, p.y) + 0.8, p.y), deg_to_rad(Main.SPAWN_YAW))
 		_montagem()
