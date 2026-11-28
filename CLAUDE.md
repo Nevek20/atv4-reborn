@@ -305,7 +305,7 @@ Pista RX01
   rivais também esperam 0.3 s andando (o preso #2 da IA repõe na hora,
   0x3646d0); reposto = fantasma (sem batida carro com carro, 0x151028)
   0.3 s e até a caixa dele sair da de outro. O carro NÃO pisca: o +0x68 do
-  objeto não é lido por ninguém no exe. Jogador preso (0x2017a8): nem todas
+  objeto não é lido por ninguém no exe (o Matheus confirmou no jogo). Jogador preso (0x2017a8): nem todas
   as rodas no chão, |v| < 1, |giro| < 0.55, sem voar > 0.2 s, por 0.69 s ->
   pede a reposição (capotado, de lado, encalhado).
 

@@ -2166,7 +2166,8 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   6 e 7, teste_reposicao). O "carro piscando" que estava no pendente NÃO
   existe no PAL: o objeto de reposição calcula um +0x68 (1 -> 0 na espera,
   (1 - cos(178 t)) / 2 depois), mas nenhum código do exe lê esse campo
-  (varredura do ELF inteiro, docs/engenharia_reversa.md). O que existe:
+  (varredura do ELF inteiro, docs/engenharia_reversa.md). O Matheus
+  confirmou no jogo: "ele não pisca, só respawna". O que existe:
   reposto = fantasma (veículo+0xb28 = 0: o par carro com carro não bate,
   0x151028) por 0.3 s e até a caixa dele sair da de qualquer outro.
   Objeto por carro (multiplayer: um por jogador, cada um com a sua tela
