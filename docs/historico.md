@@ -2306,6 +2306,24 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   câmbio da RAM = o do VehicleParams/AtV (23.1 / 11.5 / 7.7 / 5.8 / 4.6, ré
   -15, final 1.02, 10000 rpm na curva). O tools/ler_savestate.py é do buggy:
   no ATV a massa sai errada e só acha 3 rodas (o corpo do ATV é outro).
+  Commitado no atv4-dados (o Matheus deixou).
+- A física do ATV é o MESMO código da do buggy: o XML do ATV
+  (Setup/VehicleParams/AtV/ATV.xml = xml 15118, a base; ATV_01..10 por cima)
+  tem exatamente os mesmos blocos. O que muda são os valores, e alguns blocos
+  que no buggy são 0 (por isso nunca foram portados) e no ATV valem:
+  InAir/Flip_control (cambalhota: aceleração 950, até 500°/s, 0.9 s, entrada
+  entre 0.2 e 0.75), InAir/Lean_pitch_control (350, 125), InAir/Roll_control
+  (300, amortecimento 2, até sen 0.5, de pé com cos > -0.3),
+  Stability/DriverWeightTransfer (0.3 m pro lado e pra frente: o peso do
+  piloto), Bicycling.Torque 10, WheelForceHeightScales.Lateral_scale_at_
+  maximum_roll 0.075, InAir.Lean_back_gravity_scale 0.8, AntiPitch 0. Já
+  portados e com valor diferente: Wheelies/Endos, Brake/No_throttle pitch,
+  Yaw_control, Lateral_control, Powerslide, CoM (0, 0.40, 0.15), massa 0.17
+  t. Plano da etapa 1: (a) gerar o ATV (chassi + carenagem + rodas + nerf
+  bar) e o XML dele e ele andar no RX01 com a física de hoje; (b) portar os
+  blocos acima pelo exe; (c) o piloto do ATV (pose, inclinar com o comando,
+  cair).
+
 
 ## Pendente / ideias
 
