@@ -7,6 +7,9 @@ extends SceneTree
 ## reto ele sai da pista a ~180 km/h e pula (11 s): no ar a roda continua com o
 ## material da terra até ficar a 25 cm do chão e depois a cor some em 1 s, então
 ## sobra um rastro curto (o jogo, 0x225108). Imprime quanto tempo soltou no ar.
+## Longe (bug do Matheus, nov/2026): soltando na terra, o carro fica 0.3 s
+## "longe do som" (rival a mais de 150 m) e volta: não pode encher de nuvens a
+## reta de onde parou até onde está, e as pedrinhas soltas continuam andando.
 ## Uso: godot --headless --path . -s res://tests/teste_poeira.gd [-- veh]
 
 const Car := preload("res://carro/car.gd")
@@ -57,6 +60,7 @@ func _physics_process(dt: float) -> bool:
 	if t >= 1.4 and parado_vivas < 0:
 		parado_vivas = pq.vivas()
 	max_vivas = maxi(max_vivas, pq.vivas())
+	_longe(pq)
 	_mede_ar(pq)
 	if t >= prox:
 		prox += 1.0
@@ -87,6 +91,15 @@ func _physics_process(dt: float) -> bool:
 	if max_vivas < 20:
 		falhas += 1
 		print("FALHA: andando soltou só %d nuvens" % max_vivas)
+	if longe_fase != 3:
+		falhas += 1
+		print("FALHA: o teste do longe não rodou (fase %d)" % longe_fase)
+	elif longe_extra > 60:
+		falhas += 1
+		print("FALHA: voltando de longe soltou %d nuvens em 2 passos (a reta de onde parou)" % longe_extra)
+	elif longe_pedras_paradas:
+		falhas += 1
+		print("FALHA: longe, as pedrinhas soltas ficaram paradas")
 	if ar_tempo > 1.5 and ar_max <= 0.05:
 		falhas += 1
 		print("FALHA: no ar parou de soltar na hora (o jogo deixa um rastro)")
@@ -95,6 +108,55 @@ func _physics_process(dt: float) -> bool:
 		print("FALHA: longe do chão soltou por %.2f s (a cor some em 1 s)" % (ar_ultima - ar_longe))
 	print("teste_poeira: %s (máximo de nuvens vivas %d de %d)" % ["ok" if falhas == 0 else "FALHA", max_vivas, pq.max_nuvens])
 	return true
+
+
+var longe_fase := 0
+var longe_t := 0.0
+var longe_soltas := 0
+var longe_extra := 0
+var longe_idade := 0.0
+var longe_pedras := 0
+var longe_pedras_paradas := false
+
+
+## 0.3 s longe do som na terra e volta (car.gd: poeira.cortar, pedras sem
+## emitir mas andando)
+func _longe(pq) -> void:
+	var pd = car.pedras
+	match longe_fase:
+		0:
+			var soltando := false
+			for e in pq.emissores:
+				if e.estado == 2 and (e.cor as Color).a > 0.2:
+					soltando = true
+			if soltando and t > 9.0 and (pd == null or pd.vivas() > 0 or t > 10.3):
+				longe_fase = 1
+				longe_t = t
+				car.longe_som = true
+				longe_pedras = pd.vivas() if pd else 0
+				longe_idade = _idade_max(pd)
+		1:
+			if t - longe_t >= 0.3:
+				car.longe_som = false
+				longe_fase = 2
+				longe_soltas = pq.soltas
+				longe_t = t
+				if pd and longe_pedras > 0:
+					longe_pedras_paradas = pd.vivas() == longe_pedras and _idade_max(pd) <= longe_idade + 0.01
+		2:
+			if t - longe_t >= 0.039:
+				longe_extra = pq.soltas - longe_soltas
+				longe_fase = 3
+				print("  longe 0.3 s na terra: voltando soltou %d nuvens em 2 passos; pedrinhas %d no começo, paradas %s" % [
+					longe_extra, longe_pedras, longe_pedras_paradas])
+
+
+static func _idade_max(pd) -> float:
+	var m := 0.0
+	if pd:
+		for a in pd.p_idade:
+			m = maxf(m, a)
+	return m
 
 
 ## rastro no ar: quanto tempo as rodas de trás soltam depois de sair do chão

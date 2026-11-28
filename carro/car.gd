@@ -680,6 +680,8 @@ func _solve_static(w: Dictionary, f_load: float) -> float:
 func reset_to(pos: Vector3, yaw: float) -> void:
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
+	if poeira:
+		poeira.cortar()             # teleporte: a poeira não liga o lugar antigo ao novo
 	global_transform = Transform3D(Basis(Vector3.UP, yaw), pos)
 	reset_physics_interpolation()   # teleporte: não interpolar do lugar antigo
 	pos_ant = pos
@@ -1029,12 +1031,16 @@ func _physics_process(dt: float) -> void:
 		_roda_suja_passo(1.0 / JIT_HZ)
 		if perf_on: _t = _pf("ef: sujeira", _t)
 		# rival além do som 3D (150 m): não solta poeira nem pedrinha nova
-		# (minúsculas na tela; as soltas continuam). NOSSO, só CPU
-		if poeira and not longe_som:
-			poeira.passo(1.0 / JIT_HZ, v)
+		# (minúsculas na tela; as soltas continuam andando e somem). NOSSO,
+		# só CPU. A poeira corta o grupo (voltando, não liga com a última)
+		if poeira:
+			if longe_som:
+				poeira.cortar()
+			else:
+				poeira.passo(1.0 / JIT_HZ, v)
 		if perf_on: _t = _pf("ef: poeira", _t)
-		if pedras and not longe_som:
-			pedras.passo(1.0 / JIT_HZ, v)
+		if pedras:
+			pedras.passo(1.0 / JIT_HZ, v, not longe_som)
 		if lascas:
 			lascas.passo(1.0 / JIT_HZ)
 		if perf_on: _t = _pf("ef: pedras e lascas", _t)

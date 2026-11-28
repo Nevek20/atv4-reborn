@@ -319,6 +319,17 @@ func passo(dt: float, v: Vector3) -> void:
 		_emitir(e, ponto, maxf(espaco, 0.01), ini, forca, tp, dt)
 
 
+## acaba o grupo de cada roda (0x227968, estado 0): a próxima nuvem nasce
+## onde a roda estiver, sem ligar com a última. Chamado quando a emissão para
+## por fora (rival longe do som 3D, NOSSO) e no teleporte (reset_to). Até
+## nov/2026 o grupo ficava aberto: voltando, o _emitir enchia de nuvens a
+## reta da última nuvem até a roda (o Matheus: poeira "do nada" na 1ª curva,
+## toda volta, sem carro lá)
+func cortar() -> void:
+	for e in emissores:
+		e.estado = 0
+
+
 ## folga da roda no ar até o chão embaixo dela (o raio da física só alcança
 ## 5 cm abaixo da roda esticada; aqui até 0.3 m, além da regra dos 0.25)
 func _folga(centro: Vector3, up: Vector3, r: float) -> float:

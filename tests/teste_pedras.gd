@@ -7,7 +7,10 @@ extends SceneTree
 ## (atrás, do lado). Larga num ponto de terra comum perto da largada.
 ## Confere: parado não solta; patinando na terra solta (o save state da
 ## derrapagem tem 80 vivas); o estoque (256) não estoura; derrapando as
-## pedras saem pro lado em que o carro escorrega (o jogo, drr2).
+## pedras saem pro lado em que o carro escorrega (o jogo, drr2). Antes de virar
+## o carro fica "longe do som" (rival a mais de 150 m) 1.1 s: não solta nenhuma nova e
+## as que estavam no ar continuam andando e somem (bug do Matheus, nov/2026:
+## pedrinhas e borrifos parados no mapa).
 ## Uso: godot --headless --path . -s res://tests/teste_pedras.gd [-- veh]
 
 const Car := preload("res://carro/car.gd")
@@ -61,6 +64,13 @@ static func terra_perto(terrain, c: Vector2) -> Vector2:
 			if ok and absf(terrain.height_at(p.x, p.y) - terrain.height_at(p.x + fr.x * 8, p.y + fr.y * 8)) < 0.4:
 				return p
 	return c
+
+
+var longe_t := -1.0
+var longe_vivas := 0
+var longe_soltas := 0
+var longe_fim := -1
+var longe_novas := -1
 
 
 func _physics_process(dt: float) -> bool:
@@ -122,8 +132,25 @@ func _physics_process(dt: float) -> bool:
 			t, v.length() * 3.6, rad_to_deg(car.sideslip), n, npedra, n - npedra, pq.soltas - soltas_ant,
 			alt, atras / maxf(n, 1), lado / maxf(n, 1), rodas])
 		soltas_ant = pq.soltas
-	if t < vira + 4.0:
+	# longe do som 1.1 s acelerando na terra (antes de virar), com pedras no ar
+	if longe_t < 0.0 and t > 2.5 and t < vira - 1.2 and pq.vivas() >= 20:
+		longe_t = t
+		longe_vivas = pq.vivas()
+		longe_soltas = pq.soltas
+		car.longe_som = true
+	if longe_t >= 0.0 and car.longe_som and t >= longe_t + 1.1:
+		car.longe_som = false
+		longe_fim = pq.vivas()
+		longe_novas = pq.soltas - longe_soltas
+		print("  longe 1.1 s: vivas %d -> %d, soltas novas %d" % [longe_vivas, longe_fim, longe_novas])
+	if t < vira + 5.0:
 		return false
+	if longe_t < 0.0:
+		falhas += 1
+		print("FALHA: nenhuma pedra no ar pra conferir o longe")
+	elif longe_fim != 0 or longe_novas != 0:
+		falhas += 1
+		print("FALHA: longe as pedras ficaram paradas no ar (%d) ou saíram novas (%d)" % [longe_fim, longe_novas])
 	if parado != 0:
 		falhas += 1
 		print("FALHA: parado soltou %d" % parado)

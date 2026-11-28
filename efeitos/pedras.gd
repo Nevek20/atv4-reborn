@@ -164,9 +164,13 @@ func montar(c) -> bool:
 
 
 ## um quadro do jogo (0x3bb5d0): emite (0x3bb618) e anda (0x3b9d20).
-## v = velocidade do carro (mundo, corpo+0x90)
-func passo(dt: float, v: Vector3) -> void:
-	_emitir(v)
+## v = velocidade do carro (mundo, corpo+0x90). emite = false (rival longe do
+## som 3D, NOSSO): só as que já saíram andam. Até nov/2026 o rival longe nem
+## chamava o passo e as soltas (pedrinhas e borrifos) ficavam paradas no ar
+## no mapa até ele voltar (o Matheus viu)
+func passo(dt: float, v: Vector3, emite := true) -> void:
+	if emite:
+		_emitir(v)
 	_andar(dt)
 
 

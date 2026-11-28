@@ -763,6 +763,22 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   No RX01 (taxa 0.2) a lama do pneu cresce devagar e quase só patinando
   (x10) e some no asfalto (alfa 0); na lama do Hinter Valley a taxa é 3.0.
 
+- Poeira e pedrinhas dos rivais bugando (nov/2026, o Matheus: "a fumaça
+  que tem as pedrinhas fica às vezes estática no mapa, e as poeiras às vezes
+  aparecem do nada na primeira curva indo reto, toda volta, sem carro lá").
+  As duas eram do corte NOSSO de CPU do rival longe do som 3D (150 m da
+  câmera, car.gd): (1) o pedras.passo emite E anda as soltas, e longe ele não
+  era chamado: as pedrinhas e os borrifos no ar ficavam congelados no mapa
+  até o rival voltar; (2) a poeira não soltava, mas o grupo de cada roda
+  ficava aberto com a última nuvem de antes: voltando pro alcance, o _emitir
+  enchia de nuvens a reta inteira entre os dois pontos (0.15 m entre nuvens,
+  até o limite de 1024), sempre no mesmo lugar da volta. O mesmo no
+  teleporte (reposição). Agora longe as soltas andam e só não sai nova, e a
+  poeira corta o grupo (poeira.cortar, estado 0: a próxima nasce onde a roda
+  está), também no reset_to. teste_poeira: voltando de 0.3 s longe na terra,
+  o código velho soltava 241 nuvens em 2 passos, o novo 14 (o normal);
+  teste_pedras: 1.1 s longe, as 21 no ar ficavam paradas, agora somem.
+
 ## Som
 
 - Som de pneu, suspensão e pouso = do jogo (sfx_carro.gd, docs Som de

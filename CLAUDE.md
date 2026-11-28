@@ -334,6 +334,11 @@ Efeitos e som (todos FECHADOS pelo Matheus: só reabrir com prova nova)
   CARRO + desempate por tipo (sorting_offset compensa o centro da caixa).
   Pela caixa do rastro a ordem trocava ~5 vezes por segundo e piscava
   (tests/medir_ordem_fx.gd). Efeito novo: entra nessa lista.
+- Rival longe do som (longe_som, 150 m) não solta efeito novo, mas as
+  pedrinhas/borrifos soltos continuam andando (pedras.passo emite=false) e a
+  poeira corta o grupo (poeira.cortar, também no reset_to): sem isso as
+  soltas ficavam paradas no mapa e, voltando, uma reta de poeira ligava o
+  ponto antigo ao novo (bug do Matheus, nov/2026).
 - Som de pneu, suspensão, pouso e batida = do jogo (989snd). Mistura nossa
   por cima: SO_DERRAPANDO e GANHO_PNEU 0.6.
 - Som 3D de rival: player novo_player(dono, ancora, false) e o dono solta no
