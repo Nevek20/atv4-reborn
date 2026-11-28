@@ -2506,6 +2506,7 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     0; nos 4 save states parados vale 0). A posição do ponto não muda (o
     exe só usa x e z; o MINIMAPS.xml não tem Y). Largado de 6 m: 1.63x
     caindo até 1.0 no pouso. Fora do passo da física a altura sai do relevo.
+    O Matheus testou: "funcionou perfeito".
   - Tempos: "--:--:--" antes do VAI e o BEST LAP até fechar a 1ª volta; o
     TIME da 1ª volta = o TOTAL (PAL: 00:51:88 nos dois).
   - LEAD: vermelho (248,44,44) com "-" atrás do líder (PAL); verde na frente
