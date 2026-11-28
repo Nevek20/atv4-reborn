@@ -3,6 +3,7 @@ extends SceneTree
 ## state placar_final.p2s do Matheus (nome do perfil trocado por PLAYER), por
 ## cima de um fundo cinza. Uso:
 ##   godot --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pagina]
+## BOTOES=ps / xbox / pc escolhe os ícones da barra (padrão: o aparelho).
 ## t = segundos de tela (os quadriculados andam); pagina = resultados (padrão),
 ## pausa (as opções do pause.p2s), de_novo (Race again do finish_2.p2s) ou
 ## confirma (o "ARE YOU SURE?" do Restart)
@@ -32,6 +33,9 @@ func _initialize() -> void:
 		quit(1)
 		return
 	root.add_child(r)
+	# BOTOES=ps / xbox / pc: os ícones da barra (menu/botoes.gd)
+	if OS.get_environment("BOTOES") != "":
+		preload("res://menu/botoes.gd").FIXO = OS.get_environment("BOTOES")
 	r.mostrar(CL)
 	var a := OS.get_cmdline_user_args()
 	if a.size() > 2 and a[2] == "pausa":

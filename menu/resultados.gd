@@ -85,6 +85,7 @@ const T_ANIM := 0.2537369         # DAT_00847230 (RAM)
 # a página ativa (abriu, ou voltou da confirmação) = IG_scrollVert
 # (ScrollVert). Escolher e voltar pro jogo: sem som (vídeo do Matheus)
 const SomJogo := preload("res://som/som_jogo.gd")
+const Botoes := preload("res://menu/botoes.gd")   # ícones por aparelho (PS / Xbox / PC, NOSSO)
 const SOM_TROCA := "Scroll"
 const SOM_PONTA := "Back"
 const SOM_ATIVA := "ScrollVert"
@@ -254,7 +255,7 @@ func escolhida() -> String:
 	return String(opcoes[opcao]) if opcao < opcoes.size() else ""
 
 
-## setas / X (ok) / triângulo ou Esc (voltar); Start na pausa volta pro jogo
+## setas / X (ok) / B, triângulo ou Esc (voltar); Start na pausa volta pro jogo
 func _unhandled_input(ev: InputEvent) -> void:
 	if not visible or opcoes.is_empty():
 		return
@@ -277,8 +278,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 				acao = "dir"
 			JOY_BUTTON_A:
 				acao = "ok"
-			JOY_BUTTON_Y, JOY_BUTTON_START:
-				acao = "voltar"
+			JOY_BUTTON_B, JOY_BUTTON_Y, JOY_BUTTON_START:
+				acao = "voltar"             # B (o Matheus) e Y (a posição do Triângulo)
 	elif ev is InputEventJoypadMotion and ev.axis == JOY_AXIS_LEFT_X:
 		var lado := 0 if absf(ev.axis_value) < 0.5 else int(signf(ev.axis_value))
 		if lado != _eixo and lado != 0:
@@ -754,7 +755,10 @@ func _barra(_r: Rect2, a: float) -> void:
 	var tx: Texture2D = tex.get(tn)
 	for item in BARRA.get(pagina, []):
 		var x0: float = item[2]
-		if tx and _medindo == null:
+		# Xbox e PC: ícone NOSSO no lugar do do PS2 (menu/botoes.gd)
+		if _medindo == null and Botoes.desenhar(self, item[0], _px(Rect2(x0 - BOTAO_W, BOTAO_Y, BOTAO_W, BOTAO_H)), a):
+			pass
+		elif tx and _medindo == null:
 			var b: Array = info.texturas[tn].caixas.get(item[0], [0, 0, 1, 1])
 			var p := _px(Rect2(x0 - BOTAO_W, BOTAO_Y, BOTAO_W, BOTAO_H))
 			var ts := tx.get_size()

@@ -6,7 +6,8 @@ extends SceneTree
 ##  2. setas andam no seletor; Enter no Respot volta pro jogo e pede a
 ##     reposição (tela preta, menu/fader.gd);
 ##  3. a 25 m/s a pausa vem sem o Respot (0x4613a0: |v| < 17.88);
-##  4. Esc / triângulo na pausa = Resume; Quit pede "ARE YOU SURE?" (começa
+##  4. Esc / B do controle na pausa = Resume (e os ícones da barra trocam
+##     pelo aparelho: teclado = teclas, controle = Xbox; menu/botoes.gd); Quit pede "ARE YOU SURE?" (começa
 ##     no NO: volta pra pausa na mesma opção; seta = YES: treino livre);
 ##  5. Race again: Restart recomeça a corrida, Exit volta pro livre;
 ##  6. sons do menu (banco Menu_IG): abrir = ScrollVert, trocar = Scroll,
@@ -35,6 +36,17 @@ func _tecla(k: Key) -> void:
 	var ev := InputEventKey.new()
 	ev.physical_keycode = k
 	ev.keycode = k
+	ev.pressed = true
+	root.push_input(ev)
+	var solta := ev.duplicate()
+	solta.pressed = false
+	root.push_input(solta)
+
+
+func _botao(b: JoyButton) -> void:
+	var ev := InputEventJoypadButton.new()
+	ev.device = 0
+	ev.button_index = b
 	ev.pressed = true
 	root.push_input(ev)
 	var solta := ev.duplicate()
@@ -119,15 +131,26 @@ func _physics_process(_dt: float) -> bool:
 			print("pausa a 25 m/s: opções %s" % [r.opcoes])
 			if r.opcoes.has("Respot"):
 				_falha("Respot a 25 m/s")
-			# Esc = Resume
-			_tecla(KEY_ESCAPE)
+			var Botoes = preload("res://menu/botoes.gd")
+			if Botoes.atual() != "pc":
+				_falha("depois do teclado os ícones são %s (esperado pc)" % Botoes.atual())
+			# B do controle = Resume (o Matheus; o Y também volta)
+			_botao(JOY_BUTTON_B)
 			marca.q = q
+			marca.botoes = Botoes
 			fase = 6
 		6:
 			if q < marca.q + 3:
 				return false
 			if paused or r.visible:
-				_falha("Esc na pausa não voltou pro jogo")
+				_falha("B do controle na pausa não voltou pro jogo")
+			print("ícones depois do controle: %s" % marca.botoes.atual())
+			if marca.botoes.atual() != "xbox":
+				_falha("depois do controle os ícones são %s (esperado xbox)" % marca.botoes.atual())
+			if marca.botoes.de_controle("Sony DualSense Wireless Controller") != "ps" \
+					or marca.botoes.de_controle("PS4 Controller") != "ps" \
+					or marca.botoes.de_controle("Xbox Series Controller") != "xbox":
+				_falha("nome do controle -> ícones errado")
 			# Quit: pede confirmação; NO volta pra pausa; YES = treino livre
 			main.abrir_pausa()
 			main.menu_acao("pausa", "ok", "QUIT")

@@ -67,7 +67,7 @@ camera/              game_camera.gd (câmera de corrida do exe), camera_jitter.g
 menu/                oficina.gd (pintura, logos, piloto, upgrade e ajuste, tecla O até ter a Garagem; a tela é nossa),
                      hud_jogo.gd (o HUD do jogo pelo HUD_CIRCUIT.xml), hud_basico.gd (NOSSO, só sem assets/hud),
                      resultados.gd (telas da corrida pelo .fex: resultados, pausa, Race again),
-                     fader.gd (tela preta da reposição)
+                     fader.gd (tela preta da reposição), botoes.gd (ícones PS / Xbox / PC, NOSSO)
 efeitos/             poeira.gd, pedras.gd, lascas.gd, palha.gd (portas do jogo), fumaca.gd (nossa)
 pista/               terrain.gd (relevo e material do RX01), objetos_rx01.gd, multidao.gd, ceu.gd, corrida.gd (Enter: introdução, contagem, voltas), ia.gd (rivais),
                      reposicao.gd (reposição automática do jogo, R na corrida), truques.gd (Score: Slide e AirTime)
@@ -418,6 +418,10 @@ Tela de resultados (menu/resultados.gd)
   (LAYER_CONFIRM, começa no NO; a faixa dela fica no lugar da da pausa,
   NOSSO: no jogo pula 2.7 px). teste_resultados confere as 3 telas com a
   RAM, teste_pausa o fluxo e os sons. Fora da corrida o Esc fecha o jogo.
+- Ícones da barra (menu/botoes.gd, NOSSO): pelo último aparelho usado;
+  teclado = teclas (Enter / Esc), controle PlayStation = os do jogo, o resto
+  = Xbox (A / B / menu). Voltar no controle = B (o Matheus) e o Y continua.
+  Mesmo lugar do ícone do PS2; print_resultados com BOTOES=ps/xbox/pc.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
 - Lanterna e farol: o nosso (lente acesa pelos pixels), não o halo do jogo

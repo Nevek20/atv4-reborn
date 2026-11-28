@@ -2876,6 +2876,20 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   zerado nesse tempo (deve ser a batida com os outros desligada: fantasma).
   Os rivais também esperam 0.3 s antes de repor; aqui repõem na hora.
 
+- Ícones dos botões por aparelho (nov/2026, NOSSO, pedido do Matheus:
+  "os botões dá pra colocar os de PC e de Xbox?"; menu/botoes.gd). O jogo só
+  tem os do PS2. Três jogos: PlayStation = os do jogo; Xbox = círculo escuro
+  com a letra na cor de sempre (A verde, B vermelho; Start = o botão de
+  menu, 3 tracinhos), sem logo; PC = tecla clara com Enter / Esc. Troca
+  sozinho pelo último aparelho usado (teclado / mouse = PC; controle pelo
+  nome do Godot: PlayStation, DualShock, DualSense, Sony = PS; o resto =
+  Xbox); sem toque ainda, o controle ligado ou PC. Botoes.FIXO prende num
+  (vai pras opções de controle). Voltar no controle = B, escolha do Matheus
+  ("vai de B"); o Y (a posição do Triângulo) continua voltando. Mesmo lugar
+  e tamanho do ícone do PS2 na barra do .fex. teste_pausa: teclado deixa PC,
+  o B do controle volta pro jogo e deixa Xbox, nomes dos controles.
+  Multiplayer: hoje um estilo pra tela toda; com 2 jogadores, por aparelho.
+
 ## HUD básico (nov/2026, NOSSO)
 
 - Agora só quando falta o assets/hud (o HUD do jogo toma o lugar).

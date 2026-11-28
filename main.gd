@@ -217,6 +217,10 @@ func _ready() -> void:
 	fader = preload("res://menu/fader.gd").new()
 	layer.add_child(fader)
 	layer.move_child(fader, 0)
+	# ícones dos botões pelo aparelho usado (menu/botoes.gd, NOSSO)
+	var botoes := preload("res://menu/botoes.gd").new()
+	botoes.name = "Botoes"
+	add_child(botoes)
 	resultados = preload("res://menu/resultados.gd").new()
 	if resultados.montar():
 		layer.add_child(resultados)
