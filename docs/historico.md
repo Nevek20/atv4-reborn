@@ -2894,7 +2894,16 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   em branco e a letra por cima em preto, no estilo dos símbolos do jogo
   (miolo medido no atlas new_buttons_4bit_en_GB: anel do Cruz com centro
   em 22.5, 25.5 e 11 px; tecla do L1 de 11, 16 a 41, 32). Sem o atlas fica
-  o desenho simples de antes.
+  o desenho simples de antes. Na sequência (o Matheus: "tem um risquinho
+  nos botões" e "as letras estão muito bonitas em comparação aos botões,
+  deixa na mesma resolução"): o ícone passou a ser montado em pixels, do
+  tamanho do selo no atlas, e desenhado igual ao do jogo. O risquinho era a
+  ponta do X sobrando fora do círculo branco; agora o X é apagado como peça
+  solta (as partes escuras perto do centro que não encostam no anel), sem
+  círculo por cima. Letras = a fonte do próprio jogo (FONT_MEDIUM no
+  círculo, FONT_SMALL na tecla), pretas e no tamanho dela; o "Enter" não
+  cabia na tecla do L1 e a tecla alarga repetindo a coluna do meio (cresce
+  pra esquerda), em vez de encolher a letra.
   Multiplayer: hoje um estilo pra tela toda; com 2 jogadores, por aparelho.
 
 ## HUD básico (nov/2026, NOSSO)

@@ -5,6 +5,7 @@ extends Node
 ##  - "xbox": o selo do Cruz do jogo com A / B por cima (Start = o botão de
 ##    menu, 3 tracinhos), preto como os símbolos do jogo;
 ##  - "pc": o selo do L1 do jogo (uma tecla) com Esc / Enter por cima.
+##  Os dois montados em pixels na resolução do selo, com a FONT_SMALL do jogo.
 ## Troca sozinho pelo último aparelho usado: teclado / mouse = pc; controle =
 ## pelo nome que o Godot dá (PlayStation, DualShock, DualSense, Sony = ps; o
 ## resto, Xbox e desconhecido, = xbox). Sem nenhum toque ainda: o controle
@@ -62,72 +63,203 @@ static func de_controle(nome: String) -> String:
 
 ## desenha o ícone (xbox / pc) no lugar do ícone do PS2 (r = a caixa dele em
 ## px); devolve false no "ps" (quem chama desenha o do jogo). Com o atlas do
-## jogo (tx + caixas do new_buttons_4bit_en_GB): o selo original com a letra
-## por cima (o Matheus: "pegar os botões originais e colocar por cima"):
-## Xbox = o selo do Cruz com o miolo apagado e A / B (ou os 3 tracinhos do
-## menu); PC = o selo do L1 (a tecla) com Esc / Enter. Sem o atlas, o desenho
-## simples de antes
+## jogo: o selo original com a letra por cima (o Matheus: "pegar os botões
+## originais e colocar por cima"), montado NA RESOLUÇÃO DO SELO (icone()):
+## a letra sai com os mesmos pixels do botão (o Matheus: "as letras estão
+## muito bonitas em comparação aos botões"). fontes = {"FONT_SMALL": [textura,
+## glifos], "FONT_MEDIUM": [...]} (os glifos do menu/resultados.gd). Sem o
+## atlas, o desenho simples
 static func desenhar(ci: CanvasItem, caixa: String, r: Rect2, alfa: float, tx: Texture2D = null,
-		caixas: Dictionary = {}) -> bool:
+		caixas: Dictionary = {}, fontes: Dictionary = {}) -> bool:
 	var e := atual()
 	if e == "ps":
 		return false
 	var acao: String = ACAO.get(caixa, "ok")
-	var base := "cross_button" if e == "xbox" else "L1_button"
-	if tx and caixas.has(base):
-		_selo(ci, e, acao, r, alfa, tx, caixas[base])
+	var ic: Array = icone(e, acao, tx, caixas, fontes) if tx else []
+	if not ic.is_empty():
+		# a tecla alargada cresce pra esquerda (o texto da barra vem depois)
+		var k: float = ic[1]
+		var r2 := Rect2(r.end.x - r.size.x * k, r.position.y, r.size.x * k, r.size.y)
+		ci.draw_texture_rect(ic[0], r2, false, Color(1, 1, 1, alfa))
 		return true
 	_simples(ci, e, acao, r, alfa)
 	return true
 
 
-## o miolo de cada selo, em fração da caixa dele no atlas (medido no
-## new_buttons_4bit_en_GB, 256 x 256): o Cruz (45 x 56) tem o anel com
-## centro em (22.5, 25.5) e 11 px por dentro; o L1 (46 x 55) tem a tecla
-## branca de (11, 16) a (41, 32)
-const MIOLO_CRUZ := Vector3(0.5, 0.455, 0.215)        # centro x, y e raio (x largura)
-const MIOLO_L1 := Rect2(0.239, 0.291, 0.652, 0.291)
 const COR_LETRA := Color(0.0, 0.0, 0.0)              # preta como os símbolos do jogo
-static var _fonte: Font = null
+static var _cache := {}                               # "xbox:ok" -> [ImageTexture, largura / a do selo]
 
 
-static func _fonte_negrito() -> Font:
-	if _fonte == null:
-		var fv := FontVariation.new()
-		fv.base_font = ThemeDB.fallback_font
-		fv.variation_embolden = 0.9
-		_fonte = fv
-	return _fonte
-
-
-static func _selo(ci: CanvasItem, e: String, acao: String, r: Rect2, alfa: float, tx: Texture2D, b: Array) -> void:
-	var ts := tx.get_size()
-	ci.draw_texture_rect_region(tx, r, Rect2(b[0] * ts.x, b[1] * ts.y, (b[2] - b[0]) * ts.x, (b[3] - b[1]) * ts.y),
-		Color(1, 1, 1, alfa))
-	var f := _fonte_negrito()
-	var branco := Color(1, 1, 1, alfa)
-	var cor := Color(COR_LETRA.r, COR_LETRA.g, COR_LETRA.b, alfa)
+## o ícone montado em pixels, do tamanho do selo no atlas: [textura, largura
+## em relação ao selo (1 = igual)]
+##  - Xbox = o selo do Cruz (45 x 56): o símbolo do meio (as peças escuras
+##    soltas dentro do anel: o X e a borda clara dele) vira branco e a letra
+##    entra no centro do anel. Até nov/2026 era um círculo branco por cima e
+##    a ponta do X sobrava na borda (o "risquinho" que o Matheus viu);
+##  - PC = o selo do L1 (46 x 55): a tecla branca de (11, 16) a (41, 32) é
+##    limpa e o nome entra nela; se não cabe, a tecla alarga repetindo a
+##    coluna do meio (a letra nunca encolhe).
+## Letras = as fontes do jogo (as do HUD), pretas, no tamanho delas: a MEDIUM
+## no círculo, a SMALL na tecla. [] = sem a imagem do atlas
+static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fontes: Dictionary) -> Array:
+	var chave := e + ":" + acao
+	if _cache.has(chave):
+		return _cache[chave]
+	var base := "cross_button" if e == "xbox" else "L1_button"
+	var atlas := _imagem(tx)
+	if atlas == null or not caixas.has(base):
+		return []
+	var b: Array = caixas[base]
+	var w := atlas.get_width()
+	var h := atlas.get_height()
+	var reg := Rect2i(int(b[0] * w), int(b[1] * h), int(b[2] * w) - int(b[0] * w), int(b[3] * h) - int(b[1] * h))
+	var img := atlas.get_region(reg)
+	var w0 := img.get_width()
+	var branco := Color(1, 1, 1, 1)
+	var f: Array = fontes.get("FONT_MEDIUM" if e == "xbox" else "FONT_SMALL", [])
+	var letras: Array = _glifos(f, XBOX[acao][0] if e == "xbox" else PC[acao])
 	if e == "xbox":
-		var c := Vector2(r.position.x + MIOLO_CRUZ.x * r.size.x, r.position.y + MIOLO_CRUZ.y * r.size.y)
-		var raio := MIOLO_CRUZ.z * minf(r.size.x, r.size.y * 45.0 / 56.0)
-		ci.draw_circle(c, raio, branco)
+		var cx := Vector2(img.get_width() * 0.5 + 0.5, img.get_height() * 0.455)
+		_limpa_miolo(img, cx)
 		if acao == "start":
-			var w := raio * 1.1
-			for k in 3:
-				var y := c.y + (k - 1) * raio * 0.42
-				ci.draw_line(Vector2(c.x - w * 0.5, y), Vector2(c.x + w * 0.5, y), cor, maxf(raio * 0.2, 1.0))
+			# botão de menu: 3 tracinhos de 2 px
+			for n in 3:
+				img.fill_rect(Rect2i(int(cx.x) - 6, int(cx.y + (n - 1) * 4 - 1), 12, 2), COR_LETRA)
 		else:
-			_texto(ci, f, XBOX[acao][0], c, int(raio * 1.45), cor)
+			_escrever(img, letras, cx)
+	else:
+		var larg_txt := _largura(letras)
+		var falta := maxi(0, larg_txt + 4 - 30)
+		if falta > 0:
+			img = _alarga(img, 26, falta)
+		var k := Rect2i(11, 16, 30 + falta, 16)
+		img.fill_rect(k, branco)
+		_escrever(img, letras, Vector2(k.get_center()))
+	var out := [ImageTexture.create_from_image(img), float(img.get_width()) / float(w0)]
+	_cache[chave] = out
+	return out
+
+
+## a imagem de uma textura em RGBA8 (null no servidor de testes sem GPU)
+static func _imagem(t: Texture2D) -> Image:
+	if t == null:
+		return null
+	var im := t.get_image()
+	if im == null or im.is_empty():
+		return null
+	im = im.duplicate()
+	if im.is_compressed():
+		im.decompress()
+	im.convert(Image.FORMAT_RGBA8)
+	return im
+
+
+## apaga o símbolo do meio do selo: as peças escuras (com a borda
+## antisserrilhada) que não encostam no anel nem saem do selo, a partir do
+## centro
+static func _limpa_miolo(img: Image, c: Vector2) -> void:
+	var w := img.get_width()
+	var h := img.get_height()
+	var escuro := func(x: int, y: int) -> bool:
+		var p := img.get_pixel(x, y)
+		return p.a > 0.25 and p.r < 0.8
+	var visto := {}
+	var pecas: Array = []
+	var raio := minf(w, h) * 0.2            # só peças com algum pixel perto do centro
+	for y in h:
+		for x in w:
+			var k := y * w + x
+			if visto.has(k) or not escuro.call(x, y):
+				continue
+			# flood fill da peça (4 vizinhos)
+			var peca: Array = []
+			var pilha: Array = [k]
+			visto[k] = true
+			var perto := false
+			var borda := false
+			while not pilha.is_empty():
+				var q: int = pilha.pop_back()
+				var qx := q % w
+				var qy := q / w
+				peca.append(q)
+				if Vector2(qx + 0.5, qy + 0.5).distance_to(c) < raio:
+					perto = true
+				if qx == 0 or qy == 0 or qx == w - 1 or qy == h - 1:
+					borda = true
+				for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					var nx: int = qx + dv.x
+					var ny: int = qy + dv.y
+					if nx < 0 or ny < 0 or nx >= w or ny >= h:
+						continue
+					var nk := ny * w + nx
+					if not visto.has(nk) and escuro.call(nx, ny):
+						visto[nk] = true
+						pilha.append(nk)
+			# o símbolo: perto do centro, menor que o anel e sem tocar a borda
+			if perto and not borda and peca.size() < w * h / 8:
+				pecas.append(peca)
+	for peca in pecas:
+		for q in peca:
+			img.set_pixel(q % w, q / w, Color(1, 1, 1, 1))
+
+
+## a tecla mais larga: repete a coluna x n vezes
+static func _alarga(img: Image, x: int, n: int) -> Image:
+	var w := img.get_width()
+	var h := img.get_height()
+	var out := Image.create(w + n, h, false, Image.FORMAT_RGBA8)
+	out.blit_rect(img, Rect2i(0, 0, x, h), Vector2i(0, 0))
+	for k in n:
+		out.blit_rect(img, Rect2i(x, 0, 1, h), Vector2i(x + k, 0))
+	out.blit_rect(img, Rect2i(x, 0, w - x, h), Vector2i(x + n, 0))
+	return out
+
+
+## os glifos de s na fonte do jogo, já recortados e pretos
+static func _glifos(f: Array, s: String) -> Array:
+	if f.size() < 2:
+		return []
+	var fonte := _imagem(f[0])
+	var glifos: Dictionary = f[1]
+	if fonte == null or glifos.is_empty():
+		return []
+	var out: Array = []
+	for ch in s:
+		var g = glifos.get(ch.unicode_at(0))
+		if g == null:
+			continue
+		var gi := fonte.get_region(Rect2i(g[0]))
+		var usado := gi.get_used_rect()
+		if usado.size.x <= 0:
+			continue
+		gi = gi.get_region(usado)
+		for y in gi.get_height():
+			for x in gi.get_width():
+				var c := gi.get_pixel(x, y)
+				gi.set_pixel(x, y, Color(COR_LETRA.r, COR_LETRA.g, COR_LETRA.b, c.a))
+		out.append(gi)
+	return out
+
+
+static func _largura(letras: Array) -> int:
+	var l := 0
+	for gi in letras:
+		l += (gi as Image).get_width() + 1
+	return maxi(l - 1, 0)
+
+
+## escreve os glifos (no tamanho deles) centrados no ponto
+static func _escrever(img: Image, letras: Array, centro: Vector2) -> void:
+	if letras.is_empty():
 		return
-	var k := Rect2(r.position.x + MIOLO_L1.position.x * r.size.x, r.position.y + MIOLO_L1.position.y * r.size.y,
-		MIOLO_L1.size.x * r.size.x, MIOLO_L1.size.y * r.size.y)
-	ci.draw_rect(k, branco)
-	var s: String = PC[acao]
-	# a maior letra que cabe na tecla
-	var tam := int(k.size.y * 0.8)
-	while tam > 6 and f.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, tam).x > k.size.x * 0.9:
-		tam -= 1
-	_texto(ci, f, s, k.get_center(), tam, cor)
+	var alt := 0
+	for gi in letras:
+		alt = maxi(alt, (gi as Image).get_height())
+	var x := int(roundf(centro.x - _largura(letras) * 0.5))
+	for gi in letras:
+		var g: Image = gi
+		img.blend_rect(g, Rect2i(Vector2i.ZERO, g.get_size()), Vector2i(x, int(roundf(centro.y - alt * 0.5))))
+		x += g.get_width() + 1
 
 
 ## texto centrado no ponto (a altura das maiúsculas no meio)

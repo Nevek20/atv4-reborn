@@ -757,7 +757,9 @@ func _barra(_r: Rect2, a: float) -> void:
 		var x0: float = item[2]
 		# Xbox e PC: ícone NOSSO no lugar do do PS2 (menu/botoes.gd)
 		if _medindo == null and Botoes.desenhar(self, item[0], _px(Rect2(x0 - BOTAO_W, BOTAO_Y, BOTAO_W, BOTAO_H)), a,
-				tx, info.texturas.get(tn, {}).get("caixas", {})):
+				tx, info.texturas.get(tn, {}).get("caixas", {}), {
+					"FONT_SMALL": [tex.get("FONT_SMALL"), _fonte.get("FONT_SMALL", {})],
+					"FONT_MEDIUM": [tex.get("FONT_MEDIUM"), _fonte.get("FONT_MEDIUM", {})]}):
 			pass
 		elif tx and _medindo == null:
 			var b: Array = info.texturas[tn].caixas.get(item[0], [0, 0, 1, 1])
