@@ -156,7 +156,7 @@ python re/resultados_ram.py pause.p2s --saida tests/ref_pausa.json   :: a da pau
 %GODOT% --headless --path . -s res://tests/teste_hud.gd             :: HUD do jogo x RAM: 50 quadros a 640x480, conta-giros em tela larga, ponteiro/barras/velocidade dos save states, kerning
 %GODOT% --headless --path . -s res://tests/teste_resultados.gd      :: resultados, pausa e Race again x RAM (placar_final, pause, finish_2), seletor, formato do tempo, quando aparece
 %GODOT% --headless --path . --fixed-fps 50 -s res://tests/teste_pausa.gd   :: pausa na corrida (congela, HUD some, Respot só parado, Esc volta, Quit com ARE YOU SURE?, sons) e Race again (Restart / Exit)
-%GODOT% --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pausa|de_novo|confirma]   :: print da tela de resultados (ou da pausa / Race again / confirma)
+%GODOT% --path . --resolution 640x480 -s res://tests/print_resultados.gd -- saida.png [t] [pausa|de_novo|confirma]   :: print da tela de resultados (ou da pausa / Race again / confirma); BOTOES=ps/xbox/pc escolhe os ícones
 %GODOT% --headless --path . -s res://tests/teste_truques.gd         :: Score: estados, 1º quadro da RAM, fórmulas do exe, combo x multiplicador, HUD e o carro pulando/derrapando
 python re/hud_ram.py arquivo.p2s           :: HUD na RAM do save state: matrizes, ponteiro, números, barras x rpm/marcha/velocidade do carro
 python re/hud_ref.py arquivo.p2s           :: refaz tests/ref_hud_4x3.json (matriz de cada quadro do HUD_CIRCUIT na RAM)
