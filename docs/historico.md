@@ -2888,6 +2888,13 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   ("vai de B"); o Y (a posição do Triângulo) continua voltando. Mesmo lugar
   e tamanho do ícone do PS2 na barra do .fex. teste_pausa: teclado deixa PC,
   o B do controle volta pro jogo e deixa Xbox, nomes dos controles.
+  Depois (o Matheus: "dá pra pegar os botões originais e colocar por
+  cima?"): os ícones de Xbox e PC passaram a usar os selos do próprio jogo
+  (o do Cruz pro Xbox, o do L1, que é uma tecla, pro PC) com o miolo apagado
+  em branco e a letra por cima em preto, no estilo dos símbolos do jogo
+  (miolo medido no atlas new_buttons_4bit_en_GB: anel do Cruz com centro
+  em 22.5, 25.5 e 11 px; tecla do L1 de 11, 16 a 41, 32). Sem o atlas fica
+  o desenho simples de antes.
   Multiplayer: hoje um estilo pra tela toda; com 2 jogadores, por aparelho.
 
 ## HUD básico (nov/2026, NOSSO)
