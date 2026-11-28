@@ -782,7 +782,8 @@ func animar_lista(dt: float) -> void:
 ## pontos do minimapa (OBJECT_MINIMAP; MINIMAPS.xml + RAM dos 4 save states):
 ## centro = canto do quadro + (mOffsetX - (x - mXBase) x mScaleX / 1000,
 ## mOffsetZ - (z - mZBase) x mScaleZ / 1000) em NDC da tela 4:3 (x, z do
-## jogo). Rivais brancos, o jogador amarelo por cima
+## jogo). Rivais brancos, o jogador amarelo por cima. No ar o ponto cresce
+## com a altura (0x48e198; a "subidinha" que o Matheus viu no jogo)
 func _mapa_pontos(no: Dictionary, r: Rect2) -> void:
 	var tnome := _textura(String(no.at.get("mTexture", "")))
 	var mm: Dictionary = info.get("minimapa", {})
@@ -793,7 +794,43 @@ func _mapa_pontos(no: Dictionary, r: Rect2) -> void:
 		for p in pontos:
 			if bool(p[2]) != (passe == 1):
 				continue
-			_sprite(tex[tnome], dot, _tela(ponto_mapa(r, p[0], p[1])), false, COR_JOGADOR if p[2] else Color.WHITE)
+			var pr := ponto_mapa(r, p[0], p[1])
+			# no ar o ponto cresce com a altura (0x48e198: tamanho x (1 +
+			# clamp(veículo+0xae4 x 0.1, 0, 1)); dobra a 10 m), em volta do centro
+			var k := escala_ponto(float(p[3]) if p.size() > 3 else 0.0)
+			pr = Rect2(pr.get_center() - pr.size * k * 0.5, pr.size * k)
+			_sprite(tex[tnome], dot, _tela(pr), false, COR_JOGADOR if p[2] else Color.WHITE)
+
+
+## tamanho do ponto do minimapa pela altura do carro acima do chão (0x48e198)
+static func escala_ponto(altura: float) -> float:
+	return 1.0 + clampf(altura * 0.1, 0.0, 1.0)
+
+
+## veículo+0xae4 (0x203fd0, no update do veículo): sem roda no chão
+## (corpo+0x8a8 = 0), a altura do corpo acima do chão por um raio de 10 m pra
+## baixo (sem chão no alcance = 0); com roda no chão, 0 (RAM dos 4 save states
+## parados: 0). Só pro tamanho do ponto no minimapa
+var _q_alt: PhysicsRayQueryParameters3D = null
+func _altura_mapa(c: Node) -> float:
+	if not (c is RigidBody3D) or int(c.get("grounded")) > 0:
+		return 0.0
+	var p: Vector3 = c.global_position
+	var ss: PhysicsDirectSpaceState3D = c.get_world_3d().direct_space_state if c.is_inside_tree() else null
+	if ss == null:
+		# fora do passo da física (ou pausado): só o relevo
+		var t = c.get("terrain")
+		if t == null:
+			return 0.0
+		var a: float = p.y - t.height_at(p.x, p.z)
+		return a if a <= 10.0 else 0.0
+	if _q_alt == null:
+		_q_alt = PhysicsRayQueryParameters3D.new()
+	_q_alt.from = p
+	_q_alt.to = p - Vector3(0.0, 10.0, 0.0)
+	_q_alt.exclude = [c.get_rid()]
+	var hit: Dictionary = ss.intersect_ray(_q_alt)
+	return maxf(p.y - hit.position.y, 0.0) if not hit.is_empty() else 0.0
 
 
 ## retângulo (fração da tela HUD) do ponto de um carro em (x, z) do jogo
@@ -954,7 +991,7 @@ func atualizar(dt: float, car, corrida) -> void:
 				lista.append({"nome": NOME_JOGADOR if e.jogador else String(e.nome), "jogador": e.jogador})
 				var c = car if e.jogador else e.get("no")
 				if c:
-					pontos.append(_jogo_xz(c.global_position) + [e.jogador])
+					pontos.append(_jogo_xz(c.global_position) + [e.jogador, _altura_mapa(c)])
 			if correndo:
 				_lead(cl, corrida.t)
 			else:
@@ -963,7 +1000,7 @@ func atualizar(dt: float, car, corrida) -> void:
 			valores.PLAYER_POS = 1
 			valores.NUM_PLAYERS = 1
 			lista.append({"nome": NOME_JOGADOR, "jogador": true})
-			pontos.append(_jogo_xz(car.global_position) + [true])
+			pontos.append(_jogo_xz(car.global_position) + [true, _altura_mapa(car)])
 		animar_lista(passo)
 	_passo_mensagens(passo)
 	if corrida != null:

@@ -88,6 +88,12 @@ func _initialize() -> void:
 		if dd > 0.6:
 			_falha("%s: %s x RAM %s" % [c[0], c[1], c[2]])
 	print("  lista de pilotos e minimapa x RAM: %d pontos, pior %.2f px" % [checa.size(), pior_l])
+	# ponto do minimapa no ar (0x48e198): tamanho x (1 + clamp(altura x 0.1, 0, 1))
+	var esc_ponto := [h.escala_ponto(0.0), h.escala_ponto(5.0), h.escala_ponto(25.0), h.escala_ponto(-3.0)]
+	print("  ponto do minimapa no chão / 5 m / 25 m / abaixo: %s" % [esc_ponto])
+	if not (is_equal_approx(esc_ponto[0], 1.0) and is_equal_approx(esc_ponto[1], 1.5)
+			and is_equal_approx(esc_ponto[2], 2.0) and is_equal_approx(esc_ponto[3], 1.0)):
+		_falha("tamanho do ponto do minimapa no ar: %s" % [esc_ponto])
 	# 1c) fonte carregada e cada letra x RAM (tests/ref_hud_textos.json,
 	# re/hud_textos.py): largura e caixa de cada caractere; os quadradinhos
 	# das letras de cada texto (rótulos, números, tempos, nomes da lista)

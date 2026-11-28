@@ -1895,6 +1895,16 @@ JSON "interativos"). tests/teste_quebra.gd.
   0x212988 zera no começo do passo), +0x440 velocidade no plano do chão,
   +0xe0 |v|, +0x6c0 derrapagem (0x20da90: asin(lateral / |v| no plano) com
   rodas no chão, 0 no ar ou abaixo de sqrt(0.1) m/s).
+- Minimapa (OBJECT_MINIMAP, classe em 0x48ddc8..0x48ed50): 0x48ddc8 lê o
+  MINIMAPS.xml (+0x80 mScaleX, +0x84 mScaleZ, +0x88 mOffsetX, +0x8c mOffsetZ,
+  +0x70 mXBase, +0x78 mZBase; com DAT_007f3e3c+0x18 == 1, scaleX e offsetX x
+  0.75); 0x48e7e0 monta a matriz 2D (+0x90 = -scaleX/1000, +0xa4 =
+  -scaleZ/1000, +0xb0/+0xb4 = -offset - canto do quadro); 0x48e198 a cada
+  quadro: ponto = matriz x (x - base, z - base) do corpo (vtable +0x54 do
+  veículo) e tamanho = o do sprite x (1 + clamp(veículo+0xae4 x 0.1, 0, 1)).
+  veículo+0xae4 (0x203fd0): sem roda no chão (corpo+0x8a8 = 0) ou
+  corpo+0x21c = 0, corpo+0x74 (y) - chão de um raio de 10 m pra baixo
+  (0x1bcb88); sem chão = -9e30 (o clamp dá 0); com roda no chão, 0.
 - HUD 0x47cf00: formatos 0x5dd828 "%u", 0x5dd830 "%u X%u", 0x5dd820 "%s
   + %s"; cores em RAM 0x83d270 (amarela) e 0x83d260 (vermelha); fila
   0x48a118 (2 s / 3 s) depois de limpar (0x492608 → 0x48a358); cor no

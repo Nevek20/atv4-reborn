@@ -2498,6 +2498,14 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     states, erro total < 0.006): centro = canto do MINIMAP_CIRCUIT +
     (mOffsetX - (x - mXBase) x mScaleX / 1000, mOffsetZ - (z - mZBase) x
     mScaleZ / 1000) em NDC 4:3 (x, z do jogo); jogador amarelo por cima.
+    No ar o ponto cresce (nov/2026, o Matheus: "quando alguém pula a
+    bolinha dele no minimapa dá uma subidinha"): o exe (0x48e198) desenha
+    cada ponto com tamanho x (1 + clamp(veículo+0xae4 x 0.1, 0, 1)), o
+    dobro a 10 m; o veículo+0xae4 (0x203fd0) é a altura do corpo acima do
+    chão por um raio de 10 m pra baixo, só sem roda no chão (corpo+0x8a8 =
+    0; nos 4 save states parados vale 0). A posição do ponto não muda (o
+    exe só usa x e z; o MINIMAPS.xml não tem Y). Largado de 6 m: 1.63x
+    caindo até 1.0 no pouso. Fora do passo da física a altura sai do relevo.
   - Tempos: "--:--:--" antes do VAI e o BEST LAP até fechar a 1ª volta; o
     TIME da 1ª volta = o TOTAL (PAL: 00:51:88 nos dois).
   - LEAD: vermelho (248,44,44) com "-" atrás do líder (PAL); verde na frente

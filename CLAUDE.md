@@ -362,7 +362,9 @@ HUD (menu/hud_jogo.gd)
   XML x 128. Velocidade do HUD = |v pra frente| (RAM), não o 1.06.
   Conferir mudança com re/hud_ram.py nos save states e com o Screenshot.png
   de dentro do .p2s (a tela real do PAL; o PCSX2 estica o 4:3). Rótulos
-  como na tabela (sem maiúsculas). Lista, minimapa: RAM. NOSSO: Score
+  como na tabela (sem maiúsculas). Lista, minimapa: RAM. Ponto do minimapa
+  no ar cresce: tamanho x (1 + clamp(altura x 0.1, 0, 1)), altura = corpo
+  acima do chão (raio de 10 m) só sem roda no chão (0x48e198 / 0x203fd0). NOSSO: Score
   centrado, 3 dígitos x 0.8, a conta do LEAD, BEST LAP terminando junto
   com o Total.
   Letras = a fonte como fica na RAM (largura arredondada, dígitos com a
