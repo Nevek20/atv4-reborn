@@ -25,7 +25,7 @@ const NOMES_PS := ["playstation", "dualshock", "dualsense", "sony", "ps2", "ps3"
 const ACAO := {"cross_button": "ok", "triangle_button": "voltar", "start_button": "start"}
 const XBOX := {"ok": ["A", Color(0.38, 0.73, 0.26)], "voltar": ["B", Color(0.86, 0.2, 0.18)],
 	"start": ["", Color(0.9, 0.9, 0.9)]}
-const PC := {"ok": "Enter", "voltar": "Esc", "start": "Enter"}
+const PC := {"ok": "ENTER", "voltar": "ESC", "start": "ENTER"}   # maiúsculas como os selos do jogo (L1, START)
 
 
 func _ready() -> void:
@@ -99,8 +99,10 @@ static var _cache := {}                               # "xbox:ok" -> [ImageTextu
 ##  - PC = o selo do L1 (46 x 55): a tecla branca de (11, 16) a (41, 32) é
 ##    limpa e o nome entra nela; se não cabe, a tecla alarga repetindo a
 ##    coluna do meio (a letra nunca encolhe).
-## Letras = as fontes do jogo (as do HUD), pretas, no tamanho delas: a MEDIUM
-## no círculo, a SMALL na tecla. [] = sem a imagem do atlas
+## Letras = a FONT_SMALL do jogo (a do HUD), maiúsculas, pretas, no tamanho
+## dela, só o corpo da letra (sem a sombra) e centradas pelo corpo: no
+## círculo, no centro do X que saiu; na tecla, no meio dela. [] = sem a
+## imagem do atlas
 static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fontes: Dictionary) -> Array:
 	var chave := e + ":" + acao
 	if _cache.has(chave):
@@ -116,11 +118,10 @@ static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fo
 	var img := atlas.get_region(reg)
 	var w0 := img.get_width()
 	var branco := Color(1, 1, 1, 1)
-	var f: Array = fontes.get("FONT_MEDIUM" if e == "xbox" else "FONT_SMALL", [])
+	var f: Array = fontes.get("FONT_SMALL", [])
 	var letras: Array = _glifos(f, XBOX[acao][0] if e == "xbox" else PC[acao])
 	if e == "xbox":
-		var cx := Vector2(img.get_width() * 0.5 + 0.5, img.get_height() * 0.455)
-		_limpa_miolo(img, cx)
+		var cx := _limpa_miolo(img, Vector2(img.get_width() * 0.5 + 0.5, img.get_height() * 0.455))
 		if acao == "start":
 			# botão de menu: 3 tracinhos de 2 px
 			for n in 3:
@@ -156,8 +157,9 @@ static func _imagem(t: Texture2D) -> Image:
 
 ## apaga o símbolo do meio do selo: as peças escuras (com a borda
 ## antisserrilhada) que não encostam no anel nem saem do selo, a partir do
-## centro
-static func _limpa_miolo(img: Image, c: Vector2) -> void:
+## centro. Devolve o centro do símbolo apagado (o meio do anel que o
+## desenhista usou; sem símbolo, c)
+static func _limpa_miolo(img: Image, c: Vector2) -> Vector2:
 	var w := img.get_width()
 	var h := img.get_height()
 	var escuro := func(x: int, y: int) -> bool:
@@ -198,9 +200,23 @@ static func _limpa_miolo(img: Image, c: Vector2) -> void:
 			# o símbolo: perto do centro, menor que o anel e sem tocar a borda
 			if perto and not borda and peca.size() < w * h / 8:
 				pecas.append(peca)
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
 	for peca in pecas:
 		for q in peca:
 			img.set_pixel(q % w, q / w, Color(1, 1, 1, 1))
+			lo = lo.min(Vector2(q % w, q / w))
+			hi = hi.max(Vector2(q % w + 1, q / w + 1))
+		# o rastro claro em volta (o antisserrilhado do X): os vizinhos cinza
+		# claro também; o anel (escuro) fica
+		for q in peca:
+			for dy in range(-1, 2):
+				for dx in range(-1, 2):
+					var nx: int = q % w + dx
+					var ny: int = q / w + dy
+					if nx >= 0 and ny >= 0 and nx < w and ny < h and img.get_pixel(nx, ny).r > 0.5:
+						img.set_pixel(nx, ny, Color(1, 1, 1, 1))
+	return (lo + hi) * 0.5 if lo.x < INF else c
 
 
 ## a tecla mais larga: repete a coluna x n vezes
@@ -229,15 +245,22 @@ static func _glifos(f: Array, s: String) -> Array:
 		if g == null:
 			continue
 		var gi := fonte.get_region(Rect2i(g[0]))
-		var usado := gi.get_used_rect()
-		if usado.size.x <= 0:
-			continue
-		gi = gi.get_region(usado)
+		# só o corpo da letra: na fonte do jogo a letra é o branco e a sombra
+		# (cinza e escuro, pra baixo e pra direita) entortava o centro. Peso =
+		# alfa x o quanto o pixel é claro (cinza = meio, o antisserrilhado)
+		var lo := Vector2i(9999, 9999)
+		var hi := Vector2i(-1, -1)
 		for y in gi.get_height():
 			for x in gi.get_width():
 				var c := gi.get_pixel(x, y)
-				gi.set_pixel(x, y, Color(COR_LETRA.r, COR_LETRA.g, COR_LETRA.b, c.a))
-		out.append(gi)
+				var a := c.a * clampf((c.get_luminance() - 0.35) / 0.5, 0.0, 1.0)
+				gi.set_pixel(x, y, Color(COR_LETRA.r, COR_LETRA.g, COR_LETRA.b, a))
+				if a > 0.5:
+					lo = lo.min(Vector2i(x, y))
+					hi = hi.max(Vector2i(x + 1, y + 1))
+		if hi.x < 0:
+			continue
+		out.append(gi.get_region(Rect2i(lo, hi - lo)))
 	return out
 
 
@@ -255,10 +278,11 @@ static func _escrever(img: Image, letras: Array, centro: Vector2) -> void:
 	var alt := 0
 	for gi in letras:
 		alt = maxi(alt, (gi as Image).get_height())
-	var x := int(roundf(centro.x - _largura(letras) * 0.5))
+	var x := int(floorf(centro.x - _largura(letras) * 0.5 + 0.5))
+	var y := int(floorf(centro.y - alt * 0.5 + 0.5))
 	for gi in letras:
 		var g: Image = gi
-		img.blend_rect(g, Rect2i(Vector2i.ZERO, g.get_size()), Vector2i(x, int(roundf(centro.y - alt * 0.5))))
+		img.blend_rect(g, Rect2i(Vector2i.ZERO, g.get_size()), Vector2i(x, y + alt - g.get_height()))
 		x += g.get_width() + 1
 
 

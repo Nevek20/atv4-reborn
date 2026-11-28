@@ -2903,7 +2903,14 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   círculo por cima. Letras = a fonte do próprio jogo (FONT_MEDIUM no
   círculo, FONT_SMALL na tecla), pretas e no tamanho dela; o "Enter" não
   cabia na tecla do L1 e a tecla alarga repetindo a coluna do meio (cresce
-  pra esquerda), em vez de encolher a letra.
+  pra esquerda), em vez de encolher a letra. Depois (o Matheus:
+  "centralizar as letras do controle e diminuir um pouco; ENTER e ESC do
+  mesmo tamanho e centralizadas"): as duas usam a FONT_SMALL em
+  maiúsculas (o "Esc" saía "ESC" e o "nter" minúsculo, tamanhos
+  diferentes); a letra da fonte do jogo é o branco com sombra cinza pra
+  baixo e pra direita: pego só o branco (alfa x claridade) e centro pelo
+  corpo dela. No círculo o centro é o do X apagado (o meio do anel do
+  desenho) e o rastro claro do X também sai.
   Multiplayer: hoje um estilo pra tela toda; com 2 jogadores, por aparelho.
 
 ## HUD básico (nov/2026, NOSSO)

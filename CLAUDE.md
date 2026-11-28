@@ -422,9 +422,10 @@ Tela de resultados (menu/resultados.gd)
   teclado = teclas (Enter / Esc), controle PlayStation = os do jogo, o resto
   = Xbox (A / B / menu). Xbox e PC = os selos do próprio jogo (o do Cruz e o
   do L1) montados em pixels na resolução do selo: o X sai inteiro (peça
-  solta dentro do anel), letra = a fonte do jogo (MEDIUM no círculo, SMALL
-  na tecla) sem encolher; a tecla alarga pro "Enter". Voltar no controle =
-  B (o Matheus) e o Y continua.
+  solta dentro do anel, com o rastro claro), letra = a FONT_SMALL do jogo
+  em maiúsculas, só o branco dela (a sombra entortava), centrada pelo corpo
+  (no centro do X que saiu; no meio da tecla), sem encolher; a tecla alarga
+  pro ENTER. Voltar no controle = B (o Matheus) e o Y continua.
   Mesmo lugar do ícone do PS2; print_resultados com BOTOES=ps/xbox/pc.
 
 Carro por dentro (melhorias nossas, cada uma aprovada com print)
