@@ -99,8 +99,8 @@ static var _cache := {}                               # "xbox:ok" -> [ImageTextu
 ##  - PC = o selo do L1 (46 x 55): a tecla branca de (11, 16) a (41, 32) é
 ##    limpa e o nome entra nela; se não cabe, a tecla alarga repetindo a
 ##    coluna do meio (a letra nunca encolhe).
-## Letras = a FONT_SMALL do jogo (a do HUD), maiúsculas, pretas, no tamanho
-## dela, só o corpo da letra (sem a sombra) e centradas pelo corpo: no
+## Letras = as fontes do jogo (as do HUD), maiúsculas, pretas (controle: a
+## MEDIUM x 0.85; tecla: a SMALL no tamanho dela), só o corpo da letra (sem a sombra) e centradas pelo corpo: no
 ## círculo, no centro do X que saiu; na tecla, no meio dela. [] = sem a
 ## imagem do atlas
 static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fontes: Dictionary) -> Array:
@@ -118,8 +118,10 @@ static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fo
 	var img := atlas.get_region(reg)
 	var w0 := img.get_width()
 	var branco := Color(1, 1, 1, 1)
-	var f: Array = fontes.get("FONT_SMALL", [])
-	var letras: Array = _glifos(f, XBOX[acao][0] if e == "xbox" else PC[acao])
+	# controle: a MEDIUM x 0.85 (corpo de ~14 px: a SMALL, 12, ficou pequena
+	# e a MEDIUM, 16, grande; o Matheus); tecla: a SMALL no tamanho dela
+	var letras: Array = _glifos(fontes.get("FONT_MEDIUM", []), XBOX[acao][0], LETRA_CONTROLE) if e == "xbox" \
+		else _glifos(fontes.get("FONT_SMALL", []), PC[acao])
 	if e == "xbox":
 		var cx := _limpa_miolo(img, Vector2(img.get_width() * 0.5 + 0.5, img.get_height() * 0.455))
 		if acao == "start":
@@ -232,7 +234,10 @@ static func _alarga(img: Image, x: int, n: int) -> Image:
 
 
 ## os glifos de s na fonte do jogo, já recortados e pretos
-static func _glifos(f: Array, s: String) -> Array:
+const LETRA_CONTROLE := 0.85
+
+
+static func _glifos(f: Array, s: String, escala := 1.0) -> Array:
 	if f.size() < 2:
 		return []
 	var fonte := _imagem(f[0])
@@ -260,7 +265,11 @@ static func _glifos(f: Array, s: String) -> Array:
 					hi = hi.max(Vector2i(x + 1, y + 1))
 		if hi.x < 0:
 			continue
-		out.append(gi.get_region(Rect2i(lo, hi - lo)))
+		var corpo := gi.get_region(Rect2i(lo, hi - lo))
+		if escala != 1.0:
+			corpo.resize(maxi(1, int(roundf(corpo.get_width() * escala))),
+				maxi(1, int(roundf(corpo.get_height() * escala))), Image.INTERPOLATE_BILINEAR)
+		out.append(corpo)
 	return out
 
 

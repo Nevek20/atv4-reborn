@@ -2910,7 +2910,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   diferentes); a letra da fonte do jogo é o branco com sombra cinza pra
   baixo e pra direita: pego só o branco (alfa x claridade) e centro pelo
   corpo dela. No círculo o centro é o do X apagado (o meio do anel do
-  desenho) e o rastro claro do X também sai.
+  desenho) e o rastro claro do X também sai. A SMALL no controle ficou
+  pequena demais (o Matheus: "aumenta um tiquinho"): lá vai a MEDIUM x 0.85
+  (corpo de ~14 px, entre os 12 da SMALL e os 16 da MEDIUM).
   Multiplayer: hoje um estilo pra tela toda; com 2 jogadores, por aparelho.
 
 ## HUD básico (nov/2026, NOSSO)
