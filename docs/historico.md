@@ -2351,8 +2351,9 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
     é do perfil do Matheus, não de fábrica. O Matheus: no ATV a final não
     tem o ajuste fino do buggy/truck, é escolha de curta, média ou longa.
     No upgrades.xml (classe ATV) a FinalDriveRatio tem TunedSX 1, SX 0.75,
-    Standard 0.5, GP 0.25, TunedGP 0; 1.02 = 0 (a mais longa). Qual peça é
-    cada opção do menu ainda não foi conferido.
+    Standard 0.5, GP 0.25, TunedGP 0; 1.02 = 0 (a mais longa). O Matheus
+    estava na "longa" (corridas longas): longa = 0 (RAM + ele). Curta e
+    média ainda sem conferir (devem ser 1 e 0.5).
   - Andando com a física de hoje: 155 kg, 144 km/h em 7 s na largada do
     RX01, 4 rodas no chão 96% em reta. Virando ele levanta a roda de dentro
     (bitola estreita, CoM alto): esperado, mas o controle do piloto (peso,
