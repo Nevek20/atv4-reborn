@@ -2348,7 +2348,11 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   - Câmbio: marchas = RAM. Final de fábrica 1.12 (1.02 -> 1.22 a 0.5, o
     FinalDriveRatio_Standard da classe ATV); na RAM o jogador tem 1.02 e os
     4 rivais (ATV.xml base, 0.96 -> 1.20) 1.08 = o mesmo 0.5. Então o 1.02
-    é do perfil do Matheus (peça TunedGP ou ajuste), não de fábrica.
+    é do perfil do Matheus, não de fábrica. O Matheus: no ATV a final não
+    tem o ajuste fino do buggy/truck, é escolha de curta, média ou longa.
+    No upgrades.xml (classe ATV) a FinalDriveRatio tem TunedSX 1, SX 0.75,
+    Standard 0.5, GP 0.25, TunedGP 0; 1.02 = 0 (a mais longa). Qual peça é
+    cada opção do menu ainda não foi conferido.
   - Andando com a física de hoje: 155 kg, 144 km/h em 7 s na largada do
     RX01, 4 rodas no chão 96% em reta. Virando ele levanta a roda de dentro
     (bitola estreita, CoM alto): esperado, mas o controle do piloto (peso,

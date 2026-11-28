@@ -468,7 +468,8 @@ Frota
   guidão e coroa portados (suspension_visual + suspensao.cpp). "rally" do
   pecas.json = roda da FRENTE sem balança (a de trás do ATV é de rally).
   Final de fábrica 1.12: o 1.02 da RAM do atv_cl01 é do perfil do Matheus
-  (os rivais lá têm o 0.5 de fábrica).
+  (os rivais lá têm o 0.5 de fábrica). No ATV a final é peça (curta, média,
+  longa: FinalDriveRatio do upgrades.xml), sem o ajuste fino do buggy/truck.
 
 ## Pendente / ideias
 
