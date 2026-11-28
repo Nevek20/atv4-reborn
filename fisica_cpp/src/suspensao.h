@@ -43,6 +43,8 @@ class SuspensaoCpp : public RefCounted {
 		bool tem = false;
 		std::vector<ObjectID> mis;
 		Vector3 pivot, w, a0, ancora, wl, wr;
+		Vector3 top, bottom, eixo;       // ATV: amortecedor e guidão
+		ObjectID spin;                   // ATV: nó do giro da roda RL (coroa)
 		double div = 1.0;
 		Tele tele;
 		std::vector<ObjectID> rodas;     // pivôs das rodas de trás (eixos)
@@ -57,6 +59,7 @@ class SuspensaoCpp : public RefCounted {
 	std::vector<Barra> barras;
 	bool truck = false;
 	PecaTruck frame_l, frame_r, brake_l, brake_r, axle, livre;
+	PecaTruck shock_l, shock_r, guidao, coroa;   // ATV
 	Dictionary rodas_truck;              // "FL".. -> roda (Dictionary)
 	Dictionary desloca;                  // BALANCA_DESLOCA do carro
 

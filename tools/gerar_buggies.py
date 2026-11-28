@@ -26,6 +26,13 @@ Uso (na pasta do projeto):
     python tools/gerar_buggies.py <unpacked> <texturas> --so 2,3
     python tools/gerar_buggies.py <unpacked> <texturas> --tabela   (só lista)
     python tools/gerar_buggies.py <unpacked> <texturas> --classe truck
+    python tools/gerar_buggies.py <unpacked> <texturas> --classe atv --so 10
+ATV (nov/2026): o mapa ATVCompMap_Generic junta ao Chassis a carenagem
+(Fairing/<FAIRING_...>/Fairing.pingu), o escapamento (Exhaust/<modelo do
+catálogo>/EXHAUST.pingu, ex. Exhaust_Level3a -> Exhaust_ATV_06) e o nerf bar
+(NerfBar/<NERFBAR_...>/NERFBAR.pingu), todos no ponto Body. Física =
+Setup/VehicleParams/AtV/ATV_NN.xml por cima do ATV.xml (data/vehicles/
+atv_base.xml).
 <texturas> é a pasta que o gob_tex2png.py gerou. Sem ela, procura uma pasta
 "texturas" do lado da unpacked. Se a pasta não existe ou não tem .png, para
 antes de mexer em qualquer coisa (o pingu2obj escreveria os .mtl sem
@@ -63,11 +70,16 @@ BONUS = {
     "truck": [{"n": 13, "base": "TRUCK_04", "chassis": "CHASSIS_Truck_04", "cams": "TruckCamSet_04",
                "nome": "Lazarus", "assets": "truck_bonus", "dados": "truck_bonus"}],
 }
+# ATVs: nome do menu do jogo (text/15205_en.txt, ATV_NN)
+NOMES_ATV = ["Nomad 250", "Misfit 250", "Warthog 350", "Hawk 350", "Ikon 450", "Baron 450",
+             "Wickeedo 500", "Wildcat 650", "Scorpion 650", "Samurai 650"]
 CLASSES = {
     "buggy": {"id": "BUGGY", "pasta": "Buggy", "nomes": NOMES,
               "assets": lambda n: "buggy_%02d" % n, "dados": "buggy_%02d"},
     "truck": {"id": "TRUCK", "pasta": "Truck", "nomes": NOMES_TRUCK,
               "assets": lambda n: "truck_%02d" % n, "dados": "truck_%02d"},
+    "atv": {"id": "ATV", "pasta": "AtV", "nomes": NOMES_ATV, "qtd": 10,
+            "assets": lambda n: "atv_%02d" % n, "dados": "atv_%02d"},
 }
 # o volante vem grudado na carroceria no jogo; o tools/volante.py acha as
 # tiras dele e o pingu2obj separa num .obj próprio (melhoria do remake: ele
@@ -108,8 +120,24 @@ def config_xml(prefixo="BUGGY"):
             "mapa": re.search(r'ComponentMap="([^"]+)"', blk).group(1),
             "cams": re.search(r'Cameras="([^"]+)"', blk).group(1),
             "luzes": (re.search(r'LightRigCategory="(\w+)"', blk) or re.search("()", "")).group(1).upper(),
+            # ATV: carenagem, escapamento e nerf bar (componente do catálogo)
+            "fairing": (re.search(r'DefaultConfig[^>]*Fairing="([^"]+)"', blk) or re.search("()", "")).group(1),
+            "exhaust": (re.search(r'DefaultConfig[^>]*Exhaust="([^"]+)"', blk) or re.search("()", "")).group(1),
+            "nerfbar": (re.search(r'DefaultConfig[^>]*NerfBar="([^"]+)"', blk) or re.search("()", "")).group(1),
         }
     return out
+
+
+def modelo_catalogo(classe_xml, componente):
+    """mInGameModelName de um componente do catálogo (data/componentes.xml,
+    na seção da classe: ATV, Buggy...); None se não tem"""
+    s = open(os.path.join(PROJ, "data", "componentes.xml"), encoding="latin-1").read()
+    i = s.find("<%s>" % classe_xml)
+    j = s.find("</%s>" % classe_xml, i)
+    if i < 0:
+        return None
+    m = re.search(r'mComponentName="%s"[^>]*mInGameModelName="([^"]+)"' % re.escape(componente), s[i:j])
+    return m.group(1) if m else None
 
 
 def mapa_high(unpacked, nome):
@@ -131,7 +159,7 @@ def mapear(unpacked, classe="buggy"):
     k = CLASSES[classe]
     cfg = config_xml(k["id"])
     lista = [dict(cfg["%s_%02d" % (k["id"], n)], n=n, id="%s_%02d" % (k["id"], n), nome=k["nomes"][n - 1],
-                  assets=k["assets"](n), dados=k["dados"] % n) for n in range(1, 13)]
+                  assets=k["assets"](n), dados=k["dados"] % n) for n in range(1, k.get("qtd", 12) + 1)]
     for b in BONUS.get(classe, []):
         lista.append(dict(cfg[b["base"]], n=b["n"], id=b["base"], nome=b["nome"], assets=b["assets"],
                           dados=b["dados"], chassis=b["chassis"], cams=b["cams"], bonus=True))
@@ -164,6 +192,18 @@ def mapear(unpacked, classe="buggy"):
                 c["parachoque"] = pos
             elif tipo == "Lighting":
                 c["ponto_luzes"] = pos           # LIGHTRIG (barra de luz do teto)
+            elif tipo in ("Fairing", "Exhaust", "Nerfbar"):
+                # ATV: peça escolhida na DefaultConfig, modelo pelo catálogo
+                comp = c.get({"Fairing": "fairing", "Exhaust": "exhaust", "Nerfbar": "nerfbar"}[tipo], "")
+                mod = modelo_catalogo(k["id"], comp) or comp
+                if not mod or mod == "NOT_INSTALLED":
+                    continue
+                pasta = {"Fairing": "Fairing", "Exhaust": "Exhaust", "Nerfbar": "NerfBar"}[tipo]
+                b = bloco(arqs, "Vehicles/%s/%s/%s/%s/%s.pingu" % (k["pasta"], LOD, pasta, mod, model))
+                if b is None:
+                    c["faltando"].append("%s/%s" % (mod, model))
+                    continue
+                c["pecas"][pos + "/" + tipo] = b
         # física: o arquivo do jogo pelo caminho (vazio = só a base)
         c["fisica"] = arqs.get(("Setup/VehicleParams/%s/%s.xml" % (k["pasta"], vid)).lower(), (None,))[0]
         carros.append(c)
@@ -401,8 +441,10 @@ def main():
             "luzes": {k: "../luzes/%d_bloco.obj" % b for k, b in lista_lz.items()
                       if c.get("luzes") and k.endswith("_" + c["luzes"])} if c.get("ponto_luzes") else {},
             "ponto_luzes": c.get("ponto_luzes", ""),
-            # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio)
-            "rally": any(p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
+            # RallyCompMap põe a roda em FrontLeftWheel (sem balança no meio).
+            # Pela da frente: o ATV tem FrontLeftFrameWheel (balança, 0x220f08)
+            # e RearLeftWheel (a de trás já é a do rally sem canto)
+            "rally": any(p.startswith("Front") and p.endswith("Wheel") and "Frame" not in p for p in pos_rodas),
             "estepe": [p for p in pos_rodas if p.startswith("SpareWheel")],
             "cor_vertice": pingu2obj.COR_VERSAO,
         }
@@ -421,6 +463,11 @@ def main():
         pts = open(os.path.join(a.unpacked, "other", "%d_bloco.bin" % c["pontos"]), "rb").read()
         copiar(pts, os.path.join(dados, c["dados"] + "_points.bin"))
         print("[+] %s em %s" % (c["nome"], out))
+    # a base da classe (o jogo carrega ela e o do veículo por cima): ATV.xml
+    if a.classe == "atv":
+        f = ler_arquivos().get("setup/vehicleparams/atv/atv.xml")
+        if f:
+            copiar(_ler_fonte(a.unpacked, f[0]).replace(b"\r\n", b"\n"), os.path.join(dados, "atv_base.xml"))
     # catálogo de peças do jogo (pneus, aros...): o Godot lista os pneus por ele
     copiar(open(os.path.join(a.unpacked, "xml", "14882_root.xml"), "rb").read().replace(b"\r\n", b"\n"),
            os.path.join(PROJ, "data", "componentes.xml"))

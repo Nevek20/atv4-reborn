@@ -100,6 +100,18 @@ const TRUCKS := [
 # assets/carros/escort/pecas.json "fonte"); física de partida = a do Storm (o rally
 # do jogo) com rodas, curso, massa, CoM e caixa do Escort. Mão inglesa (o
 # volante fica na direita, como no modelo). Som: o I4 do Storm por enquanto
+# ATVs (nov/2026, etapa 1: o modelo e a física de hoje; tools/gerar_buggies.py
+# --classe atv). Ficam fora do frota() (os testes da frota percorrem ela) até a
+# física e o piloto do ATV fecharem: o jogo (menu, V, câmera) usa frota_jogo().
+# Desligado o que é de carro (volante, painel, motor, luzes, fumaça) e o
+# piloto (o do ATV é outro: etapa 3); sem som de motor gravado pro ATV
+const BASE_ATV := "res://data/vehicles/atv_base.xml"      # Setup/VehicleParams/AtV/ATV.xml
+const ATVS := [
+	{"name": "Samurai 650", "id": "ATV_10", "cams": "ATVCamSet_Generic", "dir": "res://assets/carros/atv_10",
+		"data": "res://data/vehicles/atv_10.xml", "points": "res://data/vehicles/atv_10_points.bin", "base": BASE_ATV,
+		"atv": true, "desligar": ["volante_nosso", "volante_gira", "volante_treme", "maos", "painel", "motor_treme",
+		"motor_anima", "luzes", "farol", "fumaca", "som_motor", "piloto"]},
+]
 const EXTRAS := [
 	{"name": "Escort RS1600", "id": "ESCORT", "tune_id": "BUGGY_12", "cams": "LanciaCam",
 		"dir": "res://assets/carros/escort", "data": "res://data/vehicles/escort.xml",
@@ -245,6 +257,11 @@ static func frota() -> Array:
 	return VEHICLES + TRUCKS + EXTRAS
 
 
+## a frota do jogo (menu, V, câmera): a de cima + os ATVs (ainda em obras)
+static func frota_jogo() -> Array:
+	return frota() + ATVS
+
+
 ## carro pronto pra entrar na cena (main, print_tela e testes da frota)
 static func configurar(c, v: Dictionary) -> void:
 	c.asset_dir = v.dir
@@ -277,7 +294,7 @@ func spawn_vehicle(i: int, pos: Vector3, yaw: float) -> void:
 		manual = car.manual
 		car.queue_free()
 	veh_idx = i
-	var v: Dictionary = frota()[i]
+	var v: Dictionary = frota_jogo()[i]
 	car = Car.new()
 	configurar(car, v)
 	car.cores_pintura = preload("res://carro/pintura.gd").salvas(car.chave())   # oficina (só o jogador)
@@ -453,7 +470,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				if corrida:
 					corrida.parar()
 			KEY_V:
-				_swap_vehicle((veh_idx + 1) % frota().size())
+				_swap_vehicle((veh_idx + 1) % frota_jogo().size())
 			KEY_F:
 				car.flip_model()
 			KEY_B:
@@ -505,7 +522,7 @@ func _troca_camera() -> void:
 # ------------------------------------------------------------ menu de carros
 var oficina                              # menu/oficina.gd (pintura do carro)
 var menu: ItemList
-var menu_idx := []                       # linha do menu -> índice em frota()
+var menu_idx := []                       # linha do menu -> índice em frota_jogo()
 
 
 func _make_menu(layer: CanvasLayer) -> void:
@@ -519,7 +536,7 @@ func _make_menu(layer: CanvasLayer) -> void:
 	menu.add_theme_font_size_override("font_size", 18)
 	# ordem da lista do jogo (BUGGY_01..12, TRUCK_01..12), as variações logo
 	# depois e os bônus no fim
-	var todos := frota()
+	var todos := frota_jogo()
 	var order := range(todos.size())
 	order.sort_custom(func(a, b): return [_grupo(todos[a]), todos[a].id, a] < [_grupo(todos[b]), todos[b].id, b])
 	for i in order:
@@ -658,7 +675,7 @@ var jit_acc := 0.0                        # passos de 1/60 das câmeras presas
 
 
 func _make_cameras() -> void:
-	var cs: String = frota()[veh_idx].cams
+	var cs: String = frota_jogo()[veh_idx].cams
 	gcams = [
 		GameCamera.load_set(CAM_XML, cs, "FollowOrbitNear"),
 		GameCamera.load_set(CAM_XML, cs, "FollowOrbitFar"),

@@ -538,6 +538,34 @@ velocidades em mph (×0.44704 → m/s) ou m/s conforme o campo; mph = m/s ×
     parado: 12.73°).
   - RearFreeAxle (0x21ee00): identidade, sobe (x_RL + x_RR)/2.
   - Rodas desses mapas = as do rally (WHEEL + x).
+- ATVs (ATVCompMap_Generic / _A, nov/2026). Tabela de ids dos pontos
+  (pares id, nome em 0x550700): 0 HANDLEBAR, 1..4 WHEEL_*, 5 ARM_PIVOT,
+  6 AXLE_ANCHOR, 7/8 A_FRAME_LEFT/RIGHT, 9..16 A_FRAME(_END)_FRONT/REAR_*,
+  17/18 SHOCKS_BOTTOM/TOP_LEFT, 19/20 SHOCKS_BOTTOM/TOP_RIGHT. Classes
+  (índice k na 0x5502c8, método +0x1c): 1 Handlebar 0x1fc150, 4 LeftShocks
+  0x1fc318, 5 RightShocks 0x1fc3a0, 7 Sprocket 0x1fc4c8; LeftFrame,
+  RightFrame e RearAxle (Axle e Rear_Arm) = as do truck. Rodas: 34/35
+  FrontLeft/RightFrameWheel 0x1fd3e0 / 0x1fd468 (pose 0x220f08: centro
+  0x220110 pela balança A_FRAME_FRONT_*, R = 0x61e390(giro, esterço) x
+  matriz do WHEEL, linha 0 negada); RearLeftWheel = a do rally.
+  - Handlebar (0x21dff8, R de 0x21df88): eixo-ângulo 0x61e6c8 (linha 1 da
+    matriz do HANDLEBAR, esterço P+0x44) em volta do HANDLEBAR. No ATV_10 o
+    eixo é (0, 0.889, -0.459): a coluna inclinada 27°.
+  - LeftShocks / RightShocks (0x21e328 / 0x21e5b0): b2 = SHOCKS_BOTTOM
+    levado pela pose da LeftFrame / RightFrame (0x21e0b8 / 0x21e1f0);
+    a = acos(norm(BOTTOM - TOP)·norm(b2 - TOP)) com clamp; R = Rz(-a) na
+    esquerda, Rz(a) na direita, em volta do SHOCKS_TOP. O acos é 3D e o
+    giro só em z: não alinha exato quando o curso muda o comprimento.
+  - Sprocket (0x21ec78): Rx(W+0x4c da roda 1 = RL, 0x2222e8) em volta do
+    AXLE_ANCHOR e depois a pose do RearAxle (0x21e998) em volta do
+    ARM_PIVOT.
+  - Peças em Position="Body" (Fairing, Exhaust, Nerfbar, Bumper, Lighting):
+    cCompPlace_Body 0x1fc100 = identidade, no frame do modelo.
+- Câmbio na RAM (atv_cl01_largada): bloco efetivo do veículo (rpm, ré -15,
+  marchas 1..5, final em +0x18 depois da 1ª) e, perto, a cópia do XML em
+  pares (não tunado, tunado). Jogador (ATV_10) final 1.02; os 4 rivais com
+  o ATV.xml base (0.96 -> 1.20) têm 1.08 = t 0.5 (FinalDriveRatio_Standard
+  de fábrica): o 1.02 do jogador é do perfil.
 - Conferido: tests/teste_pecas.gd compara 110 matrizes de 7 carros
   (Renegade, Sphinx, Inferno, Bulldog, Phantom, Storm e o truck Goliath)
   com a RAM dos save states parados, erro < 0.01 mm. Classes das rodas de

@@ -145,10 +145,48 @@ func _load_model() -> void:
 		var t := _textura_pintura(cores_pintura)
 		if t:
 			livery = t
+	if not glb:
+		_materiais_corpo(mi, mesh, livery)
+	var aabb := mesh.get_aabb()
+	var c := aabb.get_center()
+	model_offset = Vector3(-c.x, -aabb.position.y + 0.12, -c.z)
+	mi.position = model_offset
+	model_root.add_child(mi)
+	body_mi = mi
+	if chave() in CABINE_FECHADA:
+		_face_de_dentro(mi)
+	_load_pecas_corpo(livery)
+	_load_steering_wheel()
+
+
+## peças presas na carroceria (Position="Body": cCompPlace_Body 0x1fc100 =
+## identidade). Só o ATV tem (Fairing, Exhaust, Nerfbar; o buggy e o truck
+## trazem tudo no Chassis): "Body/<tipo>" no pecas.json, no frame do modelo
+func _load_pecas_corpo(livery: Texture2D) -> void:
+	var pc: Dictionary = pecas.get("pecas", {})
+	for k: String in pc:
+		if not k.begins_with("Body/"):
+			continue
+		var path := asset_dir.path_join(pc[k])
+		var mesh: Mesh = load(path) as Mesh if ResourceLoader.exists(path) else null
+		if mesh == null:
+			push_warning("sem %s: rode o tools/gerar_buggies.py" % path)
+			continue
+		if mesh is ArrayMesh and _tem("acertar_giro"):
+			mesh = _acertar_giro(mesh)
+		var mi := MeshInstance3D.new()
+		mi.name = k.get_slice("/", 1)
+		mi.mesh = mesh
+		mi.set_meta("malha_path", path)      # sujeira.gd: a _camada.obj do lado
+		_materiais_corpo(mi, mesh, livery)
+		mi.position = model_offset
+		model_root.add_child(mi)
+
+
+## materiais do modelo do jogo: pintura no "white", furo, vidro, cor do vértice
+func _materiais_corpo(mi: MeshInstance3D, mesh: Mesh, livery: Texture2D) -> void:
 	for i in mesh.get_surface_count():
 		var m := mesh.surface_get_material(i)
-		if glb:
-			continue                  # materiais do .glb como vieram (PBR, sem cor de vértice)
 		var m2: StandardMaterial3D
 		if m is StandardMaterial3D:
 			m2 = m.duplicate()
@@ -173,15 +211,6 @@ func _load_model() -> void:
 			m2.albedo_color.a = VIDRO_ALFA
 		material_do_jogo(m2)
 		mi.set_surface_override_material(i, m2)
-	var aabb := mesh.get_aabb()
-	var c := aabb.get_center()
-	model_offset = Vector3(-c.x, -aabb.position.y + 0.12, -c.z)
-	mi.position = model_offset
-	model_root.add_child(mi)
-	body_mi = mi
-	if chave() in CABINE_FECHADA:
-		_face_de_dentro(mi)
-	_load_steering_wheel()
 
 
 ## acessórios comprados (oficina, Upgrade; só visuais, mIsPhysical="false":
@@ -610,7 +639,7 @@ static func _tem_alfa(t: Texture2D) -> bool:
 ## (rider+0x2f0; no Renegade origem = ARSE - (0, 1.1315, 0.3032)), sem girar
 ## com a matriz do ponto
 func _load_piloto() -> void:
-	if not points.has("ARSE"):
+	if not points.has("ARSE") or not _tem("piloto"):
 		return
 	piloto = preload("res://carro/piloto.gd").new()
 	# piloto feminino (tools/piloto.py: FEMALE_HIGH + rabo de cavalo, o mesmo

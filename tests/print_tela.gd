@@ -119,7 +119,7 @@ func _overrides() -> bool:
 
 ## mesmo que main.spawn_vehicle, mas com as trocas das variáveis de ambiente
 func _spawn(i: int) -> void:
-	var v: Dictionary = main.frota()[i]
+	var v: Dictionary = main.frota_jogo()[i]
 	main.car.queue_free()
 	main.veh_idx = i
 	var c = Car.new()
@@ -384,7 +384,7 @@ func _process_multi() -> bool:
 	if frames < 90:
 		return false
 	if frames == 90:
-		medidas.veiculo = main.frota()[veh].name
+		medidas.veiculo = main.frota_jogo()[veh].name
 		medidas.pontos = car.points_file
 		medidas.pecas = car.pecas.get("pecas", {})
 		medidas.rodas = [car.wheel_front_file, car.wheel_rear_file]

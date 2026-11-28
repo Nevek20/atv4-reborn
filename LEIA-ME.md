@@ -13,8 +13,9 @@ marcado no código e nos docs.
 > **Situação:** jogável. Uma pista (RX01, Rallycross) com corrida completa:
 > introdução, contagem, 7 rivais da IA, voltas, o HUD do jogo, Score, tela
 > de resultados e menu de pausa. 12 buggies, 12 trucks, um truck que o jogo
-> não usa (resgatado dos arquivos) e um carro extra nosso. Os próximos são
-> os ATVs e as motos.
+> não usa (resgatado dos arquivos) e um carro extra nosso. O primeiro ATV
+> (Samurai 650) já anda com a física do buggy; o piloto dele, a física só
+> de ATV e as motos são os próximos.
 
 ## Destaques
 
@@ -76,9 +77,10 @@ no passo 1.
 :: 1. texturas do arquivo do jogo (~6 min)
 python tools\gob_tex2png.py <unpacked>\gob --out <texturas>
 
-:: 2. buggies e trucks (carroceria, peças, freios, rodas, pneus, pintura)
+:: 2. buggies, trucks e o ATV (carroceria, peças, freios, rodas, pneus, pintura)
 python tools\gerar_buggies.py <unpacked> <texturas>
 python tools\gerar_buggies.py <unpacked> <texturas> --classe truck
+python tools\gerar_buggies.py <unpacked> <texturas> --classe atv --so 10
 
 :: 3. piloto, sons e efeitos
 python tools\piloto.py <unpacked>

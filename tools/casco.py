@@ -42,6 +42,8 @@ PROJ = os.path.dirname(AQUI)
 # id do veículo -> pasta de colisão (o Lazarus tem o id do Jericho)
 CARROS = {"buggy_%02d" % n: "Buggy/Buggy_%02d" % n for n in range(1, 13)}
 CARROS.update({"truck_%02d" % n: "Truck/Truck_%02d" % n for n in range(1, 13)})
+# ATVs: o jogo só tem a pasta Generic (sem a do veículo, 0x1fed48 usa ela)
+CARROS.update({"atv_%02d" % n: "AtV/Generic" for n in range(1, 11)})
 
 
 def ler_indice():

@@ -222,6 +222,12 @@ def texture_names(model_path):
         for f in files:
             if f.startswith(prefix):
                 data = open(os.path.join(raw_dir, f), "rb").read()
+                # carenagem do ATV (17835r): a lista vem depois de blocos de
+                # pontos ("POINT 1.00", n em +16, n x 80 bytes, zeros até 16);
+                # colado no binário o 1º nome ("white", a pintura) sumia e as
+                # texturas escorregavam um slot
+                if data.startswith(b"POINT"):
+                    data = data[data.rfind(b"\0") + 1:]
                 names = [n.strip().decode("latin-1") for n in data.split(b"\n")]
                 names = [n for n in names if n and all(32 <= ord(c) < 127 for c in n)]
                 if names:

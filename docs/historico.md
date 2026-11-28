@@ -2323,6 +2323,36 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   bar) e o XML dele e ele andar no RX01 com a física de hoje; (b) portar os
   blocos acima pelo exe; (c) o piloto do ATV (pose, inclinar com o comando,
   cair).
+- Etapa 1a feita (nov/2026): o Samurai 650 (ATV_10) no main.ATVS
+  (frota_jogo: menu Tab/V, câmeras ATVCamSet_Generic), sem piloto (fica pra
+  1c) e sem as nossas da cabine (volante, painel, luzes, fumaça, motor
+  gravado: lista "desligar"). tools/gerar_buggies.py --classe atv tira o
+  chassi, a carenagem (FAIRING_ATV_10, com a pintura), o escape
+  (Exhaust_Level3a -> Exhaust_ATV_06 pelo componentes.xml) e a nerfbar; o
+  casco é o AtV/Generic (tools/casco.py).
+  - Bug do extrator achado: a lista de texturas da carenagem vem depois de
+    um bloco "POINT 1.00" vazio no raw (17835r), o 1º nome ("white") sumia e
+    a carenagem saía com a textura "dirt" (8x8 transparente). Corrigido no
+    pingu2obj; nenhum buggy, truck ou objeto da pista usa raw assim (conferi
+    todos os .obj gerados), só a carenagem muda.
+  - Peças pelo exe (docs/engenharia_reversa.md, ATVs): o ATV usa as classes
+    do truck (LeftFrame, RightFrame, RearAxle) e mais 4: amortecedores na
+    balança (Rz(-/+acos) em volta do SHOCKS_TOP), guidão (eixo da coluna do
+    arquivo, 27° no ATV_10, girando o esterço), coroa (gira com a roda RL e
+    vai com o eixo de trás). Carenagem, escape e nerfbar: identidade na
+    carroceria (car _load_pecas_corpo). Roda da frente pela balança
+    A_FRAME_FRONT_* (FrontLeftFrameWheel = a do buggy), a de trás é a do
+    rally: o "rally" do pecas.json agora olha só a roda da frente (só os
+    ATVs mudam). Em C++ também (suspensao.cpp), igual ao GDScript (0 de
+    diferença em 300 quadros, teste_atv).
+  - Câmbio: marchas = RAM. Final de fábrica 1.12 (1.02 -> 1.22 a 0.5, o
+    FinalDriveRatio_Standard da classe ATV); na RAM o jogador tem 1.02 e os
+    4 rivais (ATV.xml base, 0.96 -> 1.20) 1.08 = o mesmo 0.5. Então o 1.02
+    é do perfil do Matheus (peça TunedGP ou ajuste), não de fábrica.
+  - Andando com a física de hoje: 155 kg, 144 km/h em 7 s na largada do
+    RX01, 4 rodas no chão 96% em reta. Virando ele levanta a roda de dentro
+    (bitola estreita, CoM alto): esperado, mas o controle do piloto (peso,
+    Bicycling, Roll) é da etapa 1b, sem número do jogo ainda.
 
 
 ## Pendente / ideias

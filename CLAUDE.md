@@ -39,7 +39,8 @@ desmontado no Ghidra. Nada de "parece certo": cada número tem que ter fonte
 
 ```
 main.gd / main.tscn  cena: terreno, carro, câmera, HUD (F1 tudo / só o HUD do jogo / nada, F2 FPS, onde vai o tempo e se o C++ carregou; F3 liga/desliga o C++), menu de carros (Tab, V);
-                     VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, configurar(car, v)
+                     VEHICLES = buggies, TRUCKS, EXTRAS (nossos), frota() = os três, ATVS,
+                     frota_jogo() = frota() + ATVS (menu, V, câmeras), configurar(car, v)
 carro/               o carro
   car.gd               a FÍSICA portada do exe (suspensão, pneus, motor, câmbio, pedais, casco,
                        batida) e o _ready; herda do carro_montagem.gd, que herda do carro_base.gd
@@ -460,6 +461,14 @@ Frota
   NOSSA) e extras nossos de .glb (Escort, x 1.25). Sphinx speedrun = Sphinx
   com tudo no máximo, só do jogador ("so_jogador", rival não sorteia). Tabelas por carro usam
   car.chave() (o Lazarus tem o id do Jericho).
+- ATVs (main.ATVS, só o ATV_10 Samurai 650 por enquanto, o do save state;
+  teste_atv): mesma física do buggy, sem piloto até a etapa 1c. Peças
+  "Body/<tipo>" do pecas.json (carenagem com a pintura, escape, nerfbar)
+  presas na carroceria; balanças e eixo = classes do truck; amortecedor,
+  guidão e coroa portados (suspension_visual + suspensao.cpp). "rally" do
+  pecas.json = roda da FRENTE sem balança (a de trás do ATV é de rally).
+  Final de fábrica 1.12: o 1.02 da RAM do atv_cl01 é do perfil do Matheus
+  (os rivais lá têm o 0.5 de fábrica).
 
 ## Pendente / ideias
 

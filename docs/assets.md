@@ -208,5 +208,9 @@ volante:43,46,47,144[16-28],145-150`, cubo + aro); os outros ainda não.
 - Lotes de material: registros de 0x50 bytes a partir de 0xD0; total em
   0xAC (0xBC às vezes conta menos); +0x14 slot de textura, +0x28 início,
   +0x48 nº de tiras. Lista de nomes de textura = o .pfn do mesmo nome, que
-  fica cru no raw logo antes do modelo.
+  fica cru no raw logo antes do modelo. Às vezes o raw começa com blocos de
+  pontos ("POINT 1.00", n em +16, n x 80 bytes, zeros até múltiplo de 16) e
+  a lista vem depois (carenagem do ATV, 17835r): o pingu2obj pega o texto
+  depois do último zero, senão o 1º nome ("white", a pintura) sumia e as
+  texturas escorregavam um slot.
 - Texturas com o mesmo nome em blocos diferentes são idênticas (byte a byte).

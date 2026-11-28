@@ -151,6 +151,7 @@ bool SuspensaoCpp::configurar(Object *susp) {
 	Dictionary tr = susp->get("truck");
 	truck = !tr.is_empty();
 	frame_l = frame_r = brake_l = brake_r = axle = livre = PecaTruck();
+	shock_l = shock_r = guidao = coroa = PecaTruck();
 	if (truck) {
 		auto ler = [&](const char *nome, PecaTruck &p) {
 			p.nome = nome;
@@ -178,7 +179,19 @@ bool SuspensaoCpp::configurar(Object *susp) {
 			}
 			if (t.has("a0")) {
 				p.a0 = t["a0"];
+			}
+			if (t.has("ancora")) {
 				p.ancora = t["ancora"];
+			}
+			if (t.has("top")) {
+				p.top = t["top"];
+				p.bottom = t["bottom"];
+			}
+			if (t.has("eixo")) {
+				p.eixo = t["eixo"];
+			}
+			if (t.has("spin")) {
+				p.spin = id_de(t["spin"]);
 			}
 			if (t.has("wl")) {
 				p.wl = t["wl"];
@@ -199,6 +212,10 @@ bool SuspensaoCpp::configurar(Object *susp) {
 		ler("FrontRightBrake", brake_r);
 		ler("RearAxle", axle);
 		ler("RearFreeAxle", livre);
+		ler("LeftShocks", shock_l);
+		ler("RightShocks", shock_r);
+		ler("Handlebar", guidao);
+		ler("Sprocket", coroa);
 		rodas_truck.clear();
 		Array ws = car->get("wheels");
 		for (int64_t i = 0; i < ws.size(); i++) {
@@ -333,11 +350,13 @@ bool SuspensaoCpp::update(double steer) {
 		}
 	};
 	const PecaTruck *frames[2] = { &frame_l, &frame_r };
+	Transform3D frame_xf[2];
 	for (int i = 0; i < 2; i++) {
 		const PecaTruck &t = *frames[i];
 		if (t.tem) {
 			double xi = i == 0 ? fl : fr;
-			coloca(t, about(t.pivot, Basis(BACK_, (real_t)std::tan(xi / t.div))));
+			frame_xf[i] = about(t.pivot, Basis(BACK_, (real_t)std::tan(xi / t.div)));
+			coloca(t, frame_xf[i]);
 		}
 	}
 	const PecaTruck *freios[2] = { &brake_l, &brake_r };
@@ -349,6 +368,7 @@ bool SuspensaoCpp::update(double steer) {
 			coloca(t, Transform3D(b, t.w - b.xform(t.w) + Vector3(0, (real_t)xi, 0)));
 		}
 	}
+	Transform3D axle_xf;
 	if (axle.tem) {
 		const PecaTruck &t = axle;
 		Vector3 m = (t.wl + t.wr) * (real_t)0.5 + Vector3(0, (real_t)((rl + rr) * 0.5), 0);
@@ -367,6 +387,26 @@ bool SuspensaoCpp::update(double steer) {
 			}
 		}
 		coloca(t, out);
+		axle_xf = out;
+	}
+	// ATV: amortecedores na balança (0x21e328 / 0x21e5b0), guidão (0x21dff8)
+	// e coroa (0x21ec78)
+	const PecaTruck *shocks[2] = { &shock_l, &shock_r };
+	for (int i = 0; i < 2; i++) {
+		const PecaTruck &t = *shocks[i];
+		if (t.tem) {
+			Vector3 b2 = frame_xf[i].xform(t.bottom);
+			double a = std::acos(clampd((t.bottom - t.top).normalized().dot((b2 - t.top).normalized()), -1.0, 1.0));
+			coloca(t, about(t.top, Basis(BACK_, (real_t)(i == 0 ? -a : a))));
+		}
+	}
+	if (guidao.tem) {
+		coloca(guidao, about(guidao.pivot, Basis(guidao.eixo, (real_t)steer)));
+	}
+	if (coroa.tem) {
+		Node3D *sp = Object::cast_to<Node3D>(ObjectDB::get_instance(coroa.spin));
+		double giro = sp != nullptr ? (double)sp->get_rotation().x : 0.0;
+		coloca(coroa, axle_xf * about(coroa.ancora, Basis(RIGHT_, (real_t)giro)));
 	}
 	if (livre.tem) {
 		const PecaTruck &t = livre;

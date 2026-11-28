@@ -1,0 +1,150 @@
+<Root FileVersion="1.0000000">
+   <RigidBody Mass_non_tuned="0.1699999" Mass_fully_tuned="0.1589999" Inertia_dimensions_width="1.2990000" Inertia_dimensions_height="1.2999999" Inertia_dimensions_length="2.2000000" Linear_damping_1d="0.0000000" Angular_damping_1d="0.0000000" Friction="0.2000000" Wheels_off_ground_friction="0.6000000" Restitution="0.2000000">
+      <Angular_resistance_3d X="6.0000000" Y="1.0000000" Z="6.0000000"/>
+   </RigidBody>
+   <Engine Inertia_non_tuned="0.0000019" Inertia_fully_tuned="0.0000029" Idle_rpm="1000.0000" Rev_limiter_engage_rpm_non_tuned="9000.0000" Rev_limiter_engage_rpm_fully_tuned="9000.0000" Rev_limiter_disengage_rpm_non_tuned="8900.0000" Rev_limiter_disengage_rpm_fully_tuned="8900.0000" Rev_limiter_engage_rate="10.000000" Rev_limiter_disengage_rate="10.000000" Max_rpm_non_tuned="10000.000" Max_rpm_fully_tuned="10000.000" Drive_torque_non_tuned="0.1449999" Drive_torque_fully_tuned="0.1789999" Friction_torque_non_tuned="0.0139999" Friction_torque_fully_tuned="0.0178999">
+      <Drive_torque_vs_rpm NumValues="11" RpmMax="10000.000" TorqueScale="0.1449999" Value0="0.0000000" Value1="0.2709999" Value2="0.3059999" Value3="0.3230000" Value4="0.3388999" Value5="0.3478999" Value6="0.3379999" Value7="0.3169999" Value8="0.3000000" Value9="0.2569999" Value10="0.2279999"/>
+      <Friction_torque_vs_rpm NumValues="11" RpmMax="10000.000" TorqueScale="0.0139999" Value0="0.0000000" Value1="0.0179999" Value2="0.0539999" Value3="0.1079999" Value4="0.1800000" Value5="0.2700000" Value6="0.3779999" Value7="0.5039999" Value8="0.6480000" Value9="0.8099998" Value10="1.0000000"/>
+   </Engine>
+   <Gearbox Number_of_forward_gears="5">
+      <Ratios Gear_R="-15.000000" Gear_1_non_tuned="23.099998" Gear_1_fully_tuned="23.099998" Gear_2_non_tuned="13.199999" Gear_2_fully_tuned="13.199999" Gear_3_non_tuned="9.1999998" Gear_3_fully_tuned="9.1999998" Gear_4_non_tuned="7.0999999" Gear_4_fully_tuned="7.0999999" Gear_5_non_tuned="5.7999997" Gear_5_fully_tuned="5.7999997" Final_drive_non_tuned="0.9599999" Final_drive_fully_tuned="1.1999999"/>
+      <Manual Change_time_non_tuned="0.1000000" Change_time_fully_tuned="0.0000000" Change_clutch_threshold="0.2500000"/>
+      <AutoManual Change_up_rpm="8000.0000" Change_down_speed_difference_gear_2="15.000000" Change_down_speed_difference_gear_3="15.000000" Change_down_speed_difference_gear_4="15.000000" Change_down_speed_difference_gear_5="15.000000" Change_rpm_throttle_modifier="1.0000000" Clutch_disengagement_rate="10.000000" Clutch_engagement_rate="10.000000" Clutch_rate_throttle_modifier="1.0000000" Clutch_disengagement_rpm="1100.0000" Clutch_engagement_rpm_no_throttle="1000.0000" Clutch_engagement_rpm_full_throttle="1000.0000" Maximum_clutch_torque_non_tuned="0.0529999" Maximum_clutch_torque_fully_tuned="0.0619999" Clutch_lock_rpm_difference="100.00000" Change_time_non_tuned="0.2000000" Change_time_fully_tuned="0.1000000"/>
+      <Automatic Change_speed_throttle_modifier="1.0000000" Change_time="0.2500000">
+         <ChangeUpSpeed Gear_1="20.000000" Gear_2="50.000000" Gear_3="70.000000" Gear_4="100.00000" Gear_5="0.0000000"/>
+         <ChangeDownSpeed Gear_1="0.0000000" Gear_2="15.000000" Gear_3="35.000000" Gear_4="55.000000" Gear_5="85.000000"/>
+      </Automatic>
+   </Gearbox>
+   <InputRates>
+      <Throttle Analogue_increase_rate="8.0000000" Analogue_decrease_rate="8.0000000" Digital_increase_rate="2.0000000" Digital_decrease_rate="2.0000000">
+         <Normalised_rate_vs_speed NumValues="11" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="1.0000000" Value5="1.0000000" Value6="1.0000000" Value7="1.0000000" Value8="1.0000000" Value9="1.0000000" Value10="1.0000000"/>
+      </Throttle>
+      <Clutch Analogue_increase_rate="8.0000000" Analogue_decrease_rate="8.0000000" Digital_increase_rate="8.0000000" Digital_decrease_rate="8.0000000">
+         <Normalised_rate_vs_speed NumValues="11" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="1.0000000" Value5="1.0000000" Value6="1.0000000" Value7="1.0000000" Value8="1.0000000" Value9="1.0000000" Value10="1.0000000"/>
+      </Clutch>
+      <Footbrake Analogue_increase_rate="8.0000000" Analogue_decrease_rate="8.0000000" Digital_increase_rate="2.0000000" Digital_decrease_rate="2.0000000">
+         <Normalised_rate_vs_speed NumValues="11" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="1.0000000" Value5="1.0000000" Value6="1.0000000" Value7="1.0000000" Value8="1.0000000" Value9="1.0000000" Value10="1.0000000"/>
+      </Footbrake>
+      <Steer Analogue_increase_rate="9.0000000" Analogue_decrease_rate="9.0000000" Analogue_opposite_rate="9.0000000" Analogue_damp_increase_rate="true" Digital_increase_rate="9.0000000" Digital_decrease_rate="9.0000000" Digital_opposite_rate="9.0000000" Digital_damp_increase_rate="true">
+         <Normalised_rate_vs_speed NumValues="10" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="1.0000000" Value5="1.0000000" Value6="1.0000000" Value7="1.0000000" Value8="1.0000000" Value9="1.0000000"/>
+      </Steer>
+      <Pitch Analogue_increase_rate="4.0000000" Analogue_decrease_rate="4.0000000" Analogue_opposite_rate="4.0000000" Analogue_damp_increase_rate="false" Digital_increase_rate="4.0000000" Digital_decrease_rate="4.0000000" Digital_opposite_rate="4.0000000" Digital_damp_increase_rate="false">
+         <Normalised_rate_vs_speed NumValues="11" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="1.0000000" Value5="1.0000000" Value6="1.0000000" Value7="1.0000000" Value8="1.0000000" Value9="1.0000000" Value10="1.0000000"/>
+      </Pitch>
+   </InputRates>
+   <Misc Air_drag_coefficient="0.7549999" Ground_drag_coefficient="0.2000000" Water_drag_max_wheel_depth="0.5000000" Water_drag_coefficient="0.1000000" Internal_friction_drag_lower_speed="5.0000000" Internal_friction_drag_upper_speed="80.000000" Internal_friction_drag_lower_speed_decel="5.0000000" Internal_friction_drag_upper_speed_decel="5.0000000" Bind_rear_suspensions="false" Fully_comp_susp_coll_removal_uprightness="0.6427876"/>
+   <Ramming Additional_impulse_strength="8.0000000" Additional_impulse_position_scale="0.2000000"/>
+   <Footbrake Maximum_deceleration_non_tuned="0.0000000" Maximum_deceleration_fully_tuned="45.000000" Maximum_friction_scale="1.0000000" Maximum_friction="1.0000000" Minimum_friction_scale="0.2500000" Minimum_friction="0.1000000" Special_friction_scale="1.0000000" Front_bias_non_tuned="0.0000000" Front_bias_fully_tuned="1.0000000" Enable_ABS="true" ABS_engagement_slip_ratio="-0.2000000" ABS_disengagement_slip_ratio="-0.0099999"/>
+   <TractionControl Enable="false" Force_scale="1.0000000"/>
+   <FrictionEllipse Enabled="true" Width_scale_non_tuned="1.0000000" Width_scale_fully_tuned="1.0000000" Height_scale_non_tuned="1.0000000" Height_scale_fully_tuned="1.0000000" Disabling_friction="2.0000000" Use_load_dependence="false">
+      <FrontWheels Shrink_rate="1.0000000" Recovery_rate="1.0000000" Static_lateral_friction_coeff="1.0000000" Static_longitudinal_friction_coeff="1.0000000">
+         <HalfWidth Maximum_friction_half_width="2.2999999" Maximum_friction="1.0000000" Minimum_friction_half_width="2.2999999" Minimum_friction="0.1000000" Special_friction_half_width="2.2899999"/>
+         <HalfHeight Maximum_friction_half_height="1.5000000" Maximum_friction="1.0000000" Minimum_friction_half_height="1.5000000" Minimum_friction="0.1000000" Special_friction_half_height="1.5000000"/>
+         <MinimumScale Maximum_friction_minimum_scale="0.8000000" Maximum_friction="1.0000000" Minimum_friction_minimum_scale="0.8000000" Minimum_friction="0.1000000" Special_friction_minimum_scale="0.8000000"/>
+      </FrontWheels>
+      <RearWheels Shrink_rate="1.0000000" Recovery_rate="1.0000000" Static_lateral_friction_coeff="1.0000000" Static_longitudinal_friction_coeff="1.0000000">
+         <HalfWidth Maximum_friction_half_width="2.2000000" Maximum_friction="1.0000000" Minimum_friction_half_width="2.2000000" Minimum_friction="0.1000000" Special_friction_half_width="2.2000000"/>
+         <HalfHeight Maximum_friction_half_height="1.5000000" Maximum_friction="1.0000000" Minimum_friction_half_height="1.5000000" Minimum_friction="0.1000000" Special_friction_half_height="1.5000000"/>
+         <MinimumScale Maximum_friction_minimum_scale="0.8000000" Maximum_friction="1.0000000" Minimum_friction_minimum_scale="0.8000000" Minimum_friction="0.1000000" Special_friction_minimum_scale="0.8000000"/>
+      </RearWheels>
+   </FrictionEllipse>
+   <BasicSteering Maximum_visual_steer_angle_zero_speed="20.000000" Maximum_visual_steer_angle_full_speed="20.000000" Use_tweakable_axle_distances="false" Front_axle_distance="1.6900001" Rear_axle_distance="1.3400000" Understeer_coefficient_non_tuned="15.000000" Understeer_coefficient_fully_tuned="12.000000">
+      <Angle_vs_speed NumValues="3" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="60.000000" Value1="55.000000" Value2="45.000000"/>
+      <MaximumYawAcceleration Standard_value="100000.00" Counter_steer_maximum_scale="1.0000000" Counter_steer_maximum_scale_sideslip="60.000000"/>
+   </BasicSteering>
+   <Sideslip Speed_for_zero_sideslip="5.0000000" Speed_for_maximum_sideslip="100.00000" Maximum_sideslip_angle="10.000000" Side_deceleration_to_fwd_acceleration_min_sideslip="5.0000000" Side_deceleration_to_fwd_acceleration_max_sideslip="30.000000" Side_deceleration_to_fwd_acceleration="0.2000000" Increase_tail_off_threshold="10.000000">
+      <SideslipIncreaseYawAcceleration Maximum_friction="1.0000000" Minimum_friction="0.1000000">
+         <Maximum_friction_acceleration_vs_speed NumValues="10" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="400.00000" Value2="395.00000" Value3="390.00000" Value4="385.00000" Value5="380.00000" Value6="375.00000" Value7="370.00000" Value8="365.00000" Value9="360.00000"/>
+         <Minimum_friction_acceleration_vs_speed NumValues="10" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="320.00000" Value2="315.00000" Value3="310.00000" Value4="305.00000" Value5="300.00000" Value6="295.00000" Value7="290.00000" Value8="285.00000" Value9="280.00000"/>
+         <Special_friction_acceleration_vs_speed NumValues="10" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="400.00000" Value2="395.00000" Value3="390.00000" Value4="385.00000" Value5="380.00000" Value6="375.00000" Value7="370.00000" Value8="365.00000" Value9="360.00000"/>
+      </SideslipIncreaseYawAcceleration>
+      <SideslipDecreaseYawAccelerationStandard>
+         <ZeroThrottle Maximum_friction="1.0000000" Minimum_friction="0.1000000">
+            <Maximum_friction_acceleration_vs_speed NumValues="2" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="360.00000" Value1="360.00000"/>
+            <Minimum_friction_acceleration_vs_speed NumValues="2" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="50.000000" Value1="20.000000"/>
+            <Special_friction_acceleration_vs_speed NumValues="2" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="360.00000" Value1="360.00000"/>
+         </ZeroThrottle>
+         <FullThrottle Maximum_friction="1.0000000" Minimum_friction="0.1000000">
+            <Maximum_friction_acceleration_vs_speed NumValues="11" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="360.00000" Value1="354.00000" Value2="343.00000" Value3="327.00000" Value4="305.00000" Value5="277.00000" Value6="244.00000" Value7="206.00000" Value8="162.00000" Value9="112.00000" Value10="57.500000"/>
+            <Minimum_friction_acceleration_vs_speed NumValues="2" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="20.000000" Value1="0.0000000"/>
+            <Special_friction_acceleration_vs_speed NumValues="11" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="360.00000" Value1="354.00000" Value2="343.00000" Value3="327.00000" Value4="305.00000" Value5="277.00000" Value6="244.00000" Value7="206.00000" Value8="162.00000" Value9="112.00000" Value10="57.500000"/>
+         </FullThrottle>
+      </SideslipDecreaseYawAccelerationStandard>
+      <SideslipDecreaseYawAccelerationCounterSteer Maximum_friction="1.0000000" Minimum_friction="0.1000000">
+         <Maximum_friction_acceleration_vs_speed NumValues="10" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="400.00000" Value2="395.00000" Value3="390.00000" Value4="385.00000" Value5="380.00000" Value6="375.00000" Value7="370.00000" Value8="365.00000" Value9="360.00000"/>
+         <Minimum_friction_acceleration_vs_speed NumValues="10" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="320.00000" Value2="315.00000" Value3="310.00000" Value4="305.00000" Value5="300.00000" Value6="295.00000" Value7="290.00000" Value8="285.00000" Value9="280.00000"/>
+         <Special_friction_acceleration_vs_speed NumValues="10" AccelerationMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="400.00000" Value2="395.00000" Value3="390.00000" Value4="385.00000" Value5="380.00000" Value6="375.00000" Value7="370.00000" Value8="365.00000" Value9="360.00000"/>
+      </SideslipDecreaseYawAccelerationCounterSteer>
+      <SideVelocityDecelerationStandard Maximum_friction_deceleration="35.000000" Maximum_friction="1.0000000" Minimum_friction_deceleration="7.5000000" Minimum_friction="0.1000000" Special_friction_deceleration="40.000000"/>
+      <SideVelocityDecelerationCounterSteer Maximum_friction_deceleration="35.000000" Maximum_friction="1.0000000" Minimum_friction_deceleration="7.5000000" Minimum_friction="0.1000000" Special_friction_deceleration="40.000000"/>
+      <MaximumRate Threshold_speed="5.0000000">
+         <Maximum_increase_rate_vs_sideslip Maximum_friction="1.0000000" Minimum_friction="0.1000000">
+            <Maximum_friction_rate_vs_sideslip NumValues="2" SideslipMax="90.000000" OrdinateScale="1.0000000" Value0="20.000000" Value1="55.000000"/>
+            <Minimum_friction_rate_vs_sideslip NumValues="2" SideslipMax="90.000000" OrdinateScale="1.0000000" Value0="40.000000" Value1="75.000000"/>
+            <Special_friction_rate_vs_sideslip NumValues="2" SideslipMax="90.000000" OrdinateScale="1.0000000" Value0="10.000000" Value1="27.000000"/>
+         </Maximum_increase_rate_vs_sideslip>
+         <Maximum_decrease_rate_vs_sideslip Maximum_friction="1.0000000" Minimum_friction="0.1000000">
+            <Maximum_friction_rate_vs_sideslip NumValues="2" SideslipMax="90.000000" OrdinateScale="1.0000000" Value0="60.000000" Value1="40.000000"/>
+            <Minimum_friction_rate_vs_sideslip NumValues="2" SideslipMax="90.000000" OrdinateScale="1.0000000" Value0="80.000000" Value1="60.000000"/>
+            <Special_friction_rate_vs_sideslip NumValues="2" SideslipMax="90.000000" OrdinateScale="1.0000000" Value0="60.000000" Value1="40.000000"/>
+         </Maximum_decrease_rate_vs_sideslip>
+      </MaximumRate>
+      <RecoveryTorqueCutting Enabled="false" Maximum_increased_front_slip_ratio="0.0000000" Maximum_increased_rear_slip_ratio="0.2000000" Steering_dependent="false">
+         <Threshold_angle_vs_speed NumValues="2" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="10.000000" Value1="10.000000"/>
+         <Maximum_angle_vs_speed NumValues="2" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="15.000000" Value1="50.000000"/>
+         <Maximum_cut_vs_speed NumValues="2" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="0.2500000" Value1="0.0000000"/>
+      </RecoveryTorqueCutting>
+   </Sideslip>
+   <Stability>
+      <General>
+         <Centre_of_mass X="0.0000000" Y="0.4000000" Z="0.1500000"/>
+      </General>
+      <WheelForceHeightScales Longitudinal_scale_std="0.3000000" Longitudinal_scale_side_decel_to_fwd_accel="0.3000000" Lateral_scale_std="0.0750000" Lateral_scale_at_maximum_roll="0.0750000" Lateral_scale_sine_threshold_roll="0.0519999" Lateral_scale_sine_maximum_roll="0.1739999"/>
+      <DriverWeightTransfer Lateral_distance="0.3000000" Lateral_maximum_speed="50.000000" Longitudinal_distance="0.3000000"/>
+      <AntiPitch Sine_threshold_angle="0.0870999" Sine_maximum_angle="0.1740999" Acceleration="0.0000000"/>
+      <InAir Gravity_scale_moving_up="1.2500000" Gravity_scale_moving_down="1.2999999" Lean_back_gravity_minimum_time="0.3000000" Lean_back_gravity_scale="0.8000000" Pitch_torque="0.0000000">
+         <Yaw_control Minimum_time="0.0500000" Yaw_acceleration="150.00000" Maximum_yaw_velocity="50.000000"/>
+         <Roll_control Cosine_upright_angle_threshold="-0.3000000" Sine_maximum_roll_angle="0.5000000" Acceleration="300.00000" Damping="2.0000000"/>
+         <Brake_pitch_control Acceleration="300.00000" Maximum_pitch_velocity="125.00000"/>
+         <Lean_pitch_control Acceleration="350.00000" Maximum_pitch_velocity="125.00000"/>
+         <No_throttle_pitch_control Acceleration="300.00000" Maximum_pitch_velocity="25.000000"/>
+         <Flip_control Maximum_time="0.8999999" Pitch_input_lower_threshold="0.2000000" Pitch_input_upper_threshold="0.7500000" Acceleration="950.00000" Maximum_pitch_velocity="500.00000"/>
+         <Lateral_control Minimum_time="0.3000000" Tail_off_time="2.0000000" Steer_threshold="0.3000000" Steer_change_scale="0.1500000" Maximum_force="1.5000000"/>
+      </InAir>
+   </Stability>
+   <SlipRatio Growth_rate_during_wheel_spin="3.0000000" Recovery_rate_during_wheel_spin="4.0000000" Growth_rate_during_wheel_lock="2.0000000" Recovery_rate_during_wheel_lock="2.0000000" Maximum="10.000000"/>
+   <ReverseSpeedLimit Drive_cut_speed_threshold="25.000000" Speed_limit="15.000000"/>
+   <PreLoad Enable="true" Sine_minimum_look_elevation_angle="0.0870999" Minimum_speed="20.000000" Build_up_time_scale="0.0479999" Build_up_steer_scale="1.0000000" Compressed_suspension_scale="0.1000000" Wait_time="0.3000000" Gravity_scale="0.8500000" In_air_grace_time="0.0509999">
+      <Force_vs_speed NumValues="11" SpeedMax="100.00000" ForceScale="50.000000" Value0="0.0000000" Value1="0.2799999" Value2="0.4569999" Value3="0.5099998" Value4="0.5269999" Value5="0.5179999" Value6="0.4946457" Value7="0.4657915" Value8="0.4327175" Value9="0.3908476" Value10="0.3435247"/>
+   </PreLoad>
+   <BikeBalancing Enable="false" Maximum_roll_angle="45.000000">
+      <Roll_angle_vs_side_speed NumValues="11" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="0.0000000" Value1="10.000000" Value2="10.000000" Value3="10.000000" Value4="10.000000" Value5="10.000000" Value6="10.000000" Value7="10.000000" Value8="10.000000" Value9="10.000000" Value10="10.000000"/>
+      <Roll_angle_steer_depedence_vs_speed NumValues="11" SpeedMax="100.00000" OrdinateScale="1.0000000" Value0="45.000000" Value1="45.000000" Value2="44.299999" Value3="43.299999" Value4="40.900002" Value5="36.700001" Value6="31.299999" Value7="24.500000" Value8="16.399999" Value9="11.000000" Value10="6.0000000"/>
+      <Roll_acceleration_vs_speed NumValues="11" SpeedMax="100.00000" AccelerationScale="100.00000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="0.9899999" Value5="0.9800000" Value6="0.9499999" Value7="0.8999999" Value8="0.8000000" Value9="0.6999999" Value10="0.6000000"/>
+      <Roll_damping_vs_speed NumValues="11" SpeedMax="100.00000" DampingScale="60.000000" Value0="1.0000000" Value1="1.0000000" Value2="1.0000000" Value3="1.0000000" Value4="0.9899999" Value5="0.9800000" Value6="0.9499999" Value7="0.8999999" Value8="0.8000000" Value9="0.6999999" Value10="0.6000000"/>
+   </BikeBalancing>
+   <WheeliesAndEndos Enable="true" Wheelie_minimum_throttle="0.2000000" Wheelie_tail_off_speed="2.0000000" Wheelie_acceleration_zero_speed="40.000000" Wheelie_acceleration_upper_speed="20.000000" Wheelie_upper_speed="100.00000" Wheelie_damping="30.000000" Endo_minimum_footbrake="0.5000000" Endo_minimum_speed="5.0000000" Endo_tail_off_speed="15.000000" Endo_acceleration="3.0000000" Endo_damping="20.000000" Steer_scale_sine_pitch_threshold="0.0869999" Steer_scale_sine_pitch_maximum="0.5000000" Steer_scale_wheelie="0.3000000" Steer_scale_endo="0.6999999" Bike_roll_scale_wheelie="0.1000000" Bike_roll_scale_endo="0.5000000" Wheelie_endo_scale_sine_roll_threshold="0.0869999" Wheelie_endo_scale_sine_roll_maximum="0.5000000"/>
+   <Powerslide Growth_rate="60.000000" Decay_rate="1.0000000" Scale_of_min_friction_ellipse_scale="0.8000000" Side_deceleration_to_fwd_acceleration="0.9498999" Decay_drive_force_scale="1.0000000" Decay_boost_acceleration="0.0000000" Maximum_air_time="0.1000000">
+      <Maximum_sideslip_rate_vs_sideslip NumValues="2" Max="90.000000" OrdinateScale="1.0000000" Value0="70.000000" Value1="105.00000"/>
+      <Scale_vs_speed NumValues="2" Max="100.00000" OrdinateScale="1.0000000" Value0="1.0000000" Value1="0.8998999"/>
+   </Powerslide>
+   <Bicycling Steer_threshold="0.8000000" Max_execution_time="0.3000000" Torque="10.000000" Damping="3.0000000" Angle="40.000000" Stop_angle="15.000000" Tail_off_speed="10.000000" Steer_torque_roll_angle_threshold="30.000000" Steer_roll_back_torque="5.0000000" Steer_roll_over_torque="5.0000000" Steer_max_speed="50.000000" Max_off_ground_time="0.1000000" Wobble_increase_rate="0.5000000" Wobble_frequency="4.0000000"/>
+   <Wheels>
+      <FrontLeft Radius="0.2460000" Width="0.2089999" Mass="0.0500000" Spring_rate_non_tuned="8.5000000" Spring_rate_fully_tuned="8.5000000" Damping_coefficient_non_tuned="0.0000000" Damping_coefficient_fully_tuned="1.6499999" Minimum_position="-0.2000000" Maximum_position_non_tuned="0.0000000" Maximum_position_fully_tuned="0.3899999" Maximum_velocity="10.000000" Cosine_maximum_collision_angle="0.6429999">
+         <Normalised_spring_rate_vs_position NumValues="2" Max="1.0000000" Scale="1.0000000" Value0="0.1748999" Value1="1.0000000"/>
+         <Normalised_damping_coeff_vs_velocity NumValues="2" VelocityMax="10.000000" Scale="1.0000000" Value0="0.2000000" Value1="1.0000000"/>
+      </FrontLeft>
+      <RearLeft Radius="0.2460000" Width="0.3600000" Mass="0.0500000" Spring_rate_non_tuned="6.2500000" Spring_rate_fully_tuned="6.2500000" Damping_coefficient_non_tuned="0.0000000" Damping_coefficient_fully_tuned="1.6499999" Minimum_position="-0.2000000" Maximum_position_non_tuned="0.0000000" Maximum_position_fully_tuned="0.4000000" Maximum_velocity="10.000000" Cosine_maximum_collision_angle="0.6429999">
+         <Normalised_spring_rate_vs_position NumValues="2" Max="1.0000000" Scale="1.0000000" Value0="0.1748999" Value1="1.0000000"/>
+         <Normalised_damping_coeff_vs_velocity NumValues="2" VelocityMax="10.000000" Scale="1.0000000" Value0="0.2000000" Value1="1.0000000"/>
+      </RearLeft>
+      <FrontRight Radius="0.2460000" Width="0.2099999" Mass="0.0500000" Spring_rate_non_tuned="8.5000000" Spring_rate_fully_tuned="8.5000000" Damping_coefficient_non_tuned="0.0000000" Damping_coefficient_fully_tuned="1.6499999" Minimum_position="-0.2000000" Maximum_position_non_tuned="0.0000000" Maximum_position_fully_tuned="0.3899999" Maximum_velocity="10.000000" Cosine_maximum_collision_angle="0.6429999">
+         <Normalised_spring_rate_vs_position NumValues="2" Max="1.0000000" Scale="1.0000000" Value0="0.1748999" Value1="1.0000000"/>
+         <Normalised_damping_coeff_vs_velocity NumValues="2" VelocityMax="10.000000" Scale="1.0000000" Value0="0.2000000" Value1="1.0000000"/>
+      </FrontRight>
+      <RearRight Radius="0.2460000" Width="0.3600000" Mass="0.0500000" Spring_rate_non_tuned="6.2500000" Spring_rate_fully_tuned="6.2500000" Damping_coefficient_non_tuned="0.0000000" Damping_coefficient_fully_tuned="1.6499999" Minimum_position="-0.2000000" Maximum_position_non_tuned="0.0000000" Maximum_position_fully_tuned="0.4000000" Maximum_velocity="10.000000" Cosine_maximum_collision_angle="0.6429999">
+         <Normalised_spring_rate_vs_position NumValues="2" Max="1.0000000" Scale="1.0000000" Value0="0.1748999" Value1="1.0000000"/>
+         <Normalised_damping_coeff_vs_velocity NumValues="2" VelocityMax="10.000000" Scale="1.0000000" Value0="0.2000000" Value1="1.0000000"/>
+      </RearRight>
+   </Wheels>
+</Root>

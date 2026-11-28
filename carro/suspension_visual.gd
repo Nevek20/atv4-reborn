@@ -37,6 +37,19 @@ extends Node3D
 ##   outra descendo o eixo do jogo fica reto e as rodas soltam das pontas;
 ##   aqui ele inclina pra ligar os 2 cubos e as rodas de trás inclinam junto.
 ##   Só o desenho: o centro das rodas continua o da física.
+## ATV (ATVCompMap_*, nov/2026): usa as classes do truck (LeftFrame,
+##   RightFrame, RearAxle com Axle e Rear_Arm) e mais (ids da tabela 0x550700:
+##   0 HANDLEBAR, 5 ARM_PIVOT, 6 AXLE_ANCHOR, 7/8 A_FRAME_LEFT/RIGHT,
+##   17..20 SHOCKS_BOTTOM/TOP_LEFT/RIGHT):
+##   LeftShocks/RightShocks (0x21e328 / 0x21e5b0): Rz(-/+ acos) em volta do
+##   SHOCKS_TOP_* até o SHOCKS_BOTTOM_* levado pela LeftFrame/RightFrame (o
+##   mesmo jeito do amortecedor dianteiro do buggy, na balança do truck).
+##   Handlebar (0x21dff8 / 0x21df88): eixo-ângulo (linha 1 da matriz do
+##   HANDLEBAR, esterço P+0x44) em volta do HANDLEBAR.
+##   Sprocket (0x21ec78): Rx(giro da roda RL, W+0x4c) em volta do
+##   AXLE_ANCHOR e depois a pose do RearAxle.
+##   Rodas: FrontLeftFrameWheel (0x220f08) = a da frente do buggy (centro pela
+##   balança A_FRAME_FRONT_*, 0x220110); RearLeftWheel = a do rally.
 ## O curso usado em tudo isso já tem a tremida das rodas no chão (car.gd,
 ## 0x202760), então balança, cubo, freio e amortecedor tremem juntos.
 ##
@@ -105,7 +118,7 @@ func build(c, pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary,
 			corners.append(k)
 	if not rally and car._tem("barras_presas"):
 		_barras()
-	_build_truck(pts, dir, pecas)
+	_build_truck(pts, rot, dir, pecas)
 	# estepe (BuggyCompMap_A1/B1/C1: RearWheel em SpareWheel01)
 	for s in spare:
 		var pn: String = s + "Centre"
@@ -127,7 +140,7 @@ func liga_cpp() -> void:
 
 
 ## peças do eixo rígido dos trucks (só monta as que o pecas.json tem)
-func _build_truck(pts: Dictionary, dir: String, pecas: Dictionary) -> void:
+func _build_truck(pts: Dictionary, rot: Dictionary, dir: String, pecas: Dictionary) -> void:
 	var rodas := {}
 	for w in car.wheels:
 		rodas[("F" if w.front else "R") + ("L" if w.left else "R")] = w
@@ -164,6 +177,20 @@ func _build_truck(pts: Dictionary, dir: String, pecas: Dictionary) -> void:
 	if livre and pts.has("WHEEL_REAR_LEFT") and pts.has("WHEEL_REAR_RIGHT"):
 		truck.RearFreeAxle = {"mi": livre, "rodas": traseiras,
 			"wl": pts["WHEEL_REAR_LEFT"], "wr": pts["WHEEL_REAR_RIGHT"]}
+	# ATV: amortecedores na balança, guidão e coroa (ver o topo)
+	for lado: String in ["LEFT", "RIGHT"]:
+		var nome := lado.capitalize()
+		var sh := _part(dir, pecas.get(nome + "Shocks", ""))
+		var top := "SHOCKS_TOP_" + lado
+		var bot := "SHOCKS_BOTTOM_" + lado
+		if sh and truck.has(nome + "Frame") and pts.has(top) and pts.has(bot):
+			truck[nome + "Shocks"] = {"mi": sh, "top": pts[top], "bottom": pts[bot]}
+	var gd := _part(dir, pecas.get("Handlebar", ""))
+	if gd and pts.has("HANDLEBAR") and rot.has("HANDLEBAR"):
+		truck.Handlebar = {"mi": gd, "pivot": pts["HANDLEBAR"], "eixo": (rot["HANDLEBAR"] as Basis).y.normalized()}
+	var co := _part(dir, pecas.get("Sprocket", ""))
+	if co and truck.has("RearAxle") and pts.has("AXLE_ANCHOR") and rodas.has("RL"):
+		truck.Sprocket = {"mi": co, "ancora": pts["AXLE_ANCHOR"], "spin": rodas["RL"].spin_node}
 
 
 ## ponto pelo começo do nome, na ordem do arquivo (o jogo enche a tabela de
@@ -210,6 +237,18 @@ func pose_truck(x: Dictionary, steer: float, inclina := false) -> Dictionary:
 			if absf(u.z) > 0.1:
 				var phi := atan(_inclinacao(t, x) / u.z)
 				out.RearAxle = _about(a0, Basis(u, phi)) * out.RearAxle
+	for nome in ["LeftShocks", "RightShocks"]:
+		if truck.has(nome):
+			var t: Dictionary = truck[nome]
+			var esq: bool = nome == "LeftShocks"
+			var b2: Vector3 = out["LeftFrame" if esq else "RightFrame"] * t.bottom
+			var a := acos(clampf((t.bottom - t.top).normalized().dot((b2 - t.top).normalized()), -1.0, 1.0))
+			out[nome] = _about(t.top, Basis(Vector3.BACK, -a if esq else a))
+	if truck.has("Handlebar"):
+		out.Handlebar = _about(truck.Handlebar.pivot, Basis(truck.Handlebar.eixo, steer))
+	if truck.has("Sprocket"):
+		var t: Dictionary = truck.Sprocket
+		out.Sprocket = out.RearAxle * _about(t.ancora, Basis(Vector3.RIGHT, t.spin.rotation.x))
 	if truck.has("RearFreeAxle"):
 		var t: Dictionary = truck.RearFreeAxle
 		out.RearFreeAxle = Transform3D(Basis(), Vector3(0.0, (x.RL + x.RR) * 0.5, 0.0))
