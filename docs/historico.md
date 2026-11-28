@@ -2912,7 +2912,10 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   corpo dela. No círculo o centro é o do X apagado (o meio do anel do
   desenho) e o rastro claro do X também sai. A SMALL no controle ficou
   pequena demais (o Matheus: "aumenta um tiquinho"): lá vai a MEDIUM x 0.85
-  (corpo de ~14 px, entre os 12 da SMALL e os 16 da MEDIUM).
+  (corpo de ~14 px, entre os 12 da SMALL e os 16 da MEDIUM). O Matheus
+  aprovou ("o do controle ficou perfeito") e pediu o mesmo estilo no PC: as
+  teclas também usam a MEDIUM, x 0.75 (12 px, cabe nos 16 da tecla), e a do
+  ENTER alarga mais.
   Multiplayer: hoje um estilo pra tela toda; com 2 jogadores, por aparelho.
 
 ## HUD básico (nov/2026, NOSSO)

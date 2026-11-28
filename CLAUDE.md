@@ -423,7 +423,8 @@ Tela de resultados (menu/resultados.gd)
   = Xbox (A / B / menu). Xbox e PC = os selos do próprio jogo (o do Cruz e o
   do L1) montados em pixels na resolução do selo: o X sai inteiro (peça
   solta dentro do anel, com o rastro claro), letra = a fonte do jogo em
-  maiúsculas (controle: MEDIUM x 0.85, ~14 px; tecla: SMALL, 12 px), só o branco dela (a sombra entortava), centrada pelo corpo
+  maiúsculas, o mesmo traço nos dois (FONT_MEDIUM encolhida: controle x
+  0.85, ~14 px; tecla x 0.75, 12 px), só o branco dela (a sombra entortava), centrada pelo corpo
   (no centro do X que saiu; no meio da tecla), sem encolher; a tecla alarga
   pro ENTER. Voltar no controle = B (o Matheus) e o Y continua.
   Mesmo lugar do ícone do PS2; print_resultados com BOTOES=ps/xbox/pc.

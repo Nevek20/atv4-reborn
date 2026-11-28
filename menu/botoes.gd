@@ -99,8 +99,8 @@ static var _cache := {}                               # "xbox:ok" -> [ImageTextu
 ##  - PC = o selo do L1 (46 x 55): a tecla branca de (11, 16) a (41, 32) é
 ##    limpa e o nome entra nela; se não cabe, a tecla alarga repetindo a
 ##    coluna do meio (a letra nunca encolhe).
-## Letras = as fontes do jogo (as do HUD), maiúsculas, pretas (controle: a
-## MEDIUM x 0.85; tecla: a SMALL no tamanho dela), só o corpo da letra (sem a sombra) e centradas pelo corpo: no
+## Letras = a FONT_MEDIUM do jogo (a do HUD), maiúsculas, pretas, encolhida
+## (controle x 0.85, tecla x 0.75), só o corpo da letra (sem a sombra) e centradas pelo corpo: no
 ## círculo, no centro do X que saiu; na tecla, no meio dela. [] = sem a
 ## imagem do atlas
 static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fontes: Dictionary) -> Array:
@@ -118,10 +118,11 @@ static func icone(e: String, acao: String, tx: Texture2D, caixas: Dictionary, fo
 	var img := atlas.get_region(reg)
 	var w0 := img.get_width()
 	var branco := Color(1, 1, 1, 1)
-	# controle: a MEDIUM x 0.85 (corpo de ~14 px: a SMALL, 12, ficou pequena
-	# e a MEDIUM, 16, grande; o Matheus); tecla: a SMALL no tamanho dela
+	# o mesmo traço nos dois (a MEDIUM encolhida; o Matheus aprovou a do
+	# controle): controle x 0.85 (corpo de ~14 px; a SMALL, 12, ficou
+	# pequena e a MEDIUM, 16, grande); tecla x 0.75 (12 px, cabe nos 16 dela)
 	var letras: Array = _glifos(fontes.get("FONT_MEDIUM", []), XBOX[acao][0], LETRA_CONTROLE) if e == "xbox" \
-		else _glifos(fontes.get("FONT_SMALL", []), PC[acao])
+		else _glifos(fontes.get("FONT_MEDIUM", []), PC[acao], LETRA_TECLA)
 	if e == "xbox":
 		var cx := _limpa_miolo(img, Vector2(img.get_width() * 0.5 + 0.5, img.get_height() * 0.455))
 		if acao == "start":
@@ -235,6 +236,7 @@ static func _alarga(img: Image, x: int, n: int) -> Image:
 
 ## os glifos de s na fonte do jogo, já recortados e pretos
 const LETRA_CONTROLE := 0.85
+const LETRA_TECLA := 0.75
 
 
 static func _glifos(f: Array, s: String, escala := 1.0) -> Array:
