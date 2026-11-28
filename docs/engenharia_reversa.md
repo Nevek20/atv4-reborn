@@ -1895,6 +1895,12 @@ JSON "interativos"). tests/teste_quebra.gd.
   0x212988 zera no começo do passo), +0x440 velocidade no plano do chão,
   +0xe0 |v|, +0x6c0 derrapagem (0x20da90: asin(lateral / |v| no plano) com
   rodas no chão, 0 no ar ou abaixo de sqrt(0.1) m/s).
+- Nível e evento atuais: DAT_007f4728 (estado do jogo) +8 = tipo do evento
+  (0x4b12c0: tabela 0x83dda0 de pares {número, nome}: 0 SUPERCROSS, 1
+  RALLYCROSS, 2 ARENACROSS, 3/4 NATIONAL_LIGHT/HEAVY, 5..8 HILLCLIMB, 9/10
+  HEAD2HEAD, 11 FREESTYLE, 12 CIRCUIT, 13 P2P, 14 ENDUROCROSS, 15 RALLY, 16
+  SNOWCROSS, ...); +0xc -> nome do nível (0x171008; string em +0x14, ex.
+  "CL_01"; 0 = DAT_007f8348).
 - Minimapa (OBJECT_MINIMAP, classe em 0x48ddc8..0x48ed50): 0x48ddc8 lê o
   MINIMAPS.xml (+0x80 mScaleX, +0x84 mScaleZ, +0x88 mOffsetX, +0x8c mOffsetZ,
   +0x70 mXBase, +0x78 mZBase; com DAT_007f3e3c+0x18 == 1, scaleX e offsetX x

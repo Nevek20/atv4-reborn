@@ -2295,6 +2295,18 @@ aqui. Antes de mexer num assunto, leia a seção dele. O mapa do exe
   APROVADO pelo Matheus (nov/2026): "o fps continuou o mesmo e o pneu e a
   roda estão ótimos agora". FECHADO.
 
+## ATVs (nov/2026, começo)
+
+- 1º save state de ATV (o Matheus, atv_cl01_largada.p2s, guardado no
+  atv4-dados/savestates): pista CL_01, evento SUPERCROSS (tipo 0 na tabela
+  0x83dda0), 8 corredores no grid parados antes do Go! (relógio da largada
+  no estado 6, 5.3 s), atrás do portão do holeshot, pausado. O jogador
+  (corredor 0, tipo 1; os 7 rivais tipo 2) está no ATV_10 ("10. Bonus -
+  Pro": CHASSIS_ATV_02 + FAIRING_ATV_10, nomes perto do corpo dele na RAM),
+  câmbio da RAM = o do VehicleParams/AtV (23.1 / 11.5 / 7.7 / 5.8 / 4.6, ré
+  -15, final 1.02, 10000 rpm na curva). O tools/ler_savestate.py é do buggy:
+  no ATV a massa sai errada e só acha 3 rodas (o corpo do ATV é outro).
+
 ## Pendente / ideias
 
 - Ordem do projeto (o Matheus, nov/2026): fechar o RX01 (carro piscando
